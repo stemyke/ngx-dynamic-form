@@ -1,4 +1,5 @@
 import {Component} from "@angular/core";
+import {TestModel} from "./test.model";
 
 @Component({
     moduleId: module.id,
@@ -6,5 +7,5 @@ import {Component} from "@angular/core";
     templateUrl: "./app.component.html"
 })
 export class AppComponent {
-    title = "app";
+    testModel = new TestModel();
 }

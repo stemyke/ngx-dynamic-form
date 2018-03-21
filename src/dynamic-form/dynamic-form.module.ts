@@ -1,6 +1,7 @@
 import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
+import {NgxUtilsModule} from "@stemy/ngx-utils";
 import {DynamicFormComponent} from "./components";
 
 // --- Components ---
@@ -16,8 +17,6 @@ export const directives = [
 export const pipes = [
 ];
 
-
-
 @NgModule({
     declarations: [
         ...components,
@@ -26,7 +25,8 @@ export const pipes = [
     ],
     imports: [
         CommonModule,
-        FormsModule
+        FormsModule,
+        NgxUtilsModule.forRoot()
     ],
     exports: [
         ...components,

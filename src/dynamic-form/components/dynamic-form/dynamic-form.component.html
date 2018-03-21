@@ -1,0 +1,20 @@
+<div class="dynamic-form">
+    <ng-template #controlTemplate let-id="id" let-type="type" let-control="control">
+        <div [ngClass]="['form-group', 'form-group-' + id, control.classes]">
+            {{ id }}: {{ data[id] }}
+        </div>
+    </ng-template>
+    <ng-template #fieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
+        <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
+            <div class="form-title" *ngIf="fieldSet.title">{{ prefix + fieldSet.title }}
+            </div>
+            <ng-container *ngFor="let control of controls" [ngTemplateOutlet]="controlTemplate"
+                          [ngTemplateOutletContext]="{id: control.id, type: control.type, control: control.data}">
+            </ng-container>
+        </div>
+    </ng-template>
+    <ng-container *ngFor="let fs of formControls | groupBy:'fieldSet'"
+                  [ngTemplateOutlet]="fieldSetTemplate"
+                  [ngTemplateOutletContext]="{id: fs.fieldSet, controls: fs.items, fieldSet: fieldSets[fs.fieldSet] || defaultFieldSet}">
+    </ng-container>
+</div>
