@@ -1,20 +1,37 @@
+<ng-template #labelTemplate let-control="control.data">
+    <label class="control-label control-label-left" [attr.for]="id">
+        {{ control.label !== ' ' ? (prefix + control.label | translation) : '' }}
+    </label>
+</ng-template>
+<ng-template #inputTemplate let-control="control">
+    <input type="text" class="form-control" [attr.id]="control.id" [name]="control.id" [ngModel]="data[control.id]" placeholder="Enter email"/>
+</ng-template>
+<ng-template #controlTemplate let-context="context" let-control="context.control.data">
+    <div [ngClass]="['form-group', 'form-group-' + id, control.classes]">
+        <ng-container *ngIf="control.labelAlign == 'left'"
+                      [ngTemplateOutlet]="labelTemplate"
+                      [ngTemplateOutletContext]="context">
+        </ng-container>
+        <ng-container [ngTemplateOutlet]="inputTemplate"
+                      [ngTemplateOutletContext]="context">
+        </ng-container>
+    </div>
+</ng-template>
+<ng-template #fieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
+    <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
+        <div class="form-title" *ngIf="fieldSet.title">{{ prefix + fieldSet.title | translation }}</div>
+        <ng-container *ngFor="let control of controls"
+                      [ngTemplateOutlet]="controlTemplate"
+                      [ngTemplateOutletContext]="{context: {form: this, control: control}}">
+        </ng-container>
+    </div>
+</ng-template>
+
 <div class="dynamic-form">
-    <ng-template #controlTemplate let-id="id" let-type="type" let-control="control">
-        <div [ngClass]="['form-group', 'form-group-' + id, control.classes]">
-            {{ id }}: {{ data[id] }}
-        </div>
-    </ng-template>
-    <ng-template #fieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
-        <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
-            <div class="form-title" *ngIf="fieldSet.title">{{ prefix + fieldSet.title }}
-            </div>
-            <ng-container *ngFor="let control of controls" [ngTemplateOutlet]="controlTemplate"
-                          [ngTemplateOutletContext]="{id: control.id, type: control.type, control: control.data}">
-            </ng-container>
-        </div>
-    </ng-template>
-    <ng-container *ngFor="let fs of formControls | groupBy:'fieldSet'"
-                  [ngTemplateOutlet]="fieldSetTemplate"
-                  [ngTemplateOutletContext]="{id: fs.fieldSet, controls: fs.items, fieldSet: fieldSets[fs.fieldSet] || defaultFieldSet}">
-    </ng-container>
+    <form>
+        <ng-container *ngFor="let fs of formControls | groupBy:'fieldSet'"
+                      [ngTemplateOutlet]="fieldSetTemplate"
+                      [ngTemplateOutletContext]="{id: fs.fieldSet, controls: fs.items, fieldSet: fieldSets[fs.fieldSet] || defaultFieldSet}">
+        </ng-container>
+    </form>
 </div>

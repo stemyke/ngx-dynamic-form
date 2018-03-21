@@ -20,5 +20,9 @@
             "@angular/*": ["node_modules/@angular/*"],
             "rxjs/*": ["node_modules/rxjs/*"]
         }
-    }
+    },
+    "include": [
+        "src/**/*",
+        "node_modules/@stemy/ngx-utils/index.ts"
+    ]
 }
