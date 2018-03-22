@@ -1,6 +1,10 @@
 import {ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
-import {FormControlTester, IFormControl, IFormControlData, IFormInputData} from "./dynamic-form.types";
+import {
+    FORM_CONTROL_PROVIDER, FormControlTester, IFormControl, IFormControlComponent, IFormControlData,
+    IFormInputData
+} from "./dynamic-form.types";
 import {isNullOrUndefined} from "util";
+import {Provider, Type} from "@angular/core";
 
 const emptyArray: any = [];
 const emptyTester: FormControlTester = () => {
@@ -21,6 +25,16 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
                 break;
         }
         defineFormControl(target, propertyKey, createFormInput(propertyKey, data, inputType));
+    };
+}
+
+export function provideFormControl(component: Type<IFormControlComponent>, accept?: (control: IFormControl) => boolean): Provider {
+    return {
+        provide: FORM_CONTROL_PROVIDER,
+        useValue: {
+            component: component,
+            accept: accept || component["accept"]
+        }
     };
 }
 

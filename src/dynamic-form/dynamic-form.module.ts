@@ -2,11 +2,13 @@ import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
-import {DynamicFormComponent} from "./components";
+import {DynamicFormComponent, FormInputComponent} from "./components";
+import {provideFormControl} from "./dynamic-form.decorators";
 
 // --- Components ---
 export const components = [
-    DynamicFormComponent
+    DynamicFormComponent,
+    FormInputComponent
 ];
 
 // --- Directives ---
@@ -34,20 +36,20 @@ export const pipes = [
         ...pipes
     ],
     providers: [
-
+        provideFormControl(FormInputComponent)
     ]
 })
-export class DynamicFormModule {
+export class NgxDynamicFormModule {
     static forChild(): ModuleWithProviders {
         return {
-            ngModule: DynamicFormModule,
+            ngModule: NgxDynamicFormModule,
             providers: pipes
         };
     }
 
     static forRoot(): ModuleWithProviders {
         return {
-            ngModule: DynamicFormModule,
+            ngModule: NgxDynamicFormModule,
             providers: []
         }
     }

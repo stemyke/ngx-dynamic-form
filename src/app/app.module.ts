@@ -3,7 +3,7 @@ import {NgModule} from "@angular/core";
 
 
 import {AppComponent} from "./app.component";
-import {DynamicFormModule} from "../public_api";
+import {NgxDynamicFormModule} from "../public_api";
 
 
 @NgModule({
@@ -12,7 +12,7 @@ import {DynamicFormModule} from "../public_api";
     ],
     imports: [
         BrowserModule,
-        DynamicFormModule.forRoot()
+        NgxDynamicFormModule.forRoot()
     ],
     providers: [],
     bootstrap: [AppComponent]

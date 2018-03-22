@@ -1,13 +1,17 @@
 import {IResolveFactory} from "@stemy/ngx-utils";
+import {InjectionToken, Type} from "@angular/core";
+
+export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("forn-control-provider");
 
 // --- Basic form control interfaces ---
-export interface IFormControlOption {
-    id?: any;
-    label: string;
+export interface IFormControlComponent {
+    control: IFormControl;
+    form: IDynamicForm;
 }
 
-export interface IDynamicFormOptions {
-    [id: string]: IFormControlOption[];
+export interface IFormControlProvider {
+    component: Type<IFormControlComponent>;
+    accept: (control: IFormControl) => boolean;
 }
 
 export interface IFormControl {
@@ -39,6 +43,11 @@ export interface IFormFieldSet {
     classes?: string;
 }
 
+export interface IFormControlOption {
+    id?: any;
+    label: string;
+}
+
 // --- Basic form interfaces ---
 export interface IDynamicForm {
     data: any;
@@ -53,6 +62,10 @@ export interface IDynamicForm {
 
 export interface IDynamicFormFieldSets {
     [id: string]: IFormFieldSet
+}
+
+export interface IDynamicFormOptions {
+    [id: string]: IFormControlOption[];
 }
 
 // --- Basic form types ---
