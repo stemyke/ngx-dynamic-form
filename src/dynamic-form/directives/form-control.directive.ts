@@ -11,6 +11,4 @@ export class FormControlDirective {
 
     constructor(private vcr: ViewContainerRef) {
     }
-
-
 }

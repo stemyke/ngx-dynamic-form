@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {isNullOrUndefined} from "util";
 import {getFormControl} from "../../dynamic-form.decorators";
 import {IDynamicFormFieldSets, IFormControl, IFormFieldSet} from "../../dynamic-form.types";
-import {isNullOrUndefined} from "util";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
