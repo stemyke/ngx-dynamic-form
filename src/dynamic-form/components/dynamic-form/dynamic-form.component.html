@@ -3,7 +3,8 @@
         {{ control.label !== ' ' ? (prefix + control.label | translation) : '' }}
     </label>
 </ng-template>
-<ng-template #inputTemplate let-control="control">
+<ng-template #inputTemplate let-form="form" let-control="control">
+    <ng-container [control]="control" [form]="form"></ng-container>
     <input type="text" class="form-control" [attr.id]="control.id" [name]="control.id" [ngModel]="data[control.id]" placeholder="Enter email"/>
 </ng-template>
 <ng-template #controlTemplate let-context="context" let-control="context.control.data">

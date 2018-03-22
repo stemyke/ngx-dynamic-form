@@ -1,7 +1,8 @@
-import {Component, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {Component, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {getFormControl} from "../../dynamic-form.decorators";
 import {IDynamicFormFieldSets, IFormControl, IFormFieldSet} from "../../dynamic-form.types";
 import {isNullOrUndefined} from "util";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
     moduleId: module.id,
@@ -21,7 +22,7 @@ export class DynamicFormComponent implements OnChanges {
     fieldSets: IDynamicFormFieldSets;
     defaultFieldSet: IFormFieldSet;
 
-    constructor(private injector: Injector) {
+    constructor(private formService: DynamicFormService) {
         this.name = "label";
         this.prefix = "label.";
         this.fieldSets = {};

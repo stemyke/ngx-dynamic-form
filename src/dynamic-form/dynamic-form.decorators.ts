@@ -31,6 +31,7 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
 export function provideFormControl(component: Type<IFormControlComponent>, accept?: (control: IFormControl) => boolean): Provider {
     return {
         provide: FORM_CONTROL_PROVIDER,
+        multi: true,
         useValue: {
             component: component,
             accept: accept || component["accept"]
