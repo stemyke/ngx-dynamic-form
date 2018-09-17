@@ -1,13 +1,12 @@
 <ng-template #labelTemplate let-control="control.data">
     <label class="control-label control-label-left" [attr.for]="id">
-        {{ control.label !== ' ' ? (prefix + control.label | translation) : '' }}
+        {{ control.label !== ' ' ? (prefix + control.label | translate) : '' }}
     </label>
 </ng-template>
 <ng-template #inputTemplate let-form="form" let-control="control">
     <ng-container [control]="control" [form]="form"></ng-container>
-    <input type="text" class="form-control" [attr.id]="control.id" [name]="control.id" [ngModel]="data[control.id]" placeholder="Enter email"/>
 </ng-template>
-<ng-template #controlTemplate let-context="context" let-control="context.control.data">
+<ng-template #controlTemplate let-context="context" let-id="context.control.id" let-control="context.control.data">
     <div [ngClass]="['form-group', 'form-group-' + id, control.classes]">
         <ng-container *ngIf="control.labelAlign == 'left'"
                       [ngTemplateOutlet]="labelTemplate"
@@ -20,7 +19,7 @@
 </ng-template>
 <ng-template #fieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
-        <div class="form-title" *ngIf="fieldSet.title">{{ prefix + fieldSet.title | translation }}</div>
+        <div class="form-title" *ngIf="fieldSet.title">{{ prefix + fieldSet.title | translate }}</div>
         <ng-container *ngFor="let control of controls"
                       [ngTemplateOutlet]="controlTemplate"
                       [ngTemplateOutletContext]="{context: {form: this, control: control}}">
@@ -30,9 +29,9 @@
 
 <div class="dynamic-form">
     <form>
-        <ng-container *ngFor="let fs of formControls | groupBy:'fieldSet'"
+        <ng-container *ngFor="let fs of formControls | groupBy:'data.fieldSet'"
                       [ngTemplateOutlet]="fieldSetTemplate"
-                      [ngTemplateOutletContext]="{id: fs.fieldSet, controls: fs.items, fieldSet: fieldSets[fs.fieldSet] || defaultFieldSet}">
+                      [ngTemplateOutletContext]="{id: fs.group, controls: fs.items, fieldSet: formFieldSets[fs.group] || defaultFieldSet}">
         </ng-container>
     </form>
 </div>

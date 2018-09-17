@@ -2,20 +2,21 @@ import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
-import {DynamicFormComponent, FormInputComponent} from "./components";
-import {FormControlDirective} from "./directives";
+import {DynamicFormComponent, DynamicFormInputComponent} from "./components";
+import {DynamicFormControlDirective, DynamicFormTemplateDirective} from "./directives";
 import {DynamicFormService} from "./services";
 import {provideFormControl} from "./dynamic-form.decorators";
 
 // --- Components ---
 export const components = [
     DynamicFormComponent,
-    FormInputComponent
+    DynamicFormInputComponent
 ];
 
 // --- Directives ---
 export const directives = [
-    FormControlDirective
+    DynamicFormControlDirective,
+    DynamicFormTemplateDirective
 ];
 
 // --- Pipes ---
@@ -46,7 +47,7 @@ export class NgxDynamicFormModule {
             ngModule: NgxDynamicFormModule,
             providers: [
                 DynamicFormService,
-                provideFormControl(FormInputComponent)
+                provideFormControl(DynamicFormInputComponent)
             ]
         }
     }

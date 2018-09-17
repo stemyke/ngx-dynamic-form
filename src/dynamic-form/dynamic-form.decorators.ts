@@ -1,6 +1,7 @@
 import {ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
-    FORM_CONTROL_PROVIDER, FormControlTester, IFormControl, IFormControlComponent, IFormControlData,
+    FORM_CONTROL_PROVIDER, FormControlTester, IDynamicFormFieldSets, IFormControl, IFormControlComponent,
+    IFormControlData, IFormFieldSet,
     IFormInputData
 } from "./dynamic-form.types";
 import {isNullOrUndefined} from "util";
@@ -28,6 +29,14 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
     };
 }
 
+export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
+    return (target: any): void => {
+        const sets = getFormFieldSets(target);
+        sets[data.id] = data;
+        ReflectUtils.defineMetadata("dynamicFormFieldSets", sets, target);
+    };
+}
+
 export function provideFormControl(component: Type<IFormControlComponent>, accept?: (control: IFormControl) => boolean): Provider {
     return {
         provide: FORM_CONTROL_PROVIDER,
@@ -45,6 +54,10 @@ export function defineFormControl(target: any, propertyKey: string, control: IFo
 
 export function getFormControl(target: any, propertyKey: string): IFormControl {
     return ReflectUtils.getMetadata("dynamicFormControl", target, propertyKey);
+}
+
+export function getFormFieldSets(target: any): IDynamicFormFieldSets {
+    return ReflectUtils.getMetadata("dynamicFormFieldSets", target) || {};
 }
 
 export function createFormControl(id: string, type: string, data?: IFormControlData): IFormControl {

@@ -1,17 +1,36 @@
-import {FormInput} from "../public_api";
+import {FormInput, FormFieldSet} from "../public_api";
 
+@FormFieldSet({
+    id: "credentials",
+    classes: "form-row"
+})
+@FormFieldSet({
+    id: "numbers",
+    classes: "form-row"
+})
 export class TestModel {
 
-    @FormInput()
+    @FormInput({
+        fieldSet: "credentials",
+        classes: "col-sm-6"
+    })
     name: string = "Béla";
 
-    @FormInput()
+    @FormInput({
+        fieldSet: "credentials",
+        classes: "col-sm-6"
+    })
     password: string = "Józsi";
 
-    @FormInput()
+    @FormInput({
+        fieldSet: "numbers",
+        classes: "col-sm-6"
+    })
     num: number = 0;
 
     @FormInput({
+        fieldSet: "numbers",
+        classes: "col-sm-6",
         step: 0.1
     })
     num2: number = 10;

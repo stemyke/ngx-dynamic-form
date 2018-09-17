@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {isNullOrUndefined} from "util";
-import {getFormControl} from "../../dynamic-form.decorators";
-import {IDynamicFormFieldSets, IFormControl, IFormFieldSet} from "../../dynamic-form.types";
+import {getFormControl, getFormFieldSets} from "../../dynamic-form.decorators";
+import {IDynamicForm, IDynamicFormFieldSets, IFormControl, IFormFieldSet} from "../../dynamic-form.types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
@@ -9,23 +9,25 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
     selector: "dynamic-form",
     templateUrl: "./dynamic-form.component.html"
 })
-export class DynamicFormComponent implements OnChanges {
+export class DynamicFormComponent implements IDynamicForm, OnChanges {
 
     @Input() name: string;
     @Input() controls: IFormControl[];
+    @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
     @Input() readonly: boolean;
     @Input() validateOnBlur: boolean;
 
     prefix: string;
     formControls: IFormControl[];
-    fieldSets: IDynamicFormFieldSets;
+    formFieldSets: IDynamicFormFieldSets;
     defaultFieldSet: IFormFieldSet;
 
     constructor(private formService: DynamicFormService) {
         this.name = "label";
         this.prefix = "label.";
-        this.fieldSets = {};
+        this.formControls = [];
+        this.formFieldSets = {};
         this.defaultFieldSet = {
             id: "",
             title: "",
@@ -44,5 +46,9 @@ export class DynamicFormComponent implements OnChanges {
         this.formControls = this.controls || Object.keys(this.data).map(propertyKey => {
             return getFormControl(this.data, propertyKey);
         }).filter(c => !isNullOrUndefined(c));
+        this.formFieldSets = this.fieldSets ? this.fieldSets.reduce((result, fs) => {
+            result[fs.id] = fs;
+            return result;
+        }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
     }
 }

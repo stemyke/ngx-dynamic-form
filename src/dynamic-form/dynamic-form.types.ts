@@ -5,7 +5,14 @@ export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new I
 
 // --- Basic form control interfaces ---
 export interface IFormControlComponent {
-    control: IFormControl;
+    id: string;
+    control: IFormControlData;
+    form: IDynamicForm;
+}
+
+export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent{
+    id: string;
+    control: T;
     form: IDynamicForm;
 }
 
@@ -44,20 +51,20 @@ export interface IFormFieldSet {
 }
 
 export interface IFormControlOption {
-    id?: any;
+    id: any;
     label: string;
 }
 
 // --- Basic form interfaces ---
 export interface IDynamicForm {
     data: any;
-    getControl(id: string): IFormControl;
-    getOptionLabel(id: string): string;
-    getOptions(id: string): IFormControlOption[];
-    reloadControls(): void;
-    reloadOptions(id: string): void;
-    serialize(): Promise<any>;
-    validate(): Promise<any>;
+    // getControl(id: string): IFormControl;
+    // getOptionLabel(id: string): string;
+    // getOptions(id: string): IFormControlOption[];
+    // reloadControls(): void;
+    // reloadOptions(id: string): void;
+    // serialize(): Promise<any>;
+    // validate(): Promise<any>;
 }
 
 export interface IDynamicFormFieldSets {
