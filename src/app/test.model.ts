@@ -1,4 +1,5 @@
 import {FormInput, FormFieldSet} from "../public_api";
+import {FormSelect} from "../dynamic-form/dynamic-form.decorators";
 
 @FormFieldSet({
     id: "credentials",
@@ -28,12 +29,15 @@ export class TestModel {
     })
     num: number = 0;
 
-    @FormInput({
+    @FormSelect({
         fieldSet: "numbers",
         classes: "col-sm-6",
-        step: 0.1
+        options: () => Promise.resolve([
+            {id: "test1", label: "label.test1"},
+            {id: "test2", label: "label.test2"}
+        ])
     })
-    num2: number = 10;
+    select: string = "test2";
 
     @FormInput({
         type: "date"

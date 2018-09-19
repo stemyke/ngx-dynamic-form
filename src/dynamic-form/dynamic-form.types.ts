@@ -5,21 +5,31 @@ export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new I
 
 // --- Basic form control interfaces ---
 export interface IFormControlComponent {
-    id: string;
-    control: IFormControlData;
     form: IDynamicForm;
+    id: string;
+    data: IFormControlData;
+    meta: any;
 }
 
 export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent{
-    id: string;
-    control: T;
     form: IDynamicForm;
+    id: string;
+    data: T;
+    meta: any;
+
+    get value(): any {
+        return this.form && this.form.data ? this.form.data[this.id] : null;
+    }
 }
+
+export type IFormControlProviderAcceptor = (control: IFormControl) => boolean;
+export type IFormControlProviderLoader = (control: IFormControl, form: IDynamicForm, meta: any) => Promise<any>;
+export type IFormControlOptions = (form: IDynamicForm, data: IFormControlData) => Promise<IFormControlOption[]>;
 
 export interface IFormControlProvider {
     component: Type<IFormControlComponent>;
-    accept: (control: IFormControl) => boolean;
-    loader: (component: IFormControlComponent, injector: Injector) => Promise<any>;
+    acceptor: IFormControlProviderAcceptor;
+    loader: IFormControlProviderLoader;
 }
 
 export interface IFormControl {
@@ -45,6 +55,14 @@ export interface IFormInputData extends IFormControlData {
     step?: number;
 }
 
+export interface IFormSelectData extends IFormControlData {
+    options?: IFormControlOptions | IResolveFactory;
+    emptyOption?: boolean;
+    reloadOptions?: string;
+    type?: string;
+    multi?: boolean;
+}
+
 export interface IFormFieldSet {
     id: string;
     title?: string;
@@ -64,7 +82,11 @@ export interface IDynamicForm {
     data: any;
     readonly: boolean;
     validateOnBlur: boolean;
+
+    id: any;
     prefix: string;
+    injector: Injector;
+    isLoading: boolean;
     // getControl(id: string): IFormControl;
     // getOptionLabel(id: string): string;
     // getOptions(id: string): IFormControlOption[];

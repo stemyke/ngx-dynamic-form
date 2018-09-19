@@ -1,5 +1,5 @@
-import {Component} from "@angular/core";
-import {FormControlComponent, IFormControl, IFormInputData} from "../../dynamic-form.types";
+import {Component, Injector} from "@angular/core";
+import {FormControlComponent, IFormControl, IFormControlComponent, IFormInputData} from "../../dynamic-form.types";
 
 @Component({
     moduleId: module.id,
@@ -9,7 +9,12 @@ import {FormControlComponent, IFormControl, IFormInputData} from "../../dynamic-
 export class DynamicFormInputComponent extends FormControlComponent<IFormInputData> {
 
     // Acceptor for provider
-    static accept(control: IFormControl): boolean {
+    static acceptor(control: IFormControl): boolean {
         return control.type == "input";
+    }
+
+    // Loader for provider
+    static loader(control: IFormControl, injector: Injector, data: any): Promise<any> {
+        return Promise.resolve();
     }
 }

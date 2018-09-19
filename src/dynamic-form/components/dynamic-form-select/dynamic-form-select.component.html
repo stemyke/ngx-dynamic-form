@@ -1,0 +1,30 @@
+<ng-template let-selectedOption="selectedOption" #radioTemplate>
+    <ul class="radio-group">
+        <li *ngFor="let option of meta.options" class="radio">
+            <label [ngClass]="{checked: selectedOption == option}">
+                <input type="radio"
+                       [ngModel]="value"
+                       [name]="form.id + '-' + id"
+                       [value]="option.id">
+                {{ option.label | translate }}
+            </label>
+        </li>
+    </ul>
+</ng-template>
+<ng-template let-selectedOption="selectedOption" #selectTemplate>
+    <select class="form-control"
+            [attr.id]="form.id + '-' + id"
+            [name]="form.id + '-' + id"
+            [ngClass]="{disabled: form.readonly}"
+            [disabled]="form.readonly"
+            [ngModel]="selectedOption">
+        <option *ngFor="let option of meta.options" [ngValue]="option">
+            {{ option.label | translate }}
+        </option>
+    </select>
+    <label class="form-control-description" [attr.for]="form.id + '-' + id" *ngIf="selectedOption.description">
+        {{ selectedOption.description | translate }}
+    </label>
+</ng-template>
+<ng-container [ngTemplateOutlet]="data.type == 'radio' ? radioTemplate : selectTemplate"
+              [ngTemplateOutletContext]="{selectedOption: meta.options | find:findOption:value}">

@@ -1,8 +1,8 @@
 import {ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
     FORM_CONTROL_PROVIDER, FormControlTester, IDynamicFormFieldSets, IFormControl, IFormControlComponent,
-    IFormControlData, IFormFieldSet,
-    IFormInputData
+    IFormControlData, IFormControlProviderAcceptor, IFormControlProviderLoader, IFormFieldSet,
+    IFormInputData, IFormSelectData
 } from "./dynamic-form.types";
 import {isNullOrUndefined} from "util";
 import {Provider, Type} from "@angular/core";
@@ -25,7 +25,22 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
                 inputType = "checkbox";
                 break;
         }
-        defineFormControl(target, propertyKey, createFormInput(propertyKey, data, inputType));
+        const control = createFormControl(propertyKey, "input", data);
+        data = control.data;
+        data.type = data.type || inputType;
+        data.placeholder = data.placeholder || "";
+        data.step = data.step || 1;
+        defineFormControl(target, propertyKey, control);
+    };
+}
+
+export function FormSelect(data?: IFormSelectData): PropertyDecorator {
+    return (target: any, propertyKey: string): void => {
+        const control = createFormControl(propertyKey, "select", data);
+        data = control.data;
+        data.options = data.options || (() => Promise.resolve([]));
+        data.type = data.type || "";
+        defineFormControl(target, propertyKey, control);
     };
 }
 
@@ -37,13 +52,14 @@ export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
     };
 }
 
-export function provideFormControl(component: Type<IFormControlComponent>, accept?: (control: IFormControl) => boolean): Provider {
+export function provideFormControl(component: Type<IFormControlComponent>, acceptor?: IFormControlProviderAcceptor, loader?: IFormControlProviderLoader): Provider {
     return {
         provide: FORM_CONTROL_PROVIDER,
         multi: true,
         useValue: {
             component: component,
-            accept: accept || component["accept"]
+            acceptor: acceptor || component["acceptor"],
+            loader: loader || component["loader"]
         }
     };
 }
@@ -74,13 +90,4 @@ export function createFormControl(id: string, type: string, data?: IFormControlD
         type: type,
         data: data
     };
-}
-
-export function createFormInput(id: string, data?: IFormInputData, inputType: string = "text"): IFormControl {
-    const control = createFormControl(id, "input", data);
-    data = control.data;
-    data.type = data.type || inputType;
-    data.placeholder = data.placeholder || "";
-    data.step = data.step || 1;
-    return control;
 }

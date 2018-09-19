@@ -3,8 +3,8 @@
         {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
     </label>
 </ng-template>
-<ng-template #inputTemplate let-form="form" let-control="control">
-    <ng-container [form-control]="control" [form]="form"></ng-container>
+<ng-template #inputTemplate let-form="form" let-control="control" let-provider="provider" let-meta="meta">
+    <ng-container [form]="form" [form-control]="control" [provider]="provider" [meta]="meta"></ng-container>
 </ng-template>
 <ng-template #controlTemplate let-context let-data="$implicit.control.data">
     <ng-container *ngIf="data.labelAlign == 'left'"
@@ -19,6 +19,6 @@
                   [ngTemplateOutletContext]="context">
     </ng-container>
 </ng-template>
-<ng-container [ngTemplateOutlet]="controlTemplate" [ngTemplateOutletContext]="{$implicit: {control: control, form: form}}">
+<ng-container [ngTemplateOutlet]="controlTemplate" [ngTemplateOutletContext]="{$implicit: {form: form, control: control, provider: provider, meta: meta}}" *ngIf="!form.isLoading">
 
 </ng-container>

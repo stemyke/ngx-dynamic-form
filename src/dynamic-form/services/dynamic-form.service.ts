@@ -7,13 +7,18 @@ export class DynamicFormService {
     constructor(@Inject(FORM_CONTROL_PROVIDER) private components: IFormControlProvider[], private resolver: ComponentFactoryResolver) {
     }
 
-    createComponent(vcr: ViewContainerRef, control: IFormControl): IFormControlComponent {
-        vcr.clear();
-        if (!control) return;
-        const provider = this.components.find(p => p.accept(control));
+    findProvider(control: IFormControl): IFormControlProvider {
+        if (!control) return null;
+        const provider = this.components.find(p => p.acceptor(control));
         if (!provider) {
             throw new Error(`No component provider for control: ${JSON.stringify(control)}`);
         }
+        return provider;
+    }
+
+    createComponent(vcr: ViewContainerRef, provider: IFormControlProvider): IFormControlComponent {
+        vcr.clear();
+        if (!provider) return null;
         const factory = this.resolver.resolveComponentFactory(provider.component);
         return vcr.createComponent(factory).instance;
     }
