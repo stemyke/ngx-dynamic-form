@@ -13,8 +13,8 @@
 </ng-template>
 <ng-template let-selectedOption="selectedOption" #selectTemplate>
     <select class="form-control"
-            [attr.id]="form.id + '-' + id"
-            [name]="form.id + '-' + id"
+            [attr.id]="form.id + '-' + control.id"
+            [name]="form.id + '-' + control.id"
             [ngClass]="{disabled: form.readonly}"
             [disabled]="form.readonly"
             [ngModel]="selectedOption">

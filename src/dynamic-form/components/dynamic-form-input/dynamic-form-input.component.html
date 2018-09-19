@@ -1,2 +1,2 @@
-<input [id]="id" [type]="data.type" [placeholder]="data.placeholder | translate" [step]="data.step"
-       [name]="id" [ngModel]="form.data[id]" class="form-control"/>
+<input [id]="form.id + '-' + control.id" [type]="data.type" [placeholder]="data.placeholder | translate" [step]="data.step"
+       [name]="form.id + '-' + control.id" [ngModel]="value" class="form-control"/>

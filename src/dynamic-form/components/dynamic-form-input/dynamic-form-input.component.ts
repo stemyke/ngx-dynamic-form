@@ -1,5 +1,5 @@
 import {Component, Injector} from "@angular/core";
-import {FormControlComponent, IFormControl, IFormControlComponent, IFormInputData} from "../../dynamic-form.types";
+import {FormControlComponent, IFormControl, IFormInputData} from "../../dynamic-form.types";
 
 @Component({
     moduleId: module.id,

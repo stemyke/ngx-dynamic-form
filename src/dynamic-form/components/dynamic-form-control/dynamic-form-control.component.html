@@ -1,12 +1,12 @@
-<ng-template #labelTemplate let-form="form" let-control="control" let-data="control.data">
+<ng-template #labelTemplate let-form="handler.form" let-control="handler.control" let-data="handler.control.data">
     <label class="control-label control-label-left" [attr.for]="control.id">
         {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
     </label>
 </ng-template>
-<ng-template #inputTemplate let-form="form" let-control="control" let-provider="provider" let-meta="meta">
-    <ng-container [form]="form" [form-control]="control" [provider]="provider" [meta]="meta"></ng-container>
+<ng-template #inputTemplate let-handler="handler" let-control="control" let-provider="provider">
+    <ng-container [form-control]="handler" [provider]="provider"></ng-container>
 </ng-template>
-<ng-template #controlTemplate let-context let-data="$implicit.control.data">
+<ng-template #controlTemplate let-context let-data="control.data">
     <ng-container *ngIf="data.labelAlign == 'left'"
                   [ngTemplateOutlet]="labelTemplate"
                   [ngTemplateOutletContext]="context">
@@ -19,6 +19,6 @@
                   [ngTemplateOutletContext]="context">
     </ng-container>
 </ng-template>
-<ng-container [ngTemplateOutlet]="controlTemplate" [ngTemplateOutletContext]="{$implicit: {form: form, control: control, provider: provider, meta: meta}}" *ngIf="!form.isLoading">
+<ng-container [ngTemplateOutlet]="controlTemplate" [ngTemplateOutletContext]="{$implicit: {handler: this, provider: provider}, control: control}" *ngIf="!form.isLoading">
 
 </ng-container>
