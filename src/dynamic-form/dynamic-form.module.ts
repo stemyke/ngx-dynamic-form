@@ -2,15 +2,19 @@ import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
-import {DynamicFormComponent, DynamicFormInputComponent} from "./components";
-import {DynamicFormControlDirective, DynamicFormTemplateDirective} from "./directives";
-import {DynamicFormService} from "./services";
 import {provideFormControl} from "./dynamic-form.decorators";
+import {DynamicFormService} from "./services/dynamic-form.service";
+import {DynamicFormControlDirective} from "./directives/dynamic-form-control.directive";
+import {DynamicFormTemplateDirective} from "./directives/dynamic-form-template.directive";
+import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
+import {DynamicFormControlComponent} from "./components/dynamic-form-control/dynamic-form-control.component";
+import {DynamicFormInputComponent} from "./components/dynamic-form-input/dynamic-form-input.component";
 
 // --- Components ---
 export const components = [
     DynamicFormComponent,
-    DynamicFormInputComponent
+    DynamicFormControlComponent,
+    DynamicFormInputComponent,
 ];
 
 // --- Directives ---

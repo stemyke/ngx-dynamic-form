@@ -3,11 +3,11 @@ import {IDynamicForm, IFormControl, IFormControlComponent} from "../dynamic-form
 import {DynamicFormService} from "../services/dynamic-form.service";
 
 @Directive({
-    selector: "[control]",
+    selector: "[form-control]",
 })
 export class DynamicFormControlDirective implements OnChanges {
 
-    @Input() control: IFormControl;
+    @Input("form-control") control: IFormControl;
     @Input() form: IDynamicForm;
 
     get component(): IFormControlComponent {

@@ -1,5 +1,5 @@
+import {InjectionToken, Injector, Input, Type} from "@angular/core";
 import {IResolveFactory} from "@stemy/ngx-utils";
-import {InjectionToken, Type} from "@angular/core";
 
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("forn-control-provider");
 
@@ -19,6 +19,7 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
 export interface IFormControlProvider {
     component: Type<IFormControlComponent>;
     accept: (control: IFormControl) => boolean;
+    loader: (component: IFormControlComponent, injector: Injector) => Promise<any>;
 }
 
 export interface IFormControl {
@@ -57,7 +58,13 @@ export interface IFormControlOption {
 
 // --- Basic form interfaces ---
 export interface IDynamicForm {
+    name: string;
+    controls: IFormControl[];
+    fieldSets: IFormFieldSet[];
     data: any;
+    readonly: boolean;
+    validateOnBlur: boolean;
+    prefix: string;
     // getControl(id: string): IFormControl;
     // getOptionLabel(id: string): string;
     // getOptions(id: string): IFormControlOption[];

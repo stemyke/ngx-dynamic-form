@@ -1,0 +1,24 @@
+<ng-template #labelTemplate let-form="form" let-control="control" let-data="control.data">
+    <label class="control-label control-label-left" [attr.for]="control.id">
+        {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
+    </label>
+</ng-template>
+<ng-template #inputTemplate let-form="form" let-control="control">
+    <ng-container [form-control]="control" [form]="form"></ng-container>
+</ng-template>
+<ng-template #controlTemplate let-context let-data="$implicit.control.data">
+    <ng-container *ngIf="data.labelAlign == 'left'"
+                  [ngTemplateOutlet]="labelTemplate"
+                  [ngTemplateOutletContext]="context">
+    </ng-container>
+    <ng-container [ngTemplateOutlet]="inputTemplate"
+                  [ngTemplateOutletContext]="context">
+    </ng-container>
+    <ng-container *ngIf="data.labelAlign == 'right'"
+                  [ngTemplateOutlet]="labelTemplate"
+                  [ngTemplateOutletContext]="context">
+    </ng-container>
+</ng-template>
+<ng-container [ngTemplateOutlet]="controlTemplate" [ngTemplateOutletContext]="{$implicit: {control: control, form: form}}">
+
+</ng-container>
