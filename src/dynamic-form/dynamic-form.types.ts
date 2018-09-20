@@ -58,18 +58,19 @@ export interface IFormControlData {
     hidden?: FormControlTesterFactory;
     validator?: FormControlValidatorFactory;
     validators?: FormControlValidatorFactory[];
+    reload?: string | string[];
 }
 
 export interface IFormInputData extends IFormControlData {
     type?: string;
     placeholder?: string;
+    autocomplete?: string;
     step?: number;
 }
 
 export interface IFormSelectData extends IFormControlData {
     options?: IFormControlOptions | IResolveFactory;
     emptyOption?: boolean;
-    reloadOptions?: string;
     type?: string;
     multi?: boolean;
 }
@@ -93,6 +94,12 @@ export interface IDynamicFormControlHandler {
     meta: any;
     errors: string[];
     hasErrors: boolean;
+    isValid: boolean;
+    isReadOnly: boolean;
+    isHidden: boolean;
+    onFocus(): void;
+    onBlur(): void
+    onValueChange(value: any): void;
 }
 
 export interface IDynamicForm {
@@ -107,13 +114,17 @@ export interface IDynamicForm {
     prefix: string;
     injector: Injector;
     isLoading: boolean;
+    isValid: boolean;
+
+    validate(): Promise<any>;
+    reloadControls(): Promise<any>;
+    reloadControls(): Promise<any>;
+    emitChange(handler: IDynamicFormControlHandler): void;
     // getControl(id: string): IFormControl;
     // getOptionLabel(id: string): string;
     // getOptions(id: string): IFormControlOption[];
-    // reloadControls(): void;
     // reloadOptions(id: string): void;
     // serialize(): Promise<any>;
-    // validate(): Promise<any>;
 }
 
 export interface IDynamicFormFieldSets {

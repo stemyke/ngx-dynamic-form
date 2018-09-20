@@ -1,2 +1,42 @@
-<input [id]="form.id + '-' + control.id" [type]="data.type" [placeholder]="data.placeholder | translate" [step]="data.step"
-       [name]="form.id + '-' + control.id" [ngModel]="value" class="form-control"/>
+<ng-container [ngSwitch]="data.type">
+    <ng-container *ngSwitchCase="'textarea'">
+        <textarea class="form-control"
+                  rows="5"
+                  [attr.autocomplete]="data.autocomplete"
+                  [id]="form.id + '-' + control.id"
+                  [name]="form.id + '-' + control.id"
+                  [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+                  [disabled]="form.readonly || handler.isReadOnly"
+                  [ngModel]="value"
+                  (ngModelChange)="handler.onValueChange($event)"
+                  (blur)="handler.onBlur()"
+                  (focus)="handler.onFocus()">{{ data.placeholder | translate }}</textarea>
+    </ng-container>
+    <ng-container *ngSwitchCase="'date'">
+        <input class="form-control"
+               [attr.autocomplete]="data.autocomplete"
+               [type]="data.type"
+               [id]="form.id + '-' + control.id"
+               [name]="form.id + '-' + control.id"
+               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+               [disabled]="form.readonly || handler.isReadOnly"
+               [ngModel]="value | date: 'y-MM-dd'"
+               (ngModelChange)="onDateChange($event)"
+               (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+        <input class="form-control"
+               [attr.autocomplete]="data.autocomplete"
+               [placeholder]="data.placeholder | translate"
+               [type]="data.type"
+               [id]="form.id + '-' + control.id"
+               [name]="form.id + '-' + control.id"
+               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+               [disabled]="form.readonly || handler.isReadOnly"
+               [ngModel]="value"
+               (ngModelChange)="handler.onValueChange($event)"
+               (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
+    </ng-container>
+</ng-container>

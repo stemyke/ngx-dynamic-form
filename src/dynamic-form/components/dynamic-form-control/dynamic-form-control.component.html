@@ -1,24 +1,35 @@
-<ng-template #labelTemplate let-form="handler.form" let-control="handler.control" let-data="handler.control.data">
+<ng-template #labelTemplate let-form="form" let-control="control" let-data="control.data">
     <label class="control-label control-label-left" [attr.for]="control.id">
         {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
     </label>
 </ng-template>
-<ng-template #inputTemplate let-handler="handler" let-control="control" let-provider="provider">
-    <ng-container [form-control]="handler" [provider]="provider"></ng-container>
+<ng-template #errorTemplate let-handler="handler">
+    <div class="error-message" *ngIf="handler.hasErrors">
+        <span *ngFor="let error of handler.errors" class="help-block">{{ error | translate }}</span>
+    </div>
 </ng-template>
-<ng-template #controlTemplate let-context let-data="control.data">
+<ng-template #controlTemplate let-context let-data="control.data" let-handler="handler" let-provider="provider" let-labelTemplate="labelTemplate" let-errorTemplate="errorTemplate">
     <ng-container *ngIf="data.labelAlign == 'left'"
                   [ngTemplateOutlet]="labelTemplate"
                   [ngTemplateOutletContext]="context">
     </ng-container>
-    <ng-container [ngTemplateOutlet]="inputTemplate"
-                  [ngTemplateOutletContext]="context">
-    </ng-container>
+    <ng-container [form-control]="handler" [provider]="provider"></ng-container>
     <ng-container *ngIf="data.labelAlign == 'right'"
                   [ngTemplateOutlet]="labelTemplate"
                   [ngTemplateOutletContext]="context">
     </ng-container>
+    <ng-container [ngTemplateOutlet]="errorTemplate"
+                  [ngTemplateOutletContext]="context"></ng-container>
 </ng-template>
-<ng-container [ngTemplateOutlet]="controlTemplate" [ngTemplateOutletContext]="{$implicit: {handler: this, provider: provider}, control: control}" *ngIf="!form.isLoading">
+<ng-container [ngTemplateOutlet]="controlTemplate"
+              [ngTemplateOutletContext]="{
+                $implicit: this,
+                handler: this,
+                provider: provider,
+                control: control,
+                errorTemplate: errorTemplate,
+                labelTemplate: labelTemplate
+              }"
+              *ngIf="!form.isLoading">
 
 </ng-container>
