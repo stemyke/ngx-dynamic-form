@@ -1,6 +1,7 @@
 import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
+import {TextMaskModule} from "angular2-text-mask";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 import {provideFormControl} from "./dynamic-form.decorators";
 import {DynamicFormService} from "./services/dynamic-form.service";
@@ -37,6 +38,7 @@ export const pipes = [];
     imports: [
         CommonModule,
         FormsModule,
+        TextMaskModule,
         NgxUtilsModule.forRoot()
     ],
     exports: [

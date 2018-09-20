@@ -1,6 +1,6 @@
 import {FormInput, FormFieldSet} from "../public_api";
 import {FormSelect} from "../dynamic-form/dynamic-form.decorators";
-import {IDynamicForm, IFormControl} from "../dynamic-form/dynamic-form.types";
+import {FormControlTester, IDynamicForm, IFormControl} from "../dynamic-form/dynamic-form.types";
 import {ObjectUtils} from "@stemy/ngx-utils";
 
 @FormFieldSet({
@@ -19,7 +19,12 @@ export class TestModel {
 
     @FormInput({
         fieldSet: "credentials",
-        classes: "col-sm-6"
+        classes: "col-sm-6",
+        readonly: {
+            type: TestModel,
+            func: TestModel.testField,
+            params: ["select", "test1"]
+        }
     })
     name: string = "Béla";
 
@@ -31,14 +36,28 @@ export class TestModel {
 
     @FormInput({
         fieldSet: "test",
+        classes: "col-sm-6",
+        type: "mask",
+        mask: ["(", /[1-9]/, /\d/, /\d/, ")", " ", /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/, /\d/],
+        unmask: value => value ? value.replace(/[(|)|_|\-| ]/gi, "") : ""
+    })
+    masked: string = "";
+
+    @FormInput({
+        fieldSet: "test",
         classes: "col-sm-6"
     })
     num: number = 0;
 
     @FormInput({
         fieldSet: "test",
-        classes: "col-sm-6",
-        type: "textarea"
+        classes: "col-sm-12",
+        type: "textarea",
+        hidden: {
+            type: TestModel,
+            func: TestModel.testField,
+            params: ["select", "test1"]
+        }
     })
     textarea: string = "Józsi";
 
@@ -46,7 +65,7 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         emptyOption: true,
-        validator: (form: IDynamicForm, control: IFormControl) => {
+        validator: (control: IFormControl, form: IDynamicForm) => {
             return Promise.resolve(form.data[control.id] == "test2" ? null : "should-select-test2")
         },
         options: () => Promise.resolve([
@@ -60,7 +79,7 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         type: "radio",
-        validator: (form: IDynamicForm, control: IFormControl) => {
+        validator: (control: IFormControl, form: IDynamicForm) => {
             return Promise.resolve(form.data[control.id] == "test5" ? null : "should-select-test5")
         },
         options: () => Promise.resolve([
@@ -74,7 +93,7 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         type: "checkbox",
-        validator: (form: IDynamicForm, control: IFormControl) => {
+        validator: (control: IFormControl, form: IDynamicForm) => {
             return Promise.resolve(form.data[control.id] == "test5" ? null : "should-select-test5")
         },
         options: () => Promise.resolve([
@@ -89,7 +108,7 @@ export class TestModel {
         classes: "col-sm-6",
         emptyOption: true,
         multi: true,
-        validator: (form: IDynamicForm, control: IFormControl) => {
+        validator: (control: IFormControl, form: IDynamicForm) => {
             const value = form.data[control.id];
             return Promise.resolve(ObjectUtils.isArray(value) && value.indexOf("test2") >= 0 ? null : "should-select-test2-at-least")
         },
@@ -98,7 +117,12 @@ export class TestModel {
             {id: "test2", label: "label.test2"},
             {id: "test3", label: "label.test3"},
             {id: "test4", label: "label.test4"}
-        ])
+        ]),
+        readonly: {
+            type: TestModel,
+            func: TestModel.testField,
+            params: ["select", "test2"]
+        }
     })
     select4: string[] = ["test1", "test2"];
 
@@ -107,6 +131,11 @@ export class TestModel {
         classes: "col-sm-6",
         type: "checkbox",
         multi: true,
+        readonly: {
+            type: TestModel,
+            func: TestModel.testField,
+            params: ["select", "test2"]
+        },
         options: () => Promise.resolve([
             {id: "test5", label: "label.test5"},
             {id: "test3", label: "label.test3"}
@@ -119,4 +148,9 @@ export class TestModel {
     })
     date: Date = new Date();
 
+    static testField(id: string, value: string): FormControlTester {
+        return (control: IFormControl, form: IDynamicForm): Promise<boolean> => {
+            return Promise.resolve(form.data[id] == value);
+        }
+    }
 }

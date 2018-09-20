@@ -1,5 +1,6 @@
-import {Component, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {Component, HostBinding, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {
+    FormControlTester,
     FormControlValidator,
     IDynamicForm,
     IDynamicFormControlHandler,
@@ -40,8 +41,13 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
         return this.readonly;
     }
 
+    get isVisible(): boolean {
+        return this.visible;
+    }
+
+    @HostBinding("class.hidden")
     get isHidden(): boolean {
-        return this.hidden;
+        return !this.visible;
     }
 
     get data(): IFormControlData {
@@ -49,8 +55,11 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     }
 
     private validator: () => Promise<string[]>;
+    private readonlyTester: () => Promise<boolean>;
+    private hideTester: () => Promise<boolean>;
+
     private readonly: boolean;
-    private hidden: boolean;
+    private visible: boolean;
 
     constructor(private injector: Injector, private forms: DynamicFormService) {
         this.meta = {};
@@ -63,6 +72,8 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     ngOnChanges(changes: SimpleChanges): void {
         this.provider = this.forms.findProvider(this.control);
         this.validator = this.createValidator();
+        this.readonlyTester = this.createTester("readonly");
+        this.hideTester = this.createTester("hidden");
     }
 
     onValueChange(value: any): void {
@@ -77,7 +88,6 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     onBlur(): void {
         if (!this.form.validateOnBlur) return;
         this.form.validate().catch(() => {
-
         });
     }
 
@@ -88,7 +98,15 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     }
 
     check(): Promise<any> {
-        return Promise.resolve();
+        return new Promise<any>(resolve => {
+            this.readonlyTester().then(readonly => {
+                this.readonly = readonly;
+                this.hideTester().then(hide => {
+                    this.visible = !hide;
+                    resolve();
+                });
+            });
+        });
     }
 
     validate(clearErrors?: boolean): Promise<boolean> {
@@ -102,13 +120,18 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
         const validators = [this.data.validator].concat(this.data.validators).filter(ObjectUtils.isDefined).map(v => {
             return ReflectUtils.resolve<FormControlValidator>(v, this.injector);
         });
-        return (): Promise<string[]> => {
-            return new Promise<string[]>((resolve) => {
-                const validate = validators.map(v => v(this.form, this.control));
-                Promise.all(validate).then(results => {
-                    resolve(results.filter(error => ObjectUtils.isString(error) && error.length > 0));
-                });
+        return () => new Promise<string[]>((resolve) => {
+            const validate = validators.map(v => v(this.control, this.form));
+            Promise.all(validate).then(results => {
+                resolve(results.filter(error => ObjectUtils.isString(error) && error.length > 0));
             });
-        }
+        });
+    }
+
+    private createTester(test: string): () => Promise<boolean> {
+        const tester = this.control.data[test]
+            ? ReflectUtils.resolve<FormControlTester>(this.control.data[test], this.injector)
+            : () => Promise.resolve(false);
+        return (): Promise<boolean> => tester(this.control, this.form);
     }
 }

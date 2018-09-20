@@ -1,5 +1,6 @@
 import {Component, Injector} from "@angular/core";
 import {FormControlComponent, IFormControl, IFormInputData} from "../../dynamic-form.types";
+import {ObjectUtils} from "@stemy/ngx-utils";
 
 @Component({
     moduleId: module.id,
@@ -23,5 +24,10 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
         const dateValue = <number>date.valueOf();
         if (isNaN(dateValue) || dateValue < -30610224000000) return;
         this.handler.onValueChange(date)
+    }
+
+    onInputChange(value: string): void {
+        value = ObjectUtils.isFunction(this.data.unmask) ? this.data.unmask(value) : value;
+        this.handler.onValueChange(value)
     }
 }

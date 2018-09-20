@@ -57,6 +57,10 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
         return this.valid;
     }
 
+    get isValidating(): boolean {
+        return this.validating;
+    }
+
     @ViewChildren(DynamicFormControlComponent)
     private controlComponents: QueryList<DynamicFormControlComponent>;
     private controlHandlers: {[id: string]: IDynamicFormControlHandler};
@@ -66,6 +70,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
     private initialized: boolean;
     private loading: boolean;
     private valid: boolean;
+    private validating: boolean;
 
     constructor(public cdr: ChangeDetectorRef, injector: Injector) {
         this.name = "label";
@@ -89,7 +94,10 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
         this.initialized = false;
         this.loading = true;
         this.valid = false;
+        this.validating = false;
     }
+
+    // --- Lifecycle hooks
 
     ngAfterViewInit(): void {
         this.controlChanges = this.controlComponents.changes.subscribe(() => {
@@ -119,11 +127,25 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
         this.prefix = this.name ? `${this.name}.` : "";
     }
 
+    // --- Custom ---
+    onFormSubmit(): void {
+        this.validate().then(() => {
+            this.valid = true;
+            this.onSubmit.emit(this);
+        }, () => {
+            this.valid = false;
+        });
+    }
+
+    // --- IDynamicForm ---
+
     validate(clearErrors?: boolean): Promise<any> {
         if (!this.controlComponents) return Promise.resolve();
+        this.validating = true;
         return new Promise<any>((resolve, reject) => {
             const validate = Promise.all(this.controlComponents.map(t => t.validate(clearErrors)));
             validate.then(results => {
+                this.validating = false;
                 if (results.every(r => r)) {
                     this.valid = true;
                     return resolve();

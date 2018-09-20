@@ -25,6 +25,19 @@
                (blur)="handler.onBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
+    <ng-container *ngSwitchCase="'mask'">
+        <input class="form-control"
+               type="text"
+               [id]="form.id + '-' + control.id"
+               [name]="form.id + '-' + control.id"
+               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+               [disabled]="form.readonly || handler.isReadOnly"
+               [textMask]="{mask: data.mask, showMask: true, placeholderChar: data.placeholder}"
+               [ngModel]="value"
+               (ngModelChange)="onInputChange($event)"
+               (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
+    </ng-container>
     <ng-container *ngSwitchDefault>
         <input class="form-control"
                [attr.autocomplete]="data.autocomplete"

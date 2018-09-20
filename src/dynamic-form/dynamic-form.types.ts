@@ -35,7 +35,10 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
 
 export type IFormControlProviderAcceptor = (control: IFormControl) => boolean;
 export type IFormControlProviderLoader = (control: IFormControl, form: IDynamicForm, meta: any) => Promise<any>;
-export type IFormControlOptions = (form: IDynamicForm, data: IFormControlData) => Promise<IFormControlOption[]>;
+export type IFormControlOptions = (control: IFormControl, form: IDynamicForm) => Promise<IFormControlOption[]>;
+export type IFormInputMask = string | RegExp;
+export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
+export type IFormInputUnMaskFunction = (value: string) => any;
 
 export interface IFormControlProvider {
     component: Type<IFormControlComponent>;
@@ -63,8 +66,10 @@ export interface IFormControlData {
 
 export interface IFormInputData extends IFormControlData {
     type?: string;
-    placeholder?: string;
     autocomplete?: string;
+    placeholder?: string;
+    mask?: IFormInputMaskFunction | IFormInputMask[];
+    unmask?: IFormInputUnMaskFunction;
     step?: number;
 }
 
@@ -96,6 +101,7 @@ export interface IDynamicFormControlHandler {
     hasErrors: boolean;
     isValid: boolean;
     isReadOnly: boolean;
+    isVisible: boolean;
     isHidden: boolean;
     onFocus(): void;
     onBlur(): void
@@ -133,7 +139,7 @@ export interface IDynamicFormOptions {
 }
 
 // --- Basic form types ---
-export type FormControlTester = (form: IDynamicForm, control: IFormControl) => Promise<boolean>;
+export type FormControlTester = (control: IFormControl, form: IDynamicForm) => Promise<boolean>;
 export type FormControlTesterFactory = FormControlTester | IResolveFactory;
-export type FormControlValidator = (form: IDynamicForm, control: IFormControl) => Promise<string>;
+export type FormControlValidator = (control: IFormControl, form: IDynamicForm) => Promise<string>;
 export type FormControlValidatorFactory = FormControlValidator | IResolveFactory;

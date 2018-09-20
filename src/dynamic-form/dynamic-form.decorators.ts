@@ -28,8 +28,9 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
         const control = createFormControl(propertyKey, "input", data);
         data = control.data;
         data.type = data.type || inputType;
-        data.placeholder = data.placeholder || "";
+        data.placeholder = data.placeholder || (data.type == "mask" ? "_" : "");
         data.step = data.step || 1;
+        data.mask = data.mask || [/\w*/gi];
         defineFormControl(target, propertyKey, control);
     };
 }

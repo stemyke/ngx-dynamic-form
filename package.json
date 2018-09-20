@@ -31,7 +31,8 @@
         "zone.js": "0.8.26",
         "moment": "2.22.2",
         "bowser": "1.9.4",
-        "@stemy/ngx-utils": "2.4.1"
+        "@stemy/ngx-utils": "2.4.1",
+        "angular2-text-mask": "9.0.0"
     },
     "devDependencies": {
         "@angular/animations": "6.1.7",
@@ -51,6 +52,7 @@
         "moment": "2.22.2",
         "bowser": "1.9.4",
         "@stemy/ngx-utils": "2.4.1",
+        "angular2-text-mask": "9.0.0",
         "@angular-devkit/build-angular": "0.8.2",
         "@angular/cli": "6.2.2",
         "@angular/compiler-cli": "6.1.7",
