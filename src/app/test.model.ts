@@ -1,5 +1,15 @@
-import {ObjectUtils} from "@stemy/ngx-utils";
-import {FormInput, FormFieldSet, FormSelect, FormControlTester, IDynamicForm, IFormControl} from "../public_api";
+import {FactoryDependencies, ObjectUtils} from "@stemy/ngx-utils";
+import {
+    FormInput,
+    FormFieldSet,
+    FormSelect,
+    FormControlTester,
+    IDynamicForm,
+    IFormControl,
+    FormSerializable
+} from "../public_api";
+import {DatePipe} from "@angular/common";
+import {IFormControlSerializer} from "../ngx-dynamic-form/common-types";
 
 @FormFieldSet({
     id: "credentials",
@@ -24,12 +34,14 @@ export class TestModel {
             params: ["select", "test1"]
         }
     })
+    @FormSerializable()
     name: string = "Béla";
 
     @FormInput({
         fieldSet: "credentials",
         classes: "col-sm-6"
     })
+    @FormSerializable()
     password: string = "Józsi";
 
     @FormInput({
@@ -39,6 +51,7 @@ export class TestModel {
         mask: ["(", /[1-9]/, /\d/, /\d/, ")", " ", /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/, /\d/],
         unmask: value => value ? value.replace(/[(|)|_|\-| ]/gi, "") : ""
     })
+    @FormSerializable()
     masked: string = "";
 
     @FormInput({
@@ -144,11 +157,23 @@ export class TestModel {
     @FormInput({
         type: "date"
     })
+    @FormSerializable()
     date: Date = new Date();
+
+    @FormSerializable()
+    veryTest: string = "blabla";
 
     static testField(id: string, value: string): FormControlTester {
         return (control: IFormControl, form: IDynamicForm): Promise<boolean> => {
             return Promise.resolve(form.data[id] == value);
+        }
+    }
+
+    @FactoryDependencies(DatePipe)
+    static serializeDate(date: DatePipe): IFormControlSerializer {
+        return (id: string, form: IDynamicForm): Promise<any> => {
+            const value: any = form.data[id];
+            return Promise.resolve(ObjectUtils.isDate(value) ? date.transform(value, "yyyy-MM-dd") : value || "");
         }
     }
 }

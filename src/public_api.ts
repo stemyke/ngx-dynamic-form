@@ -9,6 +9,7 @@ export {
     IFormInputMaskFunction,
     IFormInputUnMaskFunction,
     IFormControlProvider,
+    IFormSerializer,
     IFormControl,
     IFormControlData,
     IFormInputData,
@@ -22,13 +23,15 @@ export {
     FormControlTesterFactory,
     FormControlValidator,
     FormControlValidatorFactory,
+    FormSerializable,
     FormInput,
     FormSelect,
     FormFieldSet,
     provideFormControl,
     defineFormControl,
-    getFormControl,
     getFormFieldSets,
+    getFormControl,
+    getFormSerializer,
     createFormControl
 
 } from "./ngx-dynamic-form/common-types";

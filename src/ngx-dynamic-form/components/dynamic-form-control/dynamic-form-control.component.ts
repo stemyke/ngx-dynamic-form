@@ -112,6 +112,7 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     validate(clearErrors?: boolean): Promise<boolean> {
         return this.validator().then(errors => {
             this.errors = clearErrors ? [] : errors;
+            console.log(this.control, errors);
             return errors.length == 0;
         });
     }

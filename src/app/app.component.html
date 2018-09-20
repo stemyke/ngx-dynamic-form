@@ -1,6 +1,8 @@
 <div class="container">
     <div class="bd-example">
-        <dynamic-form #form [data]="testModel" [validateOnBlur]="true"></dynamic-form>
+        <dynamic-form #form [data]="testModel" [validateOnBlur]="true">
+            <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
+        </dynamic-form>
         {{ 'Valid: ' + form.isValid }}
 
         <pre>

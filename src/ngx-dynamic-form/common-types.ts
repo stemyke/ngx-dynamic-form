@@ -37,6 +37,7 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
 export type IFormControlProviderAcceptor = (control: IFormControl) => boolean;
 export type IFormControlProviderLoader = (control: IFormControl, form: IDynamicForm, meta: any) => Promise<any>;
 export type IFormControlOptions = (control: IFormControl, form: IDynamicForm) => Promise<IFormControlOption[]>;
+export type IFormControlSerializer = (id: string, form: IDynamicForm) => Promise<any>;
 export type IFormInputMask = string | RegExp;
 export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
 export type IFormInputUnMaskFunction = (value: string) => any;
@@ -45,6 +46,11 @@ export interface IFormControlProvider {
     component: Type<IFormControlComponent>;
     acceptor: IFormControlProviderAcceptor;
     loader: IFormControlProviderLoader;
+}
+
+export interface IFormSerializer {
+    id: string;
+    func: IFormControlSerializer;
 }
 
 export interface IFormControl {
@@ -151,6 +157,16 @@ const emptyTester: FormControlTester = () => {
     return Promise.resolve(false);
 };
 
+function defaultSerializer(id: string, form: IDynamicForm): Promise<any> {
+    return Promise.resolve(form.data[id]);
+}
+
+export function FormSerializable(serializer?: IFormControlSerializer | IResolveFactory): PropertyDecorator {
+    return (target: any, propertyKey: string): void => {
+        ReflectUtils.defineMetadata("dynamicFormSerializer", serializer || defaultSerializer, target, propertyKey);
+    };
+}
+
 export function FormInput(data?: IFormInputData): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
         const meta = ReflectUtils.getOwnMetadata("design:type", target, propertyKey);
@@ -208,12 +224,16 @@ export function defineFormControl(target: any, propertyKey: string, control: IFo
     ReflectUtils.defineMetadata("dynamicFormControl", control, target, propertyKey);
 }
 
+export function getFormFieldSets(target: any): IDynamicFormFieldSets {
+    return ReflectUtils.getMetadata("dynamicFormFieldSets", target) || {};
+}
+
 export function getFormControl(target: any, propertyKey: string): IFormControl {
     return ReflectUtils.getMetadata("dynamicFormControl", target, propertyKey);
 }
 
-export function getFormFieldSets(target: any): IDynamicFormFieldSets {
-    return ReflectUtils.getMetadata("dynamicFormFieldSets", target) || {};
+export function getFormSerializer(target: any, propertyKey: string): IFormControlSerializer | IResolveFactory {
+    return ReflectUtils.getMetadata("dynamicFormSerializer", target, propertyKey);
 }
 
 export function createFormControl(id: string, type: string, data?: IFormControlData): IFormControl {

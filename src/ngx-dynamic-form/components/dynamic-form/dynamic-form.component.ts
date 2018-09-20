@@ -13,15 +13,16 @@ import {
     ViewChildren
 } from "@angular/core";
 import {Subscription} from "rxjs";
-import {ITimer, ObjectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {ITimer, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
     getFormControl,
-    getFormFieldSets,
+    getFormFieldSets, getFormSerializer,
     IDynamicForm,
     IDynamicFormControlHandler,
     IDynamicFormFieldSets,
-    IFormControl,
-    IFormFieldSet
+    IFormControl, IFormControlSerializer,
+    IFormFieldSet,
+    IFormSerializer
 } from "../../common-types";
 import {DynamicFormControlComponent} from "../dynamic-form-control/dynamic-form-control.component";
 
@@ -46,8 +47,9 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
     id: any;
     prefix: string;
     injector: Injector;
-    formControls: IFormControl[];
     formFieldSets: IDynamicFormFieldSets;
+    formControls: IFormControl[];
+    formSerializers: IFormSerializer[];
     defaultFieldSet: IFormFieldSet;
 
     get isLoading(): boolean {
@@ -117,13 +119,21 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.data || changes.controls) {
-            this.formControls = this.controls || Object.keys(this.data).map(propertyKey => {
-                return getFormControl(this.data, propertyKey);
-            }).filter(c => !ObjectUtils.isNullOrUndefined(c));
             this.formFieldSets = this.fieldSets ? this.fieldSets.reduce((result, fs) => {
                 result[fs.id] = fs;
                 return result;
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
+            const props = Object.keys(this.data);
+            this.formControls = this.controls || props.map(propertyKey => {
+                return getFormControl(this.data, propertyKey);
+            }).filter(ObjectUtils.isDefined);
+            this.formSerializers = props.map(propertyKey => {
+                const serializer = getFormSerializer(this.data, propertyKey);
+                return !serializer ? null : {
+                    id: propertyKey,
+                    func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
+                };
+            }).filter(ObjectUtils.isDefined);
         }
         this.prefix = this.name ? `${this.name}.` : "";
     }
@@ -158,7 +168,21 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
     }
 
     serialize(validate?: boolean): Promise<any> {
-        return Promise.resolve({});
+        return new Promise<any>((resolve, reject) => {
+            const serialize = () => {
+                const result = {};
+                const serializers = this.formSerializers.map(s => {
+                    return s.func(s.id, this).then(res => result[s.id] = res);
+                });
+                return Promise.all(serializers).then(() => result);
+            };
+            if (validate) {
+                this.validate().then(() => {
+                    serialize().then(resolve);
+                }, reject);
+            }
+            serialize().then(resolve);
+        });
     }
 
     reloadControls(): Promise<any> {
