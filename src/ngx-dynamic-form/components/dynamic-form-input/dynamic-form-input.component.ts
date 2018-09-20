@@ -1,5 +1,5 @@
 import {Component, Injector} from "@angular/core";
-import {FormControlComponent, IFormControl, IFormInputData} from "../../dynamic-form.types";
+import {FormControlComponent, IFormControl, IFormInputData} from "../../common-types";
 import {ObjectUtils} from "@stemy/ngx-utils";
 
 @Component({

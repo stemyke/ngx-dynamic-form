@@ -1,5 +1,5 @@
 import {ComponentFactoryResolver, Inject, Injectable, ViewContainerRef} from "@angular/core";
-import {FORM_CONTROL_PROVIDER, IFormControl, IFormControlComponent, IFormControlProvider} from "../dynamic-form.types";
+import {FORM_CONTROL_PROVIDER, IFormControl, IFormControlComponent, IFormControlProvider} from "../common-types";
 
 @Injectable()
 export class DynamicFormService {

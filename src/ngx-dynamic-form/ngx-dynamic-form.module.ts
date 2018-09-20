@@ -3,11 +3,15 @@ import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {TextMaskModule} from "angular2-text-mask";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
-import {provideFormControl} from "./dynamic-form.decorators";
+import {provideFormControl} from "./common-types";
+
 import {DynamicFormService} from "./services/dynamic-form.service";
+
+import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 import {DynamicFormControlDirective} from "./directives/dynamic-form-control.directive";
 import {DynamicFormTemplateDirective} from "./directives/dynamic-form-template.directive";
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
+
 import {DynamicFormControlComponent} from "./components/dynamic-form-control/dynamic-form-control.component";
 import {DynamicFormInputComponent} from "./components/dynamic-form-input/dynamic-form-input.component";
 import {DynamicFormSelectComponent} from "./components/dynamic-form-select/dynamic-form-select.component";
@@ -22,6 +26,7 @@ export const components = [
 
 // --- Directives ---
 export const directives = [
+    AsyncSubmitDirective,
     DynamicFormControlDirective,
     DynamicFormTemplateDirective
 ];

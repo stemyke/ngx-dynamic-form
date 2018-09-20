@@ -14,14 +14,15 @@ import {
 } from "@angular/core";
 import {Subscription} from "rxjs";
 import {ITimer, ObjectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
-import {getFormControl, getFormFieldSets} from "../../dynamic-form.decorators";
 import {
+    getFormControl,
+    getFormFieldSets,
     IDynamicForm,
     IDynamicFormControlHandler,
     IDynamicFormFieldSets,
     IFormControl,
     IFormFieldSet
-} from "../../dynamic-form.types";
+} from "../../common-types";
 import {DynamicFormControlComponent} from "../dynamic-form-control/dynamic-form-control.component";
 
 @Component({
@@ -73,14 +74,14 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
     private validating: boolean;
 
     constructor(public cdr: ChangeDetectorRef, injector: Injector) {
-        this.name = "label";
+        this.name = "";
 
         this.onInit = new EventEmitter<IDynamicForm>();
         this.onChange = new EventEmitter<IDynamicForm>();
         this.onSubmit = new EventEmitter<IDynamicForm>();
 
         this.id = UniqueUtils.uuid();
-        this.prefix = "label.";
+        this.prefix = "";
         this.injector = injector;
         this.formControls = [];
         this.formFieldSets = {};

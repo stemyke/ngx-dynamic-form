@@ -6,7 +6,7 @@ import {
     IFormControl, IFormControlOption,
     IFormControlOptions,
     IFormSelectData
-} from "../../dynamic-form.types";
+} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -28,7 +28,7 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
         }
         return new Promise<any>(resolve => {
             const getOptions = ReflectUtils.resolve<IFormControlOptions>(data.options, form.injector);
-            getOptions(form, data).then(options => {
+            getOptions(control, form).then(options => {
                 if (data.emptyOption) options.unshift({id: null, label: ""});
                 meta["options"] = options;
                 DynamicFormSelectComponent.fillOptions(control, form, options);

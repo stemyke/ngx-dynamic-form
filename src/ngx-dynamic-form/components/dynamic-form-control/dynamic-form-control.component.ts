@@ -7,7 +7,7 @@ import {
     IFormControl,
     IFormControlData,
     IFormControlProvider
-} from "../../dynamic-form.types";
+} from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 

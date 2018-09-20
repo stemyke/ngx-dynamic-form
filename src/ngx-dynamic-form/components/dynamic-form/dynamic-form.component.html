@@ -9,11 +9,12 @@
     </div>
 </ng-template>
 <form class="dynamic-form" (submit)="onFormSubmit()">
-    <div *ngIf="isLoading">{{ prefix + 'message.loading' | translate }}</div>
+    <div *ngIf="isLoading" class="dynamic-form-loader">{{ prefix + 'message.loading' | translate }}</div>
     <ng-container *ngFor="let fs of formControls | groupBy:'data.fieldSet'"
                   [ngTemplateOutlet]="fieldSetTemplate"
                   [ngTemplateOutletContext]="{id: fs.group, controls: fs.items, fieldSet: formFieldSets[fs.group] || defaultFieldSet}">
     </ng-container>
-    <div *ngIf="isValidating">{{ prefix + 'message.validating' | translate }}</div>
+    <ng-content></ng-content>
+    <div *ngIf="isValidating" class="dynamic-form-validator">{{ prefix + 'message.validating' | translate }}</div>
     <button [ngStyle]="{display: 'none'}">Submit</button>
 </form>

@@ -1,7 +1,5 @@
-import {FormInput, FormFieldSet} from "../public_api";
-import {FormSelect} from "../dynamic-form/dynamic-form.decorators";
-import {FormControlTester, IDynamicForm, IFormControl} from "../dynamic-form/dynamic-form.types";
 import {ObjectUtils} from "@stemy/ngx-utils";
+import {FormInput, FormFieldSet, FormSelect, FormControlTester, IDynamicForm, IFormControl} from "../public_api";
 
 @FormFieldSet({
     id: "credentials",
