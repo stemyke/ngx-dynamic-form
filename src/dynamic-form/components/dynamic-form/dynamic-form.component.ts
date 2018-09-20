@@ -59,6 +59,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
 
     @ViewChildren(DynamicFormControlComponent)
     private controlComponents: QueryList<DynamicFormControlComponent>;
+    private controlHandlers: {[id: string]: IDynamicFormControlHandler};
     private controlChanges: Subscription;
 
     private changeTimer: ITimer;
@@ -83,6 +84,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
             title: "",
             classes: ""
         };
+        this.controlHandlers = {};
         this.changeTimer = TimerUtils.createTimeout();
         this.initialized = false;
         this.loading = true;
@@ -90,7 +92,13 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
     }
 
     ngAfterViewInit(): void {
-        this.controlChanges = this.controlComponents.changes.subscribe(() => this.reloadControls());
+        this.controlChanges = this.controlComponents.changes.subscribe(() => {
+            this.controlHandlers = this.controlComponents.reduce((result, comp) => {
+                result[comp.control.id] = comp;
+                return result;
+            }, {});
+            this.reloadControls();
+        });
         this.reloadControls();
     }
 
@@ -126,6 +134,10 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
         });
     }
 
+    serialize(validate?: boolean): Promise<any> {
+        return Promise.resolve({});
+    }
+
     reloadControls(): Promise<any> {
         if (!this.controlComponents) return Promise.resolve();
         const load = Promise.all(this.controlComponents.map(t => t.load()));
@@ -158,6 +170,15 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
 
             });
         }, 250);
+    }
+
+    getControl(id: string): IFormControl {
+        const handler = this.controlHandlers[id];
+        return !handler ? null : handler.control;
+    }
+
+    getControlHandler(id: string): IDynamicFormControlHandler {
+        return this.controlHandlers[id];
     }
 
     private recheckControls(): Promise<any> {

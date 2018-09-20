@@ -39,7 +39,7 @@ export function FormSelect(data?: IFormSelectData): PropertyDecorator {
         const control = createFormControl(propertyKey, "select", data);
         data = control.data;
         data.options = data.options || (() => Promise.resolve([]));
-        data.type = data.type || "";
+        data.type = data.type || "select";
         defineFormControl(target, propertyKey, control);
     };
 }

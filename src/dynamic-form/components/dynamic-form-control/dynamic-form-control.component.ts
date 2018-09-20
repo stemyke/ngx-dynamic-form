@@ -1,6 +1,14 @@
 import {Component, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
-import {IDynamicForm, IDynamicFormControlHandler, IFormControl, IFormControlProvider} from "../../dynamic-form.types";
+import {
+    FormControlValidator,
+    IDynamicForm,
+    IDynamicFormControlHandler,
+    IFormControl,
+    IFormControlData,
+    IFormControlProvider
+} from "../../dynamic-form.types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 
 @Component({
     moduleId: module.id,
@@ -36,6 +44,10 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
         return this.hidden;
     }
 
+    get data(): IFormControlData {
+        return this.control ? this.control.data : null;
+    }
+
     private validator: () => Promise<string[]>;
     private readonly: boolean;
     private hidden: boolean;
@@ -43,13 +55,14 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     constructor(private injector: Injector, private forms: DynamicFormService) {
         this.meta = {};
         this.errors = [];
-        this.validator = () => Promise.resolve(["gfd"]);
+        this.validator = () => Promise.resolve([]);
     }
 
     // --- IDynamicFormControlHandler ---
 
     ngOnChanges(changes: SimpleChanges): void {
         this.provider = this.forms.findProvider(this.control);
+        this.validator = this.createValidator();
     }
 
     onValueChange(value: any): void {
@@ -83,5 +96,19 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
             this.errors = clearErrors ? [] : errors;
             return errors.length == 0;
         });
+    }
+
+    private createValidator(): () => Promise<string[]> {
+        const validators = [this.data.validator].concat(this.data.validators).filter(ObjectUtils.isDefined).map(v => {
+            return ReflectUtils.resolve<FormControlValidator>(v, this.injector);
+        });
+        return (): Promise<string[]> => {
+            return new Promise<string[]>((resolve) => {
+                const validate = validators.map(v => v(this.form, this.control));
+                Promise.all(validate).then(results => {
+                    resolve(results.filter(error => ObjectUtils.isString(error) && error.length > 0));
+                });
+            });
+        }
     }
 }

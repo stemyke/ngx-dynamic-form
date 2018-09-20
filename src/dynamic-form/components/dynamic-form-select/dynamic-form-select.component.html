@@ -1,39 +1,61 @@
-<ng-template let-selectedOption="selectedOption" #radioTemplate>
-    <ul class="radio-group">
-        <li *ngFor="let option of meta.options" class="radio">
-            <label [ngClass]="{checked: selectedOption == option}">
-                <input type="radio"
-                       [id]="form.id + '-' + control.id"
-                       [name]="form.id + '-' + control.id"
-                       [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-                       [disabled]="form.readonly || handler.isReadOnly"
-                       [value]="option.id"
-                       [ngModel]="value"
-                       (ngModelChange)="handler.onValueChange($event)"
-                       (blur)="handler.onBlur()"
-                       (focus)="handler.onFocus()">
-                {{ option.label | translate }}
-            </label>
-        </li>
-    </ul>
-</ng-template>
-<ng-template let-selectedOption="selectedOption" #selectTemplate>
+<ng-template #selectTemplate let-selected="selected">
     <select class="form-control"
+            [multiple]="data.multi"
             [id]="form.id + '-' + control.id"
             [name]="form.id + '-' + control.id"
             [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
             [disabled]="form.readonly || handler.isReadOnly"
-            [ngModel]="selectedOption"
-            (ngModelChange)="handler.onValueChange($event.id)"
+            [ngModel]="data.multi ? value : [value]"
+            (ngModelChange)="onSelectChange($event)"
             (blur)="handler.onBlur()"
             (focus)="handler.onFocus()">
-        <option *ngFor="let option of meta.options" [ngValue]="option">
+        <option *ngFor="let option of meta.options" [value]="option.id">
             {{ option.label | translate }}
         </option>
     </select>
-    <label class="form-control-description" [attr.for]="form.id + '-' + control.id" *ngIf="selectedOption.description">
-        {{ selectedOption.description | translate }}
+    <label class="form-control-description" [attr.for]="form.id + '-' + control.id" *ngIf="!data.multi && selected.description">
+        {{ selected.description | translate }}
     </label>
 </ng-template>
-<ng-container [ngTemplateOutlet]="data.type == 'radio' ? radioTemplate : selectTemplate"
-              [ngTemplateOutletContext]="{selectedOption: meta.options | find:findOption:value}">
+<ng-container [ngSwitch]="data.type">
+    <ng-container *ngSwitchCase="'radio'">
+        <ul class="radio-group">
+            <li *ngFor="let option of meta.options" class="radio">
+                <label [ngClass]="{checked: value == option.id}">
+                    <input type="radio"
+                           [id]="form.id + '-' + control.id + '-' + option.id"
+                           [name]="form.id + '-' + control.id + '-' + option.id"
+                           [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+                           [disabled]="form.readonly || handler.isReadOnly"
+                           [value]="option.id"
+                           [ngModel]="value"
+                           (ngModelChange)="onSelectChange(option.id)"
+                           (blur)="handler.onBlur()"
+                           (focus)="handler.onFocus()">
+                    {{ option.label | translate }}
+                </label>
+            </li>
+        </ul>
+    </ng-container>
+    <ng-container *ngSwitchCase="'checkbox'">
+        <ul class="checkbox-group">
+            <li *ngFor="let option of meta.options" class="radio">
+                <label [ngClass]="{checked: value == option.id}">
+                    <input type="checkbox"
+                           [id]="form.id + '-' + control.id + '-' + option.id"
+                           [name]="form.id + '-' + control.id + '-' + option.id"
+                           [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+                           [disabled]="form.readonly || handler.isReadOnly"
+                           [ngModel]="checkValue(option)"
+                           (ngModelChange)="onSelectChange(option.id)"
+                           (blur)="handler.onBlur()"
+                           (focus)="handler.onFocus()">
+                    {{ option.label | translate }}
+                </label>
+            </li>
+        </ul>
+    </ng-container>
+    <ng-container *ngSwitchDefault [ngTemplateOutlet]="selectTemplate" [ngTemplateOutletContext]="{selected: meta.options | find:findOption:value}">
+
+    </ng-container>
+</ng-container>

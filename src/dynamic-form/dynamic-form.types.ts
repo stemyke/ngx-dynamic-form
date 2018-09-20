@@ -117,14 +117,11 @@ export interface IDynamicForm {
     isValid: boolean;
 
     validate(): Promise<any>;
-    reloadControls(): Promise<any>;
+    serialize(validate?: boolean): Promise<any>;
     reloadControls(): Promise<any>;
     emitChange(handler: IDynamicFormControlHandler): void;
-    // getControl(id: string): IFormControl;
-    // getOptionLabel(id: string): string;
-    // getOptions(id: string): IFormControlOption[];
-    // reloadOptions(id: string): void;
-    // serialize(): Promise<any>;
+    getControlHandler(id: string): IDynamicFormControlHandler;
+    getControl(id: string): IFormControl;
 }
 
 export interface IDynamicFormFieldSets {

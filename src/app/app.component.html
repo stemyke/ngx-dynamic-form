@@ -2,5 +2,9 @@
     <div class="bd-example">
         <dynamic-form #form [data]="testModel" [validateOnBlur]="true"></dynamic-form>
         {{ 'Valid: ' + form.isValid }}
+
+        <pre>
+            {{ testModel | json }}
+        </pre>
     </div>
 </div>
