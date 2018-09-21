@@ -49,7 +49,8 @@ export const pipes = [];
     exports: [
         ...components,
         ...directives,
-        ...pipes
+        ...pipes,
+        NgxUtilsModule
     ],
     entryComponents: components,
     providers: pipes

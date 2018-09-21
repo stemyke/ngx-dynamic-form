@@ -1,4 +1,4 @@
-import {Component, HostBinding, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {Component, HostBinding, Injector, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from "@angular/core";
 import {
     FormControlTester,
     FormControlValidator,
@@ -16,7 +16,7 @@ import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
     selector: "[dynamic-form-control]",
     templateUrl: "./dynamic-form-control.component.html"
 })
-export class DynamicFormControlComponent implements OnChanges, IDynamicFormControlHandler {
+export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges, IDynamicFormControlHandler {
 
     @Input("dynamic-form-control") control: IFormControl;
     @Input() form: IDynamicForm;
@@ -67,7 +67,15 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
         this.validator = () => Promise.resolve([]);
     }
 
-    // --- IDynamicFormControlHandler ---
+    // --- Lifecycle hooks ---
+
+    ngOnInit(): void {
+        this.form.addControlHandler(this);
+    }
+
+    ngOnDestroy(): void {
+        this.form.removeControlHandler(this);
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         this.provider = this.forms.findProvider(this.control);
@@ -75,6 +83,8 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
         this.readonlyTester = this.createTester("readonly");
         this.hideTester = this.createTester("hidden");
     }
+
+    // --- IDynamicFormControlHandler ---
 
     onValueChange(value: any): void {
         this.form.data[this.control.id] = value;
@@ -86,12 +96,13 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
     }
 
     onBlur(): void {
-        if (!this.form.validateOnBlur) return;
-        this.form.validate().catch(() => {
-        });
+        const callback = () => this.form.emitChange(this);
+        if (this.form.validateOnBlur) {
+            this.form.validate().then(callback, callback);
+            return;
+        }
+        callback();
     }
-
-    // --- Custom ---
 
     load(): Promise<any> {
         return !this.provider ? Promise.resolve() : this.provider.loader(this.control, this.form, this.meta);
@@ -115,6 +126,8 @@ export class DynamicFormControlComponent implements OnChanges, IDynamicFormContr
             return errors.length == 0;
         });
     }
+
+    // --- Custom ---
 
     private createValidator(): () => Promise<string[]> {
         const validators = [this.data.validator].concat(this.data.validators).filter(ObjectUtils.isDefined).map(v => {

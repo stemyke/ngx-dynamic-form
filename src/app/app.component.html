@@ -1,6 +1,8 @@
 <div class="container">
     <div class="bd-example">
         <dynamic-form #form [data]="testModel" [validateOnBlur]="true">
+            <ng-template prefix="date">This is prefix!!!</ng-template>
+            <ng-template suffix="textarea">This is suffix!!!</ng-template>
             <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
         </dynamic-form>
         {{ 'Valid: ' + form.isValid }}
@@ -8,5 +10,51 @@
         <pre>
             {{ testModel | json }}
         </pre>
+
+        <dynamic-form #form2 [data]="testModel" [validateOnBlur]="true">
+            <ng-template #wrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
+                <div *ngIf="form.isLoading" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
+                <table style="width: 100%">
+                    <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>
+                </table>
+                <div *ngIf="form.isValidating" class="dynamic-form-validator">{{ form.prefix + 'message.validating' | translate }}</div>
+            </ng-template>
+            <ng-template #fieldSetTemplate let-form="form" let-id="id" let-controls="controls" let-fieldSet="fieldSet">
+                <tr class="form-title" *ngIf="fieldSet.title">
+                    <td colspan="2">{{ form.prefix + fieldSet.title | translate }}</td>
+                </tr>
+                <tr *ngFor="let control of controls"
+                    [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]"
+                    [dynamic-form-control]="control"
+                    [form]="form">
+                </tr>
+            </ng-template>
+            <ng-template #controlTemplate let-context let-data="control.data" let-inputTemplate="inputTemplate" let-labelTemplate="labelTemplate" let-errorTemplate="errorTemplate">
+                <td *ngIf="data.labelAlign == 'left'">
+                    <ng-container [ngTemplateOutlet]="labelTemplate"
+                                  [ngTemplateOutletContext]="context">
+                    </ng-container>
+                </td>
+                <td>
+                    <ng-container [ngTemplateOutlet]="inputTemplate"
+                                  [ngTemplateOutletContext]="context"></ng-container>
+                    <ng-container [ngTemplateOutlet]="errorTemplate"
+                                  [ngTemplateOutletContext]="context"></ng-container>
+                </td>
+                <td *ngIf="data.labelAlign == 'right'">
+                    <ng-container [ngTemplateOutlet]="labelTemplate"
+                                  [ngTemplateOutletContext]="context">
+                    </ng-container>
+                </td>
+            </ng-template>
+            <ng-template control="select3" let-context let-handler="handler" let-provider="provider" let-errorTemplate="errorTemplate">
+                <td colspan="2">
+                    <ng-container [form-control]="handler" [provider]="provider"></ng-container>
+                    <ng-container [ngTemplateOutlet]="errorTemplate"
+                                  [ngTemplateOutletContext]="context"></ng-container>
+                </td>
+            </ng-template>
+            <ng-template label="date">Bélaaa</ng-template>
+        </dynamic-form>
     </div>
 </div>

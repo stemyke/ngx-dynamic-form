@@ -1,20 +1,26 @@
-<ng-template #fieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
+<ng-template #defaultFieldSetTemplate let-form="form" let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
-        <div class="form-title" *ngIf="fieldSet.title">{{ prefix + fieldSet.title | translate }}</div>
+        <div class="form-title" *ngIf="fieldSet.title">{{ form.prefix + fieldSet.title | translate }}</div>
         <div *ngFor="let control of controls"
              [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]"
              [dynamic-form-control]="control"
-             [form]="this">
+             [form]="form">
         </div>
     </div>
 </ng-template>
-<form class="dynamic-form" (submit)="onFormSubmit()">
-    <div *ngIf="isLoading" class="dynamic-form-loader">{{ prefix + 'message.loading' | translate }}</div>
+<ng-template #fieldSetsTemplate>
     <ng-container *ngFor="let fs of formControls | groupBy:'data.fieldSet'"
-                  [ngTemplateOutlet]="fieldSetTemplate"
-                  [ngTemplateOutletContext]="{id: fs.group, controls: fs.items, fieldSet: formFieldSets[fs.group] || defaultFieldSet}">
+                  [ngTemplateOutlet]="fieldSetTemplate || defaultFieldSetTemplate"
+                  [ngTemplateOutletContext]="{form: this, id: fs.group, controls: fs.items, fieldSet: formFieldSets[fs.group] || defaultFieldSet}">
     </ng-container>
+</ng-template>
+<ng-template #defaultWrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
+    <div *ngIf="form.isLoading" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
+    <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>
     <ng-content></ng-content>
-    <div *ngIf="isValidating" class="dynamic-form-validator">{{ prefix + 'message.validating' | translate }}</div>
+    <div *ngIf="form.isValidating" class="dynamic-form-validator">{{ form.prefix + 'message.validating' | translate }}</div>
+</ng-template>
+<form class="dynamic-form" (submit)="onFormSubmit()">
+    <ng-container [ngTemplateOutlet]="wrapperTemplate || defaultWrapperTemplate" [ngTemplateOutletContext]="{form: this, fieldSetsTemplate: fieldSetsTemplate}"></ng-container>
     <button [ngStyle]="{display: 'none'}">Submit</button>
 </form>

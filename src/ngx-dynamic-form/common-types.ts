@@ -1,4 +1,4 @@
-import {EventEmitter, InjectionToken, Injector, Provider, Type} from "@angular/core";
+import {EventEmitter, InjectionToken, Injector, Provider, TemplateRef, Type} from "@angular/core";
 import {IResolveFactory, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {isNullOrUndefined} from "util";
 
@@ -113,6 +113,13 @@ export interface IDynamicFormControlHandler {
     onFocus(): void;
     onBlur(): void
     onValueChange(value: any): void;
+    load(): Promise<any>;
+    check(): Promise<any>;
+    validate(clearErrors?: boolean): Promise<boolean>;
+}
+
+export interface IDynamicFormTemplates {
+    [id: string]: TemplateRef<any>;
 }
 
 export interface IDynamicForm {
@@ -123,22 +130,34 @@ export interface IDynamicForm {
     readonly: boolean;
     validateOnBlur: boolean;
 
+    onChange: EventEmitter<IDynamicFormControlHandler>;
+    onValidate: EventEmitter<Promise<IDynamicForm>>;
     onInit: EventEmitter<IDynamicForm>;
-    onChange: EventEmitter<IDynamicForm>;
     onSubmit: EventEmitter<IDynamicForm>;
+
+    controlTemplate: TemplateRef<any>;
+
+    controlTemplates: IDynamicFormTemplates;
+    labelTemplates: IDynamicFormTemplates;
+    inputTemplates: IDynamicFormTemplates;
+    prefixTemplates: IDynamicFormTemplates;
+    suffixTemplates: IDynamicFormTemplates;
 
     id: any;
     prefix: string;
     injector: Injector;
     isLoading: boolean;
     isValid: boolean;
+    isValidating: boolean;
 
     validate(): Promise<any>;
     serialize(validate?: boolean): Promise<any>;
     reloadControls(): Promise<any>;
     emitChange(handler: IDynamicFormControlHandler): void;
-    getControlHandler(id: string): IDynamicFormControlHandler;
     getControl(id: string): IFormControl;
+    getControlHandler(id: string): IDynamicFormControlHandler;
+    addControlHandler(handler: IDynamicFormControlHandler);
+    removeControlHandler(handler: IDynamicFormControlHandler);
 }
 
 export interface IDynamicFormFieldSets {

@@ -12,8 +12,9 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
     @Input("async-submit") method: AsyncMethod;
     @Input() form: IDynamicForm;
 
-    private onChange: Subscription;
+    private onValidate: Subscription;
     private onSubmit: Subscription;
+    private validation: Promise<IDynamicForm>;
 
     constructor(@Inject(TOASTER_SERVICE) toaster: IToasterService, elem: ElementRef, renderer: Renderer2) {
         super(toaster);
@@ -23,12 +24,31 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
 
     ngOnInit(): void {
         if (!this.form) return;
-        this.onChange = this.form.onChange.subscribe(() => this.disabled = !this.form.isValid);
+        this.onValidate = this.form.onValidate.subscribe(validation => {
+            this.validation = validation;
+            validation.then(() => {
+                this.disabled = false;
+                this.validation = null;
+            }, () => {
+                this.disabled = true;
+                this.validation = null;
+            });
+            this.disabled = !this.form.isValid;
+        });
         this.onSubmit = this.form.onSubmit.subscribe(() => this.callMethod());
     }
 
     ngOnDestroy(): void {
-        if (this.onChange) this.onChange.unsubscribe();
+        if (this.onValidate) this.onValidate.unsubscribe();
         if (this.onSubmit) this.onSubmit.unsubscribe();
+    }
+
+    click(): void {
+        const callback = () => super.click();
+        if (this.validation) {
+            this.validation.then(callback, callback);
+            return;
+        }
+        callback();
     }
 }

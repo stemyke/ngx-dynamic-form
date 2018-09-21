@@ -1,14 +1,15 @@
 import {Directive, Input, TemplateRef} from "@angular/core";
 
 @Directive({
-    selector: "ng-template[field],ng-template[prefix],ng-template[suffix],ng-template[label]"
+    selector: "ng-template[control],ng-template[label],ng-template[input],ng-template[prefix],ng-template[suffix]"
 })
 export class DynamicFormTemplateDirective {
 
-    @Input() field: string;
+    @Input() control: string;
+    @Input() label: string;
+    @Input() input: string;
     @Input() prefix: string;
     @Input() suffix: string;
-    @Input() label: string;
 
     constructor(public template: TemplateRef<any>) {
     }
