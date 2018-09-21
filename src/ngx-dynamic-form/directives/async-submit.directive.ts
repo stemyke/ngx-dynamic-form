@@ -1,6 +1,6 @@
-import {Directive, Input, OnDestroy, OnInit} from "@angular/core";
+import {Directive, ElementRef, Inject, Input, OnDestroy, OnInit, Renderer2} from "@angular/core";
 import {Subscription} from "rxjs";
-import {AsyncMethod, AsyncMethodDirective} from "@stemy/ngx-utils";
+import {AsyncMethod, AsyncMethodDirective, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
 import {IDynamicForm} from "../common-types";
 
 @Directive({
@@ -14,6 +14,12 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
 
     private onChange: Subscription;
     private onSubmit: Subscription;
+
+    constructor(@Inject(TOASTER_SERVICE) toaster: IToasterService, elem: ElementRef, renderer: Renderer2) {
+        super(toaster);
+        if (elem.nativeElement.tagName !== "BUTTON") return;
+        renderer.setAttribute(elem.nativeElement, "type", "button");
+    }
 
     ngOnInit(): void {
         if (!this.form) return;

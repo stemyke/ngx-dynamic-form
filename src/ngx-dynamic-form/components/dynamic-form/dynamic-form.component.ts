@@ -174,14 +174,13 @@ export class DynamicFormComponent implements IDynamicForm, AfterViewInit, OnChan
                 const serializers = this.formSerializers.map(s => {
                     return s.func(s.id, this).then(res => result[s.id] = res);
                 });
-                return Promise.all(serializers).then(() => result);
+                return Promise.all(serializers).then(() => resolve(result));
             };
             if (validate) {
-                this.validate().then(() => {
-                    serialize().then(resolve);
-                }, reject);
+                this.validate().then(serialize, reject);
+                return;
             }
-            serialize().then(resolve);
+            serialize();
         });
     }
 
