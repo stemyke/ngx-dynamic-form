@@ -15,13 +15,15 @@ import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.compo
 import {DynamicFormControlComponent} from "./components/dynamic-form-control/dynamic-form-control.component";
 import {DynamicFormInputComponent} from "./components/dynamic-form-input/dynamic-form-input.component";
 import {DynamicFormSelectComponent} from "./components/dynamic-form-select/dynamic-form-select.component";
+import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
 
 // --- Components ---
 export const components = [
     DynamicFormComponent,
     DynamicFormControlComponent,
     DynamicFormInputComponent,
-    DynamicFormSelectComponent
+    DynamicFormSelectComponent,
+    DynamicFormStaticComponent
 ];
 
 // --- Directives ---
@@ -62,7 +64,8 @@ export class NgxDynamicFormModule {
             providers: [
                 DynamicFormService,
                 provideFormControl(DynamicFormInputComponent),
-                provideFormControl(DynamicFormSelectComponent)
+                provideFormControl(DynamicFormSelectComponent),
+                provideFormControl(DynamicFormStaticComponent)
             ]
         }
     }

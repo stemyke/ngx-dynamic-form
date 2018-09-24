@@ -78,6 +78,8 @@ export interface IFormInputData extends IFormControlData {
     mask?: IFormInputMaskFunction | IFormInputMask[];
     unmask?: IFormInputUnMaskFunction;
     step?: number;
+    min?: number;
+    max?: number;
 }
 
 export interface IFormSelectData extends IFormControlData {
@@ -85,6 +87,11 @@ export interface IFormSelectData extends IFormControlData {
     emptyOption?: boolean;
     type?: string;
     multi?: boolean;
+}
+
+export interface IFormStaticData extends IFormControlData {
+    properties?: string[];
+    style?: string;
 }
 
 export interface IFormFieldSet {
@@ -215,6 +222,15 @@ export function FormSelect(data?: IFormSelectData): PropertyDecorator {
         data = control.data;
         data.options = data.options || (() => Promise.resolve([]));
         data.type = data.type || "select";
+        defineFormControl(target, propertyKey, control);
+    };
+}
+
+export function FormStatic(data?: IFormStaticData): PropertyDecorator {
+    return (target: any, propertyKey: string): void => {
+        const control = createFormControl(propertyKey, "static", data);
+        data = control.data;
+        data.style = data.style || "table";
         defineFormControl(target, propertyKey, control);
     };
 }

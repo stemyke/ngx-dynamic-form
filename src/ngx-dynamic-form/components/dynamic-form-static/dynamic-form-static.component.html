@@ -1,0 +1,7 @@
+<unordered-list [listStyle]="data.style" [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+                [data]="!data.properties ? {value: value} : data.properties | remap: value">
+    <ng-template [type]="!data.properties ? 'key' : null" selector="level == 0" let-item="item"></ng-template>
+    <ng-template type="value" selector="valueType == 'date'" let-item="item">
+        {{ item.value | date }}
+    </ng-template>
+</unordered-list>

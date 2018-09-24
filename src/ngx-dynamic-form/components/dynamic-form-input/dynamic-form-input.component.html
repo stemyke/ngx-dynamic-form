@@ -14,8 +14,8 @@
     </ng-container>
     <ng-container *ngSwitchCase="'date'">
         <input class="form-control"
+               type="date"
                [attr.autocomplete]="data.autocomplete"
-               [type]="data.type"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
                [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
@@ -23,6 +23,22 @@
                [ngModel]="value | date: 'y-MM-dd'"
                (ngModelChange)="onDateChange($event)"
                (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
+    </ng-container>
+    <ng-container *ngSwitchCase="'number'">
+        <input class="form-control"
+               type="number"
+               [attr.autocomplete]="data.autocomplete"
+               [min]="data.min"
+               [max]="data.max"
+               [step]="data.step"
+               [id]="form.id + '-' + control.id"
+               [name]="form.id + '-' + control.id"
+               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+               [disabled]="form.readonly || handler.isReadOnly"
+               [ngModel]="value"
+               (ngModelChange)="handler.onValueChange($event)"
+               (blur)="onNumberBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchCase="'mask'">
@@ -41,6 +57,8 @@
     <ng-container *ngSwitchDefault>
         <input class="form-control"
                [attr.autocomplete]="data.autocomplete"
+               [minlength]="data.min"
+               [maxlength]="data.max"
                [placeholder]="data.placeholder | translate"
                [type]="data.type"
                [id]="form.id + '-' + control.id"

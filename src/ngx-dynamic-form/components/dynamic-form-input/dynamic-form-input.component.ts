@@ -1,6 +1,6 @@
 import {Component, Injector} from "@angular/core";
-import {FormControlComponent, IFormControl, IFormInputData} from "../../common-types";
 import {ObjectUtils} from "@stemy/ngx-utils";
+import {FormControlComponent, IFormControl, IFormInputData} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -29,5 +29,15 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
     onInputChange(value: string): void {
         value = ObjectUtils.isFunction(this.data.unmask) ? this.data.unmask(value) : value;
         this.handler.onValueChange(value)
+    }
+
+    onNumberBlur(): void {
+        const value = this.value;
+        if (ObjectUtils.isNumber(this.data.max) && this.data.max < value) {
+            this.handler.onValueChange(this.data.max);
+        } else if (ObjectUtils.isNumber(this.data.min) && this.data.min > value) {
+            this.handler.onValueChange(this.data.min);
+        }
+        this.handler.onBlur();
     }
 }

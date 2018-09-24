@@ -6,7 +6,7 @@ import {
     FormControlTester,
     IDynamicForm,
     IFormControl,
-    FormSerializable
+    FormSerializable, FormStatic
 } from "../public_api";
 import {DatePipe} from "@angular/common";
 import {IFormControlSerializer} from "../ngx-dynamic-form/common-types";
@@ -28,6 +28,7 @@ export class TestModel {
     @FormInput({
         fieldSet: "credentials",
         classes: "col-sm-6",
+        max: 10,
         readonly: {
             type: TestModel,
             func: TestModel.testField,
@@ -56,7 +57,8 @@ export class TestModel {
 
     @FormInput({
         fieldSet: "test",
-        classes: "col-sm-6"
+        classes: "col-sm-6",
+        max: 100
     })
     num: number = 0;
 
@@ -162,6 +164,19 @@ export class TestModel {
 
     @FormSerializable()
     veryTest: string = "blabla";
+
+    @FormStatic({
+        properties: ["test1", "num", "date"]
+    })
+    staticData: any = {
+        test2: "blah",
+        test1: "glfdkgfd",
+        num: 1010,
+        date: new Date()
+    };
+
+    @FormStatic()
+    staticData2: any = new Date();
 
     static testField(id: string, value: string): FormControlTester {
         return (control: IFormControl, form: IDynamicForm): Promise<boolean> => {
