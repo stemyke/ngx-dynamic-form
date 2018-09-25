@@ -1,6 +1,5 @@
-import {EventEmitter, InjectionToken, Injector, Provider, TemplateRef, Type} from "@angular/core";
-import {IResolveFactory, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
-import {isNullOrUndefined} from "util";
+import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
+import {IResolveFactory, ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("forn-control-provider");
 
@@ -31,6 +30,11 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
 
     get meta(): any {
         return this.handler ? this.handler.meta : null;
+    }
+
+    @HostBinding("class.form-input")
+    get inputClass(): boolean {
+        return true;
     }
 }
 
@@ -209,6 +213,7 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
         const control = createFormControl(propertyKey, "input", data);
         data = control.data;
         data.type = data.type || inputType;
+        data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
         data.placeholder = data.placeholder || (data.type == "mask" ? "_" : "");
         data.step = data.step || 1;
         data.mask = data.mask || [/\w*/gi];
@@ -222,6 +227,7 @@ export function FormSelect(data?: IFormSelectData): PropertyDecorator {
         data = control.data;
         data.options = data.options || (() => Promise.resolve([]));
         data.type = data.type || "select";
+        data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
         defineFormControl(target, propertyKey, control);
     };
 }
@@ -238,12 +244,13 @@ export function FormStatic(data?: IFormStaticData): PropertyDecorator {
 export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
     return (target: any): void => {
         const sets = getFormFieldSets(target);
+        data.classes = data.classes || "";
         sets[data.id] = data;
         ReflectUtils.defineMetadata("dynamicFormFieldSets", sets, target);
     };
 }
 
-export function provideFormControl(component: Type<IFormControlComponent>, acceptor?: IFormControlProviderAcceptor, loader?: IFormControlProviderLoader): Provider {
+export function provideFormControl(component: Type<IFormControlComponent>, acceptor?: IFormControlProviderAcceptor, loader?: IFormControlProviderLoader): ValueProvider {
     return {
         provide: FORM_CONTROL_PROVIDER,
         multi: true,
@@ -273,7 +280,7 @@ export function getFormSerializer(target: any, propertyKey: string): IFormContro
 
 export function createFormControl(id: string, type: string, data?: IFormControlData): IFormControl {
     data = data || {};
-    data.label = isNullOrUndefined(data.label) ? id : data.label;
+    data.label = ObjectUtils.isNullOrUndefined(data.label) ? id : data.label;
     data.labelAlign = data.labelAlign || "left";
     data.fieldSet = data.fieldSet || UniqueUtils.uuid();
     data.classes = data.classes || "";

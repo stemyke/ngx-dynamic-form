@@ -246,7 +246,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     }
 
     getControl(id: string): IFormControl {
-        const handler = this.controlHandlers[id];
+        const handler = this.getControlHandler(id);
         return !handler ? null : handler.control;
     }
 

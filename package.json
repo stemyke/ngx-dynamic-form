@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -70,5 +70,14 @@
         "tslint": "5.10.0",
         "typescript": "2.7.2",
         "ng-packagr": "4.1.1"
-    }
+    },
+    "main": "dist/bundles/stemy-ngx-dynamic-form.umd.js",
+    "module": "dist/fesm5/stemy-ngx-dynamic-form.js",
+    "es2015": "dist/fesm2015/stemy-ngx-dynamic-form.js",
+    "esm5": "dist/esm5/stemy-ngx-dynamic-form.js",
+    "esm2015": "dist/esm2015/stemy-ngx-dynamic-form.js",
+    "fesm5": "dist/fesm5/stemy-ngx-dynamic-form.js",
+    "fesm2015": "dist/fesm2015/stemy-ngx-dynamic-form.js",
+    "typings": "dist/stemy-ngx-dynamic-form.d.ts",
+    "metadata": "dist/stemy-ngx-dynamic-form.metadata.json"
 }
