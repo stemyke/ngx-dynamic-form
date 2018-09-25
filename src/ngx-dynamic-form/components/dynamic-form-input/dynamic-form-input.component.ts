@@ -1,6 +1,6 @@
 import {Component, Injector} from "@angular/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
-import {FormControlComponent, IFormControl, IFormInputData} from "../../common-types";
+import {FormControlComponent, IDynamicForm, IFormControl, IFormInputData} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -15,7 +15,7 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
     }
 
     // Loader for provider
-    static loader(control: IFormControl, injector: Injector, data: any): Promise<any> {
+    static loader(control: IFormControl, form: IDynamicForm, meta: any): Promise<any> {
         return Promise.resolve();
     }
 

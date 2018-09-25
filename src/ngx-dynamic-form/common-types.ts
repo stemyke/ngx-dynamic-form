@@ -8,7 +8,7 @@ export interface IFormControlComponent {
     handler: IDynamicFormControlHandler;
 }
 
-export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent{
+export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent {
 
     handler: IDynamicFormControlHandler;
 
@@ -250,14 +250,14 @@ export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
     };
 }
 
-export function provideFormControl(component: Type<IFormControlComponent>, acceptor?: IFormControlProviderAcceptor, loader?: IFormControlProviderLoader): ValueProvider {
+export function provideFormControl(component: Type<IFormControlComponent>, acceptor: IFormControlProviderAcceptor, loader: IFormControlProviderLoader): ValueProvider {
     return {
         provide: FORM_CONTROL_PROVIDER,
         multi: true,
         useValue: {
             component: component,
-            acceptor: acceptor || component["acceptor"],
-            loader: loader || component["loader"]
+            acceptor: acceptor,
+            loader: loader
         }
     };
 }

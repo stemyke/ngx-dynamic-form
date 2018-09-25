@@ -63,9 +63,9 @@ export class NgxDynamicFormModule {
             ngModule: NgxDynamicFormModule,
             providers: [
                 DynamicFormService,
-                provideFormControl(DynamicFormInputComponent),
-                provideFormControl(DynamicFormSelectComponent),
-                provideFormControl(DynamicFormStaticComponent)
+                provideFormControl(DynamicFormInputComponent, DynamicFormInputComponent.acceptor, DynamicFormInputComponent.loader),
+                provideFormControl(DynamicFormSelectComponent, DynamicFormSelectComponent.acceptor, DynamicFormSelectComponent.loader),
+                provideFormControl(DynamicFormStaticComponent, DynamicFormStaticComponent.acceptor, DynamicFormStaticComponent.loader)
             ]
         }
     }
