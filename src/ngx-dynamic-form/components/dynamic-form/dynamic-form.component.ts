@@ -2,12 +2,14 @@ import {
     AfterContentInit,
     ChangeDetectorRef,
     Component,
-    ContentChild, ContentChildren,
+    ContentChild,
+    ContentChildren,
     EventEmitter,
     Injector,
     Input,
     OnChanges,
-    Output, QueryList,
+    Output,
+    QueryList,
     SimpleChanges,
     TemplateRef
 } from "@angular/core";
@@ -18,7 +20,8 @@ import {
     getFormSerializer,
     IDynamicForm,
     IDynamicFormControlHandler,
-    IDynamicFormFieldSets, IDynamicFormTemplates,
+    IDynamicFormFieldSets,
+    IDynamicFormTemplates,
     IFormControl,
     IFormControlSerializer,
     IFormFieldSet,
@@ -236,9 +239,9 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     emitChange(handler: IDynamicFormControlHandler): void {
         this.changeTimer.clear();
         this.changeTimer.set(() => {
-            this.recheckControls().then(() => {
+            this.recheckControls().then(() => this.reloadControlsFrom(handler, new Set<IDynamicFormControlHandler>()).then(() => {
                 this.onChange.emit(handler);
-            });
+            }));
         }, 250);
     }
 
@@ -248,7 +251,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     }
 
     getControlHandler(id: string): IDynamicFormControlHandler {
-        return this.controlHandlers[id];
+        return this.controlHandlerMap[id];
     }
 
     addControlHandler(handler: IDynamicFormControlHandler): void {
@@ -264,6 +267,22 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
 
     private recheckControls(): Promise<any> {
         return Promise.all(this.controlHandlers.map(t => t.check()));
+    }
+
+    private reloadControlsFrom(handler: IDynamicFormControlHandler, handlers?: Set<IDynamicFormControlHandler>): Promise<any> {
+        const data = handler.control ? handler.control.data : null;
+        if (!data || !data.reload) return Promise.resolve();
+        const reload = ObjectUtils.isArray(data.reload) ? data.reload : [data.reload];
+        return Promise.all(reload.map(id => {
+            const handler = this.getControlHandler(id);
+            if (!handler || handlers.has(handler)) return Promise.resolve();
+            handlers.add(handler);
+            return new Promise<any>(resolve => {
+                handler.load().then(() => {
+                    this.reloadControlsFrom(handler, handlers).then(resolve);
+                });
+            })
+        }))
     }
 
     private filterTemplates(type: string): IDynamicFormTemplates {

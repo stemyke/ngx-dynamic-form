@@ -149,6 +149,7 @@ export class TestModel {
             func: TestModel.testField,
             params: ["select", "test2"]
         },
+        reload: "date",
         options: () => Promise.resolve([
             {id: "test5", label: "label.test5"},
             {id: "test3", label: "label.test3"}
@@ -157,7 +158,8 @@ export class TestModel {
     select6: string = null;
 
     @FormInput({
-        type: "date"
+        type: "date",
+        reload: "select6"
     })
     @FormSerializable()
     date: Date = new Date();
