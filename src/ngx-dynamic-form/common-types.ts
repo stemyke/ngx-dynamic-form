@@ -251,13 +251,13 @@ export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
     };
 }
 
-export function provideFormControl(component: Type<IFormControlComponent>, acceptor: IFormControlProviderAcceptor, loader: IFormControlProviderLoader, priority?: number): ValueProvider {
+export function provideFormControl(component: Type<IFormControlComponent>, acceptor: IFormControlProviderAcceptor, loader: IFormControlProviderLoader, priority: number = 0): ValueProvider {
     return {
         provide: FORM_CONTROL_PROVIDER,
         multi: true,
         useValue: {
             component: component,
-            priority: ObjectUtils.isNumber(priority) ? priority : 99999999,
+            priority: priority,
             acceptor: acceptor,
             loader: loader
         }
