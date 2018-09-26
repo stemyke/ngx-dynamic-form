@@ -1,5 +1,6 @@
 import {ComponentFactoryResolver, Inject, Injectable, ViewContainerRef} from "@angular/core";
 import {FORM_CONTROL_PROVIDER, IFormControl, IFormControlComponent, IFormControlProvider} from "../common-types";
+import {ArrayUtils, ObjectUtils} from "@stemy/ngx-utils";
 
 @Injectable()
 export class DynamicFormService {
@@ -9,11 +10,13 @@ export class DynamicFormService {
 
     findProvider(control: IFormControl): IFormControlProvider {
         if (!control) return null;
-        const provider = this.components.find(p => p.acceptor(control));
-        if (!provider) {
+        const providers = this.components.filter(p => p.acceptor(control));
+        if (providers.length == 0) {
             throw new Error(`No component provider for control: ${JSON.stringify(control)}`);
         }
-        return provider;
+        // Sort providers
+        providers.sort((a, b) => ObjectUtils.compare(a.priority, b.priority))
+        return providers[0];
     }
 
     createComponent(vcr: ViewContainerRef, provider: IFormControlProvider): IFormControlComponent {
