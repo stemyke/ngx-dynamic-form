@@ -9,7 +9,7 @@
         "public": "npm publish dist --access public"
     },
     "public": true,
-    "repository": "https://github.com/stemyke/ngx-utils.git",
+    "repository": "https://github.com/stemyke/ngx-dynamic-form.git",
     "author": "stemy <balazs.stemler@metrix.co.hu>",
     "peerDependencies": {
         "@angular/animations": "6.1.7",

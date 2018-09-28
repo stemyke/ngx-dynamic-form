@@ -63,8 +63,8 @@
                [disabled]="form.readonly || handler.isReadOnly"
                [ngModel]="value"
                (ngModelChange)="handler.onValueChange($event)"
-               (blur)="handler.onBlur(control)"
-               (focus)="handler.onFocus(control)"/>
+               (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchDefault>
         <input class="form-control"
