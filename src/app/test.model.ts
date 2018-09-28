@@ -27,7 +27,7 @@ export class TestModel {
 
     @FormInput({
         fieldSet: "credentials",
-        classes: "col-sm-6",
+        classes: "col-sm-4",
         max: 10,
         readonly: {
             type: TestModel,
@@ -40,10 +40,17 @@ export class TestModel {
 
     @FormInput({
         fieldSet: "credentials",
-        classes: "col-sm-6"
+        classes: "col-sm-4"
     })
     @FormSerializable()
     password: string = "Józsi";
+
+    @FormInput({
+        fieldSet: "credentials",
+        classes: "col-sm-4"
+    })
+    @FormSerializable()
+    rememberMe: boolean = false;
 
     @FormInput({
         fieldSet: "test",

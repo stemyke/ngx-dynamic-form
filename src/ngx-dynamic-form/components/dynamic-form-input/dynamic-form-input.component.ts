@@ -1,4 +1,4 @@
-import {Component, Injector} from "@angular/core";
+import {Component, HostBinding, Injector} from "@angular/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {FormControlComponent, IDynamicForm, IFormControl, IFormInputData} from "../../common-types";
 
@@ -17,6 +17,11 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
     // Loader for provider
     static loader(control: IFormControl, form: IDynamicForm, meta: any): Promise<any> {
         return Promise.resolve();
+    }
+
+    @HostBinding("class.checked")
+    get isChecked(): boolean {
+        return this.data.type == "checkbox" && this.value;
     }
 
     onDateChange(value: string): void {
