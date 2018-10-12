@@ -54,6 +54,18 @@
                (blur)="handler.onBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
+    <ng-container *ngSwitchCase="'checkbox'">
+        <input class="form-control"
+               type="checkbox"
+               [id]="form.id + '-' + control.id"
+               [name]="form.id + '-' + control.id"
+               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+               [disabled]="form.readonly || handler.isReadOnly"
+               [ngModel]="value"
+               (ngModelChange)="handler.onValueChange($event)"
+               (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
+    </ng-container>
     <ng-container *ngSwitchDefault>
         <input class="form-control"
                [attr.autocomplete]="data.autocomplete"
