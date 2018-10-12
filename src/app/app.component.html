@@ -1,6 +1,9 @@
 <div class="container">
     <div class="bd-example">
-        <dynamic-form #form [data]="testModel" [validateOnBlur]="true">
+
+        <button class="btn btn-secondary mb-2" type="button" (click)="newModel()">New model</button>
+
+        <dynamic-form #form name="label" [data]="testModel" [validateOnBlur]="true">
             <ng-template prefix="date">This is prefix!!!</ng-template>
             <ng-template suffix="textarea">This is suffix!!!</ng-template>
             <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
@@ -11,7 +14,7 @@
             {{ testModel | json }}
         </pre>
 
-        <dynamic-form #form2 [data]="testModel" [validateOnBlur]="true">
+        <dynamic-form #form2 name="label" [data]="testModel" [validateOnBlur]="true">
             <ng-template #wrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
                 <div *ngIf="form.isLoading" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
                 <table style="width: 100%">

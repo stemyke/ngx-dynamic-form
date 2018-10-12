@@ -1,4 +1,15 @@
-import {Component, HostBinding, Injector, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from "@angular/core";
+import {
+    Component,
+    HostBinding,
+    Injector,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit, QueryList,
+    SimpleChanges,
+    ViewChildren
+} from "@angular/core";
+import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
     FormControlTester,
     FormControlValidator,
@@ -9,7 +20,7 @@ import {
     IFormControlProvider
 } from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
-import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
+import {DynamicFormComponent} from "../dynamic-form/dynamic-form.component";
 
 @Component({
     moduleId: module.id,
@@ -20,6 +31,9 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
 
     @Input("dynamic-form-control") control: IFormControl;
     @Input() form: IDynamicForm;
+
+    @ViewChildren(DynamicFormComponent)
+    subForms: QueryList<IDynamicForm>;
 
     provider: IFormControlProvider;
     meta: any;
@@ -121,6 +135,7 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     validate(clearErrors?: boolean): Promise<boolean> {
+        console.log(this.control.id, this.subForms);
         return this.validator().then(errors => {
             this.errors = clearErrors ? [] : errors;
             return errors.length == 0;

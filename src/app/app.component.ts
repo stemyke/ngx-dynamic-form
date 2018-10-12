@@ -9,7 +9,7 @@ import {TestModel} from "./test.model";
     templateUrl: "./app.component.html"
 })
 export class AppComponent {
-    testModel = new TestModel();
+    testModel: TestModel;
 
     @ViewChild("form")
     private form: IDynamicForm;
@@ -27,4 +27,8 @@ export class AppComponent {
             });
         });
     };
+
+    newModel(): void {
+        this.testModel = new TestModel();
+    }
 }

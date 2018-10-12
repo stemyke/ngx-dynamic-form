@@ -99,6 +99,11 @@ export interface IFormStaticData extends IFormControlData {
     style?: string;
 }
 
+export interface IFormModelData extends IFormControlData {
+    controls?: IFormControl[];
+    name?: string;
+}
+
 export interface IFormFieldSet {
     id: string;
     title?: string;
@@ -211,34 +216,25 @@ export function FormInput(data?: IFormInputData): PropertyDecorator {
                 inputType = "checkbox";
                 break;
         }
-        const control = createFormControl(propertyKey, "input", data);
-        data = control.data;
-        data.type = data.type || inputType;
-        data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
-        data.placeholder = data.placeholder || (data.type == "mask" ? "_" : "");
-        data.step = data.step || 1;
-        data.mask = data.mask || [/\w*/gi];
-        defineFormControl(target, propertyKey, control);
+        defineFormControl(target, propertyKey, createFormInput(propertyKey, data, inputType));
     };
 }
 
 export function FormSelect(data?: IFormSelectData): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
-        const control = createFormControl(propertyKey, "select", data);
-        data = control.data;
-        data.options = data.options || (() => Promise.resolve([]));
-        data.type = data.type || "select";
-        data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
-        defineFormControl(target, propertyKey, control);
+        defineFormControl(target, propertyKey, createFormSelect(propertyKey, data));
     };
 }
 
 export function FormStatic(data?: IFormStaticData): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
-        const control = createFormControl(propertyKey, "static", data);
-        data = control.data;
-        data.style = data.style || "table";
-        defineFormControl(target, propertyKey, control);
+        defineFormControl(target, propertyKey, createFormStatic(propertyKey, data));
+    };
+}
+
+export function FormModel(data?: IFormModelData): PropertyDecorator {
+    return (target: any, propertyKey: string): void => {
+        defineFormControl(target, propertyKey, createFormModel(propertyKey, data));
     };
 }
 
@@ -264,7 +260,7 @@ export function provideFormControl(component: Type<IFormControlComponent>, accep
     };
 }
 
-export function defineFormControl(target: any, propertyKey: string, control: IFormControl) {
+export function defineFormControl(target: any, propertyKey: string, control: IFormControl): void {
     ReflectUtils.defineMetadata("dynamicFormControl", control, target, propertyKey);
 }
 
@@ -294,4 +290,38 @@ export function createFormControl(id: string, type: string, data?: IFormControlD
         type: type,
         data: data
     };
+}
+
+export function createFormInput(id: string, data: IFormInputData, type: string = "text"): IFormControl {
+    const control = createFormControl(id, "input", data);
+    data = control.data;
+    data.type = data.type || type;
+    data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
+    data.placeholder = data.placeholder || (data.type == "mask" ? "_" : "");
+    data.step = data.step || 1;
+    data.mask = data.mask || [/\w*/gi];
+    return control;
+}
+
+export function createFormSelect(id: string, data: IFormSelectData): IFormControl {
+    const control = createFormControl(id, "select", data);
+    data = control.data;
+    data.options = data.options || (() => Promise.resolve([]));
+    data.type = data.type || "select";
+    data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
+    return control;
+}
+
+export function createFormStatic(id: string, data: IFormStaticData): IFormControl {
+    const control = createFormControl(id, "static", data);
+    data = control.data;
+    data.style = data.style || "table";
+    return control;
+}
+
+export function createFormModel(id: string, data: IFormModelData): IFormControl {
+    const control = createFormControl(id, "model", data);
+    data = control.data;
+    data.name = data.name || "";
+    return control;
 }

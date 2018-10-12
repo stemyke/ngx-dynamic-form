@@ -126,7 +126,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         this.controlHandlerTimer = TimerUtils.createTimeout();
         this.changeTimer = TimerUtils.createTimeout();
         this.initialized = false;
-        this.loading = true;
+        this.loading = false;
         this.valid = false;
         this.validating = false;
     }
@@ -142,7 +142,8 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.data || changes.controls) {
+        this.prefix = this.name ? `${this.name}.` : "";
+        if (ObjectUtils.isObject(this.data) && (changes.data || changes.controls)) {
             this.formFieldSets = this.fieldSets ? this.fieldSets.reduce((result, fs) => {
                 result[fs.id] = fs;
                 return result;
@@ -159,7 +160,6 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
                 };
             }).filter(ObjectUtils.isDefined);
         }
-        this.prefix = this.name ? `${this.name}.` : "";
     }
 
     // --- Custom ---
@@ -193,6 +193,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     }
 
     serialize(validate?: boolean): Promise<any> {
+        if (!this.initialized) return Promise.resolve({});
         return new Promise<any>((resolve, reject) => {
             const serialize = () => {
                 const result = {};
@@ -217,6 +218,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         const load = Promise.all(this.controlHandlers.map(h => h.load()));
         if (this.initialized === false) {
             this.initialized = true;
+            this.loading = true;
             return new Promise<any>(resolve => {
                 const callback = () => {
                     this.loading = false;

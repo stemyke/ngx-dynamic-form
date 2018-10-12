@@ -6,10 +6,16 @@ import {
     FormControlTester,
     IDynamicForm,
     IFormControl,
-    FormSerializable, FormStatic
+    IFormControlSerializer,
+    FormSerializable, FormStatic, FormModel, IFormInputData
 } from "../public_api";
 import {DatePipe} from "@angular/common";
-import {IFormControlSerializer} from "../ngx-dynamic-form/common-types";
+import {SubModel} from "./sub.model";
+import {createFormInput} from "../ngx-dynamic-form/common-types";
+
+const test: IFormInputData = {
+    type: "textarea"
+};
 
 @FormFieldSet({
     id: "credentials",
@@ -24,6 +30,24 @@ import {IFormControlSerializer} from "../ngx-dynamic-form/common-types";
     classes: "form-row"
 })
 export class TestModel {
+
+    @FormModel({
+        name: "address",
+        controls: [
+            createFormInput("city", {
+                classes: "col-sm-6",
+                max: 10
+            }),
+            createFormInput("street", {
+                classes: "col-sm-6",
+                max: 10,
+                validator: (control: IFormControl, form: IDynamicForm) => {
+                    return Promise.resolve(form.data[control.id] == "Zöldfa utca" ? null : "Zöldfa utca legyen")
+                }
+            })
+        ]
+    })
+    address: SubModel = new SubModel();
 
     @FormInput({
         fieldSet: "credentials",
