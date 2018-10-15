@@ -135,10 +135,17 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     validate(clearErrors?: boolean): Promise<boolean> {
-        console.log(this.control.id, this.subForms);
-        return this.validator().then(errors => {
-            this.errors = clearErrors ? [] : errors;
-            return errors.length == 0;
+        return new Promise<boolean>(resolve => {
+            this.hideTester().then(hide => {
+                if (hide) {
+                    resolve(true);
+                    return;
+                }
+                this.validator().then(errors => {
+                    this.errors = clearErrors ? [] : errors;
+                    resolve(errors.length == 0);
+                });
+            });
         });
     }
 
