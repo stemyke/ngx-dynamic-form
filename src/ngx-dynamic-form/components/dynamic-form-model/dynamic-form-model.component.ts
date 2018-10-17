@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, OnInit, ViewChild} from "@angular/core";
 import {FormControlComponent, IDynamicForm, IFormControl, IFormModelData} from "../../common-types";
 
 @Component({
@@ -6,7 +6,10 @@ import {FormControlComponent, IDynamicForm, IFormControl, IFormModelData} from "
     selector: "dynamic-form-model",
     templateUrl: "./dynamic-form-model.component.html"
 })
-export class DynamicFormModelComponent extends FormControlComponent<IFormModelData> {
+export class DynamicFormModelComponent extends FormControlComponent<IFormModelData> implements OnInit {
+
+    @ViewChild("subForm")
+    private subForm: IDynamicForm;
 
     // Acceptor for provider
     static acceptor(control: IFormControl): boolean {
@@ -16,5 +19,10 @@ export class DynamicFormModelComponent extends FormControlComponent<IFormModelDa
     // Loader for provider
     static loader(control: IFormControl, form: IDynamicForm, meta: any): Promise<any> {
         return Promise.resolve();
+    }
+
+    ngOnInit(): void {
+        this.handler.meta.serializer = () => this.subForm.serialize();
+        this.handler.meta.validator = () => this.subForm.validate().then(() => true, () => false);
     }
 }

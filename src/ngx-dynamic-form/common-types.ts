@@ -146,6 +146,7 @@ export interface IDynamicForm {
     data: any;
     readonly: boolean;
     validateOnBlur: boolean;
+    parent: IDynamicForm;
 
     onChange: EventEmitter<IDynamicFormControlHandler>;
     onValidate: EventEmitter<Promise<IDynamicForm>>;
@@ -193,8 +194,10 @@ const emptyTester: FormControlTester = () => {
     return Promise.resolve(false);
 };
 
-function defaultSerializer(id: string, form: IDynamicForm): Promise<any> {
-    return Promise.resolve(form.data[id]);
+export function defaultSerializer(id: string, form: IDynamicForm): Promise<any> {
+    const handler = form.getControlHandler(id);
+    if (!handler || !ObjectUtils.isFunction(handler.meta.serializer)) return Promise.resolve(form.data[id]);
+    return handler.meta.serializer();
 }
 
 export function FormSerializable(serializer?: IFormControlSerializer | IResolveFactory): PropertyDecorator {

@@ -1,13 +1,7 @@
 import {FactoryDependencies, ObjectUtils} from "@stemy/ngx-utils";
 import {
-    FormInput,
-    FormFieldSet,
-    FormSelect,
-    FormControlTester,
-    IDynamicForm,
-    IFormControl,
-    IFormControlSerializer,
-    FormSerializable, FormStatic, FormModel, IFormInputData
+    FormControlTester, FormFieldSet, FormInput, FormModel, FormSelect, FormSerializable, FormStatic, IDynamicForm,
+    IFormControl, IFormControlSerializer, IFormInputData
 } from "../public_api";
 import {DatePipe} from "@angular/common";
 import {SubModel} from "./sub.model";
@@ -30,24 +24,6 @@ const test: IFormInputData = {
     classes: "form-row"
 })
 export class TestModel {
-
-    @FormModel({
-        name: "address",
-        controls: [
-            createFormInput("city", {
-                classes: "col-sm-6",
-                max: 10
-            }),
-            createFormInput("street", {
-                classes: "col-sm-6",
-                max: 10,
-                validator: (control: IFormControl, form: IDynamicForm) => {
-                    return Promise.resolve(form.data[control.id] == "Zöldfa utca" ? null : "Zöldfa utca legyen")
-                }
-            })
-        ]
-    })
-    address: SubModel = new SubModel();
 
     @FormInput({
         fieldSet: "credentials",
@@ -210,6 +186,25 @@ export class TestModel {
 
     @FormStatic()
     staticData2: any = new Date();
+
+    @FormModel({
+        name: "address",
+        controls: [
+            createFormInput("city", {
+                classes: "col-sm-6",
+                max: 10
+            }),
+            createFormInput("street", {
+                classes: "col-sm-6",
+                max: 15,
+                validator: (control: IFormControl, form: IDynamicForm) => {
+                    return Promise.resolve(form.data[control.id] !== "Zöldfa utca" ? null : "Nem lehet Zöldfa utca")
+                }
+            })
+        ]
+    })
+    @FormSerializable()
+    address: SubModel = new SubModel();
 
     static testField(id: string, value: string): FormControlTester {
         return (control: IFormControl, form: IDynamicForm): Promise<boolean> => {

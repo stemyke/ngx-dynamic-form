@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "2.2.10",
+    "version": "2.2.12",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -27,7 +27,7 @@
         "zone.js": "0.8.26",
         "moment": "2.22.2",
         "bowser": "1.9.4",
-        "@stemy/ngx-utils": "2.4.1",
+        "@stemy/ngx-utils": "2.4.4",
         "angular2-text-mask": "9.0.0"
     },
     "devDependencies": {
@@ -47,7 +47,7 @@
         "zone.js": "0.8.26",
         "moment": "2.22.2",
         "bowser": "1.9.4",
-        "@stemy/ngx-utils": "2.4.1",
+        "@stemy/ngx-utils": "2.4.4",
         "angular2-text-mask": "9.0.0",
         "@angular-devkit/build-angular": "0.8.2",
         "@angular/cli": "6.2.2",

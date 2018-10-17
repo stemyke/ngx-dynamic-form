@@ -42,6 +42,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     @Input() data: any;
     @Input() readonly: boolean;
     @Input() validateOnBlur: boolean;
+    @Input() parent: IDynamicForm;
 
     @Output() onChange: EventEmitter<IDynamicFormControlHandler>;
     @Output() onValidate: EventEmitter<Promise<IDynamicForm>>;

@@ -27,6 +27,7 @@ export {
     FormControlTesterFactory,
     FormControlValidator,
     FormControlValidatorFactory,
+    defaultSerializer,
     FormSerializable,
     FormInput,
     FormSelect,

@@ -110,9 +110,13 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onBlur(): void {
-        const callback = () => this.form.emitChange(this);
-        if (this.form.validateOnBlur) {
-            this.form.validate().then(callback, callback);
+        let form = this.form;
+        while (ObjectUtils.isDefined(form.parent)) {
+            form = form.parent;
+        }
+        const callback = () => form.emitChange(this);
+        if (form.validateOnBlur) {
+            form.validate().then(callback, callback);
             return;
         }
         callback();
@@ -143,7 +147,12 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
                 }
                 this.validator().then(errors => {
                     this.errors = clearErrors ? [] : errors;
-                    resolve(errors.length == 0);
+                    const validator: () => Promise<boolean> = ObjectUtils.isFunction(this.meta.validator) ? this.meta.validator : null;
+                    if (!validator) {
+                        resolve(errors.length == 0);
+                        return;
+                    }
+                    validator().then(result => resolve(result && errors.length == 0));
                 });
             });
         });
