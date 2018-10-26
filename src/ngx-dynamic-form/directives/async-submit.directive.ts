@@ -1,7 +1,7 @@
 import {Directive, ElementRef, Inject, Input, OnDestroy, OnInit, Renderer2} from "@angular/core";
 import {Subscription} from "rxjs";
 import {AsyncMethod, AsyncMethodDirective, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
-import {IDynamicForm} from "../common-types";
+import {IDynamicFormBase} from "../common-types";
 
 @Directive({
     selector: "[async-submit]",
@@ -10,11 +10,11 @@ import {IDynamicForm} from "../common-types";
 export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit, OnDestroy {
 
     @Input("async-submit") method: AsyncMethod;
-    @Input() form: IDynamicForm;
+    @Input() form: IDynamicFormBase;
 
     private onValidate: Subscription;
     private onSubmit: Subscription;
-    private validation: Promise<IDynamicForm>;
+    private validation: Promise<IDynamicFormBase>;
 
     constructor(@Inject(TOASTER_SERVICE) toaster: IToasterService, elem: ElementRef, renderer: Renderer2) {
         super(toaster);
@@ -26,14 +26,12 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
         if (!this.form) return;
         this.onValidate = this.form.onValidate.subscribe(validation => {
             this.validation = validation;
-            validation.then(() => {
-                this.disabled = false;
-                this.validation = null;
-            }, () => {
-                this.disabled = true;
-                this.validation = null;
-            });
             this.disabled = !this.form.isValid;
+            const cb = () => {
+                this.validation = null;
+                this.disabled = !this.form.isValid;
+            };
+            validation.then(cb, cb);
         });
         this.onSubmit = this.form.onSubmit.subscribe(() => this.callMethod());
     }

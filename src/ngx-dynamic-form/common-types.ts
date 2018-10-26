@@ -139,43 +139,60 @@ export interface IDynamicFormTemplates {
     [id: string]: TemplateRef<any>;
 }
 
-export interface IDynamicForm {
-    name: string;
-    controls: IFormControl[];
-    fieldSets: IFormFieldSet[];
+export interface IDynamicFormConfig {
+    path?: string;
+    name?: string;
+    controls?: IFormControl[];
+    fieldSets?: IFormFieldSet[];
+    id: string;
     data: any;
+}
+
+export interface IDynamicFormBase {
+
+    name: string;
     readonly: boolean;
     validateOnBlur: boolean;
-    parent: IDynamicForm;
-
-    onChange: EventEmitter<IDynamicFormControlHandler>;
-    onValidate: EventEmitter<Promise<IDynamicForm>>;
-    onInit: EventEmitter<IDynamicForm>;
-    onSubmit: EventEmitter<IDynamicForm>;
+    parent: IDynamicFormBase;
 
     controlTemplate: TemplateRef<any>;
-
     controlTemplates: IDynamicFormTemplates;
     labelTemplates: IDynamicFormTemplates;
     inputTemplates: IDynamicFormTemplates;
     prefixTemplates: IDynamicFormTemplates;
     suffixTemplates: IDynamicFormTemplates;
 
-    id: any;
-    prefix: string;
-    injector: Injector;
+    onChange: EventEmitter<IDynamicFormControlHandler>;
+    onValidate: EventEmitter<Promise<IDynamicForm>>;
+    onInit: EventEmitter<IDynamicForm>;
+    onSubmit: EventEmitter<IDynamicForm>;
+
     isLoading: boolean;
     isValid: boolean;
     isValidating: boolean;
 
     validate(): Promise<any>;
     serialize(validate?: boolean): Promise<any>;
-    reloadControls(): Promise<any>;
     emitChange(handler: IDynamicFormControlHandler): void;
+}
+
+export interface IDynamicForm extends IDynamicFormBase {
+
+    controls: IFormControl[];
+    fieldSets: IFormFieldSet[];
+    data: any;
+
+    id: any;
+    prefix: string;
+    injector: Injector;
+
+    reloadControls(): Promise<any>;
     getControl(id: string): IFormControl;
     getControlHandler(id: string): IDynamicFormControlHandler;
     addControlHandler(handler: IDynamicFormControlHandler);
     removeControlHandler(handler: IDynamicFormControlHandler);
+    recheckControls(): Promise<any>;
+    reloadControlsFrom(handler: IDynamicFormControlHandler, handlers?: Set<IDynamicFormControlHandler>): Promise<any>;
 }
 
 export interface IDynamicFormFieldSets {

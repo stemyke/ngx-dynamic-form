@@ -18,7 +18,7 @@ import {
     getFormControl,
     getFormFieldSets,
     getFormSerializer,
-    IDynamicForm,
+    IDynamicForm, IDynamicFormBase,
     IDynamicFormControlHandler,
     IDynamicFormFieldSets,
     IDynamicFormTemplates,
@@ -37,32 +37,28 @@ import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-templa
 export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
     @Input() name: string;
+    @Input() readonly: boolean;
+    @Input() validateOnBlur: boolean;
+    @Input() parent: IDynamicFormBase;
+
     @Input() controls: IFormControl[];
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
-    @Input() readonly: boolean;
-    @Input() validateOnBlur: boolean;
-    @Input() parent: IDynamicForm;
+
+    @Input() wrapperTemplate: TemplateRef<any>;
+    @Input() fieldSetTemplate: TemplateRef<any>;
+    @Input() controlTemplate: TemplateRef<any>;
+
+    @Input() controlTemplates: IDynamicFormTemplates;
+    @Input() labelTemplates: IDynamicFormTemplates;
+    @Input() inputTemplates: IDynamicFormTemplates;
+    @Input() prefixTemplates: IDynamicFormTemplates;
+    @Input() suffixTemplates: IDynamicFormTemplates;
 
     @Output() onChange: EventEmitter<IDynamicFormControlHandler>;
     @Output() onValidate: EventEmitter<Promise<IDynamicForm>>;
     @Output() onInit: EventEmitter<IDynamicForm>;
     @Output() onSubmit: EventEmitter<IDynamicForm>;
-
-    @ContentChild("wrapperTemplate")
-    wrapperTemplate: TemplateRef<any>;
-
-    @ContentChild("fieldSetTemplate")
-    fieldSetTemplate: TemplateRef<any>;
-
-    @ContentChild("controlTemplate")
-    controlTemplate: TemplateRef<any>;
-
-    controlTemplates: IDynamicFormTemplates;
-    labelTemplates: IDynamicFormTemplates;
-    inputTemplates: IDynamicFormTemplates;
-    prefixTemplates: IDynamicFormTemplates;
-    suffixTemplates: IDynamicFormTemplates;
 
     id: any;
     prefix: string;
@@ -87,6 +83,16 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
 
     @ContentChildren(DynamicFormTemplateDirective)
     private templates: QueryList<DynamicFormTemplateDirective>;
+
+
+    @ContentChild("wrapperTemplate")
+    cWrapperTemplate: TemplateRef<any>;
+
+    @ContentChild("fieldSetTemplate")
+    cFieldSetTemplate: TemplateRef<any>;
+
+    @ContentChild("controlTemplate")
+    cControlTemplate: TemplateRef<any>;
 
     private controlHandlers: IDynamicFormControlHandler[];
     private readonly controlHandlerMap: { [id: string]: IDynamicFormControlHandler };
@@ -135,11 +141,14 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     // --- Lifecycle hooks
 
     ngAfterContentInit(): void {
-        this.controlTemplates = this.filterTemplates("control");
-        this.labelTemplates = this.filterTemplates("label");
-        this.inputTemplates = this.filterTemplates("input");
-        this.prefixTemplates = this.filterTemplates("prefix");
-        this.suffixTemplates = this.filterTemplates("suffix");
+        this.wrapperTemplate = this.wrapperTemplate || this.cWrapperTemplate;
+        this.fieldSetTemplate = this.fieldSetTemplate || this.cFieldSetTemplate;
+        this.controlTemplate = this.controlTemplate || this.cControlTemplate;
+        this.controlTemplates = this.controlTemplates || this.filterTemplates("control");
+        this.labelTemplates = this.labelTemplates || this.filterTemplates("label");
+        this.inputTemplates = this.inputTemplates || this.filterTemplates("input");
+        this.prefixTemplates = this.prefixTemplates || this.filterTemplates("prefix");
+        this.suffixTemplates = this.suffixTemplates || this.filterTemplates("suffix");
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -166,12 +175,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     // --- Custom ---
 
     onFormSubmit(): void {
-        this.validate().then(() => {
-            this.valid = true;
-            this.onSubmit.emit(this);
-        }, () => {
-            this.valid = false;
-        });
+        this.validate().then(() => this.onSubmit.emit(this), () => {});
     }
 
     // --- IDynamicForm ---
@@ -181,11 +185,11 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         const validate = new Promise<any>((resolve, reject) => {
             Promise.all(this.controlHandlers.map(h => h.validate(clearErrors))).then(results => {
                 this.validating = false;
-                if (results.every(r => r)) {
-                    this.valid = true;
-                    return resolve();
+                this.valid = results.every(r => r);
+                if (this.valid) {
+                    resolve();
+                    return;
                 }
-                this.valid = false;
                 reject();
             });
         });
@@ -215,6 +219,15 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         });
     }
 
+    emitChange(handler: IDynamicFormControlHandler): void {
+        this.changeTimer.clear();
+        this.changeTimer.set(() => {
+            this.recheckControls().then(() => this.reloadControlsFrom(handler, new Set<IDynamicFormControlHandler>()).then(() => {
+                this.onChange.emit(handler);
+            }));
+        }, 250);
+    }
+
     reloadControls(): Promise<any> {
         const load = Promise.all(this.controlHandlers.map(h => h.load()));
         if (this.initialized === false) {
@@ -239,15 +252,6 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         });
     }
 
-    emitChange(handler: IDynamicFormControlHandler): void {
-        this.changeTimer.clear();
-        this.changeTimer.set(() => {
-            this.recheckControls().then(() => this.reloadControlsFrom(handler, new Set<IDynamicFormControlHandler>()).then(() => {
-                this.onChange.emit(handler);
-            }));
-        }, 250);
-    }
-
     getControl(id: string): IFormControl {
         const handler = this.getControlHandler(id);
         return !handler ? null : handler.control;
@@ -268,11 +272,11 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         delete this.controlHandlerMap[handler.control.id];
     }
 
-    private recheckControls(): Promise<any> {
+    recheckControls(): Promise<any> {
         return Promise.all(this.controlHandlers.map(t => t.check()));
     }
 
-    private reloadControlsFrom(handler: IDynamicFormControlHandler, handlers?: Set<IDynamicFormControlHandler>): Promise<any> {
+    reloadControlsFrom(handler: IDynamicFormControlHandler, handlers?: Set<IDynamicFormControlHandler>): Promise<any> {
         const data = handler.control ? handler.control.data : null;
         if (!data || !data.reload) return Promise.resolve();
         const reload = ObjectUtils.isArray(data.reload) ? data.reload : [data.reload];

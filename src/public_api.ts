@@ -21,6 +21,8 @@ export {
     IFormControlOption,
     IDynamicFormControlHandler,
     IDynamicFormTemplates,
+    IDynamicFormConfig,
+    IDynamicFormBase,
     IDynamicForm,
     IDynamicFormFieldSets,
     FormControlTester,

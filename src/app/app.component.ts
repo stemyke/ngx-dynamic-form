@@ -1,7 +1,8 @@
 import {Component, ViewChild} from "@angular/core";
 import {IAsyncMessage} from "@stemy/ngx-utils";
-import {IDynamicForm} from "../public_api";
+import {IDynamicForm, IDynamicFormBase, IDynamicFormConfig} from "../public_api";
 import {TestModel} from "./test.model";
+import {SubModel} from "./sub.model";
 
 @Component({
     moduleId: module.id,
@@ -9,10 +10,11 @@ import {TestModel} from "./test.model";
     templateUrl: "./app.component.html"
 })
 export class AppComponent {
-    testModel: TestModel;
+
+    data: IDynamicFormConfig[];
 
     @ViewChild("form")
-    private form: IDynamicForm;
+    private form: IDynamicFormBase;
 
     serialize = (): Promise<IAsyncMessage> => {
         return new Promise<IAsyncMessage>(resolve => {
@@ -29,6 +31,16 @@ export class AppComponent {
     };
 
     newModel(): void {
-        this.testModel = new TestModel();
+        this.data = [
+            {
+                id: "test",
+                data: new TestModel(),
+            },
+            {
+                id: "sub",
+                path: "address2",
+                data: new SubModel(),
+            }
+        ]
     }
 }

@@ -10,6 +10,7 @@ import {DynamicFormService} from "./services/dynamic-form.service";
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 import {DynamicFormControlDirective} from "./directives/dynamic-form-control.directive";
 import {DynamicFormTemplateDirective} from "./directives/dynamic-form-template.directive";
+import {DynamicFormsComponent} from "./components/dynamic-forms/dynamic-forms.component";
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
 
 import {DynamicFormControlComponent} from "./components/dynamic-form-control/dynamic-form-control.component";
@@ -20,6 +21,7 @@ import {DynamicFormModelComponent} from "./components/dynamic-form-model/dynamic
 
 // --- Components ---
 export const components = [
+    DynamicFormsComponent,
     DynamicFormComponent,
     DynamicFormControlComponent,
     DynamicFormInputComponent,

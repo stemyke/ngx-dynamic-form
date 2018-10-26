@@ -23,7 +23,7 @@ export class SubModel {
 
     @FormInput({
         classes: "col-sm-6",
-        max: 10,
+        max: 15,
         validator: (control: IFormControl, form: IDynamicForm) => {
             return Promise.resolve(form.data[control.id] == "Zöldfa utca" ? null : "Zöldfa utca legyen")
         }

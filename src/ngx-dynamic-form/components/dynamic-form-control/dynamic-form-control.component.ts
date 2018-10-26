@@ -13,7 +13,7 @@ import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
     FormControlTester,
     FormControlValidator,
-    IDynamicForm,
+    IDynamicForm, IDynamicFormBase,
     IDynamicFormControlHandler,
     IFormControl,
     IFormControlData,
@@ -110,7 +110,7 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onBlur(): void {
-        let form = this.form;
+        let form: IDynamicFormBase = this.form;
         while (ObjectUtils.isDefined(form.parent)) {
             form = form.parent;
         }

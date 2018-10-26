@@ -1,0 +1,25 @@
+<div class="dynamic-forms">
+    <div *ngFor="let config of data">
+        <dynamic-form [name]="config.name || name"
+                      [readonly]="readonly"
+                      [validateOnBlur]="validateOnBlur"
+                      [parent]="this"
+                      [controls]="config.controls"
+                      [fieldSets]="config.fieldSets"
+                      [data]="config.data"
+                      [controlTemplates]="controlTemplates"
+                      [wrapperTemplate]="wrapperTemplate"
+                      [fieldSetTemplate]="fieldSetTemplate"
+                      [controlTemplate]="controlTemplate"
+                      [labelTemplates]="labelTemplates"
+                      [inputTemplates]="inputTemplates"
+                      [prefixTemplates]="prefixTemplates"
+                      [suffixTemplates]="suffixTemplates"
+                      (onChange)="onChange.emit($event)"
+                      (onValidate)="onValidate.emit($event)"
+                      (onInit)="onInit.emit($event)"
+                      (onSubmit)="onSubmit.emit($event)">
+        </dynamic-form>
+    </div>
+    <ng-content></ng-content>
+</div>
