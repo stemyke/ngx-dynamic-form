@@ -31,6 +31,7 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
     @Input() name: string;
     @Input() readonly: boolean;
     @Input() validateOnBlur: boolean;
+    @Input() classes: any;
     @Input() parent: IDynamicFormBase;
 
     @Input() data: IDynamicFormConfig[];
@@ -54,6 +55,11 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
     inputTemplates: IDynamicFormTemplates;
     prefixTemplates: IDynamicFormTemplates;
     suffixTemplates: IDynamicFormTemplates;
+
+    formPrefixTemplates: IDynamicFormTemplates;
+    formSuffixTemplates: IDynamicFormTemplates;
+    innerFormPrefixTemplates: IDynamicFormTemplates;
+    innerFormSuffixTemplates: IDynamicFormTemplates;
 
     get isLoading(): boolean {
         return this.checkForms(f => f.isLoading);
@@ -99,6 +105,10 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
         this.inputTemplates = this.filterTemplates("input");
         this.prefixTemplates = this.filterTemplates("prefix");
         this.suffixTemplates = this.filterTemplates("suffix");
+        this.formPrefixTemplates = this.filterTemplates("formPrefix");
+        this.formSuffixTemplates = this.filterTemplates("formSuffix");
+        this.innerFormPrefixTemplates = this.filterTemplates("innerFormPrefix");
+        this.innerFormSuffixTemplates = this.filterTemplates("innerFormSuffix");
     }
 
     // --- IDynamicFormBase ---
@@ -155,8 +165,8 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
     }
 
     private checkForms(check: (form: IDynamicForm) => boolean): boolean {
-        if (!this.forms) return false;
         this.cdr.detectChanges();
+        if (!this.forms) return false;
         return ObjectUtils.isDefined(this.forms.find(check));
     }
 }

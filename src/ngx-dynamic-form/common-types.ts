@@ -144,6 +144,9 @@ export interface IDynamicFormConfig {
     name?: string;
     controls?: IFormControl[];
     fieldSets?: IFormFieldSet[];
+    classes?: string;
+    formClasses?: string;
+    innerFormClasses?: string;
     id: string;
     data: any;
 }
@@ -153,6 +156,7 @@ export interface IDynamicFormBase {
     name: string;
     readonly: boolean;
     validateOnBlur: boolean;
+    classes: string;
     parent: IDynamicFormBase;
 
     controlTemplate: TemplateRef<any>;

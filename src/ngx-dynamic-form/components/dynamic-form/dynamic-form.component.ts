@@ -31,7 +31,7 @@ import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-templa
 
 @Component({
     moduleId: module.id,
-    selector: "dynamic-form",
+    selector: "dynamic-form, [dynamic-form]",
     templateUrl: "./dynamic-form.component.html"
 })
 export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnChanges {
@@ -39,6 +39,7 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     @Input() name: string;
     @Input() readonly: boolean;
     @Input() validateOnBlur: boolean;
+    @Input() classes: any;
     @Input() parent: IDynamicFormBase;
 
     @Input() controls: IFormControl[];
@@ -63,6 +64,12 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     id: any;
     prefix: string;
     injector: Injector;
+
+    @ContentChild("prefixTemplate")
+    prefixTemplate: TemplateRef<any>;
+
+    @ContentChild("suffixTemplate")
+    suffixTemplate: TemplateRef<any>;
 
     formFieldSets: IDynamicFormFieldSets;
     formControls: IFormControl[];

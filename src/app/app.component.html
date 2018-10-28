@@ -6,6 +6,10 @@
         <dynamic-forms #form [data]="data" [validateOnBlur]="true">
             <ng-template prefix="date">This is prefix!!!</ng-template>
             <ng-template suffix="textarea">This is suffix!!!</ng-template>
+            <ng-template formPrefix="test"><div class="col-sm-6">Test modell prefix</div></ng-template>
+            <ng-template formPrefix="sub"><div class="col-sm-6">Sub model prefix</div></ng-template>
+            <ng-template innerFormPrefix="test">Test inner model prefix</ng-template>
+            <ng-template innerFormPrefix="sub">Sub inner model prefix</ng-template>
             <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
         </dynamic-forms>
 
