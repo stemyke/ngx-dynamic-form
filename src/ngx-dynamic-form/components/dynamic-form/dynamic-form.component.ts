@@ -91,7 +91,6 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     @ContentChildren(DynamicFormTemplateDirective)
     private templates: QueryList<DynamicFormTemplateDirective>;
 
-
     @ContentChild("wrapperTemplate")
     cWrapperTemplate: TemplateRef<any>;
 
@@ -151,11 +150,11 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         this.wrapperTemplate = this.wrapperTemplate || this.cWrapperTemplate;
         this.fieldSetTemplate = this.fieldSetTemplate || this.cFieldSetTemplate;
         this.controlTemplate = this.controlTemplate || this.cControlTemplate;
-        this.controlTemplates = this.controlTemplates || this.filterTemplates("control");
-        this.labelTemplates = this.labelTemplates || this.filterTemplates("label");
-        this.inputTemplates = this.inputTemplates || this.filterTemplates("input");
-        this.prefixTemplates = this.prefixTemplates || this.filterTemplates("prefix");
-        this.suffixTemplates = this.suffixTemplates || this.filterTemplates("suffix");
+        this.controlTemplates = this.filterTemplates(this.controlTemplates, "control");
+        this.labelTemplates = this.filterTemplates(this.labelTemplates, "label");
+        this.inputTemplates = this.filterTemplates(this.inputTemplates , "input");
+        this.prefixTemplates = this.filterTemplates(this.prefixTemplates, "prefix");
+        this.suffixTemplates =  this.filterTemplates(this.suffixTemplates, "suffix");
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -299,7 +298,8 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         }))
     }
 
-    private filterTemplates(type: string): IDynamicFormTemplates {
+    private filterTemplates(templates: IDynamicFormTemplates, type: string): IDynamicFormTemplates {
+        if (ObjectUtils.isObject(templates) && Object.keys(templates).length > 0) return templates;
         return this.templates.filter(t => !!t[type]).reduce((result, directive) => {
             result[directive[type]] = directive.template;
             return result;
