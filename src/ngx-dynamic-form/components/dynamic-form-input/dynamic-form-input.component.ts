@@ -1,5 +1,5 @@
-import {Component, HostBinding, Injector} from "@angular/core";
-import {ObjectUtils} from "@stemy/ngx-utils";
+import {Component, HostBinding, Inject} from "@angular/core";
+import {ILanguageService, ITranslation, LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
 import {FormControlComponent, IDynamicForm, IFormControl, IFormInputData} from "../../common-types";
 
 @Component({
@@ -24,6 +24,10 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
         return this.data.type == "checkbox" && this.value;
     }
 
+    constructor(@Inject(LANGUAGE_SERVICE) private language: ILanguageService) {
+        super();
+    }
+
     onDateChange(value: string): void {
         const date = new Date(value);
         const dateValue = <number>date.valueOf();
@@ -31,9 +35,27 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
         this.handler.onValueChange(date)
     }
 
-    onInputChange(value: string): void {
+    onMaskChange(value: string): void {
         value = ObjectUtils.isFunction(this.data.unmask) ? this.data.unmask(value) : value;
         this.handler.onValueChange(value)
+    }
+
+    onTextChange(value: string): void {
+        if (!this.data.useLanguage) {
+            this.handler.onValueChange(value);
+            return;
+        }
+        const translations: ITranslation[] = ObjectUtils.isArray(this.value) ? Array.from(this.value) : [];
+        const translation = translations.find(t => t.lang == this.language.editLanguage);
+        if (translation) {
+            translation.translation = value;
+        } else {
+            translations.push({
+                lang: this.language.editLanguage,
+                translation: value
+            });
+        }
+        this.handler.onValueChange(translations);
     }
 
     onNumberBlur(): void {

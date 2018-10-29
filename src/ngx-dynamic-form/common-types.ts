@@ -80,6 +80,7 @@ export interface IFormInputData extends IFormControlData {
     type?: string;
     autocomplete?: string;
     placeholder?: string;
+    useLanguage?: boolean;
     mask?: IFormInputMaskFunction | IFormInputMask[];
     unmask?: IFormInputUnMaskFunction;
     step?: number;

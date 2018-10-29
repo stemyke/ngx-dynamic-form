@@ -50,7 +50,7 @@
                [disabled]="form.readonly || handler.isReadOnly"
                [textMask]="{mask: data.mask, showMask: true, placeholderChar: data.placeholder}"
                [ngModel]="value"
-               (ngModelChange)="onInputChange($event)"
+               (ngModelChange)="onMaskChange($event)"
                (blur)="handler.onBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
@@ -63,6 +63,22 @@
                [disabled]="form.readonly || handler.isReadOnly"
                [ngModel]="value"
                (ngModelChange)="handler.onValueChange($event)"
+               (blur)="handler.onBlur()"
+               (focus)="handler.onFocus()"/>
+    </ng-container>
+    <ng-container *ngSwitchCase="'text'">
+        <input class="form-control"
+               type="text"
+               [attr.autocomplete]="data.autocomplete"
+               [minlength]="data.min"
+               [maxlength]="data.max"
+               [placeholder]="data.placeholder | translate"
+               [id]="form.id + '-' + control.id"
+               [name]="form.id + '-' + control.id"
+               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
+               [disabled]="form.readonly || handler.isReadOnly"
+               [ngModel]="data.useLanguage ? (value | translate) : value"
+               (ngModelChange)="onTextChange($event)"
                (blur)="handler.onBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
