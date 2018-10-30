@@ -39,8 +39,8 @@
     </ng-container>
     <ng-container *ngSwitchCase="'checkbox'">
         <ul class="checkbox-group">
-            <li *ngFor="let option of meta.options" class="radio">
-                <label [ngClass]="{checked: value == option.id}">
+            <li *ngFor="let option of meta.options" class="checkbox">
+                <label [ngClass]="{checked: checkValue(option)}">
                     <input type="checkbox"
                            [id]="form.id + '-' + control.id + '-' + option.id"
                            [name]="form.id + '-' + control.id + '-' + option.id"

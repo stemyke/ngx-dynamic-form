@@ -16,7 +16,7 @@ import {
     IDynamicFormBase,
     IDynamicFormConfig,
     IDynamicFormControlHandler,
-    IDynamicFormTemplates
+    IDynamicFormTemplates, IFormControl
 } from "../../common-types";
 import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-template.directive";
 import {DynamicFormComponent} from "../dynamic-form/dynamic-form.component";
@@ -157,6 +157,14 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
         }, 250);
     }
 
+    getControl(id: string): IFormControl {
+        return this.getFromValue(f => f.getControl(id));
+    }
+
+    getControlHandler(id: string): IDynamicFormControlHandler {
+        return this.getFromValue(f => f.getControlHandler(id));
+    }
+
     private filterTemplates(type: string): IDynamicFormTemplates {
         return this.templates.filter(t => !!t[type]).reduce((result, directive) => {
             result[directive[type]] = directive.template;
@@ -168,5 +176,15 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
         this.cdr.detectChanges();
         if (!this.forms) return false;
         return ObjectUtils.isDefined(this.forms.find(check));
+    }
+
+    private getFromValue<T>(check: (form: IDynamicForm) => T): T {
+        if (!this.forms) return null;
+        let value: T = null;
+        this.forms.find(f => {
+            value = check(f);
+            return ObjectUtils.isDefined(value);
+        });
+        return value;
     }
 }

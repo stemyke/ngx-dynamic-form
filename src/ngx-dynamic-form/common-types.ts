@@ -128,9 +128,10 @@ export interface IDynamicFormControlHandler {
     isReadOnly: boolean;
     isVisible: boolean;
     isHidden: boolean;
+    getData<T extends IFormControlData>();
+    onValueChange(value: any): void;
     onFocus(): void;
     onBlur(): void
-    onValueChange(value: any): void;
     load(): Promise<any>;
     check(): Promise<any>;
     validate(clearErrors?: boolean): Promise<boolean>;
@@ -179,6 +180,8 @@ export interface IDynamicFormBase {
     validate(): Promise<any>;
     serialize(validate?: boolean): Promise<any>;
     emitChange(handler: IDynamicFormControlHandler): void;
+    getControl(id: string): IFormControl;
+    getControlHandler(id: string): IDynamicFormControlHandler;
 }
 
 export interface IDynamicForm extends IDynamicFormBase {
@@ -192,8 +195,6 @@ export interface IDynamicForm extends IDynamicFormBase {
     injector: Injector;
 
     reloadControls(): Promise<any>;
-    getControl(id: string): IFormControl;
-    getControlHandler(id: string): IDynamicFormControlHandler;
     addControlHandler(handler: IDynamicFormControlHandler);
     removeControlHandler(handler: IDynamicFormControlHandler);
     recheckControls(): Promise<any>;
@@ -333,7 +334,8 @@ export function createFormSelect(id: string, data: IFormSelectData): IFormContro
     data = control.data;
     data.options = data.options || (() => Promise.resolve([]));
     data.type = data.type || "select";
-    data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
+    const classType = data.type == "select" ? "select" : `select-${data.type}`
+    data.classes = !data.classes ? `form-group-${classType}` : `${data.classes} form-group-${classType}`;
     return control;
 }
 

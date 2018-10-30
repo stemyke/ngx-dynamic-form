@@ -100,6 +100,10 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
 
     // --- IDynamicFormControlHandler ---
 
+    getData<T extends IFormControlData>() {
+        return this.data;
+    }
+
     onValueChange(value: any): void {
         this.form.data[this.control.id] = value;
         this.form.emitChange(this);
