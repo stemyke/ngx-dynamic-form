@@ -334,7 +334,7 @@ export function createFormSelect(id: string, data: IFormSelectData): IFormContro
     data = control.data;
     data.options = data.options || (() => Promise.resolve([]));
     data.type = data.type || "select";
-    const classType = data.type == "select" ? "select" : `select-${data.type}`
+    const classType = data.type == "select" ? "select" : `select-${data.type}`;
     data.classes = !data.classes ? `form-group-${classType}` : `${data.classes} form-group-${classType}`;
     return control;
 }
