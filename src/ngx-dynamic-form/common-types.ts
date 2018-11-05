@@ -1,4 +1,13 @@
-import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
+import {
+    EventEmitter,
+    HostBinding,
+    InjectionToken,
+    Injector,
+    Input,
+    TemplateRef,
+    Type,
+    ValueProvider
+} from "@angular/core";
 import {IResolveFactory, ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("forn-control-provider");
@@ -150,8 +159,19 @@ export interface IDynamicFormConfig {
     formClasses?: string;
     innerFormClasses?: string;
     id: string;
-    data: any;
 }
+
+export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
+    data: any;
+    forms: false;
+}
+
+export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
+    data: IDynamicFormsConfigs;
+    forms: true;
+}
+
+export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;
 
 export interface IDynamicFormBase {
 
@@ -161,7 +181,10 @@ export interface IDynamicFormBase {
     classes: string;
     parent: IDynamicFormBase;
 
+    wrapperTemplate: TemplateRef<any>;
+    fieldSetTemplate: TemplateRef<any>;
     controlTemplate: TemplateRef<any>;
+
     controlTemplates: IDynamicFormTemplates;
     labelTemplates: IDynamicFormTemplates;
     inputTemplates: IDynamicFormTemplates;
@@ -169,13 +192,14 @@ export interface IDynamicFormBase {
     suffixTemplates: IDynamicFormTemplates;
 
     onChange: EventEmitter<IDynamicFormControlHandler>;
-    onValidate: EventEmitter<Promise<IDynamicForm>>;
-    onInit: EventEmitter<IDynamicForm>;
-    onSubmit: EventEmitter<IDynamicForm>;
+    onValidate: EventEmitter<Promise<IDynamicFormBase>>;
+    onInit: EventEmitter<IDynamicFormBase>;
+    onSubmit: EventEmitter<IDynamicFormBase>;
 
     isLoading: boolean;
     isValid: boolean;
     isValidating: boolean;
+    injector: Injector;
 
     validate(): Promise<any>;
     serialize(validate?: boolean): Promise<any>;
@@ -192,7 +216,6 @@ export interface IDynamicForm extends IDynamicFormBase {
 
     id: any;
     prefix: string;
-    injector: Injector;
 
     reloadControls(): Promise<any>;
     addControlHandler(handler: IDynamicFormControlHandler);

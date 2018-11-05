@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {IAsyncMessage} from "@stemy/ngx-utils";
-import {IDynamicForm, IDynamicFormBase, IDynamicFormConfig} from "../public_api";
+import {IDynamicFormBase, IDynamicFormsConfigs} from "../public_api";
 import {TestModel} from "./test.model";
 import {SubModel} from "./sub.model";
 
@@ -11,7 +11,7 @@ import {SubModel} from "./sub.model";
 })
 export class AppComponent implements OnInit {
 
-    data: IDynamicFormConfig[];
+    data: IDynamicFormsConfigs;
 
     @ViewChild("form")
     private form: IDynamicFormBase;
@@ -38,16 +38,26 @@ export class AppComponent implements OnInit {
         this.data = [
             {
                 id: "test",
-                data: new TestModel(),
-                classes: "row",
-                formClasses: "col-sm-6"
+                data: new TestModel()
             },
             {
                 id: "sub",
-                path: "address2",
-                data: new SubModel(),
-                classes: "row",
-                formClasses: "col-sm-6"
+                path: "address_sub",
+                // data: [
+                //     {
+                //         id: "a1",
+                //         path: "0",
+                //         data: new SubModel(),
+                //     },
+                //     {
+                //         id: "a2",
+                //         path: "1",
+                //         data: new SubModel(),
+                //     }
+                // ],
+                data: new TestModel(),
+                forms: false,
+                innerFormClasses: "row"
             }
         ]
     }

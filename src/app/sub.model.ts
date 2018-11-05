@@ -29,5 +29,5 @@ export class SubModel {
         }
     })
     @FormSerializable()
-    street: string = "";
+    street: string = "Zöldfa utca";
 }

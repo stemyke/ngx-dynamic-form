@@ -188,20 +188,7 @@ export class TestModel {
     staticData2: any = new Date();
 
     @FormModel({
-        name: "address",
-        controls: [
-            createFormInput("city", {
-                classes: "col-sm-6",
-                max: 10
-            }),
-            createFormInput("street", {
-                classes: "col-sm-6",
-                max: 15,
-                validator: (control: IFormControl, form: IDynamicForm) => {
-                    return Promise.resolve(form.data[control.id] !== "Zöldfa utca" ? null : "Nem lehet Zöldfa utca")
-                }
-            })
-        ]
+        name: "address"
     })
     @FormSerializable()
     address: SubModel = new SubModel();

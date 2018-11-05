@@ -1,75 +1,33 @@
-import {
-    AfterContentInit,
-    ChangeDetectorRef,
-    Component,
-    ContentChild,
-    ContentChildren,
-    EventEmitter,
-    Injector,
-    Input,
-    OnChanges,
-    Output,
-    QueryList,
-    SimpleChanges,
-    TemplateRef
-} from "@angular/core";
+import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {ITimer, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
     getFormControl,
     getFormFieldSets,
     getFormSerializer,
-    IDynamicForm, IDynamicFormBase,
+    IDynamicForm,
     IDynamicFormControlHandler,
     IDynamicFormFieldSets,
-    IDynamicFormTemplates,
     IFormControl,
     IFormControlSerializer,
     IFormFieldSet,
     IFormSerializer
 } from "../../common-types";
-import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-template.directive";
+import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 
 @Component({
     moduleId: module.id,
     selector: "dynamic-form, [dynamic-form]",
-    templateUrl: "./dynamic-form.component.html"
+    templateUrl: "./dynamic-form.component.html",
+    providers: [{provide: DynamicFormBaseComponent, useExisting: DynamicFormComponent}]
 })
-export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnChanges {
-
-    @Input() name: string;
-    @Input() readonly: boolean;
-    @Input() validateOnBlur: boolean;
-    @Input() classes: any;
-    @Input() parent: IDynamicFormBase;
+export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
     @Input() controls: IFormControl[];
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
 
-    @Input() wrapperTemplate: TemplateRef<any>;
-    @Input() fieldSetTemplate: TemplateRef<any>;
-    @Input() controlTemplate: TemplateRef<any>;
-
-    @Input() controlTemplates: IDynamicFormTemplates;
-    @Input() labelTemplates: IDynamicFormTemplates;
-    @Input() inputTemplates: IDynamicFormTemplates;
-    @Input() prefixTemplates: IDynamicFormTemplates;
-    @Input() suffixTemplates: IDynamicFormTemplates;
-
-    @Output() onChange: EventEmitter<IDynamicFormControlHandler>;
-    @Output() onValidate: EventEmitter<Promise<IDynamicForm>>;
-    @Output() onInit: EventEmitter<IDynamicForm>;
-    @Output() onSubmit: EventEmitter<IDynamicForm>;
-
     id: any;
     prefix: string;
-    injector: Injector;
-
-    @ContentChild("prefixTemplate")
-    prefixTemplate: TemplateRef<any>;
-
-    @ContentChild("suffixTemplate")
-    suffixTemplate: TemplateRef<any>;
 
     formFieldSets: IDynamicFormFieldSets;
     formControls: IFormControl[];
@@ -88,45 +46,19 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         return this.validating;
     }
 
-    @ContentChildren(DynamicFormTemplateDirective)
-    private templates: QueryList<DynamicFormTemplateDirective>;
-
-    @ContentChild("wrapperTemplate")
-    cWrapperTemplate: TemplateRef<any>;
-
-    @ContentChild("fieldSetTemplate")
-    cFieldSetTemplate: TemplateRef<any>;
-
-    @ContentChild("controlTemplate")
-    cControlTemplate: TemplateRef<any>;
-
     private controlHandlers: IDynamicFormControlHandler[];
     private readonly controlHandlerMap: { [id: string]: IDynamicFormControlHandler };
     private readonly controlHandlerTimer: ITimer;
 
-    private changeTimer: ITimer;
     private initialized: boolean;
     private loading: boolean;
     private valid: boolean;
     private validating: boolean;
 
-    constructor(public cdr: ChangeDetectorRef, injector: Injector) {
-        this.name = "";
-
-        this.onChange = new EventEmitter<IDynamicFormControlHandler>();
-        this.onValidate = new EventEmitter<Promise<IDynamicForm>>();
-        this.onInit = new EventEmitter<IDynamicForm>();
-        this.onSubmit = new EventEmitter<IDynamicForm>();
-
-        this.controlTemplates = {};
-        this.labelTemplates = {};
-        this.inputTemplates = {};
-        this.prefixTemplates = {};
-        this.suffixTemplates = {};
-
+    constructor(cdr: ChangeDetectorRef, injector: Injector) {
+        super(cdr, injector);
         this.id = UniqueUtils.uuid();
         this.prefix = "";
-        this.injector = injector;
         this.formControls = [];
         this.formFieldSets = {};
         this.defaultFieldSet = {
@@ -137,7 +69,6 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
         this.controlHandlers = [];
         this.controlHandlerMap = {};
         this.controlHandlerTimer = TimerUtils.createTimeout();
-        this.changeTimer = TimerUtils.createTimeout();
         this.initialized = false;
         this.loading = false;
         this.valid = false;
@@ -145,17 +76,6 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
     }
 
     // --- Lifecycle hooks
-
-    ngAfterContentInit(): void {
-        this.wrapperTemplate = this.wrapperTemplate || this.cWrapperTemplate;
-        this.fieldSetTemplate = this.fieldSetTemplate || this.cFieldSetTemplate;
-        this.controlTemplate = this.controlTemplate || this.cControlTemplate;
-        this.controlTemplates = this.filterTemplates(this.controlTemplates, "control");
-        this.labelTemplates = this.filterTemplates(this.labelTemplates, "label");
-        this.inputTemplates = this.filterTemplates(this.inputTemplates , "input");
-        this.prefixTemplates = this.filterTemplates(this.prefixTemplates, "prefix");
-        this.suffixTemplates =  this.filterTemplates(this.suffixTemplates, "suffix");
-    }
 
     ngOnChanges(changes: SimpleChanges): void {
         this.prefix = this.name ? `${this.name}.` : "";
@@ -296,13 +216,5 @@ export class DynamicFormComponent implements IDynamicForm, AfterContentInit, OnC
                 });
             })
         }))
-    }
-
-    private filterTemplates(templates: IDynamicFormTemplates, type: string): IDynamicFormTemplates {
-        if (ObjectUtils.isObject(templates) && Object.keys(templates).length > 0) return templates;
-        return this.templates.filter(t => !!t[type]).reduce((result, directive) => {
-            result[directive[type]] = directive.template;
-            return result;
-        }, {});
     }
 }

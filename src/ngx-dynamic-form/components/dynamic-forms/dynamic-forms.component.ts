@@ -1,65 +1,28 @@
+import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, QueryList, ViewChildren} from "@angular/core";
+import {ObjectUtils} from "@stemy/ngx-utils";
 import {
-    AfterContentInit, ChangeDetectorRef,
-    Component,
-    ContentChild,
-    ContentChildren,
-    EventEmitter,
-    Input,
-    Output,
-    QueryList,
-    TemplateRef,
-    ViewChildren
-} from "@angular/core";
-import {ITimer, ObjectUtils, TimerUtils} from "@stemy/ngx-utils";
-import {
-    IDynamicForm,
     IDynamicFormBase,
-    IDynamicFormConfig,
     IDynamicFormControlHandler,
-    IDynamicFormTemplates, IFormControl
+    IDynamicFormsConfigs,
+    IDynamicFormTemplates,
+    IFormControl
 } from "../../common-types";
-import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-template.directive";
-import {DynamicFormComponent} from "../dynamic-form/dynamic-form.component";
+import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 
 @Component({
     moduleId: module.id,
-    selector: "dynamic-forms",
-    templateUrl: "./dynamic-forms.component.html"
+    selector: "dynamic-forms, [dynamic-forms]",
+    templateUrl: "./dynamic-forms.component.html",
+    providers: [{provide: DynamicFormBaseComponent, useExisting: DynamicFormsComponent}]
 })
-export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit {
+export class DynamicFormsComponent extends DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit {
 
-    @Input() name: string;
-    @Input() readonly: boolean;
-    @Input() validateOnBlur: boolean;
-    @Input() classes: any;
-    @Input() parent: IDynamicFormBase;
+    @Input() data: IDynamicFormsConfigs;
 
-    @Input() data: IDynamicFormConfig[];
-
-    @Output() onChange: EventEmitter<IDynamicFormControlHandler>;
-    @Output() onValidate: EventEmitter<Promise<IDynamicForm>>;
-    @Output() onInit: EventEmitter<IDynamicForm>;
-    @Output() onSubmit: EventEmitter<IDynamicForm>;
-
-    @ContentChild("wrapperTemplate")
-    wrapperTemplate: TemplateRef<any>;
-
-    @ContentChild("fieldSetTemplate")
-    fieldSetTemplate: TemplateRef<any>;
-
-    @ContentChild("controlTemplate")
-    controlTemplate: TemplateRef<any>;
-
-    controlTemplates: IDynamicFormTemplates;
-    labelTemplates: IDynamicFormTemplates;
-    inputTemplates: IDynamicFormTemplates;
-    prefixTemplates: IDynamicFormTemplates;
-    suffixTemplates: IDynamicFormTemplates;
-
-    formPrefixTemplates: IDynamicFormTemplates;
-    formSuffixTemplates: IDynamicFormTemplates;
-    innerFormPrefixTemplates: IDynamicFormTemplates;
-    innerFormSuffixTemplates: IDynamicFormTemplates;
+    @Input() formPrefixTemplates: IDynamicFormTemplates;
+    @Input() formSuffixTemplates: IDynamicFormTemplates;
+    @Input() innerFormPrefixTemplates: IDynamicFormTemplates;
+    @Input() innerFormSuffixTemplates: IDynamicFormTemplates;
 
     get isLoading(): boolean {
         return this.checkForms(f => f.isLoading);
@@ -73,42 +36,25 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
         return this.checkForms(f => f.isValidating);
     }
 
-    @ViewChildren(DynamicFormComponent)
-    private forms: QueryList<IDynamicForm>;
+    @ViewChildren(DynamicFormBaseComponent)
+    private forms: QueryList<IDynamicFormBase>;
 
-    @ContentChildren(DynamicFormTemplateDirective)
-    private templates: QueryList<DynamicFormTemplateDirective>;
-
-    private changeTimer: ITimer;
-
-    constructor(private cdr: ChangeDetectorRef) {
-
-        this.onChange = new EventEmitter<IDynamicFormControlHandler>();
-        this.onValidate = new EventEmitter<Promise<IDynamicForm>>();
-        this.onInit = new EventEmitter<IDynamicForm>();
-        this.onSubmit = new EventEmitter<IDynamicForm>();
-
-        this.controlTemplates = {};
-        this.labelTemplates = {};
-        this.inputTemplates = {};
-        this.prefixTemplates = {};
-        this.suffixTemplates = {};
-
-        this.changeTimer = TimerUtils.createTimeout();
+    constructor(cdr: ChangeDetectorRef, injector: Injector) {
+        super(cdr, injector);
+        this.formPrefixTemplates = {};
+        this.formSuffixTemplates = {};
+        this.innerFormPrefixTemplates = {};
+        this.innerFormSuffixTemplates = {};
     }
 
     // --- Lifecycle hooks
 
     ngAfterContentInit(): void {
-        this.controlTemplates = this.filterTemplates("control");
-        this.labelTemplates = this.filterTemplates("label");
-        this.inputTemplates = this.filterTemplates("input");
-        this.prefixTemplates = this.filterTemplates("prefix");
-        this.suffixTemplates = this.filterTemplates("suffix");
-        this.formPrefixTemplates = this.filterTemplates("formPrefix");
-        this.formSuffixTemplates = this.filterTemplates("formSuffix");
-        this.innerFormPrefixTemplates = this.filterTemplates("innerFormPrefix");
-        this.innerFormSuffixTemplates = this.filterTemplates("innerFormSuffix");
+        super.ngAfterContentInit();
+        this.formPrefixTemplates = this.filterTemplates(this.formPrefixTemplates, "formPrefix");
+        this.formSuffixTemplates = this.filterTemplates(this.formSuffixTemplates, "formSuffix");
+        this.innerFormPrefixTemplates = this.filterTemplates(this.innerFormPrefixTemplates, "innerFormPrefix");
+        this.innerFormSuffixTemplates = this.filterTemplates(this.innerFormSuffixTemplates, "innerFormSuffix");
     }
 
     // --- IDynamicFormBase ---
@@ -165,20 +111,13 @@ export class DynamicFormsComponent implements IDynamicFormBase, AfterContentInit
         return this.getFromValue(f => f.getControlHandler(id));
     }
 
-    private filterTemplates(type: string): IDynamicFormTemplates {
-        return this.templates.filter(t => !!t[type]).reduce((result, directive) => {
-            result[directive[type]] = directive.template;
-            return result;
-        }, {});
-    }
-
-    private checkForms(check: (form: IDynamicForm) => boolean): boolean {
+    private checkForms(check: (form: IDynamicFormBase) => boolean): boolean {
         this.cdr.detectChanges();
         if (!this.forms) return false;
         return ObjectUtils.isDefined(this.forms.find(check));
     }
 
-    private getFromValue<T>(check: (form: IDynamicForm) => T): T {
+    private getFromValue<T>(check: (form: IDynamicFormBase) => T): T {
         if (!this.forms) return null;
         let value: T = null;
         this.forms.find(f => {
