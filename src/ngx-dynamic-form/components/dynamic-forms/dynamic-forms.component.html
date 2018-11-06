@@ -70,7 +70,7 @@
              [innerFormPrefixTemplates]="innerFormPrefixTemplates"
              [innerFormSuffixTemplates]="innerFormSuffixTemplates"
 
-             *ngIf="config.forms; else singleFormTemplate">
+             *ngIf="config.multi; else singleFormTemplate">
             <ng-template #prefixTemplate let-form="form">
                 <ng-container [ngTemplateOutlet]="innerFormPrefixTemplates[config.id]"
                               [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>

@@ -163,12 +163,12 @@ export interface IDynamicFormConfig {
 
 export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
     data: any;
-    forms: false;
+    multi?: false;
 }
 
 export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
     data: IDynamicFormsConfigs;
-    forms: true;
+    multi: true;
 }
 
 export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;

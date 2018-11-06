@@ -43,20 +43,19 @@ export class AppComponent implements OnInit {
             {
                 id: "sub",
                 path: "address_sub",
-                // data: [
-                //     {
-                //         id: "a1",
-                //         path: "0",
-                //         data: new SubModel(),
-                //     },
-                //     {
-                //         id: "a2",
-                //         path: "1",
-                //         data: new SubModel(),
-                //     }
-                // ],
-                data: new TestModel(),
-                forms: false,
+                data: [
+                    {
+                        id: "a1",
+                        path: "0",
+                        data: new SubModel(),
+                    },
+                    {
+                        id: "a2",
+                        path: "1",
+                        data: new SubModel(),
+                    }
+                ],
+                multi: true,
                 innerFormClasses: "row"
             }
         ]
