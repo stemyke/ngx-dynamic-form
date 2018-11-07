@@ -76,17 +76,7 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
                         result = ObjectUtils.assign(result, data);
                         return;
                     }
-                    const parts = config.path.split(".");
-                    const maxIndex = parts.length - 1;
-                    let target = result;
-                    parts.forEach((part, ix) => {
-                        target[part] = target[part] || {};
-                        if (ix == maxIndex) {
-                            target[part] = ObjectUtils.assign(target[part], data);
-                            return;
-                        }
-                        target = target[part];
-                    });
+                    result = ObjectUtils.mapToPath(result, data, config.path.split("."));
                 });
                 resolve(result);
             }, reject);

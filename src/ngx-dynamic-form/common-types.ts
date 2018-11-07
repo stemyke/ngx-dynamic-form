@@ -153,8 +153,6 @@ export interface IDynamicFormTemplates {
 export interface IDynamicFormConfig {
     path?: string;
     name?: string;
-    controls?: IFormControl[];
-    fieldSets?: IFormFieldSet[];
     classes?: string;
     formClasses?: string;
     innerFormClasses?: string;
@@ -163,6 +161,8 @@ export interface IDynamicFormConfig {
 
 export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
     data: any;
+    controls?: IFormControl[];
+    fieldSets?: IFormFieldSet[];
     multi?: false;
 }
 

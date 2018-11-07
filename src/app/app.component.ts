@@ -47,11 +47,13 @@ export class AppComponent implements OnInit {
                     {
                         id: "a1",
                         path: "0",
+                        classes: "col-sm-6",
                         data: new SubModel(),
                     },
                     {
                         id: "a2",
                         path: "1",
+                        classes: "col-sm-6",
                         data: new SubModel(),
                     }
                 ],
