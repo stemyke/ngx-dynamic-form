@@ -72,11 +72,19 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
                 let result = {};
                 results.forEach((data, ix) => {
                     const config = this.data[ix];
-                    if (!config.path) {
+                    let path: Array<string | number> = null;
+                    if (ObjectUtils.isArray(config.path) && config.path.length > 0) {
+                        path = config.path;
+                    } else if (ObjectUtils.isString(config.path) && config.path.length > 0) {
+                        path = config.path.split(".");
+                    } else if (ObjectUtils.isNumber(config.path)) {
+                        path = [config.path];
+                    }
+                    if (!path) {
                         result = ObjectUtils.assign(result, data);
                         return;
                     }
-                    result = ObjectUtils.mapToPath(result, data, config.path.split("."));
+                    result = ObjectUtils.mapToPath(result, data, path.map(p => `${p}`));
                 });
                 resolve(result);
             }, reject);

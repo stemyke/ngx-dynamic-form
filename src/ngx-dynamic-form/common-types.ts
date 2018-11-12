@@ -151,7 +151,7 @@ export interface IDynamicFormTemplates {
 }
 
 export interface IDynamicFormConfig {
-    path?: string;
+    path?: string | number | Array<string | number>;
     name?: string;
     classes?: string;
     formClasses?: string;
