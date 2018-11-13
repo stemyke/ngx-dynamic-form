@@ -14,7 +14,7 @@ export class DynamicFormStaticComponent extends FormControlComponent<IFormStatic
     }
 
     // Loader for provider
-    static loader(control: IFormControl, form: IDynamicForm, meta: any): Promise<any> {
+    static loader(): Promise<any> {
         return Promise.resolve();
     }
 }

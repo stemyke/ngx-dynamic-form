@@ -1,6 +1,7 @@
 import {Component} from "@angular/core";
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
+    DynamicFormControl,
     FormControlComponent,
     IDynamicForm,
     IFormControl, IFormControlOption,
@@ -21,7 +22,7 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
     }
 
     // Loader for provider
-    static loader(control: IFormControl, form: IDynamicForm, meta: any): Promise<any> {
+    static loader(control: DynamicFormControl, form: IDynamicForm, meta: any): Promise<any> {
         const data: IFormSelectData = control.data;
         if (data.type == "radio" && data.multi) {
             return Promise.reject("Radio group doesn't support multi select!");
@@ -37,11 +38,11 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
         });
     }
 
-    static fillOptions(control: IFormControl, form: IDynamicForm, options: IFormControlOption[]): void {
-        const data: IFormSelectData = control.data;
-        const selected = form.data[control.id];
+    static fillOptions(control: DynamicFormControl, form: IDynamicForm, options: IFormControlOption[]): void {
+        const data = control.getData<IFormSelectData>();
+        const selected = control.value;
         if (data.multi || options.length == 0 || options.findIndex(t => t.id == selected) >= 0) return;
-        form.data[control.id] = options[0].id;
+        control.setValue(options[0].id, {emitEvent: false});
     }
 
     onSelectChange(value: any): void {
@@ -49,18 +50,18 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
         const current = this.value;
         if (this.data.multi) {
             if (isArray) {
-                this.handler.onValueChange(value);
+                this.handler.setValue(value);
                 return;
             }
             if (ObjectUtils.isArray(current)) {
-                this.handler.onValueChange(
+                this.handler.setValue(
                     current.indexOf(value) < 0
                         ? current.concat([value])
                         : current.filter(c => c !== value)
                 );
                 return;
             }
-            this.handler.onValueChange([value]);
+            this.handler.setValue([value]);
             return;
         }
         if (isArray) value = value[0];
@@ -68,7 +69,7 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
             const option = this.meta.options.find(o => o.id !== value);
             value = option ? option.id : null;
         }
-        this.handler.onValueChange(value);
+        this.handler.setValue(value);
     }
 
     checkValue(option: IFormControlOption): boolean {

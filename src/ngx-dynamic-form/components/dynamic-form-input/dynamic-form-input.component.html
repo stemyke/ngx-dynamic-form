@@ -8,7 +8,7 @@
                   [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
                   [disabled]="form.readonly || handler.isReadOnly"
                   [ngModel]="value"
-                  (ngModelChange)="handler.onValueChange($event)"
+                  (ngModelChange)="handler.setValue($event)"
                   (blur)="handler.onBlur()"
                   (focus)="handler.onFocus()">{{ data.placeholder | translate }}</textarea>
     </ng-container>
@@ -37,7 +37,7 @@
                [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
                [disabled]="form.readonly || handler.isReadOnly"
                [ngModel]="value"
-               (ngModelChange)="handler.onValueChange($event)"
+               (ngModelChange)="handler.setValue($event)"
                (blur)="onNumberBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
@@ -62,7 +62,7 @@
                [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
                [disabled]="form.readonly || handler.isReadOnly"
                [ngModel]="value"
-               (ngModelChange)="handler.onValueChange($event)"
+               (ngModelChange)="handler.setValue($event)"
                (blur)="handler.onBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>
@@ -94,7 +94,7 @@
                [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
                [disabled]="form.readonly || handler.isReadOnly"
                [ngModel]="value"
-               (ngModelChange)="handler.onValueChange($event)"
+               (ngModelChange)="handler.setValue($event)"
                (blur)="handler.onBlur()"
                (focus)="handler.onFocus()"/>
     </ng-container>

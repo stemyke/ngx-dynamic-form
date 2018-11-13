@@ -1,5 +1,5 @@
 <ng-template #labelTemplate let-form="form" let-control="control" let-data="control.data">
-    <label class="control-label control-label-left" [attr.for]="form.id + '-' + control.id" *ngIf="data.label">
+    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="form.id + '-' + control.id" *ngIf="data.label">
         {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
     </label>
 </ng-template>
@@ -8,8 +8,8 @@
         <span *ngFor="let error of handler.errors" class="help-block">{{ error | translate }}</span>
     </div>
 </ng-template>
-<ng-template #inputTemplate let-handler="handler" let-provider="provider">
-    <ng-container [form-control]="handler" [provider]="provider"></ng-container>
+<ng-template #inputTemplate let-handler="handler">
+    <ng-container [form-control]="handler"></ng-container>
 </ng-template>
 <ng-template #controlTemplate
              let-context
@@ -39,11 +39,10 @@
 <ng-container *ngIf="!form.isLoading && isVisible"
               [ngTemplateOutlet]="form.controlTemplates[control.id] || form.controlTemplate || controlTemplate"
               [ngTemplateOutletContext]="{
-                $implicit: this,
                 control: control,
                 form: form,
-                provider: provider,
                 handler: this,
+                $implicit: this,
                 labelTemplate: form.labelTemplates[control.id] || labelTemplate,
                 inputTemplate: form.inputTemplates[control.id] || inputTemplate,
                 prefixTemplate: form.prefixTemplates[control.id],

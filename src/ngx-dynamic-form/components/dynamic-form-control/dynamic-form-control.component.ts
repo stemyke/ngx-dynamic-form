@@ -1,26 +1,9 @@
-import {
-    Component,
-    HostBinding,
-    Injector,
-    Input,
-    OnChanges,
-    OnDestroy,
-    OnInit, QueryList,
-    SimpleChanges,
-    ViewChildren
-} from "@angular/core";
+import {Component, HostBinding, Injector, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from "@angular/core";
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
-    FormControlTester,
-    FormControlValidator,
-    IDynamicForm, IDynamicFormBase,
-    IDynamicFormControlHandler,
-    IFormControl,
-    IFormControlData,
-    IFormControlProvider
+    DynamicFormControl, FormControlTester, FormControlValidator, IDynamicForm, IDynamicFormBase,
+    IDynamicFormControlHandler, IFormControlData
 } from "../../common-types";
-import {DynamicFormService} from "../../services/dynamic-form.service";
-import {DynamicFormComponent} from "../dynamic-form/dynamic-form.component";
 
 @Component({
     moduleId: module.id,
@@ -29,13 +12,9 @@ import {DynamicFormComponent} from "../dynamic-form/dynamic-form.component";
 })
 export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges, IDynamicFormControlHandler {
 
-    @Input("dynamic-form-control") control: IFormControl;
+    @Input("dynamic-form-control") control: DynamicFormControl;
     @Input() form: IDynamicForm;
 
-    @ViewChildren(DynamicFormComponent)
-    subForms: QueryList<IDynamicForm>;
-
-    provider: IFormControlProvider;
     meta: any;
     errors: string[];
 
@@ -75,7 +54,7 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     private readonly: boolean;
     private visible: boolean;
 
-    constructor(private injector: Injector, private forms: DynamicFormService) {
+    constructor(private injector: Injector) {
         this.meta = {};
         this.errors = [];
         this.validator = () => Promise.resolve([]);
@@ -92,7 +71,6 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.provider = this.forms.findProvider(this.control);
         this.validator = this.createValidator();
         this.readonlyTester = this.createTester("readonly");
         this.hideTester = this.createTester("hidden");
@@ -104,9 +82,8 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
         return this.data;
     }
 
-    onValueChange(value: any): void {
-        this.form.data[this.control.id] = value;
-        this.form.emitChange(this);
+    setValue(value: any): void {
+        this.control.setValue(value);
     }
 
     onFocus(): void {
@@ -127,7 +104,7 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     load(): Promise<any> {
-        return !this.provider ? Promise.resolve() : this.provider.loader(this.control, this.form, this.meta);
+        return this.control.provider.loader(this.control, this.form, this.meta);
     }
 
     check(): Promise<any> {
@@ -177,7 +154,7 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
     }
 
     private createTester(test: string): () => Promise<boolean> {
-        const tester = this.control.data[test]
+        const tester: FormControlTester = this.control.data[test]
             ? ReflectUtils.resolve<FormControlTester>(this.control.data[test], this.injector)
             : () => Promise.resolve(false);
         return (): Promise<boolean> => tester(this.control, this.form);

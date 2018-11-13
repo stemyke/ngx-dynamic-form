@@ -17,4 +17,5 @@ import {NgxDynamicFormModule} from "../public_api";
     bootstrap: [AppComponent]
 })
 export class AppModule {
+
 }

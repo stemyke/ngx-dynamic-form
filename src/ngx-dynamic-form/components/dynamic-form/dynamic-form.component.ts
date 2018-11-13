@@ -1,10 +1,11 @@
 import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {ITimer, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
+    DynamicFormControl,
     getFormControl,
     getFormFieldSets,
     getFormSerializer,
-    IDynamicForm,
+    IDynamicForm, IDynamicFormBase,
     IDynamicFormControlHandler,
     IDynamicFormFieldSets,
     IFormControl,
@@ -12,6 +13,7 @@ import {
     IFormFieldSet,
     IFormSerializer
 } from "../../common-types";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 
 @Component({
@@ -30,7 +32,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     prefix: string;
 
     formFieldSets: IDynamicFormFieldSets;
-    formControls: IFormControl[];
+    formControls: DynamicFormControl[];
     formSerializers: IFormSerializer[];
     defaultFieldSet: IFormFieldSet;
 
@@ -46,6 +48,14 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         return this.validating;
     }
 
+    get topForm(): IDynamicFormBase {
+        let form: IDynamicFormBase = this;
+        while (ObjectUtils.isDefined(form.parent)) {
+            form = form.parent;
+        }
+        return form;
+    }
+
     private controlHandlers: IDynamicFormControlHandler[];
     private readonly controlHandlerMap: { [id: string]: IDynamicFormControlHandler };
     private readonly controlHandlerTimer: ITimer;
@@ -55,7 +65,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     private valid: boolean;
     private validating: boolean;
 
-    constructor(cdr: ChangeDetectorRef, injector: Injector) {
+    constructor(cdr: ChangeDetectorRef, injector: Injector, private forms: DynamicFormService) {
         super(cdr, injector);
         this.id = UniqueUtils.uuid();
         this.prefix = "";
@@ -85,9 +95,17 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 return result;
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
             const props = Object.keys(this.data);
-            this.formControls = this.controls || props.map(propertyKey => {
+            this.formControls = (this.controls || props.map(propertyKey => {
                 return getFormControl(this.data, propertyKey);
-            }).filter(ObjectUtils.isDefined);
+            }).filter(ObjectUtils.isDefined)).map(ctrl => {
+                const control = new DynamicFormControl(ctrl, this.forms.findProvider(ctrl));
+                control.setValue(this.data[ctrl.id]);
+                control.valueChanges.subscribe(value => {
+                    this.data[ctrl.id] = value;
+                    this.topForm.emitChange(this.getControlHandler(ctrl.id));
+                });
+                return control;
+            });
             this.formSerializers = props.map(propertyKey => {
                 const serializer = getFormSerializer(this.data, propertyKey);
                 return !serializer ? null : {
@@ -135,7 +153,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                         result[s.id] = res;
                     });
                 });
-                return Promise.all(serializers).then(() => resolve(result));
+                Promise.all(serializers).then(() => resolve(result));
             };
             if (validate) {
                 this.validate().then(serialize, reject);

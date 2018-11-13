@@ -8,7 +8,6 @@ import {DynamicFormService} from "../services/dynamic-form.service";
 export class DynamicFormControlDirective implements OnChanges {
 
     @Input("form-control") handler: IDynamicFormControlHandler;
-    @Input() provider: IFormControlProvider;
 
     get component(): IFormControlComponent {
         return this.comp;
@@ -20,8 +19,8 @@ export class DynamicFormControlDirective implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.provider) {
-            this.comp = this.forms.createComponent(this.vcr, this.provider);
+        if (changes.handler) {
+            this.comp = this.forms.createComponent(this.vcr, this.handler.control.provider);
         }
         if (!this.comp) return;
         this.comp.handler = this.handler;

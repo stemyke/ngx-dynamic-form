@@ -1,3 +1,5 @@
+import {DynamicFormControl} from "./ngx-dynamic-form/common-types";
+
 export {
     FORM_CONTROL_PROVIDER,
     IFormControlComponent,
@@ -11,6 +13,7 @@ export {
     IFormInputUnMaskFunction,
     IFormControlProvider,
     IFormSerializer,
+    DynamicFormControl,
     IFormControl,
     IFormControlData,
     IFormInputData,

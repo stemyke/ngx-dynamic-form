@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
-import {FormControlComponent, IDynamicForm, IFormControl, IFormModelData} from "../../common-types";
+import {DynamicFormControl, FormControlComponent, IDynamicForm, IFormControl, IFormModelData} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -17,7 +17,7 @@ export class DynamicFormModelComponent extends FormControlComponent<IFormModelDa
     }
 
     // Loader for provider
-    static loader(control: IFormControl, form: IDynamicForm, meta: any): Promise<any> {
+    static loader(): Promise<any> {
         return Promise.resolve();
     }
 

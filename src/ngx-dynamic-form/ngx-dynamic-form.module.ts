@@ -1,6 +1,6 @@
 import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {TextMaskModule} from "angular2-text-mask";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 import {provideFormControl} from "./common-types";
@@ -49,6 +49,7 @@ export const pipes = [];
     imports: [
         CommonModule,
         FormsModule,
+        ReactiveFormsModule,
         TextMaskModule,
         NgxUtilsModule.forRoot()
     ],
@@ -56,6 +57,8 @@ export const pipes = [];
         ...components,
         ...directives,
         ...pipes,
+        FormsModule,
+        ReactiveFormsModule,
         NgxUtilsModule
     ],
     entryComponents: components,

@@ -1,16 +1,8 @@
-import {
-    EventEmitter,
-    HostBinding,
-    InjectionToken,
-    Injector,
-    Input,
-    TemplateRef,
-    Type,
-    ValueProvider
-} from "@angular/core";
+import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
+import {FormControl} from "@angular/forms";
 import {IResolveFactory, ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 
-export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("forn-control-provider");
+export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("form-control-provider");
 
 // --- Basic form control interfaces ---
 export interface IFormControlComponent {
@@ -29,12 +21,12 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
         return this.control ? <T>this.control.data : null;
     }
 
-    get control(): IFormControl {
+    get control(): DynamicFormControl {
         return this.handler.control;
     }
 
     get value(): any {
-        return this.form && this.form.data && this.control ? this.form.data[this.control.id] : null;
+        return !this.control ? null : this.control.value;
     }
 
     get meta(): any {
@@ -48,8 +40,8 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
 }
 
 export type IFormControlProviderAcceptor = (control: IFormControl) => boolean;
-export type IFormControlProviderLoader = (control: IFormControl, form: IDynamicForm, meta: any) => Promise<any>;
-export type IFormControlOptions = (control: IFormControl, form: IDynamicForm) => Promise<IFormControlOption[]>;
+export type IFormControlProviderLoader = (control: DynamicFormControl, form: IDynamicForm, meta: any) => Promise<any>;
+export type IFormControlOptions = (control: DynamicFormControl, form: IDynamicForm) => Promise<IFormControlOption[]>;
 export type IFormControlSerializer = (id: string, form: IDynamicForm) => Promise<any>;
 export type IFormInputMask = string | RegExp;
 export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
@@ -65,6 +57,33 @@ export interface IFormControlProvider {
 export interface IFormSerializer {
     id: string;
     func: IFormControlSerializer;
+}
+
+export class DynamicFormControl extends FormControl {
+
+    get id(): string {
+        return this.control.id;
+    }
+
+    get type(): string {
+        return this.control.type;
+    }
+
+    get data(): IFormControlData {
+        return this.control.data;
+    }
+
+    get provider(): IFormControlProvider {
+        return this.prov;
+    }
+
+    constructor(private control: IFormControl, private prov: IFormControlProvider) {
+        super();
+    }
+
+    getData<T extends IFormControlData>(): T {
+        return <T>this.data;
+    }
 }
 
 export interface IFormControl {
@@ -128,8 +147,8 @@ export interface IFormControlOption {
 // --- Basic form interfaces ---
 
 export interface IDynamicFormControlHandler {
+    control: DynamicFormControl;
     form: IDynamicForm;
-    control: IFormControl;
     meta: any;
     errors: string[];
     hasErrors: boolean;
@@ -138,7 +157,7 @@ export interface IDynamicFormControlHandler {
     isVisible: boolean;
     isHidden: boolean;
     getData<T extends IFormControlData>();
-    onValueChange(value: any): void;
+    setValue(value: any): void;
     onFocus(): void;
     onBlur(): void
     load(): Promise<any>;
@@ -229,9 +248,9 @@ export interface IDynamicFormFieldSets {
 }
 
 // --- Basic form types ---
-export type FormControlTester = (control: IFormControl, form: IDynamicForm) => Promise<boolean>;
+export type FormControlTester = (control: DynamicFormControl, form: IDynamicForm) => Promise<boolean>;
 export type FormControlTesterFactory = FormControlTester | IResolveFactory;
-export type FormControlValidator = (control: IFormControl, form: IDynamicForm) => Promise<string>;
+export type FormControlValidator = (control: DynamicFormControl, form: IDynamicForm) => Promise<string>;
 export type FormControlValidatorFactory = FormControlValidator | IResolveFactory;
 
 // --- Decorator functions ---
