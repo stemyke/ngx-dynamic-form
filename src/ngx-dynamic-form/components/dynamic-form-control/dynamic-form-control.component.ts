@@ -96,7 +96,7 @@ export class DynamicFormControlComponent implements OnInit, OnDestroy, OnChanges
             form = form.parent;
         }
         const callback = () => form.emitChange(this);
-        if (form.validateOnBlur) {
+        if (form.validateOn) {
             form.validate().then(callback, callback);
             return;
         }

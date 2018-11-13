@@ -36,10 +36,10 @@ export class AppComponent implements OnInit {
 
     newModel(): void {
         this.data = [
-            {
-                id: "test",
-                data: new TestModel()
-            },
+            // {
+            //     id: "test",
+            //     data: new TestModel()
+            // },
             {
                 id: "sub",
                 path: "address_sub",

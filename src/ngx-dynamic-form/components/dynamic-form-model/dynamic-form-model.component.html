@@ -2,7 +2,7 @@
               [controls]="data.controls"
               [data]="value"
               [readonly]="form.readonly"
-              [validateOnBlur]="form.validateOnBlur"
+              [validateOn]="form.validateOn"
               [parent]="form" #subForm>
     <ng-template #wrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
         <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>

@@ -5,16 +5,18 @@ import {
     getFormControl,
     getFormFieldSets,
     getFormSerializer,
-    IDynamicForm, IDynamicFormBase,
+    IDynamicForm,
     IDynamicFormControlHandler,
     IDynamicFormFieldSets,
     IFormControl,
+    IFormControlProvider,
     IFormControlSerializer,
     IFormFieldSet,
     IFormSerializer
 } from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
+import {FormGroup} from "@angular/forms";
 
 @Component({
     moduleId: module.id,
@@ -46,14 +48,6 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
 
     get isValidating(): boolean {
         return this.validating;
-    }
-
-    get topForm(): IDynamicFormBase {
-        let form: IDynamicFormBase = this;
-        while (ObjectUtils.isDefined(form.parent)) {
-            form = form.parent;
-        }
-        return form;
     }
 
     private controlHandlers: IDynamicFormControlHandler[];
@@ -97,15 +91,12 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
             const props = Object.keys(this.data);
             this.formControls = (this.controls || props.map(propertyKey => {
                 return getFormControl(this.data, propertyKey);
-            }).filter(ObjectUtils.isDefined)).map(ctrl => {
-                const control = new DynamicFormControl(ctrl, this.forms.findProvider(ctrl));
-                control.setValue(this.data[ctrl.id]);
-                control.valueChanges.subscribe(value => {
-                    this.data[ctrl.id] = value;
-                    this.topForm.emitChange(this.getControlHandler(ctrl.id));
-                });
-                return control;
-            });
+            }).filter(ObjectUtils.isDefined))
+                .map(ctrl => new DynamicFormControl(ctrl, this));
+            const group = new FormGroup(this.formControls.reduce((res, ctrl) => {
+                res[ctrl.id] = ctrl;
+                return res;
+            }, {}));
             this.formSerializers = props.map(propertyKey => {
                 const serializer = getFormSerializer(this.data, propertyKey);
                 return !serializer ? null : {
@@ -234,5 +225,9 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 });
             })
         }))
+    }
+
+    findProvider(control: DynamicFormControl): IFormControlProvider {
+        return this.forms.findProvider(control);
     }
 }

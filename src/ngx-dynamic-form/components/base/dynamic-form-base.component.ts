@@ -24,7 +24,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
 
     @Input() name: string;
     @Input() readonly: boolean;
-    @Input() validateOnBlur: boolean;
+    @Input() validateOn: "change" | "blur" | "submit";
     @Input() classes: any;
     @Input() parent: IDynamicFormBase;
 

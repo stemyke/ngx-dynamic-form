@@ -15,7 +15,7 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
     }
 
     // Loader for provider
-    static loader(control: DynamicFormControl, form: IDynamicForm, meta: any): Promise<any> {
+    static loader(): Promise<any> {
         return Promise.resolve();
     }
 

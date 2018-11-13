@@ -1,6 +1,7 @@
 import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
-import {FormControl} from "@angular/forms";
+import {AbstractControlOptions, FormControl} from "@angular/forms";
 import {IResolveFactory, ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {DynamicFormService} from "./services/dynamic-form.service";
 
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("form-control-provider");
 
@@ -39,7 +40,7 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
     }
 }
 
-export type IFormControlProviderAcceptor = (control: IFormControl) => boolean;
+export type IFormControlProviderAcceptor = (control: DynamicFormControl) => boolean;
 export type IFormControlProviderLoader = (control: DynamicFormControl, form: IDynamicForm, meta: any) => Promise<any>;
 export type IFormControlOptions = (control: DynamicFormControl, form: IDynamicForm) => Promise<IFormControlOption[]>;
 export type IFormControlSerializer = (id: string, form: IDynamicForm) => Promise<any>;
@@ -73,12 +74,29 @@ export class DynamicFormControl extends FormControl {
         return this.control.data;
     }
 
-    get provider(): IFormControlProvider {
-        return this.prov;
+    get topForm(): IDynamicFormBase {
+        let form: IDynamicFormBase = this.form;
+        while (ObjectUtils.isDefined(form.parent)) {
+            form = form.parent;
+        }
+        return form;
     }
 
-    constructor(private control: IFormControl, private prov: IFormControlProvider) {
-        super();
+    public readonly provider: IFormControlProvider;
+
+    constructor(private control: IFormControl, public readonly form: IDynamicForm) {
+        super(form.data[control.id], {
+            updateOn: control.data.validateOn || form.validateOn || "blur"
+        });
+        this.provider = form.findProvider(this);
+        this.valueChanges.subscribe(value => {
+            this.form.data[this.id] = value;
+            this.topForm.emitChange(form.getControlHandler(this.id));
+            console.log(this.id, "valueChange", value);
+        });
+        this.statusChanges.subscribe(status => {
+            console.log(this.id, "statusChange", status);
+        });
     }
 
     getData<T extends IFormControlData>(): T {
@@ -101,6 +119,7 @@ export interface IFormControlData {
     hidden?: FormControlTesterFactory;
     validator?: FormControlValidatorFactory;
     validators?: FormControlValidatorFactory[];
+    validateOn?: "change" | "blur" | "submit";
     reload?: string | string[];
 }
 
@@ -196,7 +215,7 @@ export interface IDynamicFormBase {
 
     name: string;
     readonly: boolean;
-    validateOnBlur: boolean;
+    validateOn: "change" | "blur" | "submit";
     classes: string;
     parent: IDynamicFormBase;
 
@@ -241,6 +260,7 @@ export interface IDynamicForm extends IDynamicFormBase {
     removeControlHandler(handler: IDynamicFormControlHandler);
     recheckControls(): Promise<any>;
     reloadControlsFrom(handler: IDynamicFormControlHandler, handlers?: Set<IDynamicFormControlHandler>): Promise<any>;
+    findProvider(control: DynamicFormControl): IFormControlProvider;
 }
 
 export interface IDynamicFormFieldSets {

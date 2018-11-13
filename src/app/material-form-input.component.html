@@ -1,0 +1,9 @@
+<mat-form-field>
+    <input matInput
+           [placeholder]="data.label !== ' ' ? (form.prefix + data.label | translate) : ''"
+           [formControl]="control"
+           autocomplete="false">
+    <mat-error>
+        <span *ngFor="let error of handler.errors" class="help-block">{{ error | translate }}</span>
+    </mat-error>
+</mat-form-field>
