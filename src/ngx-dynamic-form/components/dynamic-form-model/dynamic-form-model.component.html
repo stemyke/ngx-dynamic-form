@@ -3,7 +3,18 @@
               [data]="value"
               [readonly]="form.readonly"
               [validateOn]="form.validateOn"
-              [parent]="form" #subForm>
+              [parent]="form"
+
+              [fieldSetTemplate]="form.fieldSetTemplate"
+              [controlTemplates]="form.controlTemplates"
+
+              [controlTemplate]="form.controlTemplate"
+              [labelTemplates]="form.labelTemplates"
+              [inputTemplates]="form.inputTemplates"
+              [prefixTemplates]="form.prefixTemplates"
+              [suffixTemplates]="form.suffixTemplates"
+
+              #subForm>
     <ng-template #wrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
         <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>
     </ng-template>

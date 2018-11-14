@@ -17,28 +17,30 @@ import {
 export class DynamicFormSelectComponent extends FormControlComponent<IFormSelectData> {
 
     // Acceptor for provider
-    static acceptor(control: IFormControl): boolean {
+    static acceptor(control: DynamicFormControl): boolean {
         return control.type == "select";
     }
 
     // Loader for provider
-    static loader(control: DynamicFormControl, form: IDynamicForm, meta: any): Promise<any> {
-        const data: IFormSelectData = control.data;
+    static loader(control: DynamicFormControl): Promise<any> {
+        const data = control.getData<IFormSelectData>();
+        console.log("", control);
         if (data.type == "radio" && data.multi) {
             return Promise.reject("Radio group doesn't support multi select!");
         }
         return new Promise<any>(resolve => {
-            const getOptions = ReflectUtils.resolve<IFormControlOptions>(data.options, form.injector);
-            getOptions(control, form).then(options => {
+            const getOptions = ReflectUtils.resolve<IFormControlOptions>(data.options, control.form.injector);
+            getOptions(control).then(options => {
                 if (data.emptyOption) options.unshift({id: null, label: ""});
-                meta["options"] = options;
-                DynamicFormSelectComponent.fillOptions(control, form, options);
+                control.meta.options = options;
+                console.log(options);
+                DynamicFormSelectComponent.fillOptions(control, options);
                 resolve(options);
             });
         });
     }
 
-    static fillOptions(control: DynamicFormControl, form: IDynamicForm, options: IFormControlOption[]): void {
+    static fillOptions(control: DynamicFormControl, options: IFormControlOption[]): void {
         const data = control.getData<IFormSelectData>();
         const selected = control.value;
         if (data.multi || options.length == 0 || options.findIndex(t => t.id == selected) >= 0) return;
@@ -50,18 +52,18 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
         const current = this.value;
         if (this.data.multi) {
             if (isArray) {
-                this.handler.setValue(value);
+                this.control.setValue(value);
                 return;
             }
             if (ObjectUtils.isArray(current)) {
-                this.handler.setValue(
+                this.control.setValue(
                     current.indexOf(value) < 0
                         ? current.concat([value])
                         : current.filter(c => c !== value)
                 );
                 return;
             }
-            this.handler.setValue([value]);
+            this.control.setValue([value]);
             return;
         }
         if (isArray) value = value[0];
@@ -69,7 +71,7 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
             const option = this.meta.options.find(o => o.id !== value);
             value = option ? option.id : null;
         }
-        this.handler.setValue(value);
+        this.control.setValue(value);
     }
 
     checkValue(option: IFormControlOption): boolean {

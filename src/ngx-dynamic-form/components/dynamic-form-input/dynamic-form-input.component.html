@@ -5,12 +5,12 @@
                   [attr.autocomplete]="data.autocomplete"
                   [id]="form.id + '-' + control.id"
                   [name]="form.id + '-' + control.id"
-                  [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-                  [disabled]="form.readonly || handler.isReadOnly"
+                  [ngClass]="{disabled: form.readonly || control.disabled}"
+                  [disabled]="form.readonly || control.disabled"
                   [ngModel]="value"
-                  (ngModelChange)="handler.setValue($event)"
-                  (blur)="handler.onBlur()"
-                  (focus)="handler.onFocus()">{{ data.placeholder | translate }}</textarea>
+                  (ngModelChange)="control.setValue($event)"
+                  (blur)="control.onBlur()"
+                  (focus)="control.onFocus()">{{ data.placeholder | translate }}</textarea>
     </ng-container>
     <ng-container *ngSwitchCase="'date'">
         <input class="form-control"
@@ -18,12 +18,12 @@
                [attr.autocomplete]="data.autocomplete"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
-               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-               [disabled]="form.readonly || handler.isReadOnly"
+               [ngClass]="{disabled: form.readonly || control.disabled}"
+               [disabled]="form.readonly || control.disabled"
                [ngModel]="value | date: 'y-MM-dd'"
                (ngModelChange)="onDateChange($event)"
-               (blur)="handler.onBlur()"
-               (focus)="handler.onFocus()"/>
+               (blur)="control.onBlur()"
+               (focus)="control.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchCase="'number'">
         <input class="form-control"
@@ -34,37 +34,37 @@
                [step]="data.step"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
-               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-               [disabled]="form.readonly || handler.isReadOnly"
+               [ngClass]="{disabled: form.readonly || control.disabled}"
+               [disabled]="form.readonly || control.disabled"
                [ngModel]="value"
-               (ngModelChange)="handler.setValue($event)"
+               (ngModelChange)="control.setValue($event)"
                (blur)="onNumberBlur()"
-               (focus)="handler.onFocus()"/>
+               (focus)="control.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchCase="'mask'">
         <input class="form-control"
                type="text"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
-               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-               [disabled]="form.readonly || handler.isReadOnly"
+               [ngClass]="{disabled: form.readonly || control.disabled}"
+               [disabled]="form.readonly || control.disabled"
                [textMask]="{mask: data.mask, showMask: true, placeholderChar: data.placeholder}"
                [ngModel]="value"
                (ngModelChange)="onMaskChange($event)"
-               (blur)="handler.onBlur()"
-               (focus)="handler.onFocus()"/>
+               (blur)="control.onBlur()"
+               (focus)="control.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchCase="'checkbox'">
         <input class="form-control"
                type="checkbox"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
-               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-               [disabled]="form.readonly || handler.isReadOnly"
+               [ngClass]="{disabled: form.readonly || control.disabled}"
+               [disabled]="form.readonly || control.disabled"
                [ngModel]="value"
-               (ngModelChange)="handler.setValue($event)"
-               (blur)="handler.onBlur()"
-               (focus)="handler.onFocus()"/>
+               (ngModelChange)="control.setValue($event)"
+               (blur)="control.onBlur()"
+               (focus)="control.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchCase="'text'">
         <input class="form-control"
@@ -75,12 +75,12 @@
                [placeholder]="data.placeholder | translate"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
-               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-               [disabled]="form.readonly || handler.isReadOnly"
+               [ngClass]="{disabled: form.readonly || control.disabled}"
+               [disabled]="form.readonly || control.disabled"
                [ngModel]="data.useLanguage ? (value | translate) : value"
                (ngModelChange)="onTextChange($event)"
-               (blur)="handler.onBlur()"
-               (focus)="handler.onFocus()"/>
+               (blur)="control.onBlur()"
+               (focus)="control.onFocus()"/>
     </ng-container>
     <ng-container *ngSwitchDefault>
         <input class="form-control"
@@ -91,11 +91,11 @@
                [type]="data.type"
                [id]="form.id + '-' + control.id"
                [name]="form.id + '-' + control.id"
-               [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-               [disabled]="form.readonly || handler.isReadOnly"
+               [ngClass]="{disabled: form.readonly || control.disabled}"
+               [disabled]="form.readonly || control.disabled"
                [ngModel]="value"
-               (ngModelChange)="handler.setValue($event)"
-               (blur)="handler.onBlur()"
-               (focus)="handler.onFocus()"/>
+               (ngModelChange)="control.setValue($event)"
+               (blur)="control.onBlur()"
+               (focus)="control.onFocus()"/>
     </ng-container>
 </ng-container>

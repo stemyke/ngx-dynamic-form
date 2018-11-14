@@ -1,5 +1,11 @@
 import {Component} from "@angular/core";
-import {FormControlComponent, IDynamicForm, IFormControl, IFormStaticData} from "../../common-types";
+import {
+    DynamicFormControl,
+    FormControlComponent,
+    IDynamicForm,
+    IFormControl,
+    IFormStaticData
+} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -9,7 +15,7 @@ import {FormControlComponent, IDynamicForm, IFormControl, IFormStaticData} from 
 export class DynamicFormStaticComponent extends FormControlComponent<IFormStaticData> {
 
     // Acceptor for provider
-    static acceptor(control: IFormControl): boolean {
+    static acceptor(control: DynamicFormControl): boolean {
         return control.type == "static";
     }
 

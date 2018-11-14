@@ -11,13 +11,7 @@ import {
     TemplateRef
 } from "@angular/core";
 import {ITimer, ObjectUtils, TimerUtils} from "@stemy/ngx-utils";
-import {
-    IDynamicForm,
-    IDynamicFormBase,
-    IDynamicFormControlHandler,
-    IDynamicFormTemplates,
-    IFormControl
-} from "../../common-types";
+import {DynamicFormControl, DynamicFormStatus, IDynamicFormBase, IDynamicFormTemplates} from "../../common-types";
 import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-template.directive";
 
 export abstract class DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit {
@@ -38,12 +32,10 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @Input() prefixTemplates: IDynamicFormTemplates;
     @Input() suffixTemplates: IDynamicFormTemplates;
 
-    @Output() onChange: EventEmitter<IDynamicFormControlHandler>;
-    @Output() onValidate: EventEmitter<Promise<IDynamicFormBase>>;
+    @Output() onChange: EventEmitter<DynamicFormControl>;
+    @Output() onStatusChange: EventEmitter<IDynamicFormBase>;
     @Output() onInit: EventEmitter<IDynamicFormBase>;
     @Output() onSubmit: EventEmitter<IDynamicFormBase>;
-
-    injector: Injector;
 
     @ContentChild("prefixTemplate")
     prefixTemplate: TemplateRef<any>;
@@ -51,9 +43,8 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @ContentChild("suffixTemplate")
     suffixTemplate: TemplateRef<any>;
 
-    abstract isLoading: boolean;
-    abstract isValid: boolean;
-    abstract isValidating: boolean;
+    abstract status: DynamicFormStatus;
+    readonly injector: Injector;
 
     @ContentChildren(DynamicFormTemplateDirective)
     protected templates: QueryList<DynamicFormTemplateDirective>;
@@ -78,21 +69,19 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
         this.prefixTemplates = {};
         this.suffixTemplates = {};
 
-        this.onChange = new EventEmitter<IDynamicFormControlHandler>();
-        this.onValidate = new EventEmitter<Promise<IDynamicForm>>();
-        this.onInit = new EventEmitter<IDynamicForm>();
-        this.onSubmit = new EventEmitter<IDynamicForm>();
+        this.onChange = new EventEmitter<DynamicFormControl>();
+        this.onStatusChange = new EventEmitter<IDynamicFormBase>();
+        this.onInit = new EventEmitter<IDynamicFormBase>();
+        this.onSubmit = new EventEmitter<IDynamicFormBase>();
         this.injector = injector;
         this.changeTimer = TimerUtils.createTimeout();
     }
 
     // --- IDynamicFormBase
 
-    abstract emitChange(handler: IDynamicFormControlHandler): void;
+    abstract emitChange(handler: DynamicFormControl): void;
 
-    abstract getControl(id: string): IFormControl;
-
-    abstract getControlHandler(id: string): IDynamicFormControlHandler;
+    abstract getControl(id: string): DynamicFormControl;
 
     abstract serialize(validate?: boolean): Promise<any>;
 

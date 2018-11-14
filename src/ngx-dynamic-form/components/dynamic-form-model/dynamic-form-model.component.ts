@@ -12,7 +12,7 @@ export class DynamicFormModelComponent extends FormControlComponent<IFormModelDa
     private subForm: IDynamicForm;
 
     // Acceptor for provider
-    static acceptor(control: IFormControl): boolean {
+    static acceptor(control: DynamicFormControl): boolean {
         return control.type == "model";
     }
 
@@ -22,7 +22,7 @@ export class DynamicFormModelComponent extends FormControlComponent<IFormModelDa
     }
 
     ngOnInit(): void {
-        this.handler.meta.serializer = () => this.subForm.serialize();
-        this.handler.meta.validator = () => this.subForm.validate().then(() => true, () => false);
+        this.control.meta.serializer = () => this.subForm.serialize();
+        this.control.meta.validator = () => this.subForm.validate().then(() => true, () => false);
     }
 }

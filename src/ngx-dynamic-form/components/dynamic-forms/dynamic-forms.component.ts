@@ -1,13 +1,15 @@
 import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, QueryList, ViewChildren} from "@angular/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
+    DynamicFormControl,
+    DynamicFormStatus,
     IDynamicFormBase,
-    IDynamicFormControlHandler,
     IDynamicFormsConfigs,
-    IDynamicFormTemplates,
-    IFormControl
+    IDynamicFormTemplates
 } from "../../common-types";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
+
+const statusPriority: DynamicFormStatus[] = ["LOADING", "PENDING", "DISABLED", "INVALID"];
 
 @Component({
     moduleId: module.id,
@@ -24,16 +26,12 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
     @Input() innerFormPrefixTemplates: IDynamicFormTemplates;
     @Input() innerFormSuffixTemplates: IDynamicFormTemplates;
 
-    get isLoading(): boolean {
-        return this.checkForms(f => f.isLoading);
-    }
-
-    get isValid(): boolean {
-        return !this.checkForms(f => !f.isValid);
-    }
-
-    get isValidating(): boolean {
-        return this.checkForms(f => f.isValidating);
+    get status(): DynamicFormStatus {
+        for (let i = 0; i < statusPriority.length; i++) {
+            const status = statusPriority[i];
+            if (this.checkForms(f => f.status == status)) return status;
+        }
+        return "VALID";
     }
 
     @ViewChildren(DynamicFormBaseComponent)
@@ -91,22 +89,18 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         });
     }
 
-    emitChange(handler: IDynamicFormControlHandler): void {
+    emitChange(control: DynamicFormControl): void {
         this.changeTimer.clear();
         this.changeTimer.set(() => {
-            const form = handler.form;
-            form.recheckControls().then(() => form.reloadControlsFrom(handler, new Set<IDynamicFormControlHandler>()).then(() => {
-                this.onChange.emit(handler);
+            const form = control.form;
+            form.recheckControls().then(() => form.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
+                this.onChange.emit(control);
             }));
         }, 250);
     }
 
-    getControl(id: string): IFormControl {
+    getControl(id: string): DynamicFormControl {
         return this.getFromValue(f => f.getControl(id));
-    }
-
-    getControlHandler(id: string): IDynamicFormControlHandler {
-        return this.getFromValue(f => f.getControlHandler(id));
     }
 
     private checkForms(check: (form: IDynamicFormBase) => boolean): boolean {

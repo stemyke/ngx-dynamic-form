@@ -1,4 +1,4 @@
-import {FormFieldSet, FormInput, FormSerializable, IDynamicForm, IFormControl} from "../public_api";
+import {DynamicFormControl, FormFieldSet, FormInput, FormSerializable} from "../public_api";
 
 @FormFieldSet({
     id: "credentials",
@@ -24,8 +24,8 @@ export class SubModel {
     @FormInput({
         classes: "col-sm-6",
         max: 15,
-        validator: (control: IFormControl, form: IDynamicForm) => {
-            return Promise.resolve(form.data[control.id] == "Zöldfa utca" ? null : "Zöldfa utca legyen")
+        validator: (control: DynamicFormControl) => {
+            return Promise.resolve(control.value == "Zöldfa utca" ? null : "Zöldfa utca legyen")
         }
     })
     @FormSerializable()

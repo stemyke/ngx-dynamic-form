@@ -1,15 +1,18 @@
 import {FactoryDependencies, ObjectUtils} from "@stemy/ngx-utils";
 import {
-    FormControlTester, FormFieldSet, FormInput, FormModel, FormSelect, FormSerializable, FormStatic, IDynamicForm,
-    IFormControl, IFormControlSerializer, IFormInputData
+    DynamicFormControl,
+    FormControlTester,
+    FormFieldSet,
+    FormInput,
+    FormModel,
+    FormSelect,
+    FormSerializable,
+    FormStatic,
+    IDynamicForm,
+    IFormControlSerializer
 } from "../public_api";
 import {DatePipe} from "@angular/common";
 import {SubModel} from "./sub.model";
-import {createFormInput} from "../ngx-dynamic-form/common-types";
-
-const test: IFormInputData = {
-    type: "textarea"
-};
 
 @FormFieldSet({
     id: "credentials",
@@ -85,8 +88,8 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         emptyOption: true,
-        validator: (control: IFormControl, form: IDynamicForm) => {
-            return Promise.resolve(form.data[control.id] == "test2" ? null : "should-select-test2")
+        validator: (control: DynamicFormControl) => {
+            return Promise.resolve(control.value == "test1" ? null : "should-select-test1")
         },
         options: () => Promise.resolve([
             {id: "test1", label: "label.test1"},
@@ -99,9 +102,6 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         type: "radio",
-        validator: (control: IFormControl, form: IDynamicForm) => {
-            return Promise.resolve(form.data[control.id] == "test5" ? null : "should-select-test5")
-        },
         options: () => Promise.resolve([
             {id: "test5", label: "label.test5"},
             {id: "test3", label: "label.test3"}
@@ -113,9 +113,6 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         type: "checkbox",
-        validator: (control: IFormControl, form: IDynamicForm) => {
-            return Promise.resolve(form.data[control.id] == "test5" ? null : "should-select-test5")
-        },
         options: () => Promise.resolve([
             {id: "test5", label: "label.test5"},
             {id: "test3", label: "label.test3"}
@@ -128,9 +125,8 @@ export class TestModel {
         classes: "col-sm-6",
         emptyOption: true,
         multi: true,
-        validator: (control: IFormControl, form: IDynamicForm) => {
-            const value = form.data[control.id];
-            return Promise.resolve(ObjectUtils.isArray(value) && value.indexOf("test2") >= 0 ? null : "should-select-test2-at-least")
+        validator: (control: DynamicFormControl) => {
+            return Promise.resolve(ObjectUtils.isArray(control.value) && control.value.indexOf("test2") >= 0 ? null : "should-select-test2-at-least")
         },
         options: () => Promise.resolve([
             {id: "test1", label: "label.test1"},
@@ -194,8 +190,8 @@ export class TestModel {
     address: SubModel = new SubModel();
 
     static testField(id: string, value: string): FormControlTester {
-        return (control: IFormControl, form: IDynamicForm): Promise<boolean> => {
-            return Promise.resolve(form.data[id] == value);
+        return (control: DynamicFormControl): Promise<boolean> => {
+            return Promise.resolve(control.form.data[id] == value);
         }
     }
 

@@ -1,6 +1,6 @@
 import {Component, HostBinding, Inject} from "@angular/core";
 import {ILanguageService, ITranslation, LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
-import {DynamicFormControl, FormControlComponent, IDynamicForm, IFormControl, IFormInputData} from "../../common-types";
+import {DynamicFormControl, FormControlComponent, IFormInputData} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -10,7 +10,7 @@ import {DynamicFormControl, FormControlComponent, IDynamicForm, IFormControl, IF
 export class DynamicFormInputComponent extends FormControlComponent<IFormInputData> {
 
     // Acceptor for provider
-    static acceptor(control: IFormControl): boolean {
+    static acceptor(control: DynamicFormControl): boolean {
         return control.type == "input";
     }
 
@@ -32,17 +32,17 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
         const date = new Date(value);
         const dateValue = <number>date.valueOf();
         if (isNaN(dateValue) || dateValue < -30610224000000) return;
-        this.handler.setValue(date)
+        this.control.setValue(date)
     }
 
     onMaskChange(value: string): void {
         value = ObjectUtils.isFunction(this.data.unmask) ? this.data.unmask(value) : value;
-        this.handler.setValue(value)
+        this.control.setValue(value)
     }
 
     onTextChange(value: string): void {
         if (!this.data.useLanguage) {
-            this.handler.setValue(value);
+            this.control.setValue(value);
             return;
         }
         const translations: ITranslation[] = ObjectUtils.isArray(this.value) ? Array.from(this.value) : [];
@@ -55,16 +55,16 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
                 translation: value
             });
         }
-        this.handler.setValue(translations);
+        this.control.setValue(translations);
     }
 
     onNumberBlur(): void {
         const value = this.value;
         if (ObjectUtils.isNumber(this.data.max) && this.data.max < value) {
-            this.handler.setValue(this.data.max);
+            this.control.setValue(this.data.max);
         } else if (ObjectUtils.isNumber(this.data.min) && this.data.min > value) {
-            this.handler.setValue(this.data.min);
+            this.control.setValue(this.data.min);
         }
-        this.handler.onBlur();
+        this.control.onBlur();
     }
 }

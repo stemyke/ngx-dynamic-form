@@ -12,9 +12,9 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
     @Input("async-submit") method: AsyncMethod;
     @Input() form: IDynamicFormBase;
 
-    private onValidate: Subscription;
+    private callback: Function;
+    private onStatusChange: Subscription;
     private onSubmit: Subscription;
-    private validation: Promise<IDynamicFormBase>;
 
     constructor(@Inject(TOASTER_SERVICE) toaster: IToasterService, elem: ElementRef, renderer: Renderer2) {
         super(toaster);
@@ -24,29 +24,27 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
 
     ngOnInit(): void {
         if (!this.form) return;
-        this.onValidate = this.form.onValidate.subscribe(validation => {
-            this.validation = validation;
-            this.disabled = !this.form.isValid;
-            const cb = () => {
-                this.validation = null;
-                this.disabled = !this.form.isValid;
-            };
-            validation.then(cb, cb);
+        this.disabled = status !== "VALID";
+        this.onStatusChange = this.form.onStatusChange.subscribe(status => {
+            this.disabled = status !== "VALID";
+            if (!this.callback || status == "PENDING") return;
+            if (!this.disabled) {
+                this.callback();
+            }
+            this.callback = null;
         });
         this.onSubmit = this.form.onSubmit.subscribe(() => this.callMethod());
     }
 
     ngOnDestroy(): void {
-        if (this.onValidate) this.onValidate.unsubscribe();
+        if (this.onStatusChange) this.onStatusChange.unsubscribe();
         if (this.onSubmit) this.onSubmit.unsubscribe();
     }
 
     click(): void {
-        const callback = () => super.click();
-        if (this.validation) {
-            this.validation.then(callback, callback);
-            return;
-        }
-        callback();
+        this.callback = () => super.click();
+        if (this.form.status !== "VALID" && this.form.status !== "INVALID") return;
+        this.callback();
+        this.callback = null;
     }
 }

@@ -1,8 +1,8 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {IAsyncMessage} from "@stemy/ngx-utils";
 import {IDynamicFormBase, IDynamicFormsConfigs} from "../public_api";
-import {TestModel} from "./test.model";
 import {SubModel} from "./sub.model";
+import {TestModel} from "./test.model";
 
 @Component({
     moduleId: module.id,
@@ -36,10 +36,10 @@ export class AppComponent implements OnInit {
 
     newModel(): void {
         this.data = [
-            // {
-            //     id: "test",
-            //     data: new TestModel()
-            // },
+            {
+                id: "test",
+                data: new TestModel()
+            },
             {
                 id: "sub",
                 path: "address_sub",

@@ -36,7 +36,7 @@
     <ng-container [ngTemplateOutlet]="errorTemplate"
                   [ngTemplateOutletContext]="context"></ng-container>
 </ng-template>
-<ng-container *ngIf="!form.isLoading && isVisible"
+<ng-container *ngIf="control.visible"
               [ngTemplateOutlet]="form.controlTemplates[control.id] || form.controlTemplate || controlTemplate"
               [ngTemplateOutletContext]="{
                 control: control,

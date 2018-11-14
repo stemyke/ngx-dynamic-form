@@ -17,11 +17,11 @@
 <ng-template #defaultWrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
     <ng-container [ngTemplateOutlet]="prefixTemplate"
                   [ngTemplateOutletContext]="{form: form, fieldSetsTemplate: fieldSetsTemplate}"></ng-container>
-    <form class="dynamic-form" [ngClass]="form.classes || ''" (submit)="onFormSubmit()">
+    <form class="dynamic-form" [ngClass]="form.classes || ''" [formGroup]="formGroup" (submit)="onFormSubmit()">
         <div *ngIf="form.isLoading" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
         <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>
         <ng-content></ng-content>
-        <div *ngIf="form.isValidating" class="dynamic-form-validator">{{ form.prefix + 'message.validating' | translate }}</div>
+        <div *ngIf="form.validating" class="dynamic-form-validator">{{ form.prefix + 'message.validating' | translate }}</div>
         <button [ngStyle]="{display: 'none'}">Submit</button>
     </form>
     <ng-container [ngTemplateOutlet]="suffixTemplate"
