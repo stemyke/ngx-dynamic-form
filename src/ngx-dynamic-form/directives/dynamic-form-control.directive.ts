@@ -1,5 +1,5 @@
 import {Directive, Input, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
-import {IDynamicFormControlHandler, IFormControlComponent, IFormControlProvider} from "../common-types";
+import {DynamicFormControl, IFormControlComponent} from "../common-types";
 import {DynamicFormService} from "../services/dynamic-form.service";
 
 @Directive({
@@ -7,7 +7,7 @@ import {DynamicFormService} from "../services/dynamic-form.service";
 })
 export class DynamicFormControlDirective implements OnChanges {
 
-    @Input("form-control") handler: IDynamicFormControlHandler;
+    @Input("form-control") control: DynamicFormControl;
 
     get component(): IFormControlComponent {
         return this.comp;
@@ -19,10 +19,10 @@ export class DynamicFormControlDirective implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.handler) {
-            this.comp = this.forms.createComponent(this.vcr, this.handler.control.provider);
+        if (changes.control) {
+            this.comp = this.forms.createComponent(this.vcr, this.control.provider);
         }
         if (!this.comp) return;
-        this.comp.handler = this.handler;
+        this.comp.control = this.control;
     }
 }

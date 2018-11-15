@@ -24,7 +24,6 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
     // Loader for provider
     static loader(control: DynamicFormControl): Promise<any> {
         const data = control.getData<IFormSelectData>();
-        console.log("", control);
         if (data.type == "radio" && data.multi) {
             return Promise.reject("Radio group doesn't support multi select!");
         }
@@ -33,7 +32,6 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
             getOptions(control).then(options => {
                 if (data.emptyOption) options.unshift({id: null, label: ""});
                 control.meta.options = options;
-                console.log(options);
                 DynamicFormSelectComponent.fillOptions(control, options);
                 resolve(options);
             });

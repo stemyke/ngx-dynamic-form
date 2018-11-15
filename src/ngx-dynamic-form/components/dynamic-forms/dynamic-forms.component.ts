@@ -57,9 +57,9 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
 
     // --- IDynamicFormBase ---
 
-    validate(): Promise<any> {
+    validate(showErrors: boolean = true): Promise<any> {
         if (!this.forms) return Promise.reject(null);
-        return Promise.all(this.forms.map(f => f.validate()));
+        return Promise.all(this.forms.map(f => f.validate(showErrors)));
     }
 
     serialize(validate?: boolean): Promise<any> {

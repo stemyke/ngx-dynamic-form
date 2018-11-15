@@ -10,12 +10,6 @@
             <ng-template formPrefix="sub"><div class="col-sm-6">Sub model prefix</div></ng-template>
             <ng-template innerFormPrefix="test">Test inner model prefix</ng-template>
             <ng-template innerFormPrefix="sub">Sub inner model prefix</ng-template>
-            <ng-template #controlTemplate
-                         let-context
-                         let-inputTemplate="inputTemplate">
-                <ng-container [ngTemplateOutlet]="inputTemplate"
-                              [ngTemplateOutletContext]="context"></ng-container>
-            </ng-template>
             <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
         </dynamic-forms>
 

@@ -85,7 +85,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
 
     abstract serialize(validate?: boolean): Promise<any>;
 
-    abstract validate(): Promise<any>;
+    abstract validate(showErrors?: boolean): Promise<any>;
 
     // --- Lifecycle hooks
 

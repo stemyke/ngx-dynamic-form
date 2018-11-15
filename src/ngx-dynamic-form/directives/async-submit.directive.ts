@@ -1,7 +1,7 @@
 import {Directive, ElementRef, Inject, Input, OnDestroy, OnInit, Renderer2} from "@angular/core";
 import {Subscription} from "rxjs";
 import {AsyncMethod, AsyncMethodDirective, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
-import {IDynamicFormBase} from "../common-types";
+import {DynamicFormStatus, IDynamicFormBase} from "../common-types";
 
 @Directive({
     selector: "[async-submit]",
@@ -25,7 +25,8 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
     ngOnInit(): void {
         if (!this.form) return;
         this.disabled = status !== "VALID";
-        this.onStatusChange = this.form.onStatusChange.subscribe(status => {
+        this.onStatusChange = this.form.onStatusChange.subscribe(form => {
+            const status: DynamicFormStatus = form.status;
             this.disabled = status !== "VALID";
             if (!this.callback || status == "PENDING") return;
             if (!this.disabled) {

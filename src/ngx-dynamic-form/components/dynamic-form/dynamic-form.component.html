@@ -1,13 +1,66 @@
+<ng-template #labelTemplate let-control="control" let-form="control.form" let-data="control.data">
+    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="form.id + '-' + control.id" *ngIf="data.label">
+        {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
+    </label>
+</ng-template>
+<ng-template #errorTemplate let-control="control">
+    <div class="error-message" *ngIf="control.errors && control.touched">
+        <ng-container *ngFor="let error of control.errors | entries">
+            <span class="help-block" *ngIf="!error.value || !error.value.subModel">
+                {{ error.key | translate: error.value }}
+            </span>
+        </ng-container>
+    </div>
+</ng-template>
+<ng-template #inputTemplate let-control="control">
+    <ng-container [form-control]="control"></ng-container>
+</ng-template>
+<ng-template #defaultControlTemplate
+             let-context
+             let-data="control.data"
+             let-labelTemplate="labelTemplate"
+             let-inputTemplate="inputTemplate"
+             let-prefixTemplate="prefixTemplate"
+             let-suffixTemplate="suffixTemplate"
+             let-errorTemplate="errorTemplate">
+    <ng-container [ngTemplateOutlet]="prefixTemplate"
+                  [ngTemplateOutletContext]="context"></ng-container>
+    <ng-container *ngIf="data.labelAlign == 'left'"
+                  [ngTemplateOutlet]="labelTemplate"
+                  [ngTemplateOutletContext]="context">
+    </ng-container>
+    <ng-container [ngTemplateOutlet]="inputTemplate"
+                  [ngTemplateOutletContext]="context"></ng-container>
+    <ng-container *ngIf="data.labelAlign !== 'left'"
+                  [ngTemplateOutlet]="labelTemplate"
+                  [ngTemplateOutletContext]="context">
+    </ng-container>
+    <ng-container [ngTemplateOutlet]="suffixTemplate"
+                  [ngTemplateOutletContext]="context"></ng-container>
+    <ng-container [ngTemplateOutlet]="errorTemplate"
+                  [ngTemplateOutletContext]="context"></ng-container>
+</ng-template>
+
 <ng-template #defaultFieldSetTemplate let-form="form" let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
         <div class="form-title" *ngIf="fieldSet.title">{{ form.prefix + fieldSet.title | translate }}</div>
-        <div *ngFor="let control of controls"
-             [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]"
-             [dynamic-form-control]="control"
-             [form]="form">
+        <div *ngFor="let control of controls" [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]">
+            <ng-container *ngIf="control.visible"
+                          [ngTemplateOutlet]="controlTemplates[control.id] || controlTemplate || defaultControlTemplate"
+                          [ngTemplateOutletContext]="{
+                            $implicit: {control: control},
+                            control: control,
+                            labelTemplate: labelTemplates[control.id] || labelTemplate,
+                            inputTemplate: inputTemplates[control.id] || inputTemplate,
+                            prefixTemplate: prefixTemplates[control.id],
+                            suffixTemplate: suffixTemplates[control.id],
+                            errorTemplate: errorTemplate
+                          }">
+            </ng-container>
         </div>
     </div>
 </ng-template>
+
 <ng-template #fieldSetsTemplate>
     <ng-container *ngFor="let fs of formControls | groupBy:'data.fieldSet'"
                   [ngTemplateOutlet]="fieldSetTemplate || defaultFieldSetTemplate"
@@ -18,10 +71,10 @@
     <ng-container [ngTemplateOutlet]="prefixTemplate"
                   [ngTemplateOutletContext]="{form: form, fieldSetsTemplate: fieldSetsTemplate}"></ng-container>
     <form class="dynamic-form" [ngClass]="form.classes || ''" [formGroup]="formGroup" (submit)="onFormSubmit()">
-        <div *ngIf="form.isLoading" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
+        <div *ngIf="form.status == 'LOADING'" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
         <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>
         <ng-content></ng-content>
-        <div *ngIf="form.validating" class="dynamic-form-validator">{{ form.prefix + 'message.validating' | translate }}</div>
+        <div *ngIf="form.status == 'PENDING'" class="dynamic-form-validator">{{ form.prefix + 'message.pending' | translate }}</div>
         <button [ngStyle]="{display: 'none'}">Submit</button>
     </form>
     <ng-container [ngTemplateOutlet]="suffixTemplate"

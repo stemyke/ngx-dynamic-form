@@ -4,6 +4,6 @@
            [formControl]="control"
            autocomplete="false">
     <mat-error>
-        <span *ngFor="let error of handler.errors" class="help-block">{{ error | translate }}</span>
+        <span *ngFor="let error of control.errors | entries" class="help-block">{{ error.key | translate: error.value }}</span>
     </mat-error>
 </mat-form-field>

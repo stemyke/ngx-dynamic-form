@@ -25,7 +25,7 @@ export class SubModel {
         classes: "col-sm-6",
         max: 15,
         validator: (control: DynamicFormControl) => {
-            return Promise.resolve(control.value == "Zöldfa utca" ? null : "Zöldfa utca legyen")
+            return Promise.resolve(control.value == "Zöldfa utc" ? null : "Zöldfa utc legyen")
         }
     })
     @FormSerializable()

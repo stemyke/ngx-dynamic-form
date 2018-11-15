@@ -7,8 +7,8 @@
             [disabled]="form.readonly || control.disabled"
             [ngModel]="data.multi ? value : [value]"
             (ngModelChange)="onSelectChange($event)"
-            (blur)="handler.onBlur()"
-            (focus)="handler.onFocus()">
+            (blur)="control.onBlur()"
+            (focus)="control.onFocus()">
         <option *ngFor="let option of meta.options" [value]="option.id">
             {{ option.label | translate }}
         </option>
@@ -25,13 +25,13 @@
                     <input type="radio"
                            [id]="form.id + '-' + control.id + '-' + option.id"
                            [name]="form.id + '-' + control.id + '-' + option.id"
-                           [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-                           [disabled]="form.readonly || handler.isReadOnly"
+                           [ngClass]="{disabled: form.readonly || control.disabled}"
+                           [disabled]="form.readonly || control.disabled"
                            [value]="option.id"
                            [ngModel]="value"
                            (ngModelChange)="onSelectChange(option.id)"
-                           (blur)="handler.onBlur()"
-                           (focus)="handler.onFocus()">
+                           (blur)="control.onBlur()"
+                           (focus)="control.onFocus()">
                     {{ option.label | translate }}
                 </label>
             </li>
@@ -44,12 +44,12 @@
                     <input type="checkbox"
                            [id]="form.id + '-' + control.id + '-' + option.id"
                            [name]="form.id + '-' + control.id + '-' + option.id"
-                           [ngClass]="{disabled: form.readonly || handler.isReadOnly}"
-                           [disabled]="form.readonly || handler.isReadOnly"
+                           [ngClass]="{disabled: form.readonly || control.disabled}"
+                           [disabled]="form.readonly || control.disabled"
                            [ngModel]="checkValue(option)"
                            (ngModelChange)="onSelectChange(option.id)"
-                           (blur)="handler.onBlur()"
-                           (focus)="handler.onFocus()">
+                           (blur)="control.onBlur()"
+                           (focus)="control.onFocus()">
                     {{ option.label | translate }}
                 </label>
             </li>

@@ -27,6 +27,7 @@ import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 })
 export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
+    @Input() formGroup: DynamicFormGroup;
     @Input() controls: IFormControl[];
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
@@ -34,7 +35,6 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     id: any;
     prefix: string;
 
-    formGroup: DynamicFormGroup;
     formFieldSets: IDynamicFormFieldSets;
     formSerializers: IFormSerializer[];
     defaultFieldSet: IFormFieldSet;
@@ -75,11 +75,14 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 return result;
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
             const props = Object.keys(this.data);
-            this.formGroup.controls = {};
             this.formGroup = new DynamicFormGroup((this.controls || props.map(propertyKey => {
                 return getFormControl(this.data, propertyKey);
             }).filter(ObjectUtils.isDefined))
                 .map(ctrl => new DynamicFormControl(ctrl, this)), this);
+            this.formGroup.statusChanges.subscribe(() => {
+                const topForm = this.formGroup.topForm;
+                topForm.onStatusChange.emit(topForm);
+            });
             this.formSerializers = props.map(propertyKey => {
                 const serializer = getFormSerializer(this.data, propertyKey);
                 return !serializer ? null : {
@@ -94,15 +97,21 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     // --- Custom ---
 
     onFormSubmit(): void {
-        this.validate().then(() => this.onSubmit.emit(this), () => {});
+        const topForm = this.formGroup.topForm;
+        topForm.validate().then(() => topForm.onSubmit.emit(this), () => {});
     }
 
     // --- IDynamicForm ---
 
-    validate(clearErrors?: boolean): Promise<any> {
+    validate(showErrors: boolean = true): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            this.formGroup.statusChanges.pipe(first()).subscribe(status => {
-                console.log(status);
+            this.formGroup.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
+                if (showErrors) this.showErrors();
+                if (status == "VALID") {
+                    resolve(null);
+                    return;
+                }
+                reject(null);
             });
             this.formGroup.updateValueAndValidity();
         });
@@ -134,14 +143,14 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         this.changeTimer.clear();
         this.changeTimer.set(() => {
             this.recheckControls().then(() => this.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
-                this.onChange.emit(control);
+                const topForm = this.formGroup.topForm;
+                topForm.onChange.emit(control);
             }));
         }, 250);
     }
 
     reloadControls(): Promise<any> {
         const load = Promise.all(this.formControls.map(h => h.load()));
-        console.log("reload controls");
         if (this.initialized === false) {
             this.initialized = true;
             this.loading = true;
@@ -149,7 +158,10 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 const callback = () => {
                     this.loading = false;
                     this.cdr.detectChanges();
-                    this.onInit.emit(this);
+                    const topForm = this.formGroup.topForm;
+                    topForm.onInit.emit(topForm);
+                    topForm.onStatusChange.emit(topForm);
+                    this.formGroup.updateValueAndValidity();
                     resolve();
                 };
                 load.then(() => this.recheckControls().then(callback, callback));
@@ -186,5 +198,9 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
 
     findProvider(control: DynamicFormControl): IFormControlProvider {
         return this.forms.findProvider(control);
+    }
+
+    showErrors(): void {
+        this.formControls.forEach(control => control.showErrors());
     }
 }

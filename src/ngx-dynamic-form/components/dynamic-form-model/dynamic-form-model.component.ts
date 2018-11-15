@@ -22,7 +22,20 @@ export class DynamicFormModelComponent extends FormControlComponent<IFormModelDa
     }
 
     ngOnInit(): void {
-        this.control.meta.serializer = () => this.subForm.serialize();
-        this.control.meta.validator = () => this.subForm.validate().then(() => true, () => false);
+        const meta = this.control.meta;
+        meta.serializer = () => this.subForm.serialize();
+        meta.validator = (ctrl: DynamicFormControl) => {
+            return this.subForm.validate(false).then(() => {
+                return null;
+            }, () => {
+                console.log({
+                    [ctrl.id]: {subModel: true}
+                });
+                return {
+                    [ctrl.id]: {subModel: true}
+                };
+            });
+        };
+        meta.showErrors = () => this.subForm.showErrors();
     }
 }

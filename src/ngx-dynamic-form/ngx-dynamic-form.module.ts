@@ -13,7 +13,6 @@ import {DynamicFormTemplateDirective} from "./directives/dynamic-form-template.d
 import {DynamicFormsComponent} from "./components/dynamic-forms/dynamic-forms.component";
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
 
-import {DynamicFormControlComponent} from "./components/dynamic-form-control/dynamic-form-control.component";
 import {DynamicFormInputComponent} from "./components/dynamic-form-input/dynamic-form-input.component";
 import {DynamicFormSelectComponent} from "./components/dynamic-form-select/dynamic-form-select.component";
 import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
@@ -23,7 +22,6 @@ import {DynamicFormModelComponent} from "./components/dynamic-form-model/dynamic
 export const components = [
     DynamicFormsComponent,
     DynamicFormComponent,
-    DynamicFormControlComponent,
     DynamicFormInputComponent,
     DynamicFormSelectComponent,
     DynamicFormStaticComponent,

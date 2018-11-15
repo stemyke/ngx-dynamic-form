@@ -96,7 +96,7 @@ export class TestModel {
             {id: "test2", label: "label.test2"}
         ])
     })
-    select: string = "test2";
+    select: string = "test1";
 
     @FormSelect({
         fieldSet: "selects",

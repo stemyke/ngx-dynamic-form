@@ -25,7 +25,6 @@ export {
     IFormModelData,
     IFormFieldSet,
     IFormControlOption,
-    IDynamicFormControlHandler,
     IDynamicFormTemplates,
     IDynamicFormConfig,
     IDynamicSingleFormConfig,
@@ -50,10 +49,11 @@ export {
     getFormFieldSets,
     getFormControl,
     getFormSerializer,
-    createFormControl,
+    createFormInput,
+    createFormSelect,
     createFormStatic,
-    createFormModel
-
+    createFormModel,
+    createFormControl
 } from "./ngx-dynamic-form/common-types";
 
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
@@ -63,7 +63,7 @@ export {DynamicFormControlDirective} from "./ngx-dynamic-form/directives/dynamic
 export {DynamicFormTemplateDirective} from "./ngx-dynamic-form/directives/dynamic-form-template.directive";
 
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";
-export {DynamicFormControlComponent} from "./ngx-dynamic-form/components/dynamic-form-control/dynamic-form-control.component";
+export {DynamicFormsComponent} from "./ngx-dynamic-form/components/dynamic-forms/dynamic-forms.component";
 export {DynamicFormInputComponent} from "./ngx-dynamic-form/components/dynamic-form-input/dynamic-form-input.component";
 export {DynamicFormSelectComponent} from "./ngx-dynamic-form/components/dynamic-form-select/dynamic-form-select.component";
 export {DynamicFormModelComponent} from "./ngx-dynamic-form/components/dynamic-form-model/dynamic-form-model.component";
