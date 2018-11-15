@@ -8,7 +8,7 @@ import {
     getFormControl,
     getFormFieldSets,
     getFormSerializer,
-    IDynamicForm,
+    IDynamicForm, IDynamicFormBase, IDynamicFormControl,
     IDynamicFormFieldSets,
     IFormControl,
     IFormControlProvider,
@@ -42,9 +42,9 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     get status(): DynamicFormStatus {
         return <DynamicFormStatus>(this.loading ? "LOADING" : this.formGroup.status);
     }
-
-    get formControls(): DynamicFormControl[] {
-        return this.formGroup.controlArray;
+    
+    get formControls(): IDynamicFormControl[] {
+        return this.formGroup.formControls;
     }
 
     private initialized: boolean;
@@ -54,7 +54,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         super(cdr, injector);
         this.id = UniqueUtils.uuid();
         this.prefix = "";
-        this.formGroup = new DynamicFormGroup([]);
+        this.formGroup = new DynamicFormGroup(this);
         this.formFieldSets = {};
         this.defaultFieldSet = {
             id: "",
@@ -69,20 +69,13 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
 
     ngOnChanges(changes: SimpleChanges): void {
         this.prefix = this.name ? `${this.name}.` : "";
-        if (ObjectUtils.isObject(this.data) && (changes.data || changes.controls)) {
+        if (ObjectUtils.isObject(this.data) && (changes.data || changes.controls || changes.formGroup)) {
             this.formFieldSets = this.fieldSets ? this.fieldSets.reduce((result, fs) => {
                 result[fs.id] = fs;
                 return result;
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
             const props = Object.keys(this.data);
-            this.formGroup = new DynamicFormGroup((this.controls || props.map(propertyKey => {
-                return getFormControl(this.data, propertyKey);
-            }).filter(ObjectUtils.isDefined))
-                .map(ctrl => new DynamicFormControl(ctrl, this)), this);
-            this.formGroup.statusChanges.subscribe(() => {
-                const topForm = this.formGroup.topForm;
-                topForm.onStatusChange.emit(topForm);
-            });
+            this.formGroup.setFormControls(this.data, this.controls);
             this.formSerializers = props.map(propertyKey => {
                 const serializer = getFormSerializer(this.data, propertyKey);
                 return !serializer ? null : {
@@ -97,8 +90,8 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     // --- Custom ---
 
     onFormSubmit(): void {
-        const topForm = this.formGroup.topForm;
-        topForm.validate().then(() => topForm.onSubmit.emit(this), () => {});
+        const root = this.root;
+        root.validate().then(() => root.onSubmit.emit(this), () => {});
     }
 
     // --- IDynamicForm ---
@@ -143,8 +136,8 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         this.changeTimer.clear();
         this.changeTimer.set(() => {
             this.recheckControls().then(() => this.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
-                const topForm = this.formGroup.topForm;
-                topForm.onChange.emit(control);
+                const root = this.root;
+                root.onChange.emit(control);
             }));
         }, 250);
     }
@@ -158,9 +151,9 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 const callback = () => {
                     this.loading = false;
                     this.cdr.detectChanges();
-                    const topForm = this.formGroup.topForm;
-                    topForm.onInit.emit(topForm);
-                    topForm.onStatusChange.emit(topForm);
+                    const root = this.root;
+                    root.onInit.emit(root);
+                    root.onStatusChange.emit(root);
                     this.formGroup.updateValueAndValidity();
                     resolve();
                 };

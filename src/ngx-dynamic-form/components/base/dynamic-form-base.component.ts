@@ -43,6 +43,14 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @ContentChild("suffixTemplate")
     suffixTemplate: TemplateRef<any>;
 
+    get root(): IDynamicFormBase {
+        let form: IDynamicFormBase = this;
+        while (ObjectUtils.isDefined(form.parent)) {
+            form = form.parent;
+        }
+        return form;
+    }
+
     abstract status: DynamicFormStatus;
     readonly injector: Injector;
 
