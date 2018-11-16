@@ -2,6 +2,7 @@ import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, OnChang
 import {first} from "rxjs/operators";
 import {ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
+    defaultSerializer,
     DynamicFormControl,
     DynamicFormGroup,
     DynamicFormStatus,
@@ -14,7 +15,7 @@ import {
     IFormControlProvider,
     IFormControlSerializer,
     IFormFieldSet,
-    IFormSerializer
+    IFormSerializer, IFormSerializers
 } from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
@@ -28,7 +29,7 @@ import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
     @Input() formGroup: DynamicFormGroup;
-    @Input() serializers: IFormSerializer[];
+    @Input() serializers: IFormSerializers;
     @Input() controls: IFormControl[];
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
@@ -84,10 +85,16 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 const topForm = this.formGroup.topForm;
                 topForm.onStatusChange.emit(topForm);
             });
-            this.formSerializers = this.serializers || props.map(propertyKey => {
-                const serializer = getFormSerializer(this.data, propertyKey);
+            this.formSerializers = ObjectUtils.isObject(this.serializers) ? Object.keys(this.serializers).map(id => {
+                const serializer = this.serializers[id] || defaultSerializer;
                 return !serializer ? null : {
-                    id: propertyKey,
+                    id: id,
+                    func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
+                };
+            }) : props.map(id => {
+                const serializer = getFormSerializer(this.data, id);
+                return !serializer ? null : {
+                    id: id,
                     func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
                 };
             }).filter(ObjectUtils.isDefined);

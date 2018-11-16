@@ -13,6 +13,7 @@ export {
     IFormInputUnMaskFunction,
     IFormControlProvider,
     IFormSerializer,
+    IFormSerializers,
     DynamicFormStatus,
     DynamicFormValidateOn,
     DynamicFormGroup,
