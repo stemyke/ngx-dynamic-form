@@ -270,6 +270,7 @@ export interface IFormStaticData extends IFormControlData {
 }
 
 export interface IFormModelData extends IFormControlData {
+    serializers?: IFormSerializer[];
     controls?: IFormControl[];
     name?: string;
 }
@@ -302,6 +303,7 @@ export interface IDynamicFormConfig {
 
 export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
     data: any;
+    serializers?: IFormSerializer[];
     controls?: IFormControl[];
     fieldSets?: IFormFieldSet[];
     multi?: false;
@@ -349,6 +351,7 @@ export interface IDynamicFormBase {
 export interface IDynamicForm extends IDynamicFormBase {
 
     formGroup: DynamicFormGroup;
+    serializers: IFormSerializer[];
     controls: IFormControl[];
     fieldSets: IFormFieldSet[];
     data: any;

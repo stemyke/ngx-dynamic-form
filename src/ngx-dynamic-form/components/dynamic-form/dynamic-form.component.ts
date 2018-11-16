@@ -28,6 +28,7 @@ import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
     @Input() formGroup: DynamicFormGroup;
+    @Input() serializers: IFormSerializer[];
     @Input() controls: IFormControl[];
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
@@ -83,7 +84,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 const topForm = this.formGroup.topForm;
                 topForm.onStatusChange.emit(topForm);
             });
-            this.formSerializers = props.map(propertyKey => {
+            this.formSerializers = this.serializers || props.map(propertyKey => {
                 const serializer = getFormSerializer(this.data, propertyKey);
                 return !serializer ? null : {
                     id: propertyKey,
