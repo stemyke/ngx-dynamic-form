@@ -157,27 +157,21 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         }, 250);
     }
 
-    reloadControls(): Promise<any> {
+    reloadControls(): void {
         const load = Promise.all(this.formControls.map(h => h.load()));
+        let callback = () => {};
         if (this.initialized === false) {
             this.initialized = true;
             this.loading = true;
-            return new Promise<any>(resolve => {
-                const callback = () => {
-                    this.loading = false;
-                    this.cdr.detectChanges();
-                    const topForm = this.formGroup.topForm;
-                    topForm.onInit.emit(topForm);
-                    topForm.onStatusChange.emit(topForm);
-                    this.formGroup.updateValueAndValidity();
-                    resolve();
-                };
-                load.then(() => this.recheckControls().then(callback, callback));
-            });
+            callback = () => {
+                this.loading = false;
+                this.cdr.detectChanges();
+                const topForm = this.formGroup.topForm;
+                topForm.onInit.emit(topForm);
+                topForm.onStatusChange.emit(topForm);
+            };
         }
-        return new Promise<any>(resolve => {
-            load.then(() => this.recheckControls().then(resolve));
-        });
+        load.then(() => this.recheckControls().then(callback, callback));
     }
 
     getControl(id: string): DynamicFormControl {

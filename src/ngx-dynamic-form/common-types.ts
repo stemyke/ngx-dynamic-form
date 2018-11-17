@@ -363,7 +363,7 @@ export interface IDynamicForm extends IDynamicFormBase {
     id: any;
     prefix: string;
 
-    reloadControls(): Promise<any>;
+    reloadControls(): void;
     recheckControls(): Promise<any>;
     reloadControlsFrom(control: DynamicFormControl, controls?: Set<DynamicFormControl>): Promise<any>;
     findProvider(control: DynamicFormControl): IFormControlProvider;
