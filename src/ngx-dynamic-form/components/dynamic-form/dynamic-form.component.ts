@@ -2,6 +2,7 @@ import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, OnChang
 import {first} from "rxjs/operators";
 import {ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
+    defaultSerializer,
     DynamicFormControl,
     DynamicFormGroup,
     DynamicFormStatus,
@@ -14,7 +15,7 @@ import {
     IFormControlProvider,
     IFormControlSerializer,
     IFormFieldSet,
-    IFormSerializer
+    IFormSerializer, IFormSerializers
 } from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
@@ -28,6 +29,7 @@ import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
     @Input() formGroup: DynamicFormGroup;
+    @Input() serializers: IFormSerializers;
     @Input() controls: IFormControl[];
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
@@ -42,7 +44,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     get status(): DynamicFormStatus {
         return <DynamicFormStatus>(this.loading ? "LOADING" : this.formGroup.status);
     }
-    
+
     get formControls(): IDynamicFormControl[] {
         return this.formGroup.formControls;
     }
@@ -76,10 +78,16 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
             const props = Object.keys(this.data);
             this.formGroup.setFormControls(this.data, this.controls);
-            this.formSerializers = props.map(propertyKey => {
-                const serializer = getFormSerializer(this.data, propertyKey);
+            this.formSerializers = ObjectUtils.isObject(this.serializers) ? Object.keys(this.serializers).map(id => {
+                const serializer = this.serializers[id] || defaultSerializer;
                 return !serializer ? null : {
-                    id: propertyKey,
+                    id: id,
+                    func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
+                };
+            }) : props.map(id => {
+                const serializer = getFormSerializer(this.data, id);
+                return !serializer ? null : {
+                    id: id,
                     func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
                 };
             }).filter(ObjectUtils.isDefined);
@@ -142,27 +150,21 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         }, 250);
     }
 
-    reloadControls(): Promise<any> {
+    reloadControls(): void {
         const load = Promise.all(this.formControls.map(h => h.load()));
+        let callback = () => {};
         if (this.initialized === false) {
             this.initialized = true;
             this.loading = true;
-            return new Promise<any>(resolve => {
-                const callback = () => {
-                    this.loading = false;
-                    this.cdr.detectChanges();
-                    const root = this.root;
-                    root.onInit.emit(root);
-                    root.onStatusChange.emit(root);
-                    this.formGroup.updateValueAndValidity();
-                    resolve();
-                };
-                load.then(() => this.recheckControls().then(callback, callback));
-            });
+            callback = () => {
+                this.loading = false;
+                this.cdr.detectChanges();
+                const root = this.root;
+                root.onInit.emit(root);
+                root.onStatusChange.emit(root);
+            };
         }
-        return new Promise<any>(resolve => {
-            load.then(() => this.recheckControls().then(resolve));
-        });
+        load.then(() => this.recheckControls().then(callback, callback));
     }
 
     getControl(id: string): DynamicFormControl {

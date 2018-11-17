@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
-import {IAsyncMessage} from "@stemy/ngx-utils";
+import {IAsyncMessage, ObjectUtils} from "@stemy/ngx-utils";
 import {IDynamicFormBase, IDynamicFormsConfigs} from "../public_api";
 import {SubModel} from "./sub.model";
 import {TestModel} from "./test.model";
@@ -40,6 +40,6 @@ export class AppComponent implements OnInit {
                 id: "test",
                 data: new TestModel()
             }
-        ]
+        ];
     }
 }

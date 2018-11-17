@@ -55,6 +55,10 @@ export interface IFormSerializer {
     func: IFormControlSerializer;
 }
 
+export interface IFormSerializers {
+    [id: string]: IFormControlSerializer | IResolveFactory | null
+}
+
 export type DynamicFormStatus = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormValidateOn = "change" | "blur" | "submit";
 
@@ -294,6 +298,7 @@ export interface IFormStaticData extends IFormControlData {
 }
 
 export interface IFormModelData extends IFormControlData {
+    serializers?: IFormSerializers;
     controls?: IFormControl[];
     name?: string;
 }
@@ -326,6 +331,7 @@ export interface IDynamicFormConfig {
 
 export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
     data: any;
+    serializers?: IFormSerializers;
     controls?: IFormControl[];
     fieldSets?: IFormFieldSet[];
     multi?: false;
@@ -377,6 +383,7 @@ export interface IDynamicFormBase extends IDynamicFormInfo {
 export interface IDynamicForm extends IDynamicFormBase {
 
     formGroup: DynamicFormGroup;
+    serializers: IFormSerializers;
     controls: IFormControl[];
     fieldSets: IFormFieldSet[];
     data: any;
@@ -384,7 +391,7 @@ export interface IDynamicForm extends IDynamicFormBase {
     id: any;
     prefix: string;
 
-    reloadControls(): Promise<any>;
+    reloadControls(): void;
     recheckControls(): Promise<any>;
     reloadControlsFrom(control: DynamicFormControl, controls?: Set<DynamicFormControl>): Promise<any>;
     findProvider(control: DynamicFormControl): IFormControlProvider;
