@@ -13,6 +13,7 @@ import {
 } from "../public_api";
 import {DatePipe} from "@angular/common";
 import {SubModel} from "./sub.model";
+import {IDynamicFormControl} from "../ngx-dynamic-form/common-types";
 
 @FormFieldSet({
     id: "credentials",
@@ -190,15 +191,15 @@ export class TestModel {
     address: SubModel = new SubModel();
 
     static testField(id: string, value: string): FormControlTester {
-        return (control: DynamicFormControl): Promise<boolean> => {
-            return Promise.resolve(control.form.data[id] == value);
+        return (control: IDynamicFormControl): Promise<boolean> => {
+            return Promise.resolve(control.model[id] == value);
         }
     }
 
     @FactoryDependencies(DatePipe)
     static serializeDate(date: DatePipe): IFormControlSerializer {
-        return (id: string, form: IDynamicForm): Promise<any> => {
-            const value: any = form.data[id];
+        return (id: string, parent: IDynamicFormControl): Promise<any> => {
+            const value: any = parent.model[id];
             return Promise.resolve(ObjectUtils.isDate(value) ? date.transform(value, "yyyy-MM-dd") : value || "");
         }
     }

@@ -28,6 +28,6 @@ export class SubModel {
             return Promise.resolve(control.value == "Zöldfa utc" ? null : "Zöldfa utc legyen")
         }
     })
-    @FormSerializable()
+    @FormSerializable((id, parent) => Promise.resolve(`${parent.model[id]} jeee`))
     street: string = "Zöldfa utca";
 }

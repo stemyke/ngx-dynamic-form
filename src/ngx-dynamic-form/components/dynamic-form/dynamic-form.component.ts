@@ -1,21 +1,9 @@
-import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {AfterContentInit, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {first} from "rxjs/operators";
-import {ObjectUtils, ReflectUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {ObjectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
-    defaultSerializer,
-    DynamicFormControl,
-    DynamicFormGroup,
-    DynamicFormStatus,
-    getFormControl,
-    getFormFieldSets,
-    getFormSerializer,
-    IDynamicForm, IDynamicFormBase, IDynamicFormControl,
-    IDynamicFormFieldSets,
-    IFormControl,
-    IFormControlProvider,
-    IFormControlSerializer,
-    IFormFieldSet,
-    IFormSerializer, IFormSerializers
+    DynamicFormGroup, DynamicFormState, getFormFieldSets, IDynamicForm, IDynamicFormControl, IDynamicFormFieldSets,
+    IFormControl, IFormFieldSet, IFormSerializers
 } from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
@@ -38,22 +26,18 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     prefix: string;
 
     formFieldSets: IDynamicFormFieldSets;
-    formSerializers: IFormSerializer[];
     defaultFieldSet: IFormFieldSet;
 
-    get status(): DynamicFormStatus {
-        return <DynamicFormStatus>(this.loading ? "LOADING" : this.formGroup.status);
+    get status(): DynamicFormState {
+        return this.formGroup.state;
     }
 
     get formControls(): IDynamicFormControl[] {
         return this.formGroup.formControls;
     }
 
-    private initialized: boolean;
-    private loading: boolean;
-
-    constructor(cdr: ChangeDetectorRef, injector: Injector, private forms: DynamicFormService) {
-        super(cdr, injector);
+    constructor(cdr: ChangeDetectorRef, forms: DynamicFormService) {
+        super(cdr, forms);
         this.id = UniqueUtils.uuid();
         this.prefix = "";
         this.formGroup = new DynamicFormGroup(this);
@@ -63,8 +47,6 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
             title: "",
             classes: ""
         };
-        this.initialized = false;
-        this.loading = false;
     }
 
     // --- Lifecycle hooks
@@ -76,22 +58,9 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
                 result[fs.id] = fs;
                 return result;
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
-            const props = Object.keys(this.data);
-            this.formGroup.setFormControls(this.data, this.controls);
-            this.formSerializers = ObjectUtils.isObject(this.serializers) ? Object.keys(this.serializers).map(id => {
-                const serializer = this.serializers[id] || defaultSerializer;
-                return !serializer ? null : {
-                    id: id,
-                    func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
-                };
-            }) : props.map(id => {
-                const serializer = getFormSerializer(this.data, id);
-                return !serializer ? null : {
-                    id: id,
-                    func: ReflectUtils.resolve<IFormControlSerializer>(serializer, this.injector)
-                };
-            }).filter(ObjectUtils.isDefined);
-            this.reloadControls();
+            if (this.formGroup.id) return;
+            this.formGroup.setFormControls(this.data, this.controls, this.serializers);
+            this.formGroup.reloadControls();
         }
     }
 
@@ -107,7 +76,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     validate(showErrors: boolean = true): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this.formGroup.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
-                if (showErrors) this.showErrors();
+                if (showErrors) this.formGroup.showErrors();
                 if (status == "VALID") {
                     resolve(null);
                     return;
@@ -119,18 +88,9 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     }
 
     serialize(validate?: boolean): Promise<any> {
-        if (!this.initialized) return Promise.resolve({});
         return new Promise<any>((resolve, reject) => {
             const serialize = () => {
-                const result = {};
-                const serializers = this.formSerializers.map(s => {
-                    return s.func(s.id, this).then(res => {
-                        const handler = this.getControl(s.id);
-                        if (handler && !handler.visible) return;
-                        result[s.id] = res;
-                    });
-                });
-                Promise.all(serializers).then(() => resolve(result));
+                this.formGroup.serialize().then(resolve);
             };
             if (validate) {
                 this.validate().then(serialize, reject);
@@ -140,62 +100,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         });
     }
 
-    emitChange(control: DynamicFormControl): void {
-        this.changeTimer.clear();
-        this.changeTimer.set(() => {
-            this.recheckControls().then(() => this.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
-                const root = this.root;
-                root.onChange.emit(control);
-            }));
-        }, 250);
-    }
-
-    reloadControls(): void {
-        const load = Promise.all(this.formControls.map(h => h.load()));
-        let callback = () => {};
-        if (this.initialized === false) {
-            this.initialized = true;
-            this.loading = true;
-            callback = () => {
-                this.loading = false;
-                this.cdr.detectChanges();
-                const root = this.root;
-                root.onInit.emit(root);
-                root.onStatusChange.emit(root);
-            };
-        }
-        load.then(() => this.recheckControls().then(callback, callback));
-    }
-
-    getControl(id: string): DynamicFormControl {
-        return <DynamicFormControl>this.formGroup.get(id);
-    }
-
-    recheckControls(): Promise<any> {
-        return Promise.all(this.formControls.map(h => h.check()));
-    }
-
-    reloadControlsFrom(control: DynamicFormControl, controls?: Set<DynamicFormControl>): Promise<any> {
-        const data = control.data;
-        if (!data || !data.reload) return Promise.resolve();
-        const reload = ObjectUtils.isArray(data.reload) ? data.reload : [data.reload];
-        return Promise.all(reload.map(id => {
-            const nextControl = this.getControl(id);
-            if (!nextControl || controls.has(nextControl)) return Promise.resolve();
-            controls.add(nextControl);
-            return new Promise<any>(resolve => {
-                nextControl.load().then(() => {
-                    this.reloadControlsFrom(nextControl, controls).then(resolve);
-                });
-            })
-        }))
-    }
-
-    findProvider(control: DynamicFormControl): IFormControlProvider {
-        return this.forms.findProvider(control);
-    }
-
-    showErrors(): void {
-        this.formControls.forEach(control => control.showErrors());
+    getControl(id: string): IDynamicFormControl {
+        return this.formGroup.getControl(id);
     }
 }

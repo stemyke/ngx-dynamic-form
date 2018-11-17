@@ -1,19 +1,19 @@
 import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
-import {IResolveFactory, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {IResolveFactory, ITimer, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("form-control-provider");
 
 // --- Basic form control interfaces ---
 export interface IFormControlComponent {
-    control: DynamicFormControl;
+    control: IDynamicFormControl;
 }
 
 export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent {
 
-    control: DynamicFormControl;
+    control: IDynamicFormControl;
 
-    get form(): IDynamicForm {
+    get form(): IDynamicFormBase {
         return !this.control ? null : this.control.form;
     }
 
@@ -35,10 +35,10 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
     }
 }
 
-export type IFormControlProviderAcceptor = (control: DynamicFormControl) => boolean;
-export type IFormControlProviderLoader = (control: DynamicFormControl) => Promise<any>;
-export type IFormControlOptions = (control: DynamicFormControl) => Promise<IFormControlOption[]>;
-export type IFormControlSerializer = (id: string, form: IDynamicForm) => Promise<any>;
+export type IFormControlProviderAcceptor = (control: IDynamicFormControl) => boolean;
+export type IFormControlProviderLoader = (control: IDynamicFormControl) => Promise<any>;
+export type IFormControlOptions = (control: IDynamicFormControl) => Promise<IFormControlOption[]>;
+export type IFormControlSerializer = (id: string, parent: IDynamicFormControl) => Promise<any>;
 export type IFormInputMask = string | RegExp;
 export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
 export type IFormInputUnMaskFunction = (value: string) => any;
@@ -59,7 +59,7 @@ export interface IFormSerializers {
     [id: string]: IFormControlSerializer | IResolveFactory | null
 }
 
-export type DynamicFormStatus = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
+export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormValidateOn = "change" | "blur" | "submit";
 
 export interface IDynamicFormControl {
@@ -68,175 +68,269 @@ export interface IDynamicFormControl {
     data: IFormControlData;
     visible: boolean;
     meta: any;
+    form: IDynamicFormBase;
+    injector: Injector;
+    provider: IFormControlProvider;
+    model: any;
+    value: any;
 
-    getData<T extends IFormControlData>();
+    setValue(value: any): void;
+    getData<T extends IFormControlData>(): T;
+    getControl(id: string): IDynamicFormControl;
     load(): Promise<any>;
     check(): Promise<any>;
+    serialize(): Promise<any>;
     onFocus(): void;
     onBlur(): void;
     showErrors(): void;
 }
 
-export class DynamicFormGroup extends FormGroup {
-
-    get rootForm(): IDynamicFormBase {
-        return this.info.root;
-    }
-
-    get injector(): Injector {
-        return this.info.injector;
-    }
-
-    get model(): any {
-        return this.modelData || {};
-    }
-
-    get formControls(): IDynamicFormControl[] {
-        return this.ctrls;
-    }
-
-    private modelData: any;
-    private ctrls: IDynamicFormControl[];
-
-    static createFormControls(group: DynamicFormGroup, controls: IFormControl[]): IDynamicFormControl[] {
-        if (!controls && ObjectUtils.isObject(group.model)) {
-            const props = Object.keys(group.model);
-            controls = props.map(propertyKey => {
-                return getFormControl(group.model, propertyKey);
-            }).filter(ObjectUtils.isDefined);
-        }
-        if (!controls) return [];
-        return controls.map(ctrl => {
-            // if (ctrl.type == "model") {
-            //     const group = new DynamicFormGroup();
-            //     return group;
-            // }
-            return new DynamicFormControl(ctrl, group);
+function createValidator(control: IDynamicFormControl): (control: AbstractControl) => Promise<ValidationErrors> {
+    const data = control.data || {};
+    const validators = [data.validator].concat(data.validators || []).filter(ObjectUtils.isDefined).map(v => {
+        return ReflectUtils.resolve<FormControlValidator>(v, control.injector);
+    });
+    return (ctrl: any) => new Promise<ValidationErrors>((resolve) => {
+        const control = <IDynamicFormControl>ctrl;
+        // control.hideTester()
+        Promise.resolve(false).then(hide => {
+            if (hide) {
+                resolve(null);
+                return;
+            }
+            const validate = validators.map(v => v(control));
+            const metaValidator = control.meta.validator;
+            if (ObjectUtils.isFunction(metaValidator)) {
+                validate.push(metaValidator(control));
+            }
+            Promise.all(validate).then(results => {
+                results = results.filter(error => ObjectUtils.isObject(error) || ObjectUtils.isString(error));
+                let result: ValidationErrors = null;
+                if (results.length > 0) {
+                    result = {};
+                    results.forEach(error => {
+                        if (ObjectUtils.isString(error)) {
+                            result[error] = {};
+                            return;
+                        }
+                        result = Object.assign(result, error);
+                    });
+                }
+                resolve(result);
+            });
         });
-    }
-
-    constructor(private readonly info: IDynamicFormInfo) {
-        super({});
-        this.ctrls = [];
-        this.statusChanges.subscribe(() => {
-            const root = this.rootForm;
-            root.onStatusChange.emit(root);
-        });
-    }
-
-    setFormControls(model: any, controls: IFormControl[]): void {
-        this.modelData = model;
-        this.ctrls.forEach(ctrl => this.removeControl(ctrl.id));
-        this.ctrls = DynamicFormGroup.createFormControls(this, controls);
-        this.ctrls.forEach(ctrl => this.addControl(ctrl.id, <AbstractControl>ctrl));
-        // https://github.com/angular/angular/issues/14542
-        const statusTimer = TimerUtils.createInterval();
-        statusTimer.set(() => {
-            if (this.status == "PENDING") return;
-            statusTimer.clear();
-            (this.statusChanges as EventEmitter<string>).emit(this.status);
-        }, 50);
-        setTimeout(statusTimer.clear, 5000);
-    }
+    });
 }
 
-export class DynamicFormControl extends FormControl implements IDynamicFormControl {
+class DynamicFormControlHelper {
 
     get id(): string {
-        return this.control.id;
+        return !this.control ? null : this.control.id;
     }
 
     get type(): string {
-        return this.control.type;
+        return !this.control? "" : this.control.type;
     }
 
     get data(): IFormControlData {
-        return this.control.data;
+        return !this.control ? this.dummyData : this.control.data;
     }
 
     get visible(): boolean {
         return !this.hidden;
     }
 
-    public readonly provider: IFormControlProvider;
+    get provider(): IFormControlProvider {
+        return this.ctrlProvider;
+    }
+
     public readonly meta: any;
-    public readonly readonlyTester: () => Promise<boolean>;
-    public readonly hideTester: () => Promise<boolean>;
 
     private hidden: boolean;
+    private ctrlProvider: IFormControlProvider;
+    private readonly dummyData: IFormControlData;
+    private readonly readonlyTester: (control: IDynamicFormControl) => Promise<boolean>;
+    private readonly hideTester: (control: IDynamicFormControl) => Promise<boolean>;
 
-    private static createValidator(control: DynamicFormControl): (control: AbstractControl) => Promise<ValidationErrors> {
-        const data = control.data;
-        const validators = [data.validator].concat(data.validators).filter(ObjectUtils.isDefined).map(v => {
-            return ReflectUtils.resolve<FormControlValidator>(v, control.group.injector);
-        });
-        return (control: DynamicFormControl) => new Promise<ValidationErrors>((resolve) => {
-            control.hideTester().then(hide => {
-                if (hide) {
-                    resolve(null);
-                    return;
-                }
-                const validate = validators.map(v => v(control));
-                const metaValidator = control.meta.validator;
-                if (ObjectUtils.isFunction(metaValidator)) {
-                    validate.push(metaValidator(control));
-                }
-                Promise.all(validate).then(results => {
-                    results = results.filter(error => ObjectUtils.isObject(error) || ObjectUtils.isString(error));
-                    let result: ValidationErrors = null;
-                    if (results.length > 0) {
-                        result = {};
-                        results.forEach(error => {
-                            if (ObjectUtils.isString(error)) {
-                                result[error] = {};
-                                return;
-                            }
-                            result = Object.assign(result, error);
-                        });
-                    }
-                    resolve(result);
+    constructor(private form: IDynamicFormBase, private control: IFormControl = null) {
+        this.meta = {};
+        this.hidden = false;
+        this.dummyData = {};
+        this.readonlyTester = this.createTester("readonly");
+        this.hideTester = this.createTester("hidden");
+    }
+
+    load(control: IDynamicFormControl): Promise<any> {
+        return !this.ctrlProvider ? Promise.resolve() : this.ctrlProvider.loader(control);
+    }
+
+    check(control: IDynamicFormControl): Promise<boolean> {
+        return new Promise<any>(resolve => {
+            this.hideTester(control).then(hide => {
+                this.hidden = hide;
+                this.readonlyTester(control).then(readonly => {
+                    resolve(readonly);
                 });
             });
         });
     }
 
-    private static createTester(control: DynamicFormControl, test: string): () => Promise<boolean> {
-        const tester: FormControlTester = control.data[test]
-            ? ReflectUtils.resolve<FormControlTester>(control.data[test], control.group.injector)
-            : () => Promise.resolve(false);
-        return (): Promise<boolean> => tester(control);
+    findProvider(control: IDynamicFormControl): void {
+        this.ctrlProvider = !this.control || !this.control.type ? null : this.form.findProvider(control);
     }
 
-    constructor(private control: IFormControl, public readonly group: DynamicFormGroup) {
-        super(group.model[control.id], {updateOn: control.data.validateOn || group.updateOn || "blur"});
-        this.group.registerControl(control.id, this);
-        this.provider = form.findProvider(this);
-        this.meta = {
-            showErrors: () => {}
-        };
-        this.hidden = false;
-        this.readonlyTester = DynamicFormControl.createTester(this, "readonly");
-        this.hideTester = DynamicFormControl.createTester(this, "hidden");
-        this.setAsyncValidators(DynamicFormControl.createValidator(this));
+    private createTester(test: string): (control: IDynamicFormControl) => Promise<boolean> {
+        const tester: FormControlTester = this.data[test]
+            ? ReflectUtils.resolve<FormControlTester>(this.data[test], this.form.injector)
+            : () => Promise.resolve(false);
+        return (control: IDynamicFormControl): Promise<boolean> => tester(control);
+    }
+}
+
+export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
+
+    get id(): string {
+        return this.helper.id;
+    }
+
+    get type(): string {
+        return this.helper.type;
+    }
+
+    get data(): IFormControlData {
+        return this.helper.data;
+    }
+
+    get visible(): boolean {
+        return this.helper.visible;
+    }
+
+    get meta(): any {
+        return this.helper.meta;
+    }
+
+    get injector(): Injector {
+        return this.form.injector;
+    }
+
+    get provider(): IFormControlProvider {
+        return this.helper.provider;
+    }
+
+    get model(): any {
+        return this.mModel;
+    }
+
+    get formControls(): IDynamicFormControl[] {
+        return this.mControls || [];
+    }
+
+    get state(): DynamicFormState {
+        return <DynamicFormState>(this.loading ? "LOADING" : this.status);
+    }
+
+    private helper: DynamicFormControlHelper;
+    private mModel: any;
+    private mControls: IDynamicFormControl[];
+    private mSerializers: IFormSerializer[];
+    private initialized: boolean;
+    private loading: boolean;
+    private changeTimer: ITimer;
+
+    private static createFormControls(group: DynamicFormGroup, controls: IFormControl[]): IDynamicFormControl[] {
+        if (!controls && ObjectUtils.isObject(group.model)) {
+            const props = Object.keys(group.model);
+            controls = props.map(id => {
+                return getFormControl(group.model, id);
+            }).filter(ObjectUtils.isDefined);
+        }
+        if (!controls) return [];
+        return controls.map(ctrl => {
+            if (ctrl.type == "model") {
+                const subGroup = new DynamicFormGroup(group.form, ctrl);
+                const model = group.model[ctrl.id] || {};
+                const data = subGroup.getData<IFormModelData>();
+                subGroup.setFormControls(model, data.controls, data.serializers);
+                group.model[ctrl.id] = model;
+                group.addControl(subGroup.id, subGroup);
+                return subGroup;
+            }
+            return new DynamicFormControl(ctrl, group);
+        });
+    }
+
+    private static createFormSerializers(group: DynamicFormGroup, serializers: IFormSerializers): IFormSerializer[] {
+        if (!serializers && ObjectUtils.isObject(group.model)) {
+            const props = Object.keys(group.model);
+            serializers = props.reduce((result, id) => {
+                const serializer = getFormSerializer(group.model, id);
+                if (!serializer) return result;
+                result[id] = serializer;
+                return result;
+            }, {});
+        }
+        if (!serializers) return [];
+        return Object.keys(serializers).map(id => {
+            const serializer = serializers[id] || defaultSerializer;
+            return !serializer ? null : {
+                id: id,
+                func: ReflectUtils.resolve<IFormControlSerializer>(serializer, group.injector)
+            };
+        });
+    }
+
+    constructor(public readonly form: IDynamicFormBase, control: IFormControl = null) {
+        super({});
+        this.helper = new DynamicFormControlHelper(form, control);
+        this.helper.findProvider(this);
+        this.mModel = {};
+        this.mControls = [];
+        this.mSerializers = [];
+        this.initialized = false;
+        this.loading = false;
+        this.changeTimer = TimerUtils.createTimeout();
+        this.statusChanges.subscribe(() => {
+            const root = this.form.root;
+            root.onStatusChange.emit(root);
+        });
+        this.setAsyncValidators(createValidator(this));
     }
 
     getData<T extends IFormControlData>(): T {
         return <T>this.data;
     }
 
+    getControl(id: string): IDynamicFormControl {
+        return <any>this.get(id);
+    }
+
     load(): Promise<any> {
-        return this.provider.loader(this);
+        const promises = this.mControls.map(c => c.load());
+        promises.push(this.helper.load(this));
+        return Promise.all(promises);
     }
 
     check(): Promise<any> {
-        return new Promise<any>(resolve => {
-            this.readonlyTester().then(readonly => {
-                if (readonly) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
-                this.hideTester().then(hide => {
-                    this.hidden = hide;
-                    resolve();
+        const check = this.helper.check(this);
+        const promises = this.mControls.map(c => c.check());
+        promises.push(check);
+        check.then(readonly => {
+            if (readonly) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
+        });
+        return Promise.all(promises);
+    }
+
+    serialize(): Promise<any> {
+        return new Promise<any>((resolve) => {
+            const result = {};
+            const serializers = this.mSerializers.map(s => {
+                return s.func(s.id, this).then(res => {
+                    const handler = this.getControl(s.id);
+                    if (handler && !handler.visible) return;
+                    result[s.id] = res;
                 });
             });
+            Promise.all(serializers).then(() => resolve(result));
         });
     }
 
@@ -250,7 +344,151 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
 
     showErrors(): void {
         this.markAsTouched({onlySelf: true});
-        this.meta.showErrors();
+        this.mControls.forEach(ctrl => ctrl.showErrors());
+    }
+
+    reloadControls(): void {
+        let callback = () => {};
+        if (this.initialized === false) {
+            this.initialized = true;
+            this.loading = true;
+            callback = () => {
+                this.loading = false;
+                // this.cdr.detectChanges();
+                const root = this.form.root;
+                root.onInit.emit(root);
+                root.onStatusChange.emit(root);
+            };
+        }
+        this.load().then(() => this.check().then(callback, callback));
+    }
+
+    setFormControls(model: any, controls: IFormControl[], serializers: IFormSerializers): void {
+        this.mModel = model;
+        this.mControls.forEach(ctrl => this.removeControl(ctrl.id));
+        this.mControls = DynamicFormGroup.createFormControls(this, controls);
+        this.mControls.forEach((ctrl: any) => this.addControl(ctrl.id, ctrl));
+        this.mSerializers = DynamicFormGroup.createFormSerializers(this, serializers);
+        // https://github.com/angular/angular/issues/14542
+        const statusTimer = TimerUtils.createInterval();
+        statusTimer.set(() => {
+            if (this.status == "PENDING") return;
+            statusTimer.clear();
+            (this.statusChanges as EventEmitter<string>).emit(this.status);
+        }, 50);
+        setTimeout(statusTimer.clear, 5000);
+    }
+
+    updateModel(control: IDynamicFormControl): void {
+        this.model[control.id] = control.value;
+        this.changeTimer.clear();
+        this.changeTimer.set(() => {
+            this.check().then(() => this.reloadControlsFrom(control, new Set<IDynamicFormControl>()).then(() => {
+                this.form.root.onChange.emit(control);
+            }));
+        }, 250);
+    }
+
+    private reloadControlsFrom(control: IDynamicFormControl, controls?: Set<IDynamicFormControl>): Promise<any> {
+        const data = control.data;
+        if (!data || !data.reload) return Promise.resolve();
+        const reload = ObjectUtils.isArray(data.reload) ? data.reload : [data.reload];
+        return Promise.all(reload.map(id => {
+            const nextControl = this.getControl(id);
+            if (!nextControl || controls.has(nextControl)) return Promise.resolve();
+            controls.add(nextControl);
+            return new Promise<any>(resolve => {
+                nextControl.load().then(() => {
+                    this.reloadControlsFrom(nextControl, controls).then(resolve);
+                });
+            })
+        }))
+    }
+}
+
+export class DynamicFormControl extends FormControl implements IDynamicFormControl {
+
+    get id(): string {
+        return this.helper.id;
+    }
+
+    get type(): string {
+        return this.helper.type;
+    }
+
+    get data(): IFormControlData {
+        return this.helper.data;
+    }
+
+    get visible(): boolean {
+        return this.helper.visible;
+    }
+
+    get meta(): any {
+        return this.helper.meta;
+    }
+
+    get form(): IDynamicFormBase {
+        return this.group.form;
+    }
+
+    get injector(): Injector {
+        return this.form.injector;
+    }
+
+    get provider(): IFormControlProvider {
+        return this.helper.provider;
+    }
+
+    get model(): any {
+        return this.group.model;
+    }
+
+    private helper: DynamicFormControlHelper;
+
+    constructor(private control: IFormControl, public readonly group: DynamicFormGroup) {
+        super(group.model[control.id], {updateOn: control.data.validateOn || group.updateOn || "blur"});
+        this.group.addControl(control.id, this);
+        this.helper = new DynamicFormControlHelper(this.form, control);
+        this.helper.findProvider(this);
+        this.valueChanges.subscribe(() => {
+            const root = this.form.root;
+            root.onStatusChange.emit(root);
+        });
+        this.valueChanges.subscribe(() => this.group.updateModel(this));
+        this.setAsyncValidators(createValidator(this));
+    }
+
+    getData<T extends IFormControlData>(): T {
+        return <T>this.data;
+    }
+
+    getControl(id: string): IDynamicFormControl {
+        return null;
+    }
+
+    load(): Promise<any> {
+        return this.helper.load(this);
+    }
+
+    check(): Promise<any> {
+        return this.helper.check(this);
+    }
+
+    serialize(): Promise<any> {
+        return Promise.resolve(this.value);
+    }
+
+    onFocus(): void {
+        this.markAsUntouched({onlySelf: true});
+    }
+
+    onBlur(): void {
+        this.markAsTouched({onlySelf: true});
+    }
+
+    showErrors(): void {
+        this.markAsTouched({onlySelf: true});
     }
 }
 
@@ -367,17 +605,17 @@ export interface IDynamicFormBase extends IDynamicFormInfo {
     prefixTemplates: IDynamicFormTemplates;
     suffixTemplates: IDynamicFormTemplates;
 
-    onChange: EventEmitter<DynamicFormControl>;
+    onChange: EventEmitter<IDynamicFormControl>;
     onStatusChange: EventEmitter<IDynamicFormBase>;
     onInit: EventEmitter<IDynamicFormBase>;
     onSubmit: EventEmitter<IDynamicFormBase>;
 
-    status: DynamicFormStatus;
+    status: DynamicFormState;
 
     validate(showErrors?: boolean): Promise<any>;
     serialize(validate?: boolean): Promise<any>;
-    emitChange(handler: DynamicFormControl): void;
-    getControl(id: string): DynamicFormControl;
+    getControl(id: string): IDynamicFormControl;
+    findProvider(control: IDynamicFormControl): IFormControlProvider;
 }
 
 export interface IDynamicForm extends IDynamicFormBase {
@@ -390,12 +628,6 @@ export interface IDynamicForm extends IDynamicFormBase {
 
     id: any;
     prefix: string;
-
-    reloadControls(): void;
-    recheckControls(): Promise<any>;
-    reloadControlsFrom(control: DynamicFormControl, controls?: Set<DynamicFormControl>): Promise<any>;
-    findProvider(control: DynamicFormControl): IFormControlProvider;
-    showErrors(): void;
 }
 
 export interface IDynamicFormFieldSets {
@@ -403,9 +635,9 @@ export interface IDynamicFormFieldSets {
 }
 
 // --- Basic form types ---
-export type FormControlTester = (control: DynamicFormControl) => Promise<boolean>;
+export type FormControlTester = (control: IDynamicFormControl) => Promise<boolean>;
 export type FormControlTesterFactory = FormControlTester | IResolveFactory;
-export type FormControlValidator = (control: DynamicFormControl) => Promise<string | ValidationErrors>;
+export type FormControlValidator = (control: IDynamicFormControl) => Promise<string | ValidationErrors>;
 export type FormControlValidatorFactory = FormControlValidator | IResolveFactory;
 
 // --- Decorator functions ---
@@ -414,10 +646,9 @@ const emptyTester: FormControlTester = () => {
     return Promise.resolve(false);
 };
 
-export function defaultSerializer(id: string, form: IDynamicForm): Promise<any> {
-    const control = form.getControl(id);
-    if (!control || !ObjectUtils.isFunction(control.meta.serializer)) return Promise.resolve(form.data[id]);
-    return control.meta.serializer();
+export function defaultSerializer(id: string, parent: IDynamicFormControl): Promise<any> {
+    const control = parent.getControl(id);
+    return !control ? Promise.resolve(parent.model[id]) : control.serialize();
 }
 
 export function FormSerializable(serializer?: IFormControlSerializer | IResolveFactory): PropertyDecorator {

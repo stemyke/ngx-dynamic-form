@@ -1,18 +1,14 @@
 import {
-    AfterContentInit,
-    ChangeDetectorRef,
-    ContentChild,
-    ContentChildren,
-    EventEmitter,
-    Injector,
-    Input,
-    Output,
-    QueryList,
-    TemplateRef
+    AfterContentInit, ChangeDetectorRef, ContentChild, ContentChildren, EventEmitter, Injector, Input, Output,
+    QueryList, TemplateRef
 } from "@angular/core";
-import {ITimer, ObjectUtils, TimerUtils} from "@stemy/ngx-utils";
-import {DynamicFormControl, DynamicFormStatus, IDynamicFormBase, IDynamicFormTemplates} from "../../common-types";
+import {ObjectUtils} from "@stemy/ngx-utils";
+import {
+    DynamicFormControl, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormTemplates,
+    IFormControlProvider
+} from "../../common-types";
 import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-template.directive";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 
 export abstract class DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit {
 
@@ -32,7 +28,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @Input() prefixTemplates: IDynamicFormTemplates;
     @Input() suffixTemplates: IDynamicFormTemplates;
 
-    @Output() onChange: EventEmitter<DynamicFormControl>;
+    @Output() onChange: EventEmitter<IDynamicFormControl>;
     @Output() onStatusChange: EventEmitter<IDynamicFormBase>;
     @Output() onInit: EventEmitter<IDynamicFormBase>;
     @Output() onSubmit: EventEmitter<IDynamicFormBase>;
@@ -51,7 +47,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
         return form;
     }
 
-    abstract status: DynamicFormStatus;
+    abstract status: DynamicFormState;
     readonly injector: Injector;
 
     @ContentChildren(DynamicFormTemplateDirective)
@@ -66,9 +62,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @ContentChild("controlTemplate")
     protected cControlTemplate: TemplateRef<any>;
 
-    protected changeTimer: ITimer;
-
-    protected constructor(public cdr: ChangeDetectorRef, injector: Injector) {
+    protected constructor(public cdr: ChangeDetectorRef, private formService: DynamicFormService) {
         this.name = "";
 
         this.controlTemplates = {};
@@ -81,19 +75,18 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
         this.onStatusChange = new EventEmitter<IDynamicFormBase>();
         this.onInit = new EventEmitter<IDynamicFormBase>();
         this.onSubmit = new EventEmitter<IDynamicFormBase>();
-        this.injector = injector;
-        this.changeTimer = TimerUtils.createTimeout();
+        this.injector = formService.injector;
     }
 
     // --- IDynamicFormBase
 
-    abstract emitChange(handler: DynamicFormControl): void;
-
-    abstract getControl(id: string): DynamicFormControl;
-
-    abstract serialize(validate?: boolean): Promise<any>;
-
     abstract validate(showErrors?: boolean): Promise<any>;
+    abstract serialize(validate?: boolean): Promise<any>;
+    abstract getControl(id: string): IDynamicFormControl;
+
+    findProvider(control: IDynamicFormControl): IFormControlProvider {
+        return this.formService.findProvider(control);
+    }
 
     // --- Lifecycle hooks
 

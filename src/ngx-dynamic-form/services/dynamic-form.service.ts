@@ -1,14 +1,17 @@
-import {ComponentFactoryResolver, Inject, Injectable, ViewContainerRef} from "@angular/core";
-import {DynamicFormControl, FORM_CONTROL_PROVIDER, IFormControlComponent, IFormControlProvider} from "../common-types";
+import {ComponentFactoryResolver, Inject, Injectable, Injector, ViewContainerRef} from "@angular/core";
+import {
+    DynamicFormControl, FORM_CONTROL_PROVIDER, IDynamicFormControl, IFormControlComponent,
+    IFormControlProvider
+} from "../common-types";
 import {ObjectUtils} from "@stemy/ngx-utils";
 
 @Injectable()
 export class DynamicFormService {
 
-    constructor(@Inject(FORM_CONTROL_PROVIDER) private components: IFormControlProvider[], private resolver: ComponentFactoryResolver) {
+    constructor(@Inject(FORM_CONTROL_PROVIDER) private components: IFormControlProvider[], private resolver: ComponentFactoryResolver, public readonly injector: Injector) {
     }
 
-    findProvider(control: DynamicFormControl): IFormControlProvider {
+    findProvider(control: IDynamicFormControl): IFormControlProvider {
         if (!control) return null;
         const providers = this.components.filter(p => p.acceptor(control));
         if (providers.length == 0) {

@@ -14,7 +14,7 @@ export {
     IFormControlProvider,
     IFormSerializer,
     IFormSerializers,
-    DynamicFormStatus,
+    DynamicFormState,
     DynamicFormValidateOn,
     DynamicFormGroup,
     DynamicFormControl,

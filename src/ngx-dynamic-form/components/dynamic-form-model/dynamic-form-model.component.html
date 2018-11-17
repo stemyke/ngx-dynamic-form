@@ -1,6 +1,5 @@
 <dynamic-form [name]="data.name || form.name"
-              [serializers]="data.serializers"
-              [controls]="data.controls"
+              [formGroup]="control"
               [data]="value"
               [readonly]="form.readonly"
               [validateOn]="form.validateOn"

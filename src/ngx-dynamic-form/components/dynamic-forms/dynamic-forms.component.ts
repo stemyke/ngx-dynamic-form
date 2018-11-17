@@ -1,15 +1,13 @@
-import {AfterContentInit, ChangeDetectorRef, Component, Injector, Input, QueryList, ViewChildren} from "@angular/core";
+import {AfterContentInit, ChangeDetectorRef, Component, Input, QueryList, ViewChildren} from "@angular/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
-    DynamicFormControl,
-    DynamicFormStatus,
-    IDynamicFormBase,
-    IDynamicFormsConfigs,
+    DynamicFormControl, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormsConfigs,
     IDynamicFormTemplates
 } from "../../common-types";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 
-const statusPriority: DynamicFormStatus[] = ["LOADING", "PENDING", "DISABLED", "INVALID"];
+const statusPriority: DynamicFormState[] = ["LOADING", "PENDING", "DISABLED", "INVALID"];
 
 @Component({
     moduleId: module.id,
@@ -26,7 +24,7 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
     @Input() innerFormPrefixTemplates: IDynamicFormTemplates;
     @Input() innerFormSuffixTemplates: IDynamicFormTemplates;
 
-    get status(): DynamicFormStatus {
+    get status(): DynamicFormState {
         for (let i = 0; i < statusPriority.length; i++) {
             const status = statusPriority[i];
             if (this.checkForms(f => f.status == status)) return status;
@@ -37,8 +35,8 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
     @ViewChildren(DynamicFormBaseComponent)
     private forms: QueryList<IDynamicFormBase>;
 
-    constructor(cdr: ChangeDetectorRef, injector: Injector) {
-        super(cdr, injector);
+    constructor(cdr: ChangeDetectorRef, formService: DynamicFormService) {
+        super(cdr, formService);
         this.formPrefixTemplates = {};
         this.formSuffixTemplates = {};
         this.innerFormPrefixTemplates = {};
@@ -89,17 +87,17 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         });
     }
 
-    emitChange(control: DynamicFormControl): void {
+    emitChange(control: IDynamicFormControl): void {
         this.changeTimer.clear();
         this.changeTimer.set(() => {
             const form = control.form;
-            form.recheckControls().then(() => form.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
-                this.onChange.emit(control);
-            }));
+            // form.group.check().then(() => form.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
+            //     this.root.onChange.emit(control);
+            // }));
         }, 250);
     }
 
-    getControl(id: string): DynamicFormControl {
+    getControl(id: string): IDynamicFormControl {
         return this.getFromValue(f => f.getControl(id));
     }
 
