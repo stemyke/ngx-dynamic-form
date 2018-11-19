@@ -38,7 +38,23 @@ export class AppComponent implements OnInit {
         this.data = [
             {
                 id: "test",
+                data: new SubModel()
+            },
+            {
+                id: "test",
+                data: new SubModel()
+            },
+            {
+                id: "test",
+                data: new SubModel()
+            },
+            {
+                id: "test",
                 data: new TestModel()
+            },
+            {
+                id: "test",
+                data: new SubModel()
             }
         ];
     }

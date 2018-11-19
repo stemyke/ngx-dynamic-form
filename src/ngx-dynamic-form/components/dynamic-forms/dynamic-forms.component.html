@@ -1,80 +1,89 @@
-<ng-container [ngTemplateOutlet]="prefixTemplate"
-              [ngTemplateOutletContext]="{form: this}"></ng-container>
-<div class="dynamic-forms" [ngClass]="classes || ''">
-    <div *ngFor="let config of data" [ngClass]="config.classes || ''">
+<ng-template #configTemplate let-formTemplate="formTemplate" let-form="form" let-config="config" let-configTemplate>
+    <div [ngClass]="config.classes || ''">
         <ng-container [ngTemplateOutlet]="formPrefixTemplates[config.id]"
-                      [ngTemplateOutletContext]="{config: config, form: this}"></ng-container>
+                      [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
         <ng-template #singleFormTemplate>
             <div dynamic-form
                  [ngClass]="config.formClasses || ''"
-                 [name]="config.name || name"
-                 [readonly]="readonly"
-                 [validateOn]="validateOn"
+                 [name]="config.name || form.name"
+                 [readonly]="form.readonly"
+                 [validateOn]="form.validateOn"
                  [classes]="config.innerFormClasses"
-                 [parent]="this"
+                 [parent]="form"
 
-                 [wrapperTemplate]="wrapperTemplate"
-                 [fieldSetTemplate]="fieldSetTemplate"
-                 [controlTemplates]="controlTemplates"
+                 [wrapperTemplate]="form.wrapperTemplate"
+                 [fieldSetTemplate]="form.fieldSetTemplate"
+                 [controlTemplates]="form.controlTemplates"
 
-                 [controlTemplate]="controlTemplate"
-                 [labelTemplates]="labelTemplates"
-                 [inputTemplates]="inputTemplates"
-                 [prefixTemplates]="prefixTemplates"
-                 [suffixTemplates]="suffixTemplates"
+                 [controlTemplate]="form.controlTemplate"
+                 [labelTemplates]="form.labelTemplates"
+                 [inputTemplates]="form.inputTemplates"
+                 [prefixTemplates]="form.prefixTemplates"
+                 [suffixTemplates]="form.suffixTemplates"
 
-                 [data]="config.data"
-                 [serializers]="config.serializers"
-                 [controls]="config.controls"
+                 [formGroup]="config.group"
                  [fieldSets]="config.fieldSets">
-                <ng-template #prefixTemplate let-form="form">
-                    <ng-container [ngTemplateOutlet]="innerFormPrefixTemplates[config.id]"
-                                  [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
+                <ng-template #prefixTemplate let-subForm="form">
+                    <ng-container [ngTemplateOutlet]="form.innerFormPrefixTemplates[config.id]"
+                                  [ngTemplateOutletContext]="{config: config, form: subForm}"></ng-container>
                 </ng-template>
-                <ng-template #suffixTemplate let-form="form">
-                    <ng-container [ngTemplateOutlet]="innerFormSuffixTemplates[config.id]"
-                                  [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
+                <ng-template #suffixTemplate let-subForm="form">
+                    <ng-container [ngTemplateOutlet]="form.innerFormSuffixTemplates[config.id]"
+                                  [ngTemplateOutletContext]="{config: config, form: subForm}"></ng-container>
                 </ng-template>
             </div>
         </ng-template>
         <div dynamic-forms
              [ngClass]="config.formClasses || ''"
              [name]="config.name || name"
-             [readonly]="readonly"
-             [validateOn]="validateOn"
+             [readonly]="form.readonly"
+             [validateOn]="form.validateOn"
              [classes]="config.innerFormClasses"
-             [parent]="this"
+             [parent]="form"
 
-             [wrapperTemplate]="wrapperTemplate"
-             [fieldSetTemplate]="fieldSetTemplate"
-             [controlTemplates]="controlTemplates"
+             [wrapperTemplate]="form.wrapperTemplate"
+             [fieldSetTemplate]="form.fieldSetTemplate"
+             [controlTemplates]="form.controlTemplates"
 
-             [controlTemplate]="controlTemplate"
-             [labelTemplates]="labelTemplates"
-             [inputTemplates]="inputTemplates"
-             [prefixTemplates]="prefixTemplates"
-             [suffixTemplates]="suffixTemplates"
+             [controlTemplate]="form.controlTemplate"
+             [labelTemplates]="form.labelTemplates"
+             [inputTemplates]="form.inputTemplates"
+             [prefixTemplates]="form.prefixTemplates"
+             [suffixTemplates]="form.suffixTemplates"
 
              [data]="config.data"
-             [formPrefixTemplates]="formPrefixTemplates"
-             [formSuffixTemplates]="formSuffixTemplates"
-             [innerFormPrefixTemplates]="innerFormPrefixTemplates"
-             [innerFormSuffixTemplates]="innerFormSuffixTemplates"
+             [containerTemplate]="form.containerTemplate"
+             [formPrefixTemplates]="form.formPrefixTemplates"
+             [formSuffixTemplates]="form.formSuffixTemplates"
+             [innerFormPrefixTemplates]="form.innerFormPrefixTemplates"
+             [innerFormSuffixTemplates]="form.innerFormSuffixTemplates"
 
              *ngIf="config.multi; else singleFormTemplate">
-            <ng-template #prefixTemplate let-form="form">
-                <ng-container [ngTemplateOutlet]="innerFormPrefixTemplates[config.id]"
-                              [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
+            <ng-template #prefixTemplate let-subForm="form">
+                <ng-container [ngTemplateOutlet]="form.innerFormPrefixTemplates[config.id]"
+                              [ngTemplateOutletContext]="{config: config, form: subForm}"></ng-container>
             </ng-template>
-            <ng-template #suffixTemplate let-form="form">
-                <ng-container [ngTemplateOutlet]="innerFormSuffixTemplates[config.id]"
-                              [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
+            <ng-template #suffixTemplate let-subForm="form">
+                <ng-container [ngTemplateOutlet]="form.innerFormSuffixTemplates[config.id]"
+                              [ngTemplateOutletContext]="{config: config, form: subForm}"></ng-container>
             </ng-template>
         </div>
         <ng-container [ngTemplateOutlet]="formSuffixTemplates[config.id]"
-                      [ngTemplateOutletContext]="{config: config, form: this}"></ng-container>
+                      [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
     </div>
-    <ng-content></ng-content>
-</div>
+</ng-template>
+<ng-template let-form="form" let-formTemplate="formTemplate" let-configTemplate="configTemplate" #defaultContainerTemplate>
+    <div class="dynamic-forms" [ngClass]="classes || ''">
+        <ng-container *ngFor="let config of data"
+                      [ngTemplateOutlet]="configTemplate"
+                      [ngTemplateOutletContext]="{form: form, config: config, formTemplate: formTemplate}"></ng-container>
+        <ng-content></ng-content>
+    </div>
+</ng-template>
+<ng-container [ngTemplateOutlet]="prefixTemplate"
+              [ngTemplateOutletContext]="{form: this}"></ng-container>
+<ng-container [ngTemplateOutlet]="containerTemplate || defaultContainerTemplate"
+              [ngTemplateOutletContext]="{form: this, configTemplate: configTemplate, formTemplate: formTemplate}">
+</ng-container>
 <ng-container [ngTemplateOutlet]="suffixTemplate"
               [ngTemplateOutletContext]="{form: this}"></ng-container>

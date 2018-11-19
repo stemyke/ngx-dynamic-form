@@ -62,6 +62,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
             this.formGroup.setFormControls(this.data, this.controls, this.serializers);
             this.formGroup.reloadControls();
         }
+        this.formGroup.setForm(this);
     }
 
     // --- Custom ---

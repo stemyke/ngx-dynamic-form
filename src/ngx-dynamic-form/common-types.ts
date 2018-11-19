@@ -133,7 +133,7 @@ class DynamicFormControlHelper {
     }
 
     get data(): IFormControlData {
-        return !this.control ? this.dummyData : this.control.data;
+        return !this.control ? this.dummyData : this.control.data || this.dummyData;
     }
 
     get visible(): boolean {
@@ -209,6 +209,10 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         return this.helper.meta;
     }
 
+    get form(): IDynamicFormBase {
+        return this.mForm;
+    }
+
     get injector(): Injector {
         return this.form.injector;
     }
@@ -230,6 +234,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     private helper: DynamicFormControlHelper;
+    private mForm: IDynamicFormBase;
     private mModel: any;
     private mControls: IDynamicFormControl[];
     private mSerializers: IFormSerializer[];
@@ -279,13 +284,14 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         });
     }
 
-    constructor(public readonly form: IDynamicFormBase, control: IFormControl = null) {
+    constructor(form: IDynamicFormBase, control: IFormControl = null) {
         super({});
-        this.helper = new DynamicFormControlHelper(form, control);
-        this.helper.findProvider(this);
+        this.mForm = form;
         this.mModel = {};
         this.mControls = [];
         this.mSerializers = [];
+        this.helper = new DynamicFormControlHelper(form, control);
+        this.helper.findProvider(this);
         this.initialized = false;
         this.loading = false;
         this.changeTimer = TimerUtils.createTimeout();
@@ -361,6 +367,10 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
             };
         }
         this.load().then(() => this.check().then(callback, callback));
+    }
+
+    setForm(form: IDynamicFormBase): void {
+        this.mForm = form;
     }
 
     setFormControls(model: any, controls: IFormControl[], serializers: IFormSerializers): void {
@@ -573,6 +583,7 @@ export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
     controls?: IFormControl[];
     fieldSets?: IFormFieldSet[];
     multi?: false;
+    group?: DynamicFormGroup;
 }
 
 export interface IDynamicMultiFormConfig extends IDynamicFormConfig {

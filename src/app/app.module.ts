@@ -1,12 +1,11 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {NgModule} from "@angular/core";
-import { MatFormFieldModule, MatInputModule } from "@angular/material";
+import {MatFormFieldModule, MatInputModule, MatStepperModule} from "@angular/material";
 
 import {AppComponent} from "./app.component";
 import {NgxDynamicFormModule, provideFormControl} from "../public_api";
 import {MaterialFormInputComponent} from "./material-form-input.component";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-
 
 @NgModule({
     declarations: [
@@ -20,6 +19,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
         BrowserModule,
         MatFormFieldModule,
         MatInputModule,
+        MatStepperModule,
         BrowserAnimationsModule,
         NgxDynamicFormModule.forRoot()
     ],

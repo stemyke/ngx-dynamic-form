@@ -3,15 +3,23 @@
 
         <button class="btn btn-secondary mb-2" type="button" (click)="newModel()">New model</button>
 
-        <dynamic-forms #form [data]="data">
-            <ng-template prefix="date">This is prefix!!!</ng-template>
-            <ng-template suffix="textarea">This is suffix!!!</ng-template>
-            <ng-template formPrefix="test"><div class="col-sm-6">Test modell prefix</div></ng-template>
-            <ng-template formPrefix="sub"><div class="col-sm-6">Sub model prefix</div></ng-template>
-            <ng-template innerFormPrefix="test">Test inner model prefix</ng-template>
-            <ng-template innerFormPrefix="sub">Sub inner model prefix</ng-template>
-            <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
-        </dynamic-forms>
+            <dynamic-forms #form [data]="data">
+                <ng-template prefix="date">This is prefix!!!</ng-template>
+                <ng-template suffix="textarea">This is suffix!!!</ng-template>
+                <ng-template formPrefix="test"><div class="col-sm-6">Test modell prefix</div></ng-template>
+                <ng-template formPrefix="sub"><div class="col-sm-6">Sub model prefix</div></ng-template>
+                <ng-template innerFormPrefix="test">Test inner model prefix</ng-template>
+                <ng-template innerFormPrefix="sub">Sub inner model prefix</ng-template>
+                <ng-template let-form="form" let-formTemplate="formTemplate" let-configTemplate="configTemplate" #containerTemplate>
+                    <mat-horizontal-stepper>
+                        <mat-step *ngFor="let config of data">
+                            <ng-container [ngTemplateOutlet]="configTemplate"
+                                          [ngTemplateOutletContext]="{form: form, config: config, formTemplate: formTemplate}"></ng-container>
+                        </mat-step>
+                    </mat-horizontal-stepper>
+                </ng-template>
+                <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
+            </dynamic-forms>
 
         {{ 'Form status: ' + form.status }}
 

@@ -1,8 +1,11 @@
-import {AfterContentInit, ChangeDetectorRef, Component, Input, QueryList, ViewChildren} from "@angular/core";
-import {ObjectUtils} from "@stemy/ngx-utils";
 import {
-    DynamicFormControl, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormsConfigs,
-    IDynamicFormTemplates
+    AfterContentInit, ChangeDetectorRef, Component, ContentChild, Input, OnChanges, QueryList, SimpleChanges,
+    TemplateRef, ViewChildren
+} from "@angular/core";
+import {ObjectUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {
+    DynamicFormGroup, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormsConfigs,
+    IDynamicFormTemplates, IDynamicSingleFormConfig
 } from "../../common-types";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 import {DynamicFormService} from "../../services/dynamic-form.service";
@@ -15,9 +18,11 @@ const statusPriority: DynamicFormState[] = ["LOADING", "PENDING", "DISABLED", "I
     templateUrl: "./dynamic-forms.component.html",
     providers: [{provide: DynamicFormBaseComponent, useExisting: DynamicFormsComponent}]
 })
-export class DynamicFormsComponent extends DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit {
+export class DynamicFormsComponent extends DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit, OnChanges {
 
     @Input() data: IDynamicFormsConfigs;
+
+    @Input() containerTemplate: TemplateRef<any>;
 
     @Input() formPrefixTemplates: IDynamicFormTemplates;
     @Input() formSuffixTemplates: IDynamicFormTemplates;
@@ -31,6 +36,9 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         }
         return "VALID";
     }
+
+    @ContentChild("containerTemplate")
+    protected cContainerTemplate: TemplateRef<any>;
 
     @ViewChildren(DynamicFormBaseComponent)
     private forms: QueryList<IDynamicFormBase>;
@@ -47,10 +55,15 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
 
     ngAfterContentInit(): void {
         super.ngAfterContentInit();
+        this.containerTemplate = this.containerTemplate || this.cContainerTemplate;
         this.formPrefixTemplates = this.filterTemplates(this.formPrefixTemplates, "formPrefix");
         this.formSuffixTemplates = this.filterTemplates(this.formSuffixTemplates, "formSuffix");
         this.innerFormPrefixTemplates = this.filterTemplates(this.innerFormPrefixTemplates, "innerFormPrefix");
         this.innerFormSuffixTemplates = this.filterTemplates(this.innerFormSuffixTemplates, "innerFormSuffix");
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        this.createFormGroups(this.data);
     }
 
     // --- IDynamicFormBase ---
@@ -87,16 +100,6 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         });
     }
 
-    emitChange(control: IDynamicFormControl): void {
-        this.changeTimer.clear();
-        this.changeTimer.set(() => {
-            const form = control.form;
-            // form.group.check().then(() => form.reloadControlsFrom(control, new Set<DynamicFormControl>()).then(() => {
-            //     this.root.onChange.emit(control);
-            // }));
-        }, 250);
-    }
-
     getControl(id: string): IDynamicFormControl {
         return this.getFromValue(f => f.getControl(id));
     }
@@ -115,5 +118,16 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
             return ObjectUtils.isDefined(value);
         });
         return value;
+    }
+
+    private createFormGroups(configs: IDynamicFormsConfigs): void {
+        (configs || []).forEach((c: any) => {
+            if (c.multi) return;
+            const config = <IDynamicSingleFormConfig>c;
+            const group = new DynamicFormGroup(this, {id: config.id || UniqueUtils.uuid(), type: "model"});
+            config.group = group;
+            group.setFormControls(config.data, config.controls, config.serializers);
+            group.reloadControls();
+        });
     }
 }
