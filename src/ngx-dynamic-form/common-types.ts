@@ -60,7 +60,7 @@ export interface IFormSerializers {
 }
 
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
-export type DynamicFormValidateOn = "change" | "blur" | "submit";
+export type DynamicFormUpdateOn = "change" | "blur" | "submit";
 
 export interface IDynamicFormControl {
     id: string;
@@ -74,24 +74,20 @@ export interface IDynamicFormControl {
     provider: IFormControlProvider;
     model: any;
     formId: string;
+
     value: any;
+    disabled: boolean;
+    updateOn: DynamicFormUpdateOn;
 
     setValue(value: any): void;
 
     getData<T extends IFormControlData>(): T;
-
     getControl(id: string): IDynamicFormControl;
-
     load(): Promise<any>;
-
     check(): Promise<any>;
-
     serialize(): Promise<any>;
-
     onFocus(): void;
-
     onBlur(): void;
-
     showErrors(): void;
 }
 
@@ -547,7 +543,7 @@ export interface IFormControlData {
     hidden?: FormControlTesterFactory;
     validator?: FormControlValidatorFactory;
     validators?: FormControlValidatorFactory[];
-    validateOn?: DynamicFormValidateOn;
+    validateOn?: DynamicFormUpdateOn;
     reload?: string | string[];
 }
 
@@ -623,16 +619,11 @@ export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
 
 export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;
 
-export interface IDynamicFormInfo {
-    injector?: Injector;
-    root?: IDynamicFormBase;
-    validateOn?: "change" | "blur" | "submit";
-}
-
-export interface IDynamicFormBase extends IDynamicFormInfo {
+export interface IDynamicFormBase {
 
     name: string;
     readonly: boolean;
+    updateOn?: "change" | "blur" | "submit";
     classes: string;
     parent: IDynamicFormBase;
 
@@ -651,7 +642,9 @@ export interface IDynamicFormBase extends IDynamicFormInfo {
     onInit: EventEmitter<IDynamicFormBase>;
     onSubmit: EventEmitter<IDynamicFormBase>;
 
+    root?: IDynamicFormBase;
     status: DynamicFormState;
+    injector?: Injector;
 
     validate(showErrors?: boolean): Promise<any>;
 

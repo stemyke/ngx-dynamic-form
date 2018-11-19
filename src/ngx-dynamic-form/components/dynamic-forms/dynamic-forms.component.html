@@ -7,7 +7,7 @@
                  [ngClass]="config.formClasses || ''"
                  [name]="config.name || form.name"
                  [readonly]="form.readonly"
-                 [validateOn]="form.validateOn"
+                 [updateOn]="form.updateOn"
                  [classes]="config.innerFormClasses"
                  [parent]="form"
 
@@ -37,7 +37,7 @@
              [ngClass]="config.formClasses || ''"
              [name]="config.name || name"
              [readonly]="form.readonly"
-             [validateOn]="form.validateOn"
+             [updateOn]="form.updateOn"
              [classes]="config.innerFormClasses"
              [parent]="form"
 
@@ -83,7 +83,7 @@
 <ng-container [ngTemplateOutlet]="prefixTemplate"
               [ngTemplateOutletContext]="{form: this}"></ng-container>
 <ng-container [ngTemplateOutlet]="containerTemplate || defaultContainerTemplate"
-              [ngTemplateOutletContext]="{form: this, configTemplate: configTemplate, formTemplate: formTemplate}">
+              [ngTemplateOutletContext]="{form: this, configTemplate: configTemplate}">
 </ng-container>
 <ng-container [ngTemplateOutlet]="suffixTemplate"
               [ngTemplateOutletContext]="{form: this}"></ng-container>
