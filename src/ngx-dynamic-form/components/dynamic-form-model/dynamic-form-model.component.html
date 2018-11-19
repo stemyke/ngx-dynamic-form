@@ -1,8 +1,8 @@
 <dynamic-form [name]="data.name || form.name"
               [formGroup]="control"
               [data]="value"
-              [readonly]="form.readonly"
-              [validateOn]="form.validateOn"
+              [readonly]="control.disabled"
+              [validateOn]="control.updateOn"
               [parent]="form"
 
               [fieldSetTemplate]="form.fieldSetTemplate"

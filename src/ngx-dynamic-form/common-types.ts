@@ -14,7 +14,7 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
     control: IDynamicFormControl;
 
     get form(): IDynamicFormBase {
-        return !this.control ? null : this.control.form;
+        return !this.control ? null: this.control.form;
     }
 
     get data(): T {
@@ -70,18 +70,28 @@ export interface IDynamicFormControl {
     meta: any;
     form: IDynamicFormBase;
     injector: Injector;
+    label: string;
     provider: IFormControlProvider;
     model: any;
+    formId: string;
     value: any;
 
     setValue(value: any): void;
+
     getData<T extends IFormControlData>(): T;
+
     getControl(id: string): IDynamicFormControl;
+
     load(): Promise<any>;
+
     check(): Promise<any>;
+
     serialize(): Promise<any>;
+
     onFocus(): void;
+
     onBlur(): void;
+
     showErrors(): void;
 }
 
@@ -129,7 +139,7 @@ class DynamicFormControlHelper {
     }
 
     get type(): string {
-        return !this.control? "" : this.control.type;
+        return !this.control ? "" : this.control.type;
     }
 
     get data(): IFormControlData {
@@ -144,6 +154,7 @@ class DynamicFormControlHelper {
         return this.ctrlProvider;
     }
 
+    public readonly formId: string;
     public readonly meta: any;
 
     private hidden: boolean;
@@ -153,6 +164,7 @@ class DynamicFormControlHelper {
     private readonly hideTester: (control: IDynamicFormControl) => Promise<boolean>;
 
     constructor(private form: IDynamicFormBase, private control: IFormControl = null) {
+        this.formId = UniqueUtils.uuid();
         this.meta = {};
         this.hidden = false;
         this.dummyData = {};
@@ -169,7 +181,7 @@ class DynamicFormControlHelper {
             this.hideTester(control).then(hide => {
                 this.hidden = hide;
                 this.readonlyTester(control).then(readonly => {
-                    resolve(readonly);
+                    resolve(control.form.readonly || readonly);
                 });
             });
         });
@@ -209,12 +221,12 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         return this.helper.meta;
     }
 
-    get form(): IDynamicFormBase {
-        return this.mForm;
-    }
-
     get injector(): Injector {
         return this.form.injector;
+    }
+
+    get label(): string {
+        return this.data.label !== " " ? `${this.prefix}${this.data.label}` : "";
     }
 
     get provider(): IFormControlProvider {
@@ -225,8 +237,20 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         return this.mModel;
     }
 
+    get formId(): string {
+        return this.helper.formId;
+    }
+
     get formControls(): IDynamicFormControl[] {
         return this.mControls || [];
+    }
+
+    get prefix(): string {
+        return !this.name ? "" : `${this.name}.`;
+    }
+
+    get name(): string {
+        return this.mName;
     }
 
     get state(): DynamicFormState {
@@ -234,7 +258,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     private helper: DynamicFormControlHelper;
-    private mForm: IDynamicFormBase;
+    private mName: string;
     private mModel: any;
     private mControls: IDynamicFormControl[];
     private mSerializers: IFormSerializer[];
@@ -255,7 +279,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
                 const subGroup = new DynamicFormGroup(group.form, ctrl);
                 const model = group.model[ctrl.id] || {};
                 const data = subGroup.getData<IFormModelData>();
-                subGroup.setFormControls(model, data.controls, data.serializers);
+                subGroup.setup(data.name || group.name, model, data.controls, data.serializers);
                 group.model[ctrl.id] = model;
                 group.addControl(subGroup.id, subGroup);
                 return subGroup;
@@ -284,9 +308,9 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         });
     }
 
-    constructor(form: IDynamicFormBase, control: IFormControl = null) {
+    constructor(public readonly form: IDynamicFormBase, control: IFormControl = null) {
         super({});
-        this.mForm = form;
+        this.mName = "";
         this.mModel = {};
         this.mControls = [];
         this.mSerializers = [];
@@ -354,7 +378,8 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     reloadControls(): void {
-        let callback = () => {};
+        let callback = () => {
+        };
         if (this.initialized === false) {
             this.initialized = true;
             this.loading = true;
@@ -369,11 +394,8 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         this.load().then(() => this.check().then(callback, callback));
     }
 
-    setForm(form: IDynamicFormBase): void {
-        this.mForm = form;
-    }
-
-    setFormControls(model: any, controls: IFormControl[], serializers: IFormSerializers): void {
+    setup(name: string, model: any, controls: IFormControl[], serializers: IFormSerializers): void {
+        this.mName = name || "";
         this.mModel = model;
         this.mControls.forEach(ctrl => this.removeControl(ctrl.id));
         this.mControls = DynamicFormGroup.createFormControls(this, controls);
@@ -446,12 +468,20 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
         return this.form.injector;
     }
 
+    get label(): string {
+        return this.data.label !== " " ? `${this.group.prefix}${this.data.label}` : "";
+    }
+
     get provider(): IFormControlProvider {
         return this.helper.provider;
     }
 
     get model(): any {
         return this.group.model;
+    }
+
+    get formId(): string {
+        return this.helper.formId;
     }
 
     private helper: DynamicFormControlHelper;
@@ -624,8 +654,11 @@ export interface IDynamicFormBase extends IDynamicFormInfo {
     status: DynamicFormState;
 
     validate(showErrors?: boolean): Promise<any>;
+
     serialize(validate?: boolean): Promise<any>;
+
     getControl(id: string): IDynamicFormControl;
+
     findProvider(control: IDynamicFormControl): IFormControlProvider;
 }
 
@@ -638,7 +671,6 @@ export interface IDynamicForm extends IDynamicFormBase {
     data: any;
 
     id: any;
-    prefix: string;
 }
 
 export interface IDynamicFormFieldSets {

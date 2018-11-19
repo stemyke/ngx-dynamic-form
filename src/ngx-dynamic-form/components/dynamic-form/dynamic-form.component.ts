@@ -23,7 +23,6 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     @Input() data: any;
 
     id: any;
-    prefix: string;
 
     formFieldSets: IDynamicFormFieldSets;
     defaultFieldSet: IFormFieldSet;
@@ -39,7 +38,6 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     constructor(cdr: ChangeDetectorRef, forms: DynamicFormService) {
         super(cdr, forms);
         this.id = UniqueUtils.uuid();
-        this.prefix = "";
         this.formGroup = new DynamicFormGroup(this);
         this.formFieldSets = {};
         this.defaultFieldSet = {
@@ -52,17 +50,15 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     // --- Lifecycle hooks
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.prefix = this.name ? `${this.name}.` : "";
         if (ObjectUtils.isObject(this.data) && (changes.data || changes.controls || changes.formGroup)) {
             this.formFieldSets = this.fieldSets ? this.fieldSets.reduce((result, fs) => {
                 result[fs.id] = fs;
                 return result;
             }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
             if (this.formGroup.id) return;
-            this.formGroup.setFormControls(this.data, this.controls, this.serializers);
+            this.formGroup.setup(this.name, this.data, this.controls, this.serializers);
             this.formGroup.reloadControls();
         }
-        this.formGroup.setForm(this);
     }
 
     // --- Custom ---

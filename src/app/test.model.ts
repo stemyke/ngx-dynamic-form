@@ -89,7 +89,7 @@ export class TestModel {
         fieldSet: "selects",
         classes: "col-sm-4",
         emptyOption: true,
-        validator: (control: DynamicFormControl) => {
+        validator: (control: IDynamicFormControl) => {
             return Promise.resolve(control.value == "test1" ? null : "should-select-test1")
         },
         options: () => Promise.resolve([
@@ -126,7 +126,7 @@ export class TestModel {
         classes: "col-sm-6",
         emptyOption: true,
         multi: true,
-        validator: (control: DynamicFormControl) => {
+        validator: (control: IDynamicFormControl) => {
             return Promise.resolve(ObjectUtils.isArray(control.value) && control.value.indexOf("test2") >= 0 ? null : "should-select-test2-at-least")
         },
         options: () => Promise.resolve([

@@ -1,10 +1,10 @@
 <ng-template #selectTemplate let-selected="selected">
     <select class="form-control"
             [multiple]="data.multi"
-            [id]="form.id + '-' + control.id"
-            [name]="form.id + '-' + control.id"
-            [ngClass]="{disabled: form.readonly || control.disabled}"
-            [disabled]="form.readonly || control.disabled"
+            [id]="control.formId"
+            [name]="control.formId"
+            [ngClass]="{disabled: control.disabled}"
+            [disabled]="control.disabled"
             [ngModel]="data.multi ? value : [value]"
             (ngModelChange)="onSelectChange($event)"
             (blur)="control.onBlur()"
@@ -13,7 +13,7 @@
             {{ option.label | translate }}
         </option>
     </select>
-    <label class="form-control-description" [attr.for]="form.id + '-' + control.id" *ngIf="!data.multi && selected.description">
+    <label class="form-control-description" [attr.for]="control.formId" *ngIf="!data.multi && selected.description">
         {{ selected.description | translate }}
     </label>
 </ng-template>
@@ -23,10 +23,10 @@
             <li *ngFor="let option of meta.options" class="radio">
                 <label [ngClass]="{checked: value == option.id}">
                     <input type="radio"
-                           [id]="form.id + '-' + control.id + '-' + option.id"
-                           [name]="form.id + '-' + control.id + '-' + option.id"
-                           [ngClass]="{disabled: form.readonly || control.disabled}"
-                           [disabled]="form.readonly || control.disabled"
+                           [id]="control.formId + '-' + option.id"
+                           [name]="control.formId + '-' + option.id"
+                           [ngClass]="{disabled: control.disabled}"
+                           [disabled]="control.disabled"
                            [value]="option.id"
                            [ngModel]="value"
                            (ngModelChange)="onSelectChange(option.id)"
@@ -42,10 +42,10 @@
             <li *ngFor="let option of meta.options" class="checkbox">
                 <label [ngClass]="{checked: checkValue(option)}">
                     <input type="checkbox"
-                           [id]="form.id + '-' + control.id + '-' + option.id"
-                           [name]="form.id + '-' + control.id + '-' + option.id"
-                           [ngClass]="{disabled: form.readonly || control.disabled}"
-                           [disabled]="form.readonly || control.disabled"
+                           [id]="control.formId + '-' + option.id"
+                           [name]="control.formId + '-' + option.id"
+                           [ngClass]="{disabled: control.disabled}"
+                           [disabled]="control.disabled"
                            [ngModel]="checkValue(option)"
                            (ngModelChange)="onSelectChange(option.id)"
                            (blur)="control.onBlur()"

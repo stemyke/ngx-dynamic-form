@@ -3,7 +3,7 @@ import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
     DynamicFormControl,
     FormControlComponent,
-    IDynamicForm,
+    IDynamicForm, IDynamicFormControl,
     IFormControl, IFormControlOption,
     IFormControlOptions,
     IFormSelectData
@@ -22,7 +22,7 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
     }
 
     // Loader for provider
-    static loader(control: DynamicFormControl): Promise<any> {
+    static loader(control: IDynamicFormControl): Promise<any> {
         const data = control.getData<IFormSelectData>();
         if (data.type == "radio" && data.multi) {
             return Promise.reject("Radio group doesn't support multi select!");
@@ -38,11 +38,11 @@ export class DynamicFormSelectComponent extends FormControlComponent<IFormSelect
         });
     }
 
-    static fillOptions(control: DynamicFormControl, options: IFormControlOption[]): void {
+    static fillOptions(control: IDynamicFormControl, options: IFormControlOption[]): void {
         const data = control.getData<IFormSelectData>();
         const selected = control.value;
         if (data.multi || options.length == 0 || options.findIndex(t => t.id == selected) >= 0) return;
-        control.setValue(options[0].id, {emitEvent: false});
+        control.setValue(options[0].id);
     }
 
     onSelectChange(value: any): void {

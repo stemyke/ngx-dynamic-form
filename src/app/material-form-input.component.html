@@ -1,6 +1,6 @@
 <mat-form-field>
     <input matInput
-           [placeholder]="data.label !== ' ' ? (form.prefix + data.label | translate) : ''"
+           [placeholder]="control.label | translate"
            [formControl]="control"
            autocomplete="false">
     <mat-error>

@@ -1,15 +1,13 @@
 <ng-template #labelTemplate let-control="control" let-form="control.form" let-data="control.data">
-    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="form.id + '-' + control.id" *ngIf="data.label">
-        {{ data.label !== ' ' ? (form.prefix + data.label | translate) : '' }}
+    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="form.id + '-' + control.id">
+        {{ control.label | translate }}
     </label>
 </ng-template>
 <ng-template #errorTemplate let-control="control">
     <div class="error-message" *ngIf="control.errors && control.touched">
-        <ng-container *ngFor="let error of control.errors | entries">
-            <span class="help-block" *ngIf="!error.value || !error.value.subModel">
-                {{ error.key | translate: error.value }}
-            </span>
-        </ng-container>
+        <span class="help-block" *ngFor="let error of control.errors | entries">
+            {{ error.key | translate: error.value }}
+        </span>
     </div>
 </ng-template>
 <ng-template #inputTemplate let-control="control">
@@ -17,6 +15,7 @@
 </ng-template>
 <ng-template #defaultControlTemplate
              let-context
+             let-control="control"
              let-data="control.data"
              let-labelTemplate="labelTemplate"
              let-inputTemplate="inputTemplate"
@@ -25,13 +24,13 @@
              let-errorTemplate="errorTemplate">
     <ng-container [ngTemplateOutlet]="prefixTemplate"
                   [ngTemplateOutletContext]="context"></ng-container>
-    <ng-container *ngIf="data.labelAlign == 'left'"
+    <ng-container *ngIf="control.label && data.labelAlign == 'left'"
                   [ngTemplateOutlet]="labelTemplate"
                   [ngTemplateOutletContext]="context">
     </ng-container>
     <ng-container [ngTemplateOutlet]="inputTemplate"
                   [ngTemplateOutletContext]="context"></ng-container>
-    <ng-container *ngIf="data.labelAlign !== 'left'"
+    <ng-container *ngIf="control.label && data.labelAlign == 'right'"
                   [ngTemplateOutlet]="labelTemplate"
                   [ngTemplateOutletContext]="context">
     </ng-container>

@@ -126,7 +126,7 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
             const config = <IDynamicSingleFormConfig>c;
             const group = new DynamicFormGroup(this, {id: config.id || UniqueUtils.uuid(), type: "model"});
             config.group = group;
-            group.setFormControls(config.data, config.controls, config.serializers);
+            group.setup(config.name || this.name, config.data, config.controls, config.serializers);
             group.reloadControls();
         });
     }
