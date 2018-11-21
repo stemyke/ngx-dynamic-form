@@ -16,6 +16,7 @@ export {
     IFormSerializers,
     DynamicFormState,
     DynamicFormUpdateOn,
+    IDynamicFormControl,
     DynamicFormGroup,
     DynamicFormControl,
     IFormControl,
@@ -63,10 +64,12 @@ export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.d
 export {DynamicFormControlDirective} from "./ngx-dynamic-form/directives/dynamic-form-control.directive";
 export {DynamicFormTemplateDirective} from "./ngx-dynamic-form/directives/dynamic-form-template.directive";
 
+export {DynamicFormBaseComponent} from "./ngx-dynamic-form/components/base/dynamic-form-base.component";
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";
 export {DynamicFormsComponent} from "./ngx-dynamic-form/components/dynamic-forms/dynamic-forms.component";
 export {DynamicFormInputComponent} from "./ngx-dynamic-form/components/dynamic-form-input/dynamic-form-input.component";
 export {DynamicFormSelectComponent} from "./ngx-dynamic-form/components/dynamic-form-select/dynamic-form-select.component";
+export {DynamicFormStaticComponent} from "./ngx-dynamic-form/components/dynamic-form-static/dynamic-form-static.component";
 export {DynamicFormModelComponent} from "./ngx-dynamic-form/components/dynamic-form-model/dynamic-form-model.component";
 
 export {NgxDynamicFormModule} from "./ngx-dynamic-form/ngx-dynamic-form.module";
