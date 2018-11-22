@@ -52,7 +52,7 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         if (!this.data) return;
         if (changes.data || changes.controls || changes.serializers || changes.formGroup) {
             if (this.group.id) return;
-            this.group.setup(this.name, this.data, this.controls, this.serializers, this.fieldSets);
+            this.group.setup(this.data, this);
             this.group.reloadControls();
         }
     }

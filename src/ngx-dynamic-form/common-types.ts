@@ -281,7 +281,8 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
                 const subGroup = new DynamicFormGroup(group.form, ctrl);
                 const model = group.model[ctrl.id] || {};
                 const data = subGroup.getData<IFormModelData>();
-                subGroup.setup(data.name || group.name, model, data.controls, data.serializers, data.fieldSets);
+                data.name = data.name || group.name;
+                subGroup.setup(model, data);
                 group.model[ctrl.id] = model;
                 group.addControl(subGroup.id, subGroup);
                 return subGroup;
@@ -397,14 +398,14 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         this.load().then(() => this.check().then(callback, callback));
     }
 
-    setup(name: string, model: any, controls: IFormControl[], serializers: IFormSerializers, fieldSets: IFormFieldSet[]): void {
+    setup(model: any, info: IDynamicFormInfo): void {
         this.mName = name || "";
         this.mModel = model;
         this.mControls.forEach(ctrl => this.removeControl(ctrl.id));
-        this.mControls = DynamicFormGroup.createFormControls(this, controls);
+        this.mControls = DynamicFormGroup.createFormControls(this, info.controls);
         this.mControls.forEach((ctrl: any) => this.addControl(ctrl.id, ctrl));
-        this.mSerializers = DynamicFormGroup.createFormSerializers(this, serializers);
-        this.mFieldSets = fieldSets ? fieldSets.reduce((result, fs) => {
+        this.mSerializers = DynamicFormGroup.createFormSerializers(this, info.serializers);
+        this.mFieldSets = info.fieldSets ? info.fieldSets.reduce((result, fs) => {
             result[fs.id] = fs;
             return result;
         }, {}) : getFormFieldSets(Object.getPrototypeOf(model).constructor);
