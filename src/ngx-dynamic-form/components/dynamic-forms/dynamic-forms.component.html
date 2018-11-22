@@ -21,7 +21,7 @@
                  [prefixTemplates]="form.prefixTemplates"
                  [suffixTemplates]="form.suffixTemplates"
 
-                 [formGroup]="config.group"
+                 [group]="config.group"
                  [fieldSets]="config.fieldSets">
                 <ng-template #prefixTemplate let-subForm="form">
                     <ng-container [ngTemplateOutlet]="form.innerFormPrefixTemplates[config.id]"

@@ -10,14 +10,6 @@
                 <ng-template formPrefix="sub"><div class="col-sm-6">Sub model prefix</div></ng-template>
                 <ng-template innerFormPrefix="test">Test inner model prefix</ng-template>
                 <ng-template innerFormPrefix="sub">Sub inner model prefix</ng-template>
-                <ng-template let-form="form" let-formTemplate="formTemplate" let-configTemplate="configTemplate" #containerTemplate>
-                    <mat-horizontal-stepper>
-                        <mat-step *ngFor="let config of data">
-                            <ng-container [ngTemplateOutlet]="configTemplate"
-                                          [ngTemplateOutletContext]="{form: form, config: config, formTemplate: formTemplate}"></ng-container>
-                        </mat-step>
-                    </mat-horizontal-stepper>
-                </ng-template>
                 <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
             </dynamic-forms>
 

@@ -21,6 +21,7 @@ import {IDynamicFormControl} from "../ngx-dynamic-form/common-types";
 })
 @FormFieldSet({
     id: "test",
+    title: "Form row title!!!",
     classes: "form-row"
 })
 @FormFieldSet({

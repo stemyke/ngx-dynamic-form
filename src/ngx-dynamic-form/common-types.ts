@@ -75,6 +75,7 @@ export interface IDynamicFormControl {
     model: any;
     formId: string;
 
+    errors: ValidationErrors;
     value: any;
     disabled: boolean;
     updateOn: DynamicFormUpdateOn;
@@ -222,7 +223,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     get label(): string {
-        return this.data.label !== " " ? `${this.prefix}${this.data.label}` : "";
+        return this.data.label !== "" ? `${this.prefix}${this.data.label}` : "";
     }
 
     get provider(): IFormControlProvider {
@@ -239,6 +240,10 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
 
     get formControls(): IDynamicFormControl[] {
         return this.mControls || [];
+    }
+
+    get formFields(): IDynamicFormFieldSets {
+        return this.mFieldSets || {};
     }
 
     get prefix(): string {
@@ -258,6 +263,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     private mModel: any;
     private mControls: IDynamicFormControl[];
     private mSerializers: IFormSerializer[];
+    private mFieldSets: IDynamicFormFieldSets;
     private initialized: boolean;
     private loading: boolean;
     private changeTimer: ITimer;
@@ -275,7 +281,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
                 const subGroup = new DynamicFormGroup(group.form, ctrl);
                 const model = group.model[ctrl.id] || {};
                 const data = subGroup.getData<IFormModelData>();
-                subGroup.setup(data.name || group.name, model, data.controls, data.serializers);
+                subGroup.setup(data.name || group.name, model, data.controls, data.serializers, data.fieldSets);
                 group.model[ctrl.id] = model;
                 group.addControl(subGroup.id, subGroup);
                 return subGroup;
@@ -310,6 +316,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         this.mModel = {};
         this.mControls = [];
         this.mSerializers = [];
+        this.mFieldSets = {};
         this.helper = new DynamicFormControlHelper(form, control);
         this.helper.findProvider(this);
         this.initialized = false;
@@ -390,13 +397,17 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         this.load().then(() => this.check().then(callback, callback));
     }
 
-    setup(name: string, model: any, controls: IFormControl[], serializers: IFormSerializers): void {
+    setup(name: string, model: any, controls: IFormControl[], serializers: IFormSerializers, fieldSets: IFormFieldSet[]): void {
         this.mName = name || "";
         this.mModel = model;
         this.mControls.forEach(ctrl => this.removeControl(ctrl.id));
         this.mControls = DynamicFormGroup.createFormControls(this, controls);
         this.mControls.forEach((ctrl: any) => this.addControl(ctrl.id, ctrl));
         this.mSerializers = DynamicFormGroup.createFormSerializers(this, serializers);
+        this.mFieldSets = fieldSets ? fieldSets.reduce((result, fs) => {
+            result[fs.id] = fs;
+            return result;
+        }, {}) : getFormFieldSets(Object.getPrototypeOf(model).constructor);
         // https://github.com/angular/angular/issues/14542
         const statusTimer = TimerUtils.createInterval();
         statusTimer.set(() => {
@@ -465,7 +476,7 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
     }
 
     get label(): string {
-        return this.data.label !== " " ? `${this.group.prefix}${this.data.label}` : "";
+        return this.data.label !== "" ? `${this.group.prefix}${this.data.label}` : "";
     }
 
     get provider(): IFormControlProvider {
@@ -571,10 +582,8 @@ export interface IFormStaticData extends IFormControlData {
     style?: string;
 }
 
-export interface IFormModelData extends IFormControlData {
-    serializers?: IFormSerializers;
-    controls?: IFormControl[];
-    name?: string;
+export interface IFormModelData extends IFormControlData, IDynamicFormInfo {
+
 }
 
 export interface IFormFieldSet {
@@ -603,13 +612,9 @@ export interface IDynamicFormConfig {
     id: string;
 }
 
-export interface IDynamicSingleFormConfig extends IDynamicFormConfig {
+export interface IDynamicSingleFormConfig extends IDynamicFormConfig, IDynamicFormInfo {
     data: any;
-    serializers?: IFormSerializers;
-    controls?: IFormControl[];
-    fieldSets?: IFormFieldSet[];
     multi?: false;
-    group?: DynamicFormGroup;
 }
 
 export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
@@ -655,15 +660,16 @@ export interface IDynamicFormBase {
     findProvider(control: IDynamicFormControl): IFormControlProvider;
 }
 
-export interface IDynamicForm extends IDynamicFormBase {
+export interface IDynamicFormInfo {
+    group?: DynamicFormGroup;
+    name?: string;
+    controls?: IFormControl[];
+    serializers?: IFormSerializers;
+    fieldSets?: IFormFieldSet[];
+}
 
-    formGroup: DynamicFormGroup;
-    serializers: IFormSerializers;
-    controls: IFormControl[];
-    fieldSets: IFormFieldSet[];
+export interface IDynamicForm extends IDynamicFormBase, IDynamicFormInfo {
     data: any;
-
-    id: any;
 }
 
 export interface IDynamicFormFieldSets {

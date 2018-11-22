@@ -1,9 +1,13 @@
 import {AfterContentInit, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {first} from "rxjs/operators";
-import {ObjectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
-    DynamicFormGroup, DynamicFormState, getFormFieldSets, IDynamicForm, IDynamicFormControl, IDynamicFormFieldSets,
-    IFormControl, IFormFieldSet, IFormSerializers
+    DynamicFormGroup,
+    DynamicFormState,
+    IDynamicForm,
+    IDynamicFormControl,
+    IFormControl,
+    IFormFieldSet,
+    IFormSerializers
 } from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
@@ -16,30 +20,25 @@ import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 })
 export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 
-    @Input() formGroup: DynamicFormGroup;
-    @Input() serializers: IFormSerializers;
+    @Input() group: DynamicFormGroup;
     @Input() controls: IFormControl[];
+    @Input() serializers: IFormSerializers;
     @Input() fieldSets: IFormFieldSet[];
     @Input() data: any;
 
-    id: any;
-
-    formFieldSets: IDynamicFormFieldSets;
     defaultFieldSet: IFormFieldSet;
 
     get status(): DynamicFormState {
-        return this.formGroup.state;
+        return this.group.state;
     }
 
     get formControls(): IDynamicFormControl[] {
-        return this.formGroup.formControls;
+        return this.group.formControls;
     }
 
     constructor(cdr: ChangeDetectorRef, forms: DynamicFormService) {
         super(cdr, forms);
-        this.id = UniqueUtils.uuid();
-        this.formGroup = new DynamicFormGroup(this);
-        this.formFieldSets = {};
+        this.group = new DynamicFormGroup(this);
         this.defaultFieldSet = {
             id: "",
             title: "",
@@ -50,14 +49,11 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     // --- Lifecycle hooks
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (ObjectUtils.isObject(this.data) && (changes.data || changes.controls || changes.formGroup)) {
-            this.formFieldSets = this.fieldSets ? this.fieldSets.reduce((result, fs) => {
-                result[fs.id] = fs;
-                return result;
-            }, {}) : getFormFieldSets(Object.getPrototypeOf(this.data).constructor);
-            if (this.formGroup.id) return;
-            this.formGroup.setup(this.name, this.data, this.controls, this.serializers);
-            this.formGroup.reloadControls();
+        if (!this.data) return;
+        if (changes.data || changes.controls || changes.serializers || changes.formGroup) {
+            if (this.group.id) return;
+            this.group.setup(this.name, this.data, this.controls, this.serializers, this.fieldSets);
+            this.group.reloadControls();
         }
     }
 
@@ -72,22 +68,22 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
 
     validate(showErrors: boolean = true): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            this.formGroup.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
-                if (showErrors) this.formGroup.showErrors();
+            this.group.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
+                if (showErrors) this.group.showErrors();
                 if (status == "VALID") {
                     resolve(null);
                     return;
                 }
                 reject(null);
             });
-            this.formGroup.updateValueAndValidity();
+            this.group.updateValueAndValidity();
         });
     }
 
     serialize(validate?: boolean): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             const serialize = () => {
-                this.formGroup.serialize().then(resolve);
+                this.group.serialize().then(resolve);
             };
             if (validate) {
                 this.validate().then(serialize, reject);
@@ -98,6 +94,6 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
     }
 
     getControl(id: string): IDynamicFormControl {
-        return this.formGroup.getControl(id);
+        return this.group.getControl(id);
     }
 }

@@ -33,6 +33,7 @@ export {
     IDynamicMultiFormConfig,
     IDynamicFormsConfigs,
     IDynamicFormBase,
+    IDynamicFormInfo,
     IDynamicForm,
     IDynamicFormFieldSets,
     FormControlTester,

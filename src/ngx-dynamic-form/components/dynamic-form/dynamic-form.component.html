@@ -40,9 +40,9 @@
                   [ngTemplateOutletContext]="context"></ng-container>
 </ng-template>
 
-<ng-template #defaultFieldSetTemplate let-form="form" let-id="id" let-controls="controls" let-fieldSet="fieldSet">
+<ng-template #defaultFieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
-        <div class="form-title" *ngIf="fieldSet.title">{{ form.prefix + fieldSet.title | translate }}</div>
+        <div class="form-title" *ngIf="fieldSet.title">{{ group.prefix + fieldSet.title | translate }}</div>
         <div *ngFor="let control of controls" [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]">
             <ng-container *ngIf="control.visible"
                           [ngTemplateOutlet]="controlTemplates[control.id] || controlTemplate || defaultControlTemplate"
@@ -63,17 +63,19 @@
 <ng-template #fieldSetsTemplate>
     <ng-container *ngFor="let fs of formControls | groupBy:'data.fieldSet'"
                   [ngTemplateOutlet]="fieldSetTemplate || defaultFieldSetTemplate"
-                  [ngTemplateOutletContext]="{form: this, id: fs.group, controls: fs.items, fieldSet: formFieldSets[fs.group] || defaultFieldSet}">
+                  [ngTemplateOutletContext]="{form: this, id: fs.group, controls: fs.items, fieldSet: group.formFields[fs.group] || defaultFieldSet}">
     </ng-container>
 </ng-template>
 <ng-template #defaultWrapperTemplate let-form="form" let-fieldSetsTemplate="fieldSetsTemplate">
     <ng-container [ngTemplateOutlet]="prefixTemplate"
                   [ngTemplateOutletContext]="{form: form, fieldSetsTemplate: fieldSetsTemplate}"></ng-container>
-    <form class="dynamic-form" [ngClass]="form.classes || ''" [formGroup]="formGroup" (submit)="onFormSubmit()">
-        <div *ngIf="form.status == 'LOADING'" class="dynamic-form-loader">{{ form.prefix + 'message.loading' | translate }}</div>
+    <form class="dynamic-form" [ngClass]="form.classes || ''" [formGroup]="group" (submit)="onFormSubmit()">
+        <div *ngIf="form.status == 'LOADING'" class="dynamic-form-loader">{{ group.prefix + 'message.loading' |
+            translate }}</div>
         <ng-container [ngTemplateOutlet]="fieldSetsTemplate"></ng-container>
         <ng-content></ng-content>
-        <div *ngIf="form.status == 'PENDING'" class="dynamic-form-validator">{{ form.prefix + 'message.pending' | translate }}</div>
+        <div *ngIf="form.status == 'PENDING'" class="dynamic-form-validator">{{ group.prefix + 'message.pending' |
+            translate }}</div>
         <button [ngStyle]="{display: 'none'}">Submit</button>
     </form>
     <ng-container [ngTemplateOutlet]="suffixTemplate"
