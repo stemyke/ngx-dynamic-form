@@ -399,7 +399,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     setup(model: any, info: IDynamicFormInfo): void {
-        this.mName = name || "";
+        this.mName = info.name || "";
         this.mModel = model;
         this.mControls.forEach(ctrl => this.removeControl(ctrl.id));
         this.mControls = DynamicFormGroup.createFormControls(this, info.controls);
