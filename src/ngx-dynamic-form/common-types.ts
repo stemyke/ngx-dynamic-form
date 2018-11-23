@@ -312,7 +312,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     constructor(public readonly form: IDynamicFormBase, control: IFormControl = null) {
-        super({});
+        super({}, {updateOn: ((!control || !control.data) ? null : control.data.updateOn) || form.updateOn || "blur"});
         this.mName = "";
         this.mModel = {};
         this.mControls = [];
@@ -495,7 +495,7 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
     private helper: DynamicFormControlHelper;
 
     constructor(private control: IFormControl, public readonly group: DynamicFormGroup) {
-        super(group.model[control.id], {updateOn: control.data.validateOn || group.updateOn || "blur"});
+        super(group.model[control.id], {updateOn: control.data.updateOn || group.updateOn});
         this.group.addControl(control.id, this);
         this.helper = new DynamicFormControlHelper(this.form, control);
         this.helper.findProvider(this);
@@ -555,7 +555,7 @@ export interface IFormControlData {
     hidden?: FormControlTesterFactory;
     validator?: FormControlValidatorFactory;
     validators?: FormControlValidatorFactory[];
-    validateOn?: DynamicFormUpdateOn;
+    updateOn?: DynamicFormUpdateOn;
     reload?: string | string[];
 }
 
@@ -627,8 +627,8 @@ export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMult
 
 export interface IDynamicFormBase {
 
-    name: string;
-    readonly: boolean;
+    name?: string;
+    readonly?: boolean;
     updateOn?: "change" | "blur" | "submit";
     classes: string;
     parent: IDynamicFormBase;

@@ -74,7 +74,7 @@
 </ng-template>
 <ng-template let-form="form" let-formTemplate="formTemplate" let-configTemplate="configTemplate" #defaultContainerTemplate>
     <div class="dynamic-forms" [ngClass]="classes || ''">
-        <ng-container *ngFor="let config of data"
+        <ng-container *ngFor="let config of form.configs"
                       [ngTemplateOutlet]="configTemplate"
                       [ngTemplateOutletContext]="{form: form, config: config, formTemplate: formTemplate}"></ng-container>
         <ng-content></ng-content>

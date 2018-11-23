@@ -37,6 +37,8 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         return "VALID";
     }
 
+    public configs: IDynamicFormsConfigs;
+
     @ContentChild("containerTemplate")
     protected cContainerTemplate: TemplateRef<any>;
 
@@ -63,7 +65,7 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.createFormGroups(this.data);
+        this.configs = this.createFormGroups(this.data);
     }
 
     // --- IDynamicFormBase ---
@@ -120,15 +122,16 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         return value;
     }
 
-    private createFormGroups(configs: IDynamicFormsConfigs): void {
-        (configs || []).forEach((c: any) => {
-            if (c.multi) return;
+    private createFormGroups(configs: IDynamicFormsConfigs): IDynamicFormsConfigs {
+        return (configs || []).map((c: any) => {
+            if (c.multi) return c;
             const config = <IDynamicSingleFormConfig>c;
             const group = new DynamicFormGroup(this, {id: config.id || UniqueUtils.uuid(), type: "model"});
             config.group = group;
             config.name = config.name || this.name;
             group.setup(config.data, config);
             group.reloadControls();
+            return config;
         });
     }
 }
