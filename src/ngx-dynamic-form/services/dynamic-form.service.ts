@@ -1,8 +1,5 @@
 import {ComponentFactoryResolver, Inject, Injectable, Injector, ViewContainerRef} from "@angular/core";
-import {
-    DynamicFormControl, FORM_CONTROL_PROVIDER, IDynamicFormControl, IFormControlComponent,
-    IFormControlProvider
-} from "../common-types";
+import {FORM_CONTROL_PROVIDER, IDynamicFormControl, IFormControlComponent, IFormControlProvider} from "../common-types";
 import {ObjectUtils} from "@stemy/ngx-utils";
 
 @Injectable()
