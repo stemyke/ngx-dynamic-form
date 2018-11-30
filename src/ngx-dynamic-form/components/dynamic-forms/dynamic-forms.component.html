@@ -72,18 +72,18 @@
                       [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
     </div>
 </ng-template>
-<ng-template let-form="form" let-formTemplate="formTemplate" let-configTemplate="configTemplate" #defaultContainerTemplate>
+<ng-template let-form="form" let-configTemplate="configTemplate" #defaultContainerTemplate>
     <div class="dynamic-forms" [ngClass]="classes || ''">
         <ng-container *ngFor="let config of form.configs"
                       [ngTemplateOutlet]="configTemplate"
-                      [ngTemplateOutletContext]="{form: form, config: config, formTemplate: formTemplate}"></ng-container>
+                      [ngTemplateOutletContext]="{form: form, config: config}"></ng-container>
         <ng-content></ng-content>
     </div>
 </ng-template>
 <ng-container [ngTemplateOutlet]="prefixTemplate"
               [ngTemplateOutletContext]="{form: this}"></ng-container>
 <ng-container [ngTemplateOutlet]="containerTemplate || defaultContainerTemplate"
-              [ngTemplateOutletContext]="{form: this, configTemplate: configTemplate}">
+              [ngTemplateOutletContext]="{form: this, configTemplate: configTemplate, defaultContainerTemplate: defaultContainerTemplate}">
 </ng-container>
 <ng-container [ngTemplateOutlet]="suffixTemplate"
               [ngTemplateOutletContext]="{form: this}"></ng-container>

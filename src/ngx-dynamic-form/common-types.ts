@@ -86,6 +86,7 @@ export interface IDynamicFormControl {
     getControl(id: string): IDynamicFormControl;
     load(): Promise<any>;
     check(): Promise<any>;
+    shouldSerialize(): Promise<boolean>;
     serialize(): Promise<any>;
     onFocus(): void;
     onBlur(): void;
@@ -159,6 +160,7 @@ class DynamicFormControlHelper {
     private readonly dummyData: IFormControlData;
     private readonly readonlyTester: (control: IDynamicFormControl) => Promise<boolean>;
     private readonly hideTester: (control: IDynamicFormControl) => Promise<boolean>;
+    private readonly serializeTester: (control: IDynamicFormControl) => Promise<boolean>;
 
     constructor(private form: IDynamicFormBase, private control: IFormControl = null) {
         this.formId = UniqueUtils.uuid();
@@ -167,6 +169,9 @@ class DynamicFormControlHelper {
         this.dummyData = {};
         this.readonlyTester = this.createTester("readonly");
         this.hideTester = this.createTester("hidden");
+        this.serializeTester = this.createTester("shouldSerialize", (control: IDynamicFormControl) => {
+            return Promise.resolve(control.visible);
+        });
     }
 
     load(control: IDynamicFormControl): Promise<any> {
@@ -184,14 +189,18 @@ class DynamicFormControlHelper {
         });
     }
 
+    shouldSerialize(control: IDynamicFormControl): Promise<boolean> {
+        return this.serializeTester(control);
+    }
+
     findProvider(control: IDynamicFormControl): void {
         this.ctrlProvider = !this.control || !this.control.type ? null : this.form.findProvider(control);
     }
 
-    private createTester(test: string): (control: IDynamicFormControl) => Promise<boolean> {
+    private createTester(test: string, defaultFunc: FormControlTester = null): (control: IDynamicFormControl) => Promise<boolean> {
         const tester: FormControlTester = this.data[test]
             ? ReflectUtils.resolve<FormControlTester>(this.data[test], this.form.injector)
-            : () => Promise.resolve(false);
+            : (defaultFunc || (() => Promise.resolve(false)));
         return (control: IDynamicFormControl): Promise<boolean> => tester(control);
     }
 }
@@ -354,14 +363,23 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         return Promise.all(promises);
     }
 
+    shouldSerialize(): Promise<boolean> {
+        return this.helper.shouldSerialize(this);
+    }
+
     serialize(): Promise<any> {
         return new Promise<any>((resolve) => {
             const result = {};
             const serializers = this.mSerializers.map(s => {
-                return s.func(s.id, this).then(res => {
-                    const handler = this.getControl(s.id);
-                    if (handler && !handler.visible) return;
-                    result[s.id] = res;
+                return new Promise<any>(resolve => {
+                    s.func(s.id, this).then(res => {
+                        const ctrl = this.getControl(s.id);
+                        const promise = !ctrl ? Promise.resolve(true) : ctrl.shouldSerialize();
+                        promise.then(should => {
+                            if (should) result[s.id] = res;
+                            resolve();
+                        });
+                    });
                 });
             });
             Promise.all(serializers).then(() => resolve(result));
@@ -381,9 +399,8 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         this.mControls.forEach(ctrl => ctrl.showErrors());
     }
 
-    reloadControls(): void {
-        let callback = () => {
-        };
+    reloadControls(): Promise<any> {
+        let callback = () => {};
         if (this.initialized === false) {
             this.initialized = true;
             this.loading = true;
@@ -395,7 +412,11 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
                 root.onStatusChange.emit(root);
             };
         }
-        this.load().then(() => this.check().then(callback, callback));
+        const promise = new Promise<any>(resolve => {
+            this.load().then(() => this.check().then(resolve));
+        });
+        promise.then(callback, callback);
+        return promise;
     }
 
     setup(model: any, info: IDynamicFormInfo): void {
@@ -523,6 +544,10 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
         return this.helper.check(this);
     }
 
+    shouldSerialize(): Promise<boolean> {
+        return this.helper.shouldSerialize(this);
+    }
+
     serialize(): Promise<any> {
         return Promise.resolve(this.value);
     }
@@ -553,6 +578,7 @@ export interface IFormControlData {
     classes?: string;
     readonly?: FormControlTesterFactory;
     hidden?: FormControlTesterFactory;
+    shouldSerialize?: FormControlTesterFactory;
     validator?: FormControlValidatorFactory;
     validators?: FormControlValidatorFactory[];
     updateOn?: DynamicFormUpdateOn;
