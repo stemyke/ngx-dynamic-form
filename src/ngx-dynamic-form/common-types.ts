@@ -410,6 +410,14 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
                 const root = this.form.root;
                 root.onInit.emit(root);
                 root.onStatusChange.emit(root);
+                // https://github.com/angular/angular/issues/14542
+                const statusTimer = TimerUtils.createInterval();
+                statusTimer.set(() => {
+                    if (this.status == "PENDING") return;
+                    statusTimer.clear();
+                    root.onStatusChange.emit(root);
+                }, 50);
+                setTimeout(statusTimer.clear, 5000);
             };
         }
         const promise = new Promise<any>(resolve => {
@@ -430,14 +438,6 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
             result[fs.id] = fs;
             return result;
         }, {}) : getFormFieldSets(Object.getPrototypeOf(model).constructor);
-        // https://github.com/angular/angular/issues/14542
-        const statusTimer = TimerUtils.createInterval();
-        statusTimer.set(() => {
-            if (this.status == "PENDING") return;
-            statusTimer.clear();
-            (this.statusChanges as EventEmitter<string>).emit(this.status);
-        }, 50);
-        setTimeout(statusTimer.clear, 5000);
     }
 
     updateModel(control: IDynamicFormControl): void {
@@ -520,10 +520,6 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
         this.group.addControl(control.id, this);
         this.helper = new DynamicFormControlHelper(this.form, control);
         this.helper.findProvider(this);
-        this.valueChanges.subscribe(() => {
-            const root = this.form.root;
-            root.onStatusChange.emit(root);
-        });
         this.valueChanges.subscribe(() => this.group.updateModel(this));
         this.setAsyncValidators(createValidator(this));
     }

@@ -24,11 +24,10 @@ export class AsyncSubmitDirective extends AsyncMethodDirective implements OnInit
 
     ngOnInit(): void {
         if (!this.form) return;
-        this.disabled = status !== "VALID";
+        this.disabled = this.form.status !== "VALID";
         this.onStatusChange = this.form.onStatusChange.subscribe(form => {
-            const status: DynamicFormState = form.status;
-            this.disabled = status !== "VALID";
-            if (!this.callback || status == "PENDING") return;
+            this.disabled = form.status !== "VALID";
+            if (!this.callback || form.status == "PENDING") return;
             if (!this.disabled) {
                 this.callback();
             }
