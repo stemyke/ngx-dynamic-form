@@ -537,7 +537,11 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
     }
 
     check(): Promise<any> {
-        return this.helper.check(this);
+        const check = this.helper.check(this);
+        check.then(readonly => {
+            if (readonly) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
+        });
+        return check;
     }
 
     shouldSerialize(): Promise<boolean> {
