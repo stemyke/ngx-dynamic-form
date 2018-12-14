@@ -1,6 +1,6 @@
 import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
-import {IResolveFactory, ITimer, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {IResolveFactory, ITimer, IAsyncMessage, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("form-control-provider");
 
@@ -686,6 +686,8 @@ export interface IDynamicFormBase {
 
     findProvider(control: IDynamicFormControl): IFormControlProvider;
 }
+
+export declare type AsyncSubmitMethod = (form: IDynamicFormBase) => Promise<IAsyncMessage>;
 
 export interface IDynamicFormInfo {
     group?: DynamicFormGroup;

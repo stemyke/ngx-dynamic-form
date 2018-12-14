@@ -33,6 +33,7 @@ export {
     IDynamicMultiFormConfig,
     IDynamicFormsConfigs,
     IDynamicFormBase,
+    AsyncSubmitMethod,
     IDynamicFormInfo,
     IDynamicForm,
     IDynamicFormFieldSets,
