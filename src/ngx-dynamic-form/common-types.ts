@@ -87,6 +87,7 @@ export interface IDynamicFormControl {
     load(): Promise<any>;
     check(): Promise<any>;
     shouldSerialize(): Promise<boolean>;
+    shouldValidate(): Promise<boolean>;
     serialize(): Promise<any>;
     onFocus(): void;
     onBlur(): void;
@@ -100,9 +101,8 @@ function createValidator(control: IDynamicFormControl): (control: AbstractContro
     });
     return (ctrl: any) => new Promise<ValidationErrors>((resolve) => {
         const control = <IDynamicFormControl>ctrl;
-        // control.hideTester()
-        Promise.resolve(false).then(hide => {
-            if (hide) {
+        control.shouldValidate().then(should => {
+            if (!should) {
                 resolve(null);
                 return;
             }
@@ -161,6 +161,7 @@ class DynamicFormControlHelper {
     private readonly readonlyTester: (control: IDynamicFormControl) => Promise<boolean>;
     private readonly hideTester: (control: IDynamicFormControl) => Promise<boolean>;
     private readonly serializeTester: (control: IDynamicFormControl) => Promise<boolean>;
+    private readonly validateTester: (control: IDynamicFormControl) => Promise<boolean>;
 
     constructor(private form: IDynamicFormBase, private control: IFormControl = null) {
         this.formId = UniqueUtils.uuid();
@@ -170,6 +171,9 @@ class DynamicFormControlHelper {
         this.readonlyTester = this.createTester("readonly");
         this.hideTester = this.createTester("hidden");
         this.serializeTester = this.createTester("shouldSerialize", (control: IDynamicFormControl) => {
+            return Promise.resolve(control.visible);
+        });
+        this.validateTester = this.createTester("shouldValidate", (control: IDynamicFormControl) => {
             return Promise.resolve(control.visible);
         });
     }
@@ -191,6 +195,10 @@ class DynamicFormControlHelper {
 
     shouldSerialize(control: IDynamicFormControl): Promise<boolean> {
         return this.serializeTester(control);
+    }
+
+    shouldValidate(control: IDynamicFormControl): Promise<boolean> {
+        return this.validateTester(control);
     }
 
     findProvider(control: IDynamicFormControl): void {
@@ -365,6 +373,10 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
 
     shouldSerialize(): Promise<boolean> {
         return this.helper.shouldSerialize(this);
+    }
+
+    shouldValidate(): Promise<boolean> {
+        return this.helper.shouldValidate(this);
     }
 
     serialize(): Promise<any> {
@@ -548,6 +560,10 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
         return this.helper.shouldSerialize(this);
     }
 
+    shouldValidate(): Promise<boolean> {
+        return this.helper.shouldValidate(this);
+    }
+
     serialize(): Promise<any> {
         return Promise.resolve(this.value);
     }
@@ -579,6 +595,7 @@ export interface IFormControlData {
     readonly?: FormControlTesterFactory;
     hidden?: FormControlTesterFactory;
     shouldSerialize?: FormControlTesterFactory;
+    shouldValidate?: FormControlTesterFactory;
     validator?: FormControlValidatorFactory;
     validators?: FormControlValidatorFactory[];
     updateOn?: DynamicFormUpdateOn;
