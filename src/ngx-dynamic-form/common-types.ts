@@ -1,4 +1,12 @@
-import {EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider} from "@angular/core";
+import {
+    EventEmitter,
+    HostBinding,
+    InjectionToken,
+    Injector,
+    TemplateRef,
+    Type,
+    ValueProvider
+} from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
 import {IResolveFactory, ITimer, IAsyncMessage, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 
@@ -632,8 +640,11 @@ export interface IFormModelData extends IFormControlData, IDynamicFormInfo {
 
 export interface IFormFieldSet {
     id: string;
-    title?: string;
     classes?: string;
+    title?: string;
+    titleClasses?: string;
+    setClasses?: string;
+    controlClasses?: string;
 }
 
 export interface IFormControlOption {
@@ -685,6 +696,8 @@ export interface IDynamicFormBase {
     inputTemplates: IDynamicFormTemplates;
     prefixTemplates: IDynamicFormTemplates;
     suffixTemplates: IDynamicFormTemplates;
+    setPrefixTemplates: IDynamicFormTemplates;
+    setSuffixTemplates: IDynamicFormTemplates;
 
     onChange: EventEmitter<IDynamicFormControl>;
     onStatusChange: EventEmitter<IDynamicFormBase>;

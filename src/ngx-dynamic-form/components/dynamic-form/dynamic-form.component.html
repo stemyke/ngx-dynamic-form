@@ -1,5 +1,5 @@
 <ng-template #labelTemplate let-control="control" let-form="control.form" let-data="control.data">
-    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="form.id + '-' + control.id">
+    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="control.formId">
         {{ control.label | translate }}
     </label>
 </ng-template>
@@ -42,11 +42,14 @@
 
 <ng-template #defaultFieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
-        <div class="form-title" *ngIf="fieldSet.title">{{ group.prefix + fieldSet.title | translate }}</div>
-        <div *ngFor="let control of controls" [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]">
-            <ng-container *ngIf="control.visible"
-                          [ngTemplateOutlet]="controlTemplates[control.id] || controlTemplate || defaultControlTemplate"
-                          [ngTemplateOutletContext]="{
+        <div *ngIf="fieldSet.title" [ngClass]="['form-title', fieldSet.titleClasses || '']">
+            {{ group.prefix + fieldSet.title | translate }}
+        </div>
+        <ng-template #subControls>
+            <div *ngFor="let control of controls" [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]">
+                <ng-container *ngIf="control.visible"
+                              [ngTemplateOutlet]="controlTemplates[control.id] || controlTemplate || defaultControlTemplate"
+                              [ngTemplateOutletContext]="{
                             $implicit: {control: control},
                             control: control,
                             labelTemplate: labelTemplates[control.id] || labelTemplate,
@@ -55,8 +58,16 @@
                             suffixTemplate: suffixTemplates[control.id],
                             errorTemplate: errorTemplate
                           }">
-            </ng-container>
+                </ng-container>
+            </div>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="setPrefixTemplates[fieldSet.id]" [ngTemplateOutletContext]="fieldSet"></ng-container>
+        <div *ngIf="fieldSet.setClasses; else subControls" [ngClass]="fieldSet.setClasses">
+            <div *ngIf="fieldSet.controlClasses; else subControls" [ngClass]="fieldSet.controlClasses">
+                <ng-container [ngTemplateOutlet]="subControls"></ng-container>
+            </div>
         </div>
+        <ng-container [ngTemplateOutlet]="setSuffixTemplates[fieldSet.id]" [ngTemplateOutletContext]="fieldSet"></ng-container>
     </div>
 </ng-template>
 

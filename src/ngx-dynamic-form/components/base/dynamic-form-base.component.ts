@@ -27,6 +27,8 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @Input() inputTemplates: IDynamicFormTemplates;
     @Input() prefixTemplates: IDynamicFormTemplates;
     @Input() suffixTemplates: IDynamicFormTemplates;
+    @Input() setPrefixTemplates: IDynamicFormTemplates;
+    @Input() setSuffixTemplates: IDynamicFormTemplates;
 
     @Output() onChange: EventEmitter<IDynamicFormControl>;
     @Output() onStatusChange: EventEmitter<IDynamicFormBase>;
@@ -99,6 +101,8 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
         this.inputTemplates = this.filterTemplates(this.inputTemplates , "input");
         this.prefixTemplates = this.filterTemplates(this.prefixTemplates, "prefix");
         this.suffixTemplates =  this.filterTemplates(this.suffixTemplates, "suffix");
+        this.setPrefixTemplates = this.filterTemplates(this.prefixTemplates, "setPrefix");
+        this.setSuffixTemplates =  this.filterTemplates(this.suffixTemplates, "setSuffix");
     }
 
     protected filterTemplates(templates: IDynamicFormTemplates, type: string): IDynamicFormTemplates {

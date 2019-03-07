@@ -6,6 +6,8 @@ import {Directive, Input, TemplateRef} from "@angular/core";
                 ng-template[input],
                 ng-template[prefix],
                 ng-template[suffix],
+                ng-template[setPrefix],
+                ng-template[setSuffix],
                 ng-template[formPrefix],
                 ng-template[formSuffix],
                 ng-template[innerFormPrefix],
@@ -18,6 +20,8 @@ export class DynamicFormTemplateDirective {
     @Input() input: string;
     @Input() prefix: string;
     @Input() suffix: string;
+    @Input() setPrefix: string;
+    @Input() setSuffix: string;
     @Input() formPrefix: string;
     @Input() formSuffix: string;
     @Input() innerFormPrefix: string;
