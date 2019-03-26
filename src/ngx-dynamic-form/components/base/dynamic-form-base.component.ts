@@ -51,6 +51,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
 
     abstract status: DynamicFormState;
     readonly injector: Injector;
+    readonly cdr: ChangeDetectorRef;
 
     @ContentChildren(DynamicFormTemplateDirective)
     protected templates: QueryList<DynamicFormTemplateDirective>;
@@ -64,7 +65,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @ContentChild("controlTemplate")
     protected cControlTemplate: TemplateRef<any>;
 
-    protected constructor(public cdr: ChangeDetectorRef, private formService: DynamicFormService) {
+    protected constructor(cdr: ChangeDetectorRef, private formService: DynamicFormService) {
         this.name = "";
 
         this.controlTemplates = {};
@@ -78,6 +79,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
         this.onInit = new EventEmitter<IDynamicFormBase>();
         this.onSubmit = new EventEmitter<IDynamicFormBase>();
         this.injector = formService.injector;
+        this.cdr = cdr;
     }
 
     // --- IDynamicFormBase

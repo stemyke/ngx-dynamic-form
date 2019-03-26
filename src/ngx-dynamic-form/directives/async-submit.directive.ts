@@ -1,4 +1,5 @@
 import {
+    ChangeDetectorRef,
     Directive,
     ElementRef,
     EventEmitter,
@@ -43,7 +44,7 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
         return this.loading;
     }
 
-    constructor(@Inject(TOASTER_SERVICE) private toaster: IToasterService, elem: ElementRef, renderer: Renderer2) {
+    constructor(@Inject(TOASTER_SERVICE) private toaster: IToasterService, private cdr: ChangeDetectorRef, elem: ElementRef, renderer: Renderer2) {
         this.onSuccess = new EventEmitter<IAsyncMessage>();
         this.onError = new EventEmitter<IAsyncMessage>();
         if (elem.nativeElement.tagName !== "BUTTON") return;
@@ -53,8 +54,10 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
     ngOnInit(): void {
         if (!this.form) return;
         this.disabled = this.form.status !== "VALID";
+        this.cdr.detectChanges();
         this.onStatusChange = this.form.onStatusChange.subscribe(form => {
             this.disabled = form.status !== "VALID";
+            this.cdr.detectChanges();
             if (!this.callback || form.status == "PENDING") return;
             if (!this.disabled) {
                 this.callback();

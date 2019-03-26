@@ -1,4 +1,5 @@
 import {
+    ChangeDetectorRef,
     EventEmitter,
     HostBinding,
     InjectionToken,
@@ -592,6 +593,7 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
 export interface IFormControl {
     id: string;
     type: string;
+    visible?: boolean;
     data?: IFormControlData;
 }
 
@@ -707,6 +709,7 @@ export interface IDynamicFormBase {
     root?: IDynamicFormBase;
     status: DynamicFormState;
     injector?: Injector;
+    cdr?: ChangeDetectorRef;
 
     validate(showErrors?: boolean): Promise<any>;
 
