@@ -371,13 +371,13 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
     }
 
     check(): Promise<any> {
-        const check = this.helper.check(this);
-        const promises = this.mControls.map(c => c.check());
-        promises.push(check);
-        check.then(readonly => {
-            if (readonly) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
+        return new Promise<any>(resolve => {
+            this.helper.check(this).then(readonly => {
+                if (readonly) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
+                const promises = this.mControls.map(c => c.check());
+                Promise.all(promises).then(resolve);
+            })
         });
-        return Promise.all(promises);
     }
 
     shouldSerialize(): Promise<boolean> {
@@ -560,7 +560,7 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
     check(): Promise<any> {
         const check = this.helper.check(this);
         check.then(readonly => {
-            if (readonly) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
+            if (readonly || this.group.disabled) this.disable({emitEvent: false}); else this.enable({emitEvent: false});
         });
         return check;
     }
