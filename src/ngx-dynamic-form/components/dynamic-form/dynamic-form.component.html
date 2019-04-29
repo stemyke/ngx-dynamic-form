@@ -47,7 +47,7 @@
         </div>
         <ng-template #subControls>
             <ng-container *ngFor="let control of controls">
-                <div [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes]" *ngIf="control.visible">
+                <div [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes, control.errors && control.touched ? 'form-group-invalid' : '']" *ngIf="control.visible">
                     <ng-container [ngxTemplateOutlet]="controlTemplates[control.id] || controlTemplate || defaultControlTemplate"
                                   [context]="{
                                     control: control,
