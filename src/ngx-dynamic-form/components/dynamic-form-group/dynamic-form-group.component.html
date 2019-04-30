@@ -1,6 +1,6 @@
 <ng-template #labelTemplate>
     <label [ngClass]="'control-label control-label-' + control.data.labelAlign" [attr.for]="control.formId">
-        {{ control.label | translate: control.parent }}
+        {{ control.label | translate: control.model }}
     </label>
 </ng-template>
 <ng-template #errorTemplate>
