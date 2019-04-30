@@ -1,12 +1,13 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "2.8.4",
+    "version": "2.9.0",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
         "build": "ng-packagr -p ng-package.json",
-        "public": "npm publish dist --access public"
+        "public": "npm publish dist --access public",
+        "notify": "sudo sysctl fs.inotify.max_user_watches=524288 && sudo sysctl -p --system"
     },
     "public": true,
     "repository": "https://github.com/stemyke/ngx-dynamic-form.git",
@@ -27,8 +28,8 @@
         "rxjs": "^6.3.3 || ^6.4.0",
         "zone.js": "^0.8.26 || ^0.9.0",
         "moment": "^2.24.0",
-        "bowser": "^2.2.0",
-        "@stemy/ngx-utils": ">=2.8.12",
+        "ngx-device-detector": "^1.3.5",
+        "@stemy/ngx-utils": ">=2.9.5",
         "angular2-text-mask": "^9.0.0"
     },
     "devDependencies": {
@@ -46,8 +47,8 @@
         "rxjs": "6.4.0",
         "zone.js": "0.8.26",
         "moment": "2.24.0",
-        "bowser": "2.2.0",
-        "@stemy/ngx-utils": "2.8.12",
+        "ngx-device-detector": "1.3.5",
+        "@stemy/ngx-utils": "2.9.5",
         "angular2-text-mask": "9.0.0",
         "@angular-devkit/build-angular": "0.13.8",
         "@angular/cli": "7.3.8",

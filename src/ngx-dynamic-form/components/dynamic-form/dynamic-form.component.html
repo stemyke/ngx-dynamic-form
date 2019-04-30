@@ -1,64 +1,11 @@
-<ng-template #labelTemplate let-control="control" let-form="control.form" let-data="control.data">
-    <label [ngClass]="'control-label control-label-' + data.labelAlign" [attr.for]="control.formId">
-        {{ control.label | translate: control.parent }}
-    </label>
-</ng-template>
-<ng-template #errorTemplate let-control="control">
-    <div class="error-message" *ngIf="control.errors && control.touched">
-        <span class="help-block" *ngFor="let error of control.errors | entries">
-            {{ error.key | translate: error.value }}
-        </span>
-    </div>
-</ng-template>
-<ng-template #inputTemplate let-control="control">
-    <ng-container [form-control]="control"></ng-container>
-</ng-template>
-<ng-template #defaultControlTemplate
-             let-context
-             let-control="control"
-             let-data="control.data"
-             let-labelTemplate="labelTemplate"
-             let-inputTemplate="inputTemplate"
-             let-prefixTemplate="prefixTemplate"
-             let-suffixTemplate="suffixTemplate"
-             let-errorTemplate="errorTemplate">
-    <ng-container [ngTemplateOutlet]="prefixTemplate"
-                  [ngTemplateOutletContext]="context"></ng-container>
-    <ng-container *ngIf="control.label && data.labelAlign == 'left'"
-                  [ngTemplateOutlet]="labelTemplate"
-                  [ngTemplateOutletContext]="context">
-    </ng-container>
-    <ng-container [ngTemplateOutlet]="inputTemplate"
-                  [ngTemplateOutletContext]="context"></ng-container>
-    <ng-container *ngIf="control.label && data.labelAlign == 'right'"
-                  [ngTemplateOutlet]="labelTemplate"
-                  [ngTemplateOutletContext]="context">
-    </ng-container>
-    <ng-container [ngTemplateOutlet]="suffixTemplate"
-                  [ngTemplateOutletContext]="context"></ng-container>
-    <ng-container [ngTemplateOutlet]="errorTemplate"
-                  [ngTemplateOutletContext]="context"></ng-container>
-</ng-template>
-
 <ng-template #defaultFieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
         <div *ngIf="fieldSet.title" [ngClass]="['form-title', fieldSet.titleClasses || '']">
             {{ group.prefix + fieldSet.title | translate }}
         </div>
         <ng-template #subControls>
-            <ng-container *ngFor="let control of controls">
-                <div [ngClass]="['form-group', 'form-group-' + control.id, control.data.classes, control.errors && control.touched ? 'form-group-invalid' : '']" *ngIf="control.visible">
-                    <ng-container [ngxTemplateOutlet]="controlTemplates[control.id] || controlTemplate || defaultControlTemplate"
-                                  [context]="{
-                                    control: control,
-                                    labelTemplate: labelTemplates[control.id] || labelTemplate,
-                                    inputTemplate: inputTemplates[control.id] || inputTemplate,
-                                    prefixTemplate: prefixTemplates[control.id],
-                                    suffixTemplate: suffixTemplates[control.id],
-                                    errorTemplate: errorTemplate
-                                  }">
-                    </ng-container>
-                </div>
+            <ng-container *ngFor="let control of controls" [form-group]="control" [form]="this">
+
             </ng-container>
         </ng-template>
         <ng-container [ngxTemplateOutlet]="setPrefixTemplates[fieldSet.id]" [context]="fieldSet"></ng-container>

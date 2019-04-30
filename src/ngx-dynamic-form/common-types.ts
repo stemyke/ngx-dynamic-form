@@ -11,10 +11,16 @@ import {
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
 import {IResolveFactory, ITimer, IAsyncMessage, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 
+export const FORM_GROUP_TYPE: InjectionToken<Type<IFormControlComponent>> = new InjectionToken<Type<IFormControlComponent>>("form-group-provider");
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("form-control-provider");
 
 // --- Basic form control interfaces ---
 export interface IFormControlComponent {
+    control: IDynamicFormControl;
+}
+
+export interface IFormGroupComponent {
+    form: IDynamicForm;
     control: IDynamicFormControl;
 }
 
@@ -86,6 +92,7 @@ export interface IDynamicFormControl {
 
     errors: ValidationErrors;
     value: any;
+    touched: boolean;
     disabled: boolean;
     updateOn: DynamicFormUpdateOn;
 
@@ -802,6 +809,13 @@ export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
         data.classes = data.classes || "";
         sets[data.id] = data;
         ReflectUtils.defineMetadata("dynamicFormFieldSets", sets, target);
+    };
+}
+
+export function provideFormGroup(component: Type<IFormGroupComponent>): ValueProvider {
+    return {
+        provide: FORM_GROUP_TYPE,
+        useValue: component
     };
 }
 
