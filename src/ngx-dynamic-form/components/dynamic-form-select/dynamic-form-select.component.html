@@ -13,8 +13,8 @@
             {{ option.label | translate }}
         </option>
     </select>
-    <label class="form-control-description" [attr.for]="control.formId" *ngIf="!data.multi && selected.description">
-        {{ selected.description | translate }}
+    <label class="form-control-description" [attr.for]="control.formId" *ngIf="!data.multi && selected?.description">
+        {{ selected?.description | translate }}
     </label>
 </ng-template>
 <ng-container [ngSwitch]="data.type">
@@ -55,7 +55,7 @@
             </li>
         </ul>
     </ng-container>
-    <ng-container *ngSwitchDefault [ngTemplateOutlet]="selectTemplate" [ngTemplateOutletContext]="{selected: meta.options | find:findOption:value}">
+    <ng-container *ngSwitchDefault [ngTemplateOutlet]="selectTemplate" [ngTemplateOutletContext]="{selected: meta?.options | find:findOption:value}">
 
     </ng-container>
 </ng-container>
