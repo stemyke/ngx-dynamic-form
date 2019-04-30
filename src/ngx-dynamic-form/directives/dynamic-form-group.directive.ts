@@ -9,6 +9,7 @@ export class DynamicFormGroupDirective implements OnChanges {
 
     @Input("form-group") control: IDynamicFormControl;
     @Input() form: IDynamicForm;
+    @Input() visible: boolean;
 
     get component(): IFormControlComponent {
         return this.comp;
@@ -20,7 +21,12 @@ export class DynamicFormGroupDirective implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.control || changes.form) {
+        if (changes.control || changes.form || changes.visible) {
+            if (!this.visible) {
+                this.vcr.clear();
+                this.comp = null;
+                return;
+            }
             this.comp = this.forms.createGroup(this.vcr);
         }
         if (!this.comp) return;

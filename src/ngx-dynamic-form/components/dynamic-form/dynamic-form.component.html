@@ -4,7 +4,7 @@
             {{ group.prefix + fieldSet.title | translate }}
         </div>
         <ng-template #subControls>
-            <ng-container *ngFor="let control of controls" [form-group]="control" [form]="this">
+            <ng-container *ngFor="let control of controls" [form-group]="control" [visible]="control.visible" [form]="this">
 
             </ng-container>
         </ng-template>
