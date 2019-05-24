@@ -3,6 +3,7 @@ import {DynamicFormControl} from "./ngx-dynamic-form/common-types";
 export {
     FORM_CONTROL_PROVIDER,
     IFormControlComponent,
+    IFormGroupComponent,
     FormControlComponent,
     IFormControlProviderAcceptor,
     IFormControlProviderLoader,
@@ -48,6 +49,9 @@ export {
     FormStatic,
     FormModel,
     FormFieldSet,
+    FormGroupProvider,
+    provideFormGroup,
+    FormControlProvider,
     provideFormControl,
     defineFormControl,
     getFormFieldSets,
@@ -69,6 +73,7 @@ export {DynamicFormTemplateDirective} from "./ngx-dynamic-form/directives/dynami
 export {DynamicFormBaseComponent} from "./ngx-dynamic-form/components/base/dynamic-form-base.component";
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";
 export {DynamicFormsComponent} from "./ngx-dynamic-form/components/dynamic-forms/dynamic-forms.component";
+export {DynamicFormGroupComponent} from "./ngx-dynamic-form/components/dynamic-form-group/dynamic-form-group.component";
 export {DynamicFormInputComponent} from "./ngx-dynamic-form/components/dynamic-form-input/dynamic-form-input.component";
 export {DynamicFormSelectComponent} from "./ngx-dynamic-form/components/dynamic-form-select/dynamic-form-select.component";
 export {DynamicFormStaticComponent} from "./ngx-dynamic-form/components/dynamic-form-static/dynamic-form-static.component";

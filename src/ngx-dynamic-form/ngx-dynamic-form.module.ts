@@ -3,7 +3,7 @@ import {CommonModule} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {TextMaskModule} from "angular2-text-mask";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
-import {provideFormControl, provideFormGroup} from "./common-types";
+import {FormControlProvider, FormGroupProvider, provideFormControl, provideFormGroup} from "./common-types";
 
 import {DynamicFormService} from "./services/dynamic-form.service";
 
@@ -53,7 +53,7 @@ export const pipes = [];
         FormsModule,
         ReactiveFormsModule,
         TextMaskModule,
-        NgxUtilsModule.forRoot()
+        NgxUtilsModule
     ],
     exports: [
         ...components,
@@ -67,7 +67,8 @@ export const pipes = [];
     providers: pipes
 })
 export class NgxDynamicFormModule {
-    static forRoot(): ModuleWithProviders {
+
+    static forRoot(controlProviders?: Array<FormControlProvider>, groupProvider?: FormGroupProvider): ModuleWithProviders {
         return {
             ngModule: NgxDynamicFormModule,
             providers: [
@@ -76,7 +77,8 @@ export class NgxDynamicFormModule {
                 provideFormControl(DynamicFormSelectComponent, DynamicFormSelectComponent.acceptor, DynamicFormSelectComponent.loader),
                 provideFormControl(DynamicFormStaticComponent, DynamicFormStaticComponent.acceptor, DynamicFormStaticComponent.loader),
                 provideFormControl(DynamicFormModelComponent, DynamicFormModelComponent.acceptor, DynamicFormModelComponent.loader),
-                provideFormGroup(DynamicFormGroupComponent)
+                ...(controlProviders || []),
+                groupProvider || provideFormGroup(DynamicFormGroupComponent)
             ]
         }
     }

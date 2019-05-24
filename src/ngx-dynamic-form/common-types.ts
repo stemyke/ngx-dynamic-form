@@ -812,14 +812,26 @@ export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
     };
 }
 
-export function provideFormGroup(component: Type<IFormGroupComponent>): ValueProvider {
+export interface FormGroupProvider extends ValueProvider {
+    provide: InjectionToken<Type<IFormGroupComponent>>;
+    multi?: boolean;
+    useValue: Type<IFormGroupComponent>;
+}
+
+export function provideFormGroup(component: Type<IFormGroupComponent>): FormGroupProvider {
     return {
         provide: FORM_GROUP_TYPE,
         useValue: component
     };
 }
 
-export function provideFormControl(component: Type<IFormControlComponent>, acceptor: IFormControlProviderAcceptor, loader: IFormControlProviderLoader, priority: number = 0): ValueProvider {
+export interface FormControlProvider {
+    provide: InjectionToken<IFormControlProvider>;
+    multi?: boolean;
+    useValue: IFormControlProvider;
+}
+
+export function provideFormControl(component: Type<IFormControlComponent>, acceptor: IFormControlProviderAcceptor, loader: IFormControlProviderLoader, priority: number = 0): FormControlProvider {
     return {
         provide: FORM_CONTROL_PROVIDER,
         multi: true,

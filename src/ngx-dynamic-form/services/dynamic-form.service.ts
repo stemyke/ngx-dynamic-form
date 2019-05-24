@@ -21,7 +21,11 @@ export class DynamicFormService {
         if (!control) return null;
         const providers = this.components.filter(p => p.acceptor(control));
         if (providers.length == 0) {
-            throw new Error(`No component provider for control: ${JSON.stringify(control)}`);
+            throw new Error(`No component provider for control: ${JSON.stringify({
+                id: control.id,
+                type: control.type,
+                data: control.data
+            })}`);
         }
         // Sort providers
         providers.sort((a, b) => ObjectUtils.compare(a.priority, b.priority))
