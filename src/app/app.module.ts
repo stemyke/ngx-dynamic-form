@@ -6,6 +6,7 @@ import {AppComponent} from "./app.component";
 import {NgxDynamicFormModule, provideFormControl} from "../public_api";
 import {MaterialFormInputComponent} from "./material-form-input.component";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 @NgModule({
     declarations: [
@@ -21,6 +22,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
         MatInputModule,
         MatStepperModule,
         BrowserAnimationsModule,
+        NgxUtilsModule.forRoot(),
         NgxDynamicFormModule.forRoot()
     ],
     providers: [

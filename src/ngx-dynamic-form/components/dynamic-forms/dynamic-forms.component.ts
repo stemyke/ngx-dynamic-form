@@ -39,7 +39,7 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
 
     public configs: IDynamicFormsConfigs;
 
-    @ContentChild("containerTemplate")
+    @ContentChild("containerTemplate", {static: false})
     protected cContainerTemplate: TemplateRef<any>;
 
     @ViewChildren(DynamicFormBaseComponent)

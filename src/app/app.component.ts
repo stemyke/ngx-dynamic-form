@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
 
     data: IDynamicFormsConfigs;
 
-    @ViewChild("form")
+    @ViewChild("form", {static: false})
     private form: IDynamicFormBase;
 
     serialize = (): Promise<IAsyncMessage> => {

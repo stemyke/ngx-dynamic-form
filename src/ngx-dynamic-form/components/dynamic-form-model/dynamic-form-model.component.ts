@@ -8,7 +8,7 @@ import {DynamicFormControl, FormControlComponent, IDynamicForm, IFormModelData} 
 })
 export class DynamicFormModelComponent extends FormControlComponent<IFormModelData> {
 
-    @ViewChild("subForm")
+    @ViewChild("subForm", {static: false})
     private subForm: IDynamicForm;
 
     // Acceptor for provider

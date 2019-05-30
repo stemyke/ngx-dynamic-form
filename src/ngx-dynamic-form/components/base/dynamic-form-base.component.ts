@@ -35,10 +35,10 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @Output() onInit: EventEmitter<IDynamicFormBase>;
     @Output() onSubmit: EventEmitter<IDynamicFormBase>;
 
-    @ContentChild("prefixTemplate")
+    @ContentChild("prefixTemplate", {static: false})
     prefixTemplate: TemplateRef<any>;
 
-    @ContentChild("suffixTemplate")
+    @ContentChild("suffixTemplate", {static: false})
     suffixTemplate: TemplateRef<any>;
 
     get root(): IDynamicFormBase {
@@ -56,13 +56,13 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @ContentChildren(DynamicFormTemplateDirective)
     protected templates: QueryList<DynamicFormTemplateDirective>;
 
-    @ContentChild("wrapperTemplate")
+    @ContentChild("wrapperTemplate", {static: false})
     protected cWrapperTemplate: TemplateRef<any>;
 
-    @ContentChild("fieldSetTemplate")
+    @ContentChild("fieldSetTemplate", {static: false})
     protected cFieldSetTemplate: TemplateRef<any>;
 
-    @ContentChild("controlTemplate")
+    @ContentChild("controlTemplate", {static: false})
     protected cControlTemplate: TemplateRef<any>;
 
     protected constructor(cdr: ChangeDetectorRef, private formService: DynamicFormService) {
