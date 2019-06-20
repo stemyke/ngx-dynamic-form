@@ -1,5 +1,6 @@
 <ng-template #defaultFieldSetTemplate let-id="id" let-controls="controls" let-fieldSet="fieldSet">
     <div [ngClass]="['form-fields', 'form-fields-' + id, fieldSet.classes]">
+        <ng-container [ngxTemplateOutlet]="setPrefixTemplates[fieldSet.id]" [context]="fieldSet"></ng-container>
         <div *ngIf="fieldSet.title" [ngClass]="['form-title', fieldSet.titleClasses || '']">
             {{ group.prefix + fieldSet.title | translate }}
         </div>
@@ -8,7 +9,6 @@
 
             </ng-container>
         </ng-template>
-        <ng-container [ngxTemplateOutlet]="setPrefixTemplates[fieldSet.id]" [context]="fieldSet"></ng-container>
         <div *ngIf="fieldSet.setClasses; else subControls" [ngClass]="fieldSet.setClasses">
             <div *ngIf="fieldSet.controlClasses; else subControls" [ngClass]="fieldSet.controlClasses">
                 <ng-container [ngTemplateOutlet]="subControls"></ng-container>
