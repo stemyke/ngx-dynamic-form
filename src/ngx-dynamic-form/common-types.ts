@@ -678,6 +678,7 @@ export interface IDynamicFormConfig {
 
 export interface IDynamicSingleFormConfig extends IDynamicFormConfig, IDynamicFormInfo {
     data: any;
+    controlData?: IFormControlData;
     multi?: false;
 }
 
@@ -721,6 +722,8 @@ export interface IDynamicFormBase {
     validate(showErrors?: boolean): Promise<any>;
 
     serialize(validate?: boolean): Promise<any>;
+
+    check(): Promise<any>;
 
     getControl(id: string): IDynamicFormControl;
 

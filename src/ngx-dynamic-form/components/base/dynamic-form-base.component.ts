@@ -86,6 +86,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
 
     abstract validate(showErrors?: boolean): Promise<any>;
     abstract serialize(validate?: boolean): Promise<any>;
+    abstract check(): Promise<any>;
     abstract getControl(id: string): IDynamicFormControl;
 
     findProvider(control: IDynamicFormControl): IFormControlProvider {

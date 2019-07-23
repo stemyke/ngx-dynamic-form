@@ -93,6 +93,10 @@ export class DynamicFormComponent extends DynamicFormBaseComponent implements ID
         });
     }
 
+    check(): Promise<any> {
+        return this.group.check();
+    }
+
     getControl(id: string): IDynamicFormControl {
         return this.group.getControl(id);
     }

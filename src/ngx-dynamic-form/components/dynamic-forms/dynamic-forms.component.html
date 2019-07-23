@@ -4,6 +4,7 @@
                       [ngTemplateOutletContext]="{config: config, form: form}"></ng-container>
         <ng-template #singleFormTemplate>
             <div dynamic-form
+                 [hidden]="!config.group?.visible"
                  [ngClass]="config.formClasses || ''"
                  [name]="config.name || form.name"
                  [readonly]="form.readonly"

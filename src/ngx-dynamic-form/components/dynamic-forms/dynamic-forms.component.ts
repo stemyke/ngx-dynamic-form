@@ -77,8 +77,8 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
 
     serialize(validate?: boolean): Promise<any> {
         if (!this.forms) return validate ? Promise.reject(null) : Promise.resolve({});
-        const promises = this.forms.map(f => f.serialize(validate));
         return new Promise<any>((resolve, reject) => {
+            const promises = this.forms.map(f => f.serialize(validate));
             Promise.all(promises).then(results => {
                 let result = {};
                 results.forEach((data, ix) => {
@@ -100,6 +100,11 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
                 resolve(result);
             }, reject);
         });
+    }
+
+    check(): Promise<any> {
+        if (!this.forms) return Promise.resolve(null);
+        return Promise.all(this.forms.map(t => t.check()));
     }
 
     getControl(id: string): IDynamicFormControl {
@@ -126,7 +131,11 @@ export class DynamicFormsComponent extends DynamicFormBaseComponent implements I
         return (configs || []).map((c: any) => {
             if (c.multi) return c;
             const config = <IDynamicSingleFormConfig>c;
-            const group = new DynamicFormGroup(this, {id: config.id || UniqueUtils.uuid(), type: "model"});
+            const group = new DynamicFormGroup(this, {
+                id: config.id || UniqueUtils.uuid(),
+                type: "model",
+                data: config.controlData
+            });
             config.group = group;
             config.name = config.name || this.name;
             group.setup(config.data, config);
