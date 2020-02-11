@@ -68,7 +68,7 @@ export const pipes = [];
 })
 export class NgxDynamicFormModule {
 
-    static forRoot(controlProviders?: Array<FormControlProvider>, groupProvider?: FormGroupProvider): ModuleWithProviders {
+    static forRoot(controlProviders?: Array<FormControlProvider>, groupProvider?: FormGroupProvider): ModuleWithProviders<NgxDynamicFormModule> {
         return {
             ngModule: NgxDynamicFormModule,
             providers: [

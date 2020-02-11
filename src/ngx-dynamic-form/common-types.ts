@@ -1,13 +1,4 @@
-import {
-    ChangeDetectorRef,
-    EventEmitter,
-    HostBinding,
-    InjectionToken,
-    Injector,
-    TemplateRef,
-    Type,
-    ValueProvider
-} from "@angular/core";
+import { ChangeDetectorRef, EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider, Directive } from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
 import {IResolveFactory, ITimer, IAsyncMessage, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
 
@@ -24,6 +15,7 @@ export interface IFormGroupComponent {
     control: IDynamicFormControl;
 }
 
+@Directive()
 export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent {
 
     control: IDynamicFormControl;

@@ -1,7 +1,4 @@
-import {
-    AfterContentInit, ChangeDetectorRef, ContentChild, ContentChildren, EventEmitter, Injector, Input, Output,
-    QueryList, TemplateRef
-} from "@angular/core";
+import { AfterContentInit, ChangeDetectorRef, ContentChild, ContentChildren, EventEmitter, Injector, Input, Output, QueryList, TemplateRef, Directive } from "@angular/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     DynamicFormControl, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormTemplates,
@@ -10,6 +7,7 @@ import {
 import {DynamicFormTemplateDirective} from "../../directives/dynamic-form-template.directive";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 
+@Directive()
 export abstract class DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit {
 
     @Input() name: string;
@@ -35,10 +33,10 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @Output() onInit: EventEmitter<IDynamicFormBase>;
     @Output() onSubmit: EventEmitter<IDynamicFormBase>;
 
-    @ContentChild("prefixTemplate", {static: false})
+    @ContentChild("prefixTemplate")
     prefixTemplate: TemplateRef<any>;
 
-    @ContentChild("suffixTemplate", {static: false})
+    @ContentChild("suffixTemplate")
     suffixTemplate: TemplateRef<any>;
 
     get root(): IDynamicFormBase {
@@ -56,13 +54,13 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
     @ContentChildren(DynamicFormTemplateDirective)
     protected templates: QueryList<DynamicFormTemplateDirective>;
 
-    @ContentChild("wrapperTemplate", {static: false})
+    @ContentChild("wrapperTemplate")
     protected cWrapperTemplate: TemplateRef<any>;
 
-    @ContentChild("fieldSetTemplate", {static: false})
+    @ContentChild("fieldSetTemplate")
     protected cFieldSetTemplate: TemplateRef<any>;
 
-    @ContentChild("controlTemplate", {static: false})
+    @ContentChild("controlTemplate")
     protected cControlTemplate: TemplateRef<any>;
 
     protected constructor(cdr: ChangeDetectorRef, private formService: DynamicFormService) {

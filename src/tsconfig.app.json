@@ -1,11 +1,10 @@
 {
     "extends": "../tsconfig.json",
-    "exclude": [
-        "test.ts",
-        "**/*.spec.ts"
-    ],
     "compilerOptions": {
-        "outDir": "../out-tsc/app",
-        "module": "es2015"
-    }
+        "outDir": "../out-tsc/app"
+},
+  "files": [
+    "main.ts",
+    "polyfills.ts"
+  ]
 }
