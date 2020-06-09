@@ -651,6 +651,7 @@ export interface IFormFieldSet {
 export interface IFormControlOption {
     id: any;
     label: string;
+    selectable?: boolean;
 }
 
 // --- Basic form interfaces ---

@@ -9,7 +9,7 @@
             (ngModelChange)="onSelectChange($event)"
             (blur)="control.onBlur()"
             (focus)="control.onFocus()">
-        <option *ngFor="let option of meta.options" [value]="option.id">
+        <option *ngFor="let option of meta.options" [value]="option.id" [disabled]="option.selectable == false">
             {{ option.label | translate }}
         </option>
     </select>
@@ -26,7 +26,7 @@
                            [id]="control.formId + '-' + option.id"
                            [name]="control.formId + '-' + option.id"
                            [ngClass]="{disabled: control.disabled}"
-                           [disabled]="control.disabled"
+                           [disabled]="control.disabled || option.selectable == false"
                            [value]="option.id"
                            [ngModel]="value"
                            (ngModelChange)="onSelectChange(option.id)"
@@ -45,7 +45,7 @@
                            [id]="control.formId + '-' + option.id"
                            [name]="control.formId + '-' + option.id"
                            [ngClass]="{disabled: control.disabled}"
-                           [disabled]="control.disabled"
+                           [disabled]="control.disabled || option.selectable == false"
                            [ngModel]="checkValue(option)"
                            (ngModelChange)="onSelectChange(option.id)"
                            (blur)="control.onBlur()"
