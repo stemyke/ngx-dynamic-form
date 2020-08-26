@@ -37,23 +37,27 @@ export class FormUtilities {
     }
 
     static validateMinLength(length: number): FormControlValidator {
-        return (control: IDynamicFormControl) => {
+        // @dynamic
+        const lambda = (control: IDynamicFormControl) => {
             const value = control.value;
             if (!ObjectUtils.isString(value) || value.length < length) {
                 return Promise.resolve({"error.min-length": {length: length}});
             }
             return Promise.resolve(null);
-        }
+        };
+        return lambda;
     }
 
     static validateMaxLength(length: number): FormControlValidator {
-        return (control: IDynamicFormControl) => {
+        // @dynamic
+        const lambda = (control: IDynamicFormControl) => {
             const value = control.value;
             if (!ObjectUtils.isString(value) || value.length > length) {
                 return Promise.resolve({"error.max-length": {length: length}});
             }
             return Promise.resolve(null);
-        }
+        };
+        return lambda;
     }
 
     static validateRequiredTranslation(control: IDynamicFormControl): Promise<string> {
