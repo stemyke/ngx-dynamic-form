@@ -6,6 +6,7 @@ import {NgxUtilsModule} from "@stemy/ngx-utils";
 import {FormControlProvider, FormGroupProvider, provideFormControl, provideFormGroup} from "./common-types";
 
 import {DynamicFormService} from "./services/dynamic-form.service";
+import {OpenApiService} from "./services/open-api.service";
 
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 import {DynamicFormControlDirective} from "./directives/dynamic-form-control.directive";
@@ -15,6 +16,7 @@ import {DynamicFormsComponent} from "./components/dynamic-forms/dynamic-forms.co
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
 
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
+import {DynamicFormFileComponent} from "./components/dynamic-form-file/dynamic-form-file.component";
 import {DynamicFormInputComponent} from "./components/dynamic-form-input/dynamic-form-input.component";
 import {DynamicFormSelectComponent} from "./components/dynamic-form-select/dynamic-form-select.component";
 import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
@@ -25,6 +27,7 @@ export const components = [
     DynamicFormsComponent,
     DynamicFormComponent,
     DynamicFormGroupComponent,
+    DynamicFormFileComponent,
     DynamicFormInputComponent,
     DynamicFormSelectComponent,
     DynamicFormStaticComponent,
@@ -73,6 +76,8 @@ export class NgxDynamicFormModule {
             ngModule: NgxDynamicFormModule,
             providers: [
                 DynamicFormService,
+                OpenApiService,
+                provideFormControl(DynamicFormFileComponent, DynamicFormFileComponent.acceptor, DynamicFormFileComponent.loader),
                 provideFormControl(DynamicFormInputComponent, DynamicFormInputComponent.acceptor, DynamicFormInputComponent.loader),
                 provideFormControl(DynamicFormSelectComponent, DynamicFormSelectComponent.acceptor, DynamicFormSelectComponent.loader),
                 provideFormControl(DynamicFormStaticComponent, DynamicFormStaticComponent.acceptor, DynamicFormStaticComponent.loader),

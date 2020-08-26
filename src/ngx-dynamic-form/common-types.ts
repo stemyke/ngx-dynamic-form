@@ -1,6 +1,15 @@
 import { ChangeDetectorRef, EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider, Directive } from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
-import {IResolveFactory, ITimer, IAsyncMessage, ObjectUtils, ReflectUtils, TimerUtils, UniqueUtils} from "@stemy/ngx-utils";
+import {
+    IResolveFactory,
+    ITimer,
+    IAsyncMessage,
+    ObjectUtils,
+    ReflectUtils,
+    TimerUtils,
+    UniqueUtils,
+    IRequestOptions
+} from "@stemy/ngx-utils";
 
 export const FORM_GROUP_TYPE: InjectionToken<Type<IFormControlComponent>> = new InjectionToken<Type<IFormControlComponent>>("form-group-provider");
 export const FORM_CONTROL_PROVIDER: InjectionToken<IFormControlProvider> = new InjectionToken<IFormControlProvider>("form-control-provider");
@@ -635,6 +644,17 @@ export interface IFormStaticData extends IFormControlData {
     style?: string;
 }
 
+export interface IFormFileData extends IFormControlData {
+    accept?: string;
+    multi?: boolean;
+    baseUrl?: string;
+    asFile?: boolean;
+    asDataUrl?: boolean;
+    uploadUrl?: string;
+    uploadOptions?: IRequestOptions;
+    createUploadData?: (file: File) => any;
+}
+
 export interface IFormModelData extends IFormControlData, IDynamicFormInfo {
 
 }
@@ -799,6 +819,12 @@ export function FormModel(data?: IFormModelData): PropertyDecorator {
     };
 }
 
+export function FormFile(data?: IFormFileData): PropertyDecorator {
+    return (target: any, propertyKey: string): void => {
+        defineFormControl(target, propertyKey, createFormFile(propertyKey, data));
+    };
+}
+
 export function FormFieldSet(data: IFormFieldSet): ClassDecorator {
     return (target: any): void => {
         const sets = getFormFieldSets(target);
@@ -904,5 +930,20 @@ export function createFormModel(id: string, data: IFormModelData): IFormControl 
     const control = createFormControl(id, "model", data);
     data = control.data;
     data.name = data.name || "";
+    return control;
+}
+
+export function createFormFile(id: string, data: IFormFileData): IFormControl {
+    const control = createFormControl(id, "file", data);
+    data = control.data;
+    data.accept = data.accept || ".jpg,.jpeg,.png";
+    data.multi = data.multi || false;
+    data.baseUrl = ObjectUtils.isString(data.baseUrl) ? data.baseUrl : "assets/";
+    data.uploadUrl = ObjectUtils.isString(data.uploadUrl) ? data.uploadUrl : "assets";
+    data.createUploadData = data.createUploadData || ((file: File) => {
+        const form = new FormData();
+        form.append("file", file);
+        return form;
+    });
     return control;
 }
