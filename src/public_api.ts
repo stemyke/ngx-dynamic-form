@@ -68,7 +68,7 @@ export {
 
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 export {FormUtilities} from "./ngx-dynamic-form/services/form-utilities";
-export {OpenApiService} from "./ngx-dynamic-form/services/open-api.service";
+export {OpenApiService, IOpenApiSchemaProperty, IOpenApiSchema, IDynamicFormInputs} from "./ngx-dynamic-form/services/open-api.service";
 
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
 export {DynamicFormControlDirective} from "./ngx-dynamic-form/directives/dynamic-form-control.directive";
