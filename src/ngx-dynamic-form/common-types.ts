@@ -13,7 +13,7 @@ import {
 
 // --- Basic form control interfaces ---
 
-export type IFormControlSerializer = (id: string, parent: IDynamicFormControl) => Promise<any>;
+export type IFormControlSerializer = (id: string, parent: AbstractControl) => Promise<any>;
 export type IFormInputMask = string | RegExp;
 export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
 export type IFormInputUnMaskFunction = (value: string) => any;
