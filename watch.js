@@ -55,7 +55,6 @@ function build(type, cb = null) {
 build('', () => {
     console.log('Watching for file changes started.');
     watch('./src', { delay: 1000, recursive: true, filter: /\.(json|html|scss|ts)$/ }, () => build('ngx-dynamic-form'));
-    watch('./styles', { delay: 1000, recursive: false, filter: /\.(css|scss)$/ }, () => build('styles'));
     if (noProject || program.skipModules) return;
     copy('./node_modules', path.join(projectPath, 'node_modules'), `node modules to project: ${projectPath}`).then(() => {
         deployToProject();
