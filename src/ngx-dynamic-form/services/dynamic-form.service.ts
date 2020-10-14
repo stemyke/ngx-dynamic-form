@@ -24,7 +24,6 @@ import {
     DynamicValidatorsConfig
 } from "@ng-dynamic-forms/core";
 import {FormArray, FormGroup} from "@angular/forms";
-import {FormUtilities} from "./form-utilities";
 
 @Injectable()
 export class DynamicFormService extends Base {
