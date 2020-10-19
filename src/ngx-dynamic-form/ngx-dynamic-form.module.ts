@@ -2,7 +2,6 @@ import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
 import {DYNAMIC_VALIDATORS, Validator, ValidatorFactory} from "@ng-dynamic-forms/core";
-import {TextMaskModule} from "angular2-text-mask";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {DynamicFormService} from "./services/dynamic-form.service";
@@ -32,7 +31,6 @@ export const pipes = [];
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        TextMaskModule,
         NgxUtilsModule
     ],
     exports: [

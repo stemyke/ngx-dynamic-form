@@ -4,15 +4,18 @@ import {
     IApiService,
     IOpenApiSchema,
     IOpenApiSchemaProperty,
-    IOpenApiSchemas, ObservableUtils,
+    IOpenApiSchemas,
+    ObservableUtils,
     OpenApiService,
     StringUtils
 } from "@stemy/ngx-utils";
 import {
     DynamicFormArrayModel,
     DynamicFormArrayModelConfig,
+    DynamicFormComponent,
     DynamicFormComponentService,
-    DynamicFormControlModel, DynamicFormGroupModel,
+    DynamicFormControlModel,
+    DynamicFormGroupModel,
     DynamicFormModel,
     DynamicFormService as Base,
     DynamicFormValidationService,
@@ -38,9 +41,16 @@ export class DynamicFormService extends Base {
         super(cs, vs);
     }
 
-    patchValue(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
+    patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         this.patchValueRecursive(value, formModel, formGroup);
+        this.detectChanges();
         formGroup.patchValue(value);
+    }
+
+    patchForm(value: any, component: DynamicFormComponent): void {
+        this.patchValueRecursive(value, component.model, component.group);
+        this.detectChanges(component);
+        component.group.patchValue(value);
     }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -58,7 +68,6 @@ export class DynamicFormService extends Base {
                 while (subModel.size < length) {
                     this.insertFormArrayGroup(subModel.size, subArray, subModel);
                 }
-                this.detectChanges();
                 for (let i = 0; i < length; i++) {
                     const itemModel = subModel.get(i);
                     this.patchValueRecursive(subValue[i], itemModel.group, subArray.at(i) as FormGroup);
