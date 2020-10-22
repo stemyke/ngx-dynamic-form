@@ -5,11 +5,14 @@ import {
     IOpenApiSchema,
     IOpenApiSchemaProperty,
     IOpenApiSchemas,
+    ObjectUtils,
     ObservableUtils,
     OpenApiService,
     StringUtils
 } from "@stemy/ngx-utils";
 import {
+    DynamicFileUploadModel,
+    DynamicFileUploadModelConfig,
     DynamicFormArrayModel,
     DynamicFormArrayModelConfig,
     DynamicFormComponent,
@@ -113,8 +116,8 @@ export class DynamicFormService extends Base {
                 } else {
                     return new DynamicInputModel(this.getFormInputConfig(property, schema));
                 }
-            // case "file":
-            //     return createFormFile(property.id, this.getFormFileData(property, schema));
+            case "file":
+                return new DynamicFileUploadModel(this.getFormUploadConfig(property, schema));
         }
         return null;
     }
@@ -122,7 +125,8 @@ export class DynamicFormService extends Base {
     protected getFormControlConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormValueControlModelConfig<any> {
         return {
             id: property.id,
-            label: property.id,
+            label: ObjectUtils.isString(property.label) ? property.label : property.id,
+            hidden: property.hidden,
             // readonly: property.readonly ? FormUtilities.readonly : null,
             // shouldSerialize: FormUtilities.checkReadonly,
             validators: this.getValidators(property, schema)
@@ -162,9 +166,11 @@ export class DynamicFormService extends Base {
         return Object.assign(this.getFormControlConfig(property, schema), { options });
     }
 
-    // protected getFormFileData(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): IFormFileData {
-    //     return Object.assign(Object.assign({}, this.getBaseFormData(property, schema)), { multi: property.multi });
-    // }
+    protected getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {
+        const url = this.api.url(property.url || "assets");
+        const {accept, autoUpload, maxSize, minSize, removeUrl, showFileList} = property;
+        return Object.assign(this.getFormControlConfig(property, schema), { url, accept, autoUpload, maxSize, minSize, removeUrl, showFileList });
+    }
 
     protected getValidators(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicValidatorsConfig {
         const validators: DynamicValidatorsConfig = {};
