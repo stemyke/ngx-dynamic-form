@@ -1,6 +1,8 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {NgModule} from "@angular/core";
-import {MatFormFieldModule, MatInputModule, MatStepperModule} from "@angular/material";
+import {MatStepperModule} from "@angular/material/stepper";
+import {MatInputModule} from "@angular/material/input";
+import {MatFormFieldModule} from "@angular/material/form-field";
 
 import {AppComponent} from "./app.component";
 import {NgxDynamicFormModule, provideFormControl} from "../public_api";
