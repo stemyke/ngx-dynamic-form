@@ -10,8 +10,14 @@ import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
 import {validateJSON, validatePhone, validateRequiredTranslation} from "./utils/validators";
 
+import {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
+import {DynamicBaseFormControlContainerComponent} from "./components/base/dynamic-base-form-control-container.component";
+
 // --- Components ---
-export const components = [];
+export const components = [
+    DynamicBaseFormComponent,
+    DynamicBaseFormControlContainerComponent
+];
 
 // --- Directives ---
 export const directives = [
