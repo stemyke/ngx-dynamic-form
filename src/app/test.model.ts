@@ -155,10 +155,10 @@ export class TestModel {
             params: ["select", "test2"]
         },
         reload: "date",
-        options: () => Promise.resolve([
-            {id: "test5", label: "label.test5"},
-            {id: "test3", label: "label.test3"}
-        ])
+        options: [
+            {value: "test5", label: "label.test5"},
+            {value: "test3", label: "label.test3"}
+        ]
     })
     select6: string = null;
 

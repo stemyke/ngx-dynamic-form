@@ -56,6 +56,10 @@ export class DynamicFormService extends Base {
         component.group.patchValue(value);
     }
 
+    // serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
+    //
+    // }
+
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         Object.keys(value).forEach(key => {
             const subModel = this.findModelById(key, formModel);
@@ -81,6 +85,30 @@ export class DynamicFormService extends Base {
                 this.patchValueRecursive(subValue, subModel.group, subGroup as FormGroup);
             }
         });
+    }
+
+    protected async serializeRecursive(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
+        // const result = {};
+        // const keys = formGroup.;
+        //
+        // Object.keys(value).forEach(key => {
+        //     const subModel = this.findModelById(key, formModel);
+        //     const subValue = value[key];
+        //     if (!subModel) return;
+        //     const subGroup = this.findControlByModel(subModel, formGroup);
+        //     if (subModel instanceof DynamicFormArrayModel) {
+        //         const length = Array.isArray(subValue) ? subValue.length : 0;
+        //         const subArray = subGroup as FormArray;
+        //         for (let i = 0; i < length; i++) {
+        //             const itemModel = subModel.get(i);
+        //             this.patchValueRecursive(subValue[i], itemModel.group, subArray.at(i) as FormGroup);
+        //         }
+        //         return;
+        //     }
+        //     if (subModel instanceof DynamicFormGroupModel) {
+        //         this.patchValueRecursive(subValue, subModel.group, subGroup as FormGroup);
+        //     }
+        // });
     }
 
     async getFormModelForSchema(name: string): Promise<DynamicFormModel> {
@@ -127,9 +155,11 @@ export class DynamicFormService extends Base {
             id: property.id,
             label: ObjectUtils.isString(property.label) ? property.label : property.id,
             hidden: property.hidden,
-            // readonly: property.readonly ? FormUtilities.readonly : null,
-            // shouldSerialize: FormUtilities.checkReadonly,
-            validators: this.getValidators(property, schema)
+            disabled: property.disabled,
+            validators: this.getValidators(property, schema),
+            additional: {
+
+            }
         };
     }
 
