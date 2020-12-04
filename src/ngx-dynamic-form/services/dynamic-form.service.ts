@@ -29,8 +29,9 @@ import {
     DynamicSelectModelConfig,
     DynamicValidatorsConfig
 } from "@ng-dynamic-forms/core";
-import {FormArray, FormGroup} from "@angular/forms";
+import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {IFormControlSerializer} from "../common-types";
+import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -59,6 +60,11 @@ export class DynamicFormService extends Base {
 
     serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
         return this.serializeRecursive(formModel, formGroup);
+    }
+
+    showErrors(form: DynamicBaseFormComponent): void {
+        this.showErrorsForGroup(form.group);
+        this.detectChanges(form);
     }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -90,7 +96,7 @@ export class DynamicFormService extends Base {
 
     protected async serializeRecursive(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
         const result = {};
-        if (!formModel || !formGroup.value) return result;
+        if (!formModel || !formGroup || !formGroup.value) return result;
         for (const i in formModel) {
             const subModel = formModel[i] as DynamicFormValueControlModel<any>;
             const subControl = this.findControlByModel(subModel, formGroup);
@@ -119,6 +125,27 @@ export class DynamicFormService extends Base {
             result[subModel.id] = subControl.value;
         }
         return result;
+    }
+
+    protected showErrorsForGroup(formGroup: FormGroup): void {
+        if (!formGroup) return;
+        formGroup.markAsTouched({onlySelf: true});
+        const controls = Object.keys(formGroup.controls).map(id => formGroup.controls[id]);
+        this.showErrorsForControls(controls);
+    }
+
+    protected showErrorsForControls(controls: AbstractControl[]): void {
+        controls.forEach(control => {
+            console.log(control, control.parent);
+            if (control instanceof FormGroup) {
+                this.showErrorsForGroup(control);
+                return;
+            }
+            control.markAsTouched({onlySelf: true});
+            if (control instanceof FormArray) {
+                this.showErrorsForControls(control.controls);
+            }
+        });
     }
 
     async getFormModelForSchema(name: string): Promise<DynamicFormModel> {
@@ -161,15 +188,18 @@ export class DynamicFormService extends Base {
     }
 
     protected getFormControlConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormValueControlModelConfig<any> {
+        const validators = this.getValidators(property, schema);
+        const errorMessages = Object.keys(validators).reduce((res, key) => {
+            res[key] = `error.${key}`;
+            return res;
+        }, {});
         return {
             id: property.id,
             label: ObjectUtils.isString(property.label) ? property.label : property.id,
             hidden: property.hidden,
             disabled: property.disabled,
-            validators: this.getValidators(property, schema),
-            errorMessages: {
-                required: "equi"
-            },
+            validators,
+            errorMessages,
             additional: {
 
             }
@@ -222,7 +252,6 @@ export class DynamicFormService extends Base {
         }
         if (property.minLength) {
             validators.minLength = property.minLength;
-            console.log(property, "??????");
         }
         if (property.maxLength) {
             validators.maxLength = property.maxLength;
@@ -238,7 +267,6 @@ export class DynamicFormService extends Base {
                 validators.email = null;
                 break;
         }
-        console.log(validators, property);
         return validators;
     }
 }

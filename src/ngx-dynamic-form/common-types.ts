@@ -25,7 +25,8 @@ export interface IDynamicFormBase {
     onStatusChange: EventEmitter<IDynamicFormBase>;
     onSubmit: EventEmitter<IDynamicFormBase>;
 
-    serialize(): Promise<any>;
+    validate(): Promise<any>;
+    serialize(validate?: boolean): Promise<any>;
 }
 
 export interface IDynamicForm extends IDynamicFormBase{

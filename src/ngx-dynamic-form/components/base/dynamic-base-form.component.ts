@@ -26,6 +26,7 @@ import {ObservableUtils} from "@stemy/ngx-utils";
 import {DynamicFormState, IDynamicForm, IDynamicFormBase} from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {Observable} from "rxjs/index";
+import {first} from "rxjs/internal/operators";
 
 @Component({
     selector: "dynamic-base-form",
@@ -101,7 +102,28 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements Af
         this.changeDetectorRef.detectChanges();
     }
 
-    serialize(): Promise<any> {
-        return this.formService.serialize(this.model, this.group);
+    validate(showErrors: boolean = true): Promise<any> {
+        if (!this.group) return Promise.resolve();
+        return new Promise<any>((resolve, reject) => {
+            this.group.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
+                if (showErrors) {
+                    this.formService.showErrors(this);
+                }
+                if (status == "VALID") {
+                    resolve(null);
+                    return;
+                }
+                reject(null);
+            });
+            this.group.updateValueAndValidity();
+        });
+    }
+
+    async serialize(validate?: boolean): Promise<any> {
+        if (!this.group) return null;
+        if (validate) {
+            await this.validate();
+        }
+        return await this.formService.serialize(this.model, this.group);
     }
 }

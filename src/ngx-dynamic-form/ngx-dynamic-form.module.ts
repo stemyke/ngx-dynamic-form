@@ -1,7 +1,12 @@
 import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
-import {DYNAMIC_VALIDATORS, Validator, ValidatorFactory} from "@ng-dynamic-forms/core";
+import {
+    DYNAMIC_VALIDATORS,
+    DynamicFormService as BaseDynamicFormService,
+    Validator,
+    ValidatorFactory
+} from "@ng-dynamic-forms/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {DynamicFormService} from "./services/dynamic-form.service";
@@ -70,6 +75,10 @@ export class NgxDynamicFormModule {
             ngModule: NgxDynamicFormModule,
             providers: [
                 DynamicFormService,
+                {
+                    provide: BaseDynamicFormService,
+                    useExisting: DynamicFormService
+                }
             ]
         }
     }
