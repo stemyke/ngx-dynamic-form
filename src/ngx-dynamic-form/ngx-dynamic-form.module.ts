@@ -4,6 +4,7 @@ import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
 import {
     DYNAMIC_VALIDATORS,
     DynamicFormService as BaseDynamicFormService,
+    DynamicFormValidationService as BaseDynamicFormValidationService,
     Validator,
     ValidatorFactory
 } from "@ng-dynamic-forms/core";
@@ -17,6 +18,7 @@ import {validateJSON, validatePhone, validateRequiredTranslation} from "./utils/
 
 import {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
 import {DynamicBaseFormControlContainerComponent} from "./components/base/dynamic-base-form-control-container.component";
+import {DynamicFormValidationService} from "./services/dynamic-form-validation.service";
 
 // --- Components ---
 export const components = [
@@ -75,9 +77,14 @@ export class NgxDynamicFormModule {
             ngModule: NgxDynamicFormModule,
             providers: [
                 DynamicFormService,
+                DynamicFormValidationService,
                 {
                     provide: BaseDynamicFormService,
                     useExisting: DynamicFormService
+                },
+                {
+                    provide: BaseDynamicFormValidationService,
+                    useExisting: DynamicFormValidationService
                 }
             ]
         }
