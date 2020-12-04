@@ -12,10 +12,9 @@ import {
     Output,
     Renderer2
 } from "@angular/core";
-import {NgForm} from "@angular/forms";
 import {Subscription} from "rxjs";
 import {IAsyncMessage, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
-import {AsyncSubmitMethod} from "../common-types";
+import {AsyncSubmitMethod, IDynamicFormBase} from "../common-types";
 
 @Directive({
     selector: "[async-submit]",
@@ -24,7 +23,7 @@ import {AsyncSubmitMethod} from "../common-types";
 export class AsyncSubmitDirective implements OnInit, OnDestroy {
 
     @Input("async-submit") method: AsyncSubmitMethod;
-    @Input() form: NgForm;
+    @Input() form: IDynamicFormBase;
 
     @Output() onSuccess: EventEmitter<IAsyncMessage>;
     @Output() onError: EventEmitter<IAsyncMessage>;
@@ -56,7 +55,7 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
         if (!this.form) return;
         this.disabled = this.form.status !== "VALID";
         this.cdr.detectChanges();
-        this.onStatusChange = this.form.statusChanges.subscribe(() => {
+        this.onStatusChange = this.form.onStatusChange.subscribe(() => {
             this.disabled = this.form.status !== "VALID";
             this.cdr.detectChanges();
             if (!this.callback || this.form.status == "PENDING") return;
@@ -65,7 +64,7 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
             }
             this.callback = null;
         });
-        this.onSubmit = this.form.ngSubmit.subscribe(() => this.callMethod());
+        this.onSubmit = this.form.onSubmit.subscribe(() => this.callMethod());
     }
 
     ngOnDestroy(): void {

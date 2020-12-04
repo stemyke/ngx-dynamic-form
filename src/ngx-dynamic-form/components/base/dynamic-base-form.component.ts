@@ -23,25 +23,34 @@ import {
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
 import {ObservableUtils} from "@stemy/ngx-utils";
+import {DynamicFormState, IDynamicForm, IDynamicFormBase} from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {Observable} from "rxjs/index";
 
 @Component({
     selector: "dynamic-base-form",
     template: "",
     changeDetection: ChangeDetectionStrategy.Default
 })
-export class DynamicBaseFormComponent extends DynamicFormComponent implements AfterViewInit {
+export class DynamicBaseFormComponent extends DynamicFormComponent implements AfterViewInit, IDynamicForm {
 
     @Input() group: FormGroup;
     @Input() model: DynamicFormModel;
     @Input() layout: DynamicFormLayout;
 
-    @Output() blur: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
-    @Output() change: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
-    @Output() focus: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
+    @Output() blur: EventEmitter<DynamicFormControlEvent>;
+    @Output() change: EventEmitter<DynamicFormControlEvent>;
+    @Output() focus: EventEmitter<DynamicFormControlEvent>;
 
     @ContentChildren(DynamicTemplateDirective) contentTemplates: QueryList<DynamicTemplateDirective>;
     @ViewChildren(DynamicTemplateDirective) viewTemplates: QueryList<DynamicTemplateDirective>;
+
+    get status(): DynamicFormState {
+        return !this.group ? null : this.group.status as DynamicFormState;
+    }
+
+    @Output() readonly onStatusChange: EventEmitter<IDynamicFormBase>;
+    @Output() readonly onSubmit: EventEmitter<IDynamicFormBase>;
 
     protected subscription: Subscription;
 
@@ -49,6 +58,11 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements Af
                 changeDetectorRef: ChangeDetectorRef,
                 componentService: DynamicFormComponentService,) {
         super(changeDetectorRef, componentService);
+        this.blur = new EventEmitter<DynamicFormControlEvent>();
+        this.change = new EventEmitter<DynamicFormControlEvent>();
+        this.focus = new EventEmitter<DynamicFormControlEvent>();
+        this.onStatusChange = new EventEmitter<IDynamicFormBase>();
+        this.onSubmit = new EventEmitter<IDynamicFormBase>();
         this.templates = new QueryList<DynamicTemplateDirective>();
     }
 
@@ -85,5 +99,9 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements Af
     clearFormArray(formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.clearFormArray(formArray, formArrayModel);
         this.changeDetectorRef.detectChanges();
+    }
+
+    serialize(): Promise<any> {
+        return this.formService.serialize(this.model, this.group);
     }
 }

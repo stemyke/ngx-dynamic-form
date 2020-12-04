@@ -41,7 +41,7 @@
         "no-debugger": true,
         "no-duplicate-variable": true,
         "no-empty": false,
-        "no-empty-interface": true,
+        "no-empty-interface": false,
         "no-eval": false,
         "no-inferrable-types": [
             false,

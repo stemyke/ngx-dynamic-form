@@ -21,7 +21,7 @@ import {
     DynamicFormGroupModel,
     DynamicFormModel,
     DynamicFormService as Base,
-    DynamicFormValidationService,
+    DynamicFormValidationService, DynamicFormValueControlModel,
     DynamicFormValueControlModelConfig,
     DynamicInputModel,
     DynamicInputModelConfig,
@@ -30,6 +30,7 @@ import {
     DynamicValidatorsConfig
 } from "@ng-dynamic-forms/core";
 import {FormArray, FormGroup} from "@angular/forms";
+import {IFormControlSerializer} from "../common-types";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -56,19 +57,19 @@ export class DynamicFormService extends Base {
         component.group.patchValue(value);
     }
 
-    // serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
-    //
-    // }
+    serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
+        return this.serializeRecursive(formModel, formGroup);
+    }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         Object.keys(value).forEach(key => {
             const subModel = this.findModelById(key, formModel);
             const subValue = value[key];
             if (!subModel) return;
-            const subGroup = this.findControlByModel(subModel, formGroup);
+            const subControl = this.findControlByModel(subModel, formGroup);
             if (subModel instanceof DynamicFormArrayModel) {
                 const length = Array.isArray(subValue) ? subValue.length : 0;
-                const subArray = subGroup as FormArray;
+                const subArray = subControl as FormArray;
                 while (subModel.size > length) {
                     this.removeFormArrayGroup(0, subArray, subModel);
                 }
@@ -82,33 +83,42 @@ export class DynamicFormService extends Base {
                 return;
             }
             if (subModel instanceof DynamicFormGroupModel) {
-                this.patchValueRecursive(subValue, subModel.group, subGroup as FormGroup);
+                this.patchValueRecursive(subValue, subModel.group, subControl as FormGroup);
             }
         });
     }
 
     protected async serializeRecursive(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
-        // const result = {};
-        // const keys = formGroup.;
-        //
-        // Object.keys(value).forEach(key => {
-        //     const subModel = this.findModelById(key, formModel);
-        //     const subValue = value[key];
-        //     if (!subModel) return;
-        //     const subGroup = this.findControlByModel(subModel, formGroup);
-        //     if (subModel instanceof DynamicFormArrayModel) {
-        //         const length = Array.isArray(subValue) ? subValue.length : 0;
-        //         const subArray = subGroup as FormArray;
-        //         for (let i = 0; i < length; i++) {
-        //             const itemModel = subModel.get(i);
-        //             this.patchValueRecursive(subValue[i], itemModel.group, subArray.at(i) as FormGroup);
-        //         }
-        //         return;
-        //     }
-        //     if (subModel instanceof DynamicFormGroupModel) {
-        //         this.patchValueRecursive(subValue, subModel.group, subGroup as FormGroup);
-        //     }
-        // });
+        const result = {};
+        if (!formModel || !formGroup.value) return result;
+        for (const i in formModel) {
+            const subModel = formModel[i] as DynamicFormValueControlModel<any>;
+            const subControl = this.findControlByModel(subModel, formGroup);
+            const serializer = subModel.additional?.serializer as IFormControlSerializer;
+            if (ObjectUtils.isFunction(serializer)) {
+                result[subModel.id] = await serializer(subModel, subControl);
+                continue;
+            }
+            if (subModel instanceof DynamicFormArrayModel) {
+                const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
+                const subArray = subControl as FormArray;
+                const resArray = [];
+                for (let i = 0; i < length; i++) {
+                    const itemModel = subModel.get(i);
+                    resArray.push(
+                        await this.serializeRecursive(itemModel.group, subArray.at(i) as FormGroup)
+                    );
+                }
+                result[subModel.id] = resArray;
+                continue;
+            }
+            if (subModel instanceof DynamicFormGroupModel) {
+                result[subModel.id] = this.serializeRecursive(subModel.group, subControl as FormGroup);
+                continue;
+            }
+            result[subModel.id] = subControl.value;
+        }
+        return result;
     }
 
     async getFormModelForSchema(name: string): Promise<DynamicFormModel> {
@@ -157,6 +167,9 @@ export class DynamicFormService extends Base {
             hidden: property.hidden,
             disabled: property.disabled,
             validators: this.getValidators(property, schema),
+            errorMessages: {
+                required: "equi"
+            },
             additional: {
 
             }
@@ -209,6 +222,7 @@ export class DynamicFormService extends Base {
         }
         if (property.minLength) {
             validators.minLength = property.minLength;
+            console.log(property, "??????");
         }
         if (property.maxLength) {
             validators.maxLength = property.maxLength;
@@ -224,6 +238,7 @@ export class DynamicFormService extends Base {
                 validators.email = null;
                 break;
         }
-        return {};
+        console.log(validators, property);
+        return validators;
     }
 }

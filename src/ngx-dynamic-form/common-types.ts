@@ -1,7 +1,12 @@
-import {TemplateRef} from "@angular/core";
-import {AbstractControl, FormArray, NgForm} from "@angular/forms";
+import {EventEmitter, TemplateRef} from "@angular/core";
+import {AbstractControl, FormArray} from "@angular/forms";
 import {Observable} from "rxjs";
-import {DynamicValidatorsConfig, DynamicValidatorDescriptor, DynamicFormOptionConfig} from "@ng-dynamic-forms/core";
+import {
+    DynamicFormOptionConfig,
+    DynamicFormValueControlModel,
+    DynamicValidatorDescriptor,
+    DynamicValidatorsConfig
+} from "@ng-dynamic-forms/core";
 import {
     IAsyncMessage,
     IRequestOptions,
@@ -13,7 +18,21 @@ import {
 
 // --- Basic form control interfaces ---
 
-export type IFormControlSerializer = (id: string, parent: AbstractControl) => Promise<any>;
+export interface IDynamicFormBase {
+
+    status: DynamicFormState;
+
+    onStatusChange: EventEmitter<IDynamicFormBase>;
+    onSubmit: EventEmitter<IDynamicFormBase>;
+
+    serialize(): Promise<any>;
+}
+
+export interface IDynamicForm extends IDynamicFormBase{
+
+}
+
+export type IFormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;
 export type IFormInputMask = string | RegExp;
 export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
 export type IFormInputUnMaskFunction = (value: string) => any;
@@ -134,7 +153,7 @@ export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
 
 export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;
 
-export declare type AsyncSubmitMethod = (form: NgForm) => Promise<IAsyncMessage>;
+export declare type AsyncSubmitMethod = (form: IDynamicFormBase) => Promise<IAsyncMessage>;
 
 export interface IDynamicFormInfo {
     name?: string;
