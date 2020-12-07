@@ -6,7 +6,7 @@ import {
     ContentChildren,
     EventEmitter,
     HostBinding,
-    Input,
+    Input, OnInit,
     Output,
     QueryList,
     Type,
@@ -14,6 +14,7 @@ import {
     ViewContainerRef
 } from "@angular/core";
 import {FormGroup} from "@angular/forms";
+import {Subscription} from "rxjs";
 import {
     DYNAMIC_FORM_CONTROL_TYPE_ARRAY,
     DynamicFormArrayGroupModel,
@@ -28,13 +29,15 @@ import {
     DynamicFormValidationService,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
+import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
     selector: "dynamic-base-form-control",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicBaseFormControlContainerComponent extends DynamicFormControlContainerComponent {
+export class DynamicBaseFormControlContainerComponent extends DynamicFormControlContainerComponent implements OnInit {
 
     @ContentChildren(DynamicTemplateDirective) contentTemplateList: QueryList<DynamicTemplateDirective>;
 
@@ -53,14 +56,7 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
 
     @ViewChild("componentViewContainer", {read: ViewContainerRef, static: true}) componentViewContainerRef: ViewContainerRef;
 
-    constructor(readonly changeDetectorRef: ChangeDetectorRef,
-                readonly componentFactoryResolver: ComponentFactoryResolver,
-                readonly layoutService: DynamicFormLayoutService,
-                readonly validationService: DynamicFormValidationService,
-                readonly componentService: DynamicFormComponentService,
-                readonly relationService: DynamicFormRelationService) {
-        super(changeDetectorRef, componentFactoryResolver, layoutService, validationService, componentService, relationService);
-    }
+    protected onDetectChanges: Subscription;
 
     get componentType(): Type<DynamicFormControl> | null {
         return this.componentService.getCustomComponentType(this.model) ?? this.getComponentType(this.model);
@@ -76,6 +72,32 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
         return (this.model.type == DYNAMIC_FORM_CONTROL_TYPE_ARRAY)
             ? this.layoutService.getAlignedTemplate(this.model, this.templates, "ARRAY_END" as any)
             : this.layoutService.getEndTemplate(this.model, this.templates);
+    }
+
+    get formService(): DynamicFormService {
+        return this.form.formService;
+    }
+
+    constructor(readonly form: DynamicBaseFormComponent,
+                readonly changeDetectorRef: ChangeDetectorRef,
+                readonly componentFactoryResolver: ComponentFactoryResolver,
+                readonly layoutService: DynamicFormLayoutService,
+                readonly validationService: DynamicFormValidationService,
+                readonly componentService: DynamicFormComponentService,
+                readonly relationService: DynamicFormRelationService) {
+        super(changeDetectorRef, componentFactoryResolver, layoutService, validationService, componentService, relationService);
+    }
+
+    ngOnInit(): void {
+        this.onDetectChanges = this.formService.onDetectChanges.subscribe(form => {
+            if (form !== this.form) return;
+            this.changeDetectorRef.detectChanges();
+        });
+    }
+
+    ngOnDestroy() {
+        super.ngOnDestroy();
+        this.onDetectChanges.unsubscribe();
     }
 
     protected getComponentType(model: DynamicFormControlModel): Type<DynamicFormControl> | null {

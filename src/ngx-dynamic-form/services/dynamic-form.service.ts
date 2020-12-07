@@ -1,4 +1,4 @@
-import {Injectable} from "@angular/core";
+import {EventEmitter, Injectable} from "@angular/core";
 import {from, Observable} from "rxjs";
 import {
     IApiService,
@@ -21,7 +21,8 @@ import {
     DynamicFormGroupModel,
     DynamicFormModel,
     DynamicFormService as Base,
-    DynamicFormValidationService, DynamicFormValueControlModel,
+    DynamicFormValidationService,
+    DynamicFormValueControlModel,
     DynamicFormValueControlModelConfig,
     DynamicInputModel,
     DynamicInputModelConfig,
@@ -31,7 +32,6 @@ import {
 } from "@ng-dynamic-forms/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {IFormControlSerializer} from "../common-types";
-import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -40,10 +40,12 @@ export class DynamicFormService extends Base {
         return this.openApi.api;
     }
 
-    private schemas: IOpenApiSchemas;
+    readonly onDetectChanges: EventEmitter<DynamicFormComponent>;
+    protected schemas: IOpenApiSchemas;
 
     constructor(cs: DynamicFormComponentService, vs: DynamicFormValidationService, readonly openApi: OpenApiService) {
         super(cs, vs);
+        this.onDetectChanges = new EventEmitter<DynamicFormComponent>();
     }
 
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -62,9 +64,14 @@ export class DynamicFormService extends Base {
         return this.serializeRecursive(formModel, formGroup);
     }
 
-    showErrors(form: DynamicBaseFormComponent): void {
+    showErrors(form: DynamicFormComponent): void {
         this.showErrorsForGroup(form.group);
         this.detectChanges(form);
+    }
+
+    detectChanges(formComponent?: DynamicFormComponent) {
+        super.detectChanges(formComponent);
+        this.onDetectChanges.emit(formComponent);
     }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
