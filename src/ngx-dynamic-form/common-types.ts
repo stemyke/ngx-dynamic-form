@@ -23,6 +23,7 @@ export interface IDynamicFormBase {
     status: DynamicFormState;
 
     onStatusChange: EventEmitter<IDynamicFormBase>;
+    onValueChange: EventEmitter<IDynamicFormBase>;
     onSubmit: EventEmitter<IDynamicFormBase>;
 
     validate(): Promise<any>;

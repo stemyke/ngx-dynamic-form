@@ -6,7 +6,6 @@ import {AbstractControl} from "@angular/forms";
 export class DynamicFormValidationService extends Base {
 
     showErrorMessages(control: AbstractControl, model: DynamicFormControlModel, hasFocus: boolean): boolean {
-        console.log(model.id, super.showErrorMessages(control, model, hasFocus));
         return super.showErrorMessages(control, model, hasFocus);
     }
 }

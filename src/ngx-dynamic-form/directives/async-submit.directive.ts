@@ -39,12 +39,24 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
         return this.disabled;
     }
 
+    set isDisabled(value: boolean) {
+        this.disabled = value;
+        if (value) {
+            this.renderer.setAttribute(this.elem.nativeElement, "disabled", "disabled");
+            return;
+        }
+        this.renderer.removeAttribute(this.elem.nativeElement, "disabled");
+    }
+
     @HostBinding("class.loading")
     get isLoading(): boolean {
         return this.loading;
     }
 
-    constructor(@Inject(TOASTER_SERVICE) private toaster: IToasterService, private cdr: ChangeDetectorRef, elem: ElementRef, renderer: Renderer2) {
+    constructor(@Inject(TOASTER_SERVICE) private toaster: IToasterService,
+                readonly cdr: ChangeDetectorRef,
+                readonly elem: ElementRef,
+                readonly renderer: Renderer2) {
         this.onSuccess = new EventEmitter<IAsyncMessage>();
         this.onError = new EventEmitter<IAsyncMessage>();
         if (elem.nativeElement.tagName !== "BUTTON") return;
@@ -53,10 +65,10 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         if (!this.form) return;
-        this.disabled = this.form.status !== "VALID";
+        this.isDisabled = this.form.status !== "VALID";
         this.cdr.detectChanges();
         this.onStatusChange = this.form.onStatusChange.subscribe(() => {
-            this.disabled = this.form.status !== "VALID";
+            this.isDisabled = this.form.status !== "VALID";
             this.cdr.detectChanges();
             if (!this.callback || this.form.status == "PENDING") return;
             if (!this.disabled) {

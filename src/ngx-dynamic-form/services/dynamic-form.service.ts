@@ -143,7 +143,6 @@ export class DynamicFormService extends Base {
 
     protected showErrorsForControls(controls: AbstractControl[]): void {
         controls.forEach(control => {
-            console.log(control, control.parent);
             if (control instanceof FormGroup) {
                 this.showErrorsForGroup(control);
                 return;
