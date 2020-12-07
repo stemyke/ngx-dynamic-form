@@ -39,6 +39,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Input() group: FormGroup;
     @Input() model: DynamicFormModel;
     @Input() layout: DynamicFormLayout;
+    @Input() labelPrefix: string;
 
     @Output() blur: EventEmitter<DynamicFormControlEvent>;
     @Output() change: EventEmitter<DynamicFormControlEvent>;
@@ -73,6 +74,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.templates = new QueryList<DynamicTemplateDirective>();
         this.subscription = new Subscription();
         this.groupSubscription = new Subscription();
+        this.labelPrefix = "label";
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -90,6 +92,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     }
 
     ngAfterViewInit(): void {
+        console.log(this.ngForm);
         this.subscription = ObservableUtils.multiSubscription(
             ObservableUtils.subscribe({
                 subjects: [this.contentTemplates.changes, this.viewTemplates.changes],
@@ -98,7 +101,10 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                     this.templates.reset(templates);
                 }
             }),
-            this.ngForm.ngSubmit.subscribe(() => this.onSubmit.emit(this))
+            this.ngForm.ngSubmit.subscribe(() => {
+                console.log("FORM SUBMITTED");
+                this.onSubmit.emit(this);
+            })
         );
     }
 
