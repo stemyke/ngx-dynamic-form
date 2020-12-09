@@ -51,7 +51,7 @@ export class DynamicFormService extends Base {
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         this.patchValueRecursive(value, formModel, formGroup);
         this.detectChanges();
-        formGroup.patchValue(value);
+        formGroup.patchValue(ObjectUtils.copy(value));
     }
 
     patchForm(value: any, component: DynamicFormComponent): void {
@@ -80,6 +80,10 @@ export class DynamicFormService extends Base {
             const subValue = value[key];
             if (!subModel) return;
             const subControl = this.findControlByModel(subModel, formGroup);
+            if (subModel instanceof DynamicSelectModel && ObjectUtils.isObject(subValue)) {
+                value[key] = subValue.id || subValue._id || subValue;
+                return;
+            }
             if (subModel instanceof DynamicFormArrayModel) {
                 const length = Array.isArray(subValue) ? subValue.length : 0;
                 const subArray = subControl as FormArray;
@@ -237,7 +241,7 @@ export class DynamicFormService extends Base {
             : ObservableUtils.fromFunction(() => {
                 this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
                     return result.items.map(i => {
-                        return { id: i._id, label: i.name };
+                        return { value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id };
                     });
                 });
                 return this.api.cache[property.endpoint];
