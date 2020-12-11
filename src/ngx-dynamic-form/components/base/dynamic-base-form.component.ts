@@ -92,7 +92,6 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     }
 
     ngAfterViewInit(): void {
-        console.log(this.ngForm);
         this.subscription = ObservableUtils.multiSubscription(
             ObservableUtils.subscribe({
                 subjects: [this.contentTemplates.changes, this.viewTemplates.changes],

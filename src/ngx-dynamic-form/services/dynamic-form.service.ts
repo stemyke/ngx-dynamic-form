@@ -232,7 +232,14 @@ export class DynamicFormService extends Base {
                 inputType = "textarea";
                 break;
         }
-        return Object.assign(this.getFormControlConfig(property, schema), { inputType, multiple: property.type == "array" });
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                inputType,
+                autoComplete: property.autoComplete || "off",
+                multiple: property.type == "array"
+            }
+        );
     }
 
     protected getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
