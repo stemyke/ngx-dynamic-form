@@ -245,7 +245,7 @@ export class DynamicFormService extends Base {
     protected getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
         const $enum = property.items?.enum || property.enum
         const options = ObjectUtils.isArray($enum)
-            ? new BehaviorSubject($enum.map(id => ({id, label: `${property.id}.${id}`})))
+            ? new BehaviorSubject($enum.map(value => ({value, label: `${property.id}.${value}`})))
             : ObservableUtils.fromFunction(() => {
                 this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
                     return result.items.map(i => {

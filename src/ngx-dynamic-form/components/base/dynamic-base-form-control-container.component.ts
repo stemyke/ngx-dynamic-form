@@ -31,6 +31,8 @@ import {
 } from "@ng-dynamic-forms/core";
 import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {ObjectUtils} from "@stemy/ngx-utils";
+import {OnCreatedFormControl} from "../../common-types";
 
 @Component({
     selector: "dynamic-base-form-control",
@@ -98,6 +100,13 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
     ngOnDestroy() {
         super.ngOnDestroy();
         this.onDetectChanges.unsubscribe();
+    }
+
+    protected createFormControlComponent() {
+        super.createFormControlComponent();
+        const component = this.componentRef?.instance as OnCreatedFormControl;
+        if (!component || !ObjectUtils.isFunction(component.onCreated)) return;
+        component.onCreated();
     }
 
     protected getComponentType(model: DynamicFormControlModel): Type<DynamicFormControl> | null {

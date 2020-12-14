@@ -2,6 +2,7 @@ import {EventEmitter, TemplateRef} from "@angular/core";
 import {AbstractControl, FormArray} from "@angular/forms";
 import {Observable} from "rxjs";
 import {
+    DynamicFormControl,
     DynamicFormOptionConfig,
     DynamicFormValueControlModel,
     DynamicValidatorDescriptor,
@@ -32,6 +33,10 @@ export interface IDynamicFormBase {
 
 export interface IDynamicForm extends IDynamicFormBase{
 
+}
+
+export interface OnCreatedFormControl extends DynamicFormControl {
+    onCreated(): any;
 }
 
 export type IFormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;

@@ -1,6 +1,7 @@
 export {
     IDynamicFormBase,
     IDynamicForm,
+    OnCreatedFormControl,
     IFormControlSerializer,
     IFormInputMask,
     IFormInputMaskFunction,
