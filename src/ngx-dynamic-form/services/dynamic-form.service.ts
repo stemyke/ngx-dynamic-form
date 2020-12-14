@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable} from "@angular/core";
-import {from, Observable} from "rxjs";
+import {BehaviorSubject} from "rxjs";
 import {
     IApiService,
     IOpenApiSchema,
@@ -188,6 +188,8 @@ export class DynamicFormService extends Base {
             case "array":
                 if (property.items?.$ref || property.$ref) {
                     return new DynamicFormArrayModel(this.getFormArrayConfig(property, schema));
+                } else if (property.items?.enum || property.enum) {
+                    return new DynamicSelectModel<any>(this.getFormSelectConfig(property, schema));
                 } else {
                     return new DynamicInputModel(this.getFormInputConfig(property, schema));
                 }
@@ -210,16 +212,14 @@ export class DynamicFormService extends Base {
             disabled: property.disabled,
             validators,
             errorMessages,
-            additional: {
-
-            }
+            additional: {}
         };
     }
 
     protected getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormArrayModelConfig {
         const ref = property.items?.$ref || property.$ref || "";
         const subSchema = this.schemas[ref.split("/").pop()];
-        return Object.assign(this.getFormControlConfig(property, schema), { groupFactory: () => this.getFormModelForSchemaDef(subSchema) });
+        return Object.assign(this.getFormControlConfig(property, schema), {groupFactory: () => this.getFormModelForSchemaDef(subSchema)});
     }
 
     protected getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
@@ -243,23 +243,38 @@ export class DynamicFormService extends Base {
     }
 
     protected getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
-        const options = Array.isArray(property.enum)
-            ? from(property.enum.map(id => ({ id, label: `${property.id}.${id}` }))) as Observable<any>
+        const $enum = property.items?.enum || property.enum
+        const options = ObjectUtils.isArray($enum)
+            ? new BehaviorSubject($enum.map(id => ({id, label: `${property.id}.${id}`})))
             : ObservableUtils.fromFunction(() => {
                 this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
                     return result.items.map(i => {
-                        return { value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id };
+                        return {value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id};
                     });
                 });
                 return this.api.cache[property.endpoint];
-            })
-        return Object.assign(this.getFormControlConfig(property, schema), { options });
+            });
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                options,
+                multiple: property.type == "array"
+            }
+        );
     }
 
     protected getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {
         const url = this.api.url(property.url || "assets");
         const {accept, autoUpload, maxSize, minSize, removeUrl, showFileList} = property;
-        return Object.assign(this.getFormControlConfig(property, schema), { url, accept, autoUpload, maxSize, minSize, removeUrl, showFileList });
+        return Object.assign(this.getFormControlConfig(property, schema), {
+            url,
+            accept,
+            autoUpload,
+            maxSize,
+            minSize,
+            removeUrl,
+            showFileList
+        });
     }
 
     protected getValidators(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicValidatorsConfig {
