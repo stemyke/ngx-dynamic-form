@@ -86,6 +86,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 }),
                 this.group.valueChanges.subscribe(() => {
                     this.onValueChange.emit(this);
+                    this.formService.notifyChanges(this.model, this.group);
                 })
             );
         }
@@ -101,7 +102,6 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 }
             }),
             this.ngForm.ngSubmit.subscribe(() => {
-                console.log("FORM SUBMITTED");
                 this.onSubmit.emit(this);
             })
         );

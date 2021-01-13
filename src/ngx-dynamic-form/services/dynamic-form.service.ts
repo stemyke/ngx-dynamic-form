@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable} from "@angular/core";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, Subject} from "rxjs";
 import {
     IApiService,
     IOpenApiSchema,
@@ -32,6 +32,7 @@ import {
 } from "@ng-dynamic-forms/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {IFormControlSerializer} from "../common-types";
+import {FormSubject} from "../utils/form-subject";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -62,6 +63,10 @@ export class DynamicFormService extends Base {
 
     serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
         return this.serializeRecursive(formModel, formGroup);
+    }
+
+    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup): void {
+        this.notifyChangesRecusrive(formModel, formGroup);
     }
 
     showErrors(form: DynamicFormComponent): void {
@@ -138,6 +143,36 @@ export class DynamicFormService extends Base {
         return result;
     }
 
+    protected notifyChangesRecusrive(formModel: DynamicFormModel, formGroup: FormGroup): void {
+        if (!formModel || !formGroup) return;
+        for (const i in formModel) {
+            const subModel = formModel[i] as DynamicFormValueControlModel<any>;
+            const subControl = this.findControlByModel(subModel, formGroup);
+            if (subModel instanceof DynamicFormArrayModel) {
+                const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
+                const subArray = subControl as FormArray;
+                for (let i = 0; i < length; i++) {
+                    const itemModel = subModel.get(i);
+                    this.notifyChangesRecusrive(itemModel.group, subArray.at(i) as FormGroup);
+                }
+                continue;
+            }
+            if (subModel instanceof DynamicFormGroupModel) {
+                this.notifyChangesRecusrive(subModel.group, subControl as FormGroup);
+                continue;
+            }
+            if (subModel instanceof DynamicSelectModel) {
+                let options = subModel.options$;
+                while (options instanceof Subject && options.source) {
+                    options = options.source;
+                }
+                if (options instanceof FormSubject) {
+                    options.notify(subModel, subControl);
+                }
+            }
+        }
+    }
+
     protected showErrorsForGroup(formGroup: FormGroup): void {
         if (!formGroup) return;
         formGroup.markAsTouched({onlySelf: true});
@@ -174,7 +209,7 @@ export class DynamicFormService extends Base {
     }
 
     protected getFormControlModel(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormControlModel {
-        if (Array.isArray(property.enum)) {
+        if (Array.isArray(property.enum) || ObjectUtils.isString(property.optionsPath)) {
             return new DynamicSelectModel<any>(this.getFormSelectConfig(property, schema));
         }
         switch (property.type) {
@@ -243,8 +278,38 @@ export class DynamicFormService extends Base {
     }
 
     protected getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
-        const $enum = property.items?.enum || property.enum
-        const options = ObjectUtils.isArray($enum)
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                options: this.getFormSelectOptions(property, schema),
+                multiple: property.type == "array"
+            }
+        );
+    }
+
+    protected getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
+        const $enum = property.items?.enum || property.enum;
+        if (property.optionsPath) {
+            return new FormSubject(((formModel, control) => {
+                let path = property.optionsPath;
+                let target = control;
+                if (path.startsWith("$root")) {
+                    path = path.substr(5);
+                    while (target.parent) {
+                        target = target.parent;
+                    }
+                }
+                while (path.startsWith(".")) {
+                    path = path.substr(1);
+                    if (target.parent) {
+                        target = target.parent;
+                    }
+                }
+                const value = ObjectUtils.getValue(target.value, path);
+                return (!ObjectUtils.isArray(value) ? []: value).map(value => ({value, label: value}));
+            }));
+        }
+        return ObjectUtils.isArray($enum)
             ? new BehaviorSubject($enum.map(value => ({value, label: `${property.id}.${value}`})))
             : ObservableUtils.fromFunction(() => {
                 this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
@@ -254,13 +319,6 @@ export class DynamicFormService extends Base {
                 });
                 return this.api.cache[property.endpoint];
             });
-        return Object.assign(
-            this.getFormControlConfig(property, schema),
-            {
-                options,
-                multiple: property.type == "array"
-            }
-        );
     }
 
     protected getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {

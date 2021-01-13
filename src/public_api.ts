@@ -49,6 +49,7 @@ export {
 } from "./ngx-dynamic-form/common-types";
 
 export {validateJSON, validateRequiredTranslation, validatePhone} from "./ngx-dynamic-form/utils/validators";
+export {FormSubject} from "./ngx-dynamic-form/utils/form-subject";
 
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 
