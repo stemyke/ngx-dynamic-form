@@ -11,6 +11,8 @@ import {
     StringUtils
 } from "@stemy/ngx-utils";
 import {
+    DynamicCheckboxModel,
+    DynamicCheckboxModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
     DynamicFormArrayModel,
@@ -215,9 +217,10 @@ export class DynamicFormService extends Base {
         switch (property.type) {
             case "string":
             case "number":
-            case "boolean":
             case "textarea":
                 return new DynamicInputModel(this.getFormInputConfig(property, schema));
+            case "boolean":
+                return new DynamicCheckboxModel(this.getFormCheckboxConfig(property, schema));
             case "list":
                 return new DynamicSelectModel<any>(this.getFormSelectConfig(property, schema));
             case "array":
@@ -283,6 +286,15 @@ export class DynamicFormService extends Base {
             {
                 options: this.getFormSelectOptions(property, schema),
                 multiple: property.type == "array"
+            }
+        );
+    }
+
+    protected getFormCheckboxConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicCheckboxModelConfig {
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                indeterminate: property.indeterminate === true
             }
         );
     }
