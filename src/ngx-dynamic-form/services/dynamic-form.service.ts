@@ -21,6 +21,7 @@ import {
     DynamicFormComponentService,
     DynamicFormControlModel,
     DynamicFormGroupModel,
+    DynamicFormGroupModelConfig,
     DynamicFormModel,
     DynamicFormService as Base,
     DynamicFormValidationService,
@@ -68,7 +69,7 @@ export class DynamicFormService extends Base {
     }
 
     notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup): void {
-        this.notifyChangesRecusrive(formModel, formGroup);
+        this.notifyChangesRecursive(formModel, formGroup);
     }
 
     showErrors(form: DynamicFormComponent): void {
@@ -137,7 +138,7 @@ export class DynamicFormService extends Base {
                 continue;
             }
             if (subModel instanceof DynamicFormGroupModel) {
-                result[subModel.id] = this.serializeRecursive(subModel.group, subControl as FormGroup);
+                result[subModel.id] = await this.serializeRecursive(subModel.group, subControl as FormGroup);
                 continue;
             }
             result[subModel.id] = subControl.value;
@@ -145,7 +146,7 @@ export class DynamicFormService extends Base {
         return result;
     }
 
-    protected notifyChangesRecusrive(formModel: DynamicFormModel, formGroup: FormGroup): void {
+    protected notifyChangesRecursive(formModel: DynamicFormModel, formGroup: FormGroup): void {
         if (!formModel || !formGroup) return;
         for (const i in formModel) {
             const subModel = formModel[i] as DynamicFormValueControlModel<any>;
@@ -155,12 +156,12 @@ export class DynamicFormService extends Base {
                 const subArray = subControl as FormArray;
                 for (let i = 0; i < length; i++) {
                     const itemModel = subModel.get(i);
-                    this.notifyChangesRecusrive(itemModel.group, subArray.at(i) as FormGroup);
+                    this.notifyChangesRecursive(itemModel.group, subArray.at(i) as FormGroup);
                 }
                 continue;
             }
             if (subModel instanceof DynamicFormGroupModel) {
-                this.notifyChangesRecusrive(subModel.group, subControl as FormGroup);
+                this.notifyChangesRecursive(subModel.group, subControl as FormGroup);
                 continue;
             }
             if (subModel instanceof DynamicSelectModel) {
@@ -234,6 +235,9 @@ export class DynamicFormService extends Base {
             case "file":
                 return new DynamicFileUploadModel(this.getFormUploadConfig(property, schema));
         }
+        if (property.$ref) {
+            return new DynamicFormGroupModel(this.getFormGroupConfig(property, schema));
+        }
         return null;
     }
 
@@ -258,6 +262,12 @@ export class DynamicFormService extends Base {
         const ref = property.items?.$ref || property.$ref || "";
         const subSchema = this.schemas[ref.split("/").pop()];
         return Object.assign(this.getFormControlConfig(property, schema), {groupFactory: () => this.getFormModelForSchemaDef(subSchema)});
+    }
+
+    protected getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormGroupModelConfig {
+        const ref = property.$ref || "";
+        const subSchema = this.schemas[ref.split("/").pop()];
+        return Object.assign(this.getFormControlConfig(property, schema), {group: this.getFormModelForSchemaDef(subSchema)});
     }
 
     protected getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
