@@ -15,6 +15,7 @@ import {
 } from "@angular/core";
 import {FormArray, FormGroup, NgForm} from "@angular/forms";
 import {Subscription} from "rxjs";
+import {first} from "rxjs/operators";
 import {
     DynamicFormArrayModel,
     DynamicFormComponent,
@@ -24,10 +25,9 @@ import {
     DynamicFormModel,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
-import {ObservableUtils} from "@stemy/ngx-utils";
+import {EventsService, ObservableUtils} from "@stemy/ngx-utils";
 import {DynamicFormState, IDynamicForm, IDynamicFormBase} from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
-import {first} from "rxjs/internal/operators";
 
 @Component({
     selector: "dynamic-base-form",
@@ -62,6 +62,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     protected groupSubscription: Subscription;
 
     constructor(@Inject(DynamicFormService) readonly formService: DynamicFormService,
+                @Inject(EventsService) readonly events: EventsService,
                 changeDetectorRef: ChangeDetectorRef,
                 componentService: DynamicFormComponentService,) {
         super(changeDetectorRef, componentService);
@@ -94,12 +95,17 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
 
     ngAfterViewInit(): void {
         this.subscription = ObservableUtils.multiSubscription(
-            ObservableUtils.subscribe({
-                subjects: [this.contentTemplates.changes, this.viewTemplates.changes],
-                cb: () => {
-                    const templates = this.contentTemplates.toArray().concat(this.viewTemplates.toArray());
-                    this.templates.reset(templates);
+            ObservableUtils.subscribe(
+                {
+                    subjects: [this.contentTemplates.changes, this.viewTemplates.changes],
+                    cb: () => {
+                        const templates = this.contentTemplates.toArray().concat(this.viewTemplates.toArray());
+                        this.templates.reset(templates);
+                    }
                 }
+            ),
+            this.events.languageChanged.subscribe(() => {
+                this.formService.detectChanges(this)
             }),
             this.ngForm.ngSubmit.subscribe(() => {
                 this.onSubmit.emit(this);
