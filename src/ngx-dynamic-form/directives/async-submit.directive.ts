@@ -24,6 +24,7 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
 
     @Input("async-submit") method: AsyncSubmitMethod;
     @Input() form: IDynamicFormBase;
+    @Input() context: any;
 
     @Output() onSuccess: EventEmitter<IAsyncMessage>;
     @Output() onError: EventEmitter<IAsyncMessage>;
@@ -95,7 +96,7 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
     callMethod(): void {
         if (this.loading) return;
         this.loading = true;
-        this.method(this.form).then(result => {
+        this.method(this.form, this.context).then(result => {
             this.loading = false;
             if (result) {
                 this.onSuccess.emit(result);

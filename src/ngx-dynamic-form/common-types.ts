@@ -160,7 +160,7 @@ export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
 
 export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;
 
-export declare type AsyncSubmitMethod = (form: IDynamicFormBase) => Promise<IAsyncMessage>;
+export declare type AsyncSubmitMethod = (form: IDynamicFormBase, context?: any) => Promise<IAsyncMessage>;
 
 export interface IDynamicFormInfo {
     name?: string;
