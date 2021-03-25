@@ -31,6 +31,8 @@ import {
     DynamicInputModelConfig,
     DynamicSelectModel,
     DynamicSelectModelConfig,
+    DynamicTextAreaModel,
+    DynamicTextAreaModelConfig,
     DynamicValidatorsConfig
 } from "@ng-dynamic-forms/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
@@ -218,8 +220,9 @@ export class DynamicFormService extends Base {
         switch (property.type) {
             case "string":
             case "number":
-            case "textarea":
                 return new DynamicInputModel(this.getFormInputConfig(property, schema));
+            case "textarea":
+                return new DynamicTextAreaModel(this.getFormTextareaConfig(property, schema));
             case "boolean":
                 return new DynamicCheckboxModel(this.getFormCheckboxConfig(property, schema));
             case "list":
@@ -284,6 +287,19 @@ export class DynamicFormService extends Base {
             this.getFormControlConfig(property, schema),
             {
                 inputType,
+                autoComplete: property.autoComplete || "off",
+                multiple: property.type == "array"
+            }
+        );
+    }
+
+    protected getFormTextareaConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicTextAreaModelConfig {
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                cols: property.cols || null,
+                rows: property.rows || 10,
+                wrap: property.wrap || false,
                 autoComplete: property.autoComplete || "off",
                 multiple: property.type == "array"
             }
