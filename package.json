@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "10.2.13",
+    "version": "10.2.14",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -21,7 +21,6 @@
         "@angular/router": "^10.0.0",
         "@angular/platform-browser": "^10.0.0",
         "@angular/platform-server": "^10.0.0",
-        "@nguniversal/express-engine": "^10.0.0",
         "express": "^4.0.0",
         "resize-detector": "^0.2.2",
         "core-js": "^3.6.5",
@@ -29,7 +28,7 @@
         "zone.js": "^0.10.3",
         "moment": "^2.27.0",
         "ngx-device-detector": "^2.0.0",
-        "@stemy/ngx-utils": "^10.2.35",
+        "@stemy/ngx-utils": "^10.2.39",
         "@ng-dynamic-forms/core": "^12.0.0",
         "@ng-dynamic-forms/ui-basic": "^12.0.0"
     },
@@ -42,7 +41,6 @@
         "@angular/router": "^10.1.5",
         "@angular/platform-browser": "^10.1.5",
         "@angular/platform-server": "^10.1.5",
-        "@nguniversal/express-engine": "10.0.2",
         "express": "4.17.1",
         "resize-detector": "0.2.2",
         "core-js": "3.6.5",
@@ -50,7 +48,7 @@
         "zone.js": "0.10.3",
         "moment": "2.27.0",
         "ngx-device-detector": "2.0.0",
-        "@stemy/ngx-utils": "10.2.35",
+        "@stemy/ngx-utils": "10.2.39",
         "@ng-dynamic-forms/core": "12.0.0",
         "@ng-dynamic-forms/ui-basic": "12.0.0",
         "@angular/platform-browser-dynamic": "^10.1.5",

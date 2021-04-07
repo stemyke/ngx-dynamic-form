@@ -6,7 +6,8 @@ import {
     ContentChildren,
     EventEmitter,
     HostBinding,
-    Input, OnInit,
+    Input,
+    OnInit,
     Output,
     QueryList,
     Type,
@@ -94,6 +95,7 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
         this.onDetectChanges = this.formService.onDetectChanges.subscribe(form => {
             if (form !== this.form) return;
             this.changeDetectorRef.detectChanges();
+            this.formService.updateSelectOptions(this.model, this.control);
         });
     }
 

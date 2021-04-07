@@ -1,12 +1,12 @@
 import {EventEmitter, Injectable} from "@angular/core";
-import {BehaviorSubject, Subject} from "rxjs";
+import {Subject} from "rxjs";
 import {
     IApiService,
+    ILanguageService,
     IOpenApiSchema,
     IOpenApiSchemaProperty,
     IOpenApiSchemas,
     ObjectUtils,
-    ObservableUtils,
     OpenApiService,
     StringUtils
 } from "@stemy/ngx-utils";
@@ -23,6 +23,7 @@ import {
     DynamicFormGroupModel,
     DynamicFormGroupModelConfig,
     DynamicFormModel,
+    DynamicFormOptionConfig,
     DynamicFormService as Base,
     DynamicFormValidationService,
     DynamicFormValueControlModel,
@@ -44,6 +45,10 @@ export class DynamicFormService extends Base {
 
     get api(): IApiService {
         return this.openApi.api;
+    }
+
+    get language(): ILanguageService {
+        return this.api.language;
     }
 
     readonly onDetectChanges: EventEmitter<DynamicFormComponent>;
@@ -72,6 +77,22 @@ export class DynamicFormService extends Base {
 
     notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup): void {
         this.notifyChangesRecursive(formModel, formGroup);
+    }
+
+    updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: AbstractControl): void {
+        if (formControlModel instanceof DynamicSelectModel) {
+            let options = formControlModel.options$;
+            if (options instanceof FormSubject) {
+                options.notify(formControlModel, formControl);
+                return;
+            }
+            while (options instanceof Subject && options.source) {
+                options = options.source;
+                if (options instanceof FormSubject) {
+                    options.notify(formControlModel, formControl);
+                }
+            }
+        }
     }
 
     showErrors(form: DynamicFormComponent): void {
@@ -166,15 +187,7 @@ export class DynamicFormService extends Base {
                 this.notifyChangesRecursive(subModel.group, subControl as FormGroup);
                 continue;
             }
-            if (subModel instanceof DynamicSelectModel) {
-                let options = subModel.options$;
-                while (options instanceof Subject && options.source) {
-                    options = options.source;
-                }
-                if (options instanceof FormSubject) {
-                    options.notify(subModel, subControl);
-                }
-            }
+            this.updateSelectOptions(subModel, subControl);
         }
     }
 
@@ -325,10 +338,18 @@ export class DynamicFormService extends Base {
         );
     }
 
+    protected async translateOptions(options: DynamicFormOptionConfig<any>[]): Promise<DynamicFormOptionConfig<any>[]> {
+        if (!options) return [];
+        for (const option of options) {
+            option.label = await this.language.getTranslation(option.label);
+        }
+        return options;
+    }
+
     protected getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
         const $enum = property.items?.enum || property.enum;
         if (property.optionsPath) {
-            return new FormSubject(((formModel, control) => {
+            return new FormSubject((formModel, control) => {
                 let path = property.optionsPath;
                 let target = control;
                 if (path.startsWith("$root")) {
@@ -344,19 +365,25 @@ export class DynamicFormService extends Base {
                     }
                 }
                 const value = ObjectUtils.getValue(target.value, path);
-                return (!ObjectUtils.isArray(value) ? []: value).map(value => ({value, label: value}));
-            }));
-        }
-        return ObjectUtils.isArray($enum)
-            ? new BehaviorSubject($enum.map(value => ({value, label: `${property.id}.${value}`})))
-            : ObservableUtils.fromFunction(() => {
-                this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
-                    return result.items.map(i => {
-                        return {value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id};
-                    });
-                });
-                return this.api.cache[property.endpoint];
+                const options = (!ObjectUtils.isArray(value) ? []: value).map(value => ({value, label: value}));
+                return this.translateOptions(options);
             });
+        }
+        if (ObjectUtils.isArray($enum)) {
+            return new FormSubject(() => {
+                const options = $enum.map(value => ({value, label: `${property.id}.${value}`}));
+                return this.translateOptions(options);
+            });
+        }
+        return new FormSubject(async () => {
+            this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
+                return result.items.map(i => {
+                    return {value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id};
+                });
+            });
+            const options = (await this.api.cache[property.endpoint]).map(t => Object.assign({}, t));
+            return this.translateOptions(options);
+        });
     }
 
     protected getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {
