@@ -371,7 +371,10 @@ export class DynamicFormService extends Base {
         }
         if (ObjectUtils.isArray($enum)) {
             return new FormSubject(() => {
-                const options = $enum.map(value => ({value, label: `${property.id}.${value}`}));
+                const options = $enum.map(value => {
+                    const label = property.translatable ? `${property.id}.${value}` : value;
+                    return {value, label};
+                });
                 return this.translateOptions(options);
             });
         }
