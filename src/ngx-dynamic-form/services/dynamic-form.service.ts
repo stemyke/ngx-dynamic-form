@@ -270,7 +270,7 @@ export class DynamicFormService extends Base {
             disabled: property.disabled,
             validators,
             errorMessages,
-            additional: {}
+            additional: Object.assign({}, property)
         };
     }
 
