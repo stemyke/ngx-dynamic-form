@@ -1,22 +1,11 @@
 import {EventEmitter, Injectable} from "@angular/core";
+import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
-import {
-    IApiService,
-    ILanguageService,
-    IOpenApiSchema,
-    IOpenApiSchemaProperty,
-    IOpenApiSchemas,
-    ObjectUtils,
-    OpenApiService,
-    StringUtils
-} from "@stemy/ngx-utils";
 import {
     DynamicCheckboxModel,
     DynamicCheckboxModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
-    DynamicFormArrayModel,
-    DynamicFormArrayModelConfig,
     DynamicFormComponent,
     DynamicFormComponentService,
     DynamicFormControlModel,
@@ -34,11 +23,24 @@ import {
     DynamicSelectModelConfig,
     DynamicTextAreaModel,
     DynamicTextAreaModelConfig,
-    DynamicValidatorsConfig
+    DynamicValidatorsConfig,
+    DynamicFormArrayModel as DynamicFormArrayModelBase
 } from "@ng-dynamic-forms/core";
-import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
+import {
+    IApiService,
+    ILanguageService,
+    IOpenApiSchema,
+    IOpenApiSchemaProperty,
+    IOpenApiSchemas,
+    ObjectUtils,
+    OpenApiService,
+    StringUtils
+} from "@stemy/ngx-utils";
+
 import {IFormControlSerializer} from "../common-types";
+
 import {FormSubject} from "../utils/form-subject";
+import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "../utils/dynamic-form-array.model";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -115,7 +117,7 @@ export class DynamicFormService extends Base {
                 value[key] = subValue.id || subValue._id || subValue;
                 return;
             }
-            if (subModel instanceof DynamicFormArrayModel) {
+            if (subModel instanceof DynamicFormArrayModelBase) {
                 const length = Array.isArray(subValue) ? subValue.length : 0;
                 const subArray = subControl as FormArray;
                 while (subModel.size > length) {
@@ -147,7 +149,7 @@ export class DynamicFormService extends Base {
                 result[subModel.id] = await serializer(subModel, subControl);
                 continue;
             }
-            if (subModel instanceof DynamicFormArrayModel) {
+            if (subModel instanceof DynamicFormArrayModelBase) {
                 const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
                 const subArray = subControl as FormArray;
                 const resArray = [];
@@ -174,7 +176,7 @@ export class DynamicFormService extends Base {
         for (const i in formModel) {
             const subModel = formModel[i] as DynamicFormValueControlModel<any>;
             const subControl = this.findControlByModel(subModel, formGroup);
-            if (subModel instanceof DynamicFormArrayModel) {
+            if (subModel instanceof DynamicFormArrayModelBase) {
                 const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
                 const subArray = subControl as FormArray;
                 for (let i = 0; i < length; i++) {
