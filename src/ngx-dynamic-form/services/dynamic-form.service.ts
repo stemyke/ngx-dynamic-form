@@ -303,7 +303,13 @@ export class DynamicFormService extends Base {
             {
                 inputType,
                 autoComplete: property.autoComplete || "off",
-                multiple: property.type == "array"
+                multiple: property.type == "array",
+                accept: ObjectUtils.isString(property.accept) ? property.accept : null,
+                mask: ObjectUtils.isString(property.mask) ? property.mask : null,
+                pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
+                step: isNaN(property.step) ? 1 : property.step,
+                min: isNaN(property.min) ? Number.MIN_SAFE_INTEGER : property.min,
+                max: isNaN(property.max) ? Number.MAX_SAFE_INTEGER : property.max,
             }
         );
     }
