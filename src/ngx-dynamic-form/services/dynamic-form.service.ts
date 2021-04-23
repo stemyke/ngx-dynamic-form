@@ -166,6 +166,12 @@ export class DynamicFormService extends Base {
                 result[subModel.id] = await this.serializeRecursive(subModel.group, subControl as FormGroup);
                 continue;
             }
+            if (subModel instanceof DynamicInputModel && !ObjectUtils.isNullOrUndefined(subControl.value)) {
+                result[subModel.id] = subModel.inputType == "number"
+                    ? parseFloat((`${subControl.value}` || "0").replace(/,/gi, ".")) || null
+                    : subControl.value;
+                continue;
+            }
             result[subModel.id] = subControl.value;
         }
         return result;
