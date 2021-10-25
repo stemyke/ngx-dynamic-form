@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "10.2.21",
+    "version": "10.2.22",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -28,7 +28,7 @@
         "zone.js": "^0.10.3 || ^0.11.4",
         "moment": "^2.27.0",
         "ngx-device-detector": "^2.0.0",
-        "@stemy/ngx-utils": "^10.2.39 | ^11.0.0",
+        "@stemy/ngx-utils": "^10.2.39 || ^11.0.0",
         "@ng-dynamic-forms/core": "^12.0.0",
         "@ng-dynamic-forms/ui-basic": "^12.0.0"
     },
