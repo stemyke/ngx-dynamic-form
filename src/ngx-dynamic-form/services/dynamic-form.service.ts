@@ -419,7 +419,7 @@ export class DynamicFormService extends Base {
 
     protected getValidators(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicValidatorsConfig {
         const validators: DynamicValidatorsConfig = {};
-        if (schema.required.indexOf(property.id) >= 0) {
+        if (ObjectUtils.isArray(schema.required) && schema.required.indexOf(property.id) >= 0) {
             validators.required = null;
         }
         if (property.minLength) {

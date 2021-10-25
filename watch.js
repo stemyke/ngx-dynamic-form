@@ -19,6 +19,7 @@ const noProject = !projectPath;
 let builds = 0;
 
 function deployToProject() {
+    if (noProject) return Promise.resolve();
     const stemyPath = path.join(projectPath, 'node_modules', '@stemy');
     return copy('./dist/', stemyPath, 'dist folder to project').then(() => {
         const targetPath = path.join(stemyPath, 'ngx-dynamic-form');
@@ -55,7 +56,10 @@ function build(type, cb = null) {
 build('', () => {
     console.log('Watching for file changes started.');
     watch('./src', { delay: 1000, recursive: true, filter: /\.(json|html|scss|ts)$/ }, () => build('ngx-dynamic-form'));
-    if (noProject || program.skipModules) return;
+    if (noProject || program.skipModules) {
+        deployToProject();
+        return;
+    }
     copy('./node_modules', path.join(projectPath, 'node_modules'), `node modules to project: ${projectPath}`).then(() => {
         deployToProject();
     });
