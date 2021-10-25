@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "10.1.4",
+    "version": "10.1.5",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -29,7 +29,7 @@
         "moment": "^2.27.0",
         "ngx-device-detector": "^2.0.0",
         "invokable": "^1.0.3",
-        "@stemy/ngx-utils": "^10.2.38",
+        "@stemy/ngx-utils": "^10.2.38 | ^11.0.0",
         "angular2-text-mask": "^9.0.0"
     },
     "devDependencies": {
