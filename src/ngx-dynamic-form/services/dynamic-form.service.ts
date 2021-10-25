@@ -241,6 +241,7 @@ export class DynamicFormService extends Base {
         switch (property.type) {
             case "string":
             case "number":
+            case "integer":
                 return new DynamicInputModel(this.getFormInputConfig(property, schema));
             case "textarea":
                 return new DynamicTextAreaModel(this.getFormTextareaConfig(property, schema));
@@ -302,6 +303,9 @@ export class DynamicFormService extends Base {
                 break;
             case "textarea":
                 inputType = "textarea";
+                break;
+            case "integer":
+                inputType = "number";
                 break;
         }
         return Object.assign(
