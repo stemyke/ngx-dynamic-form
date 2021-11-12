@@ -55,9 +55,6 @@ export type IFormControlProviderAcceptor = (control: IDynamicFormControl) => boo
 export type IFormControlProviderLoader = (control: IDynamicFormControl) => Promise<any>;
 export type IFormControlOptions = (control: IDynamicFormControl) => Promise<IFormControlOption[]>;
 export type IFormControlSerializer = (id: string, parent: IDynamicFormControl) => Promise<any>;
-export type IFormInputMask = string | RegExp;
-export type IFormInputMaskFunction = (raw: string) => IFormInputMask[];
-export type IFormInputUnMaskFunction = (value: string) => any;
 
 export interface IFormControlProvider {
     component: Type<IFormControlComponent>;
@@ -625,8 +622,6 @@ export interface IFormInputData extends IFormControlData {
     autocomplete?: string;
     placeholder?: string;
     useLanguage?: boolean;
-    mask?: IFormInputMaskFunction | IFormInputMask[];
-    unmask?: IFormInputUnMaskFunction;
     step?: number;
     min?: number;
     max?: number;
@@ -903,9 +898,8 @@ export function createFormInput(id: string, data: IFormInputData, type: string =
     data = control.data;
     data.type = data.type || type;
     data.classes = !data.classes ? `form-group-${data.type}` : `${data.classes} form-group-${data.type}`;
-    data.placeholder = data.placeholder || (data.type == "mask" ? "_" : "");
+    data.placeholder = data.placeholder || "";
     data.step = data.step || 1;
-    data.mask = data.mask || [/\w*/gi];
     return control;
 }
 

@@ -101,7 +101,7 @@
         "no-input-rename": false,
         "no-output-rename": false,
         "component-class-suffix": true,
-        "directive-class-suffix": true,
+        "directive-class-suffix": false,
         "no-access-missing-member": true,
         "templates-use-public": true,
         "invoke-injectable": true

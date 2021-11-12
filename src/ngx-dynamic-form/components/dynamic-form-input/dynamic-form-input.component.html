@@ -41,19 +41,6 @@
                (blur)="onNumberBlur()"
                (focus)="control.onFocus()"/>
     </ng-container>
-    <ng-container *ngSwitchCase="'mask'">
-        <input class="form-control"
-               type="text"
-               [id]="control.formId"
-               [name]="control.formId"
-               [ngClass]="{disabled: control.disabled}"
-               [disabled]="control.disabled"
-               [textMask]="{mask: data.mask, showMask: true, placeholderChar: data.placeholder}"
-               [ngModel]="value"
-               (ngModelChange)="onMaskChange($event)"
-               (blur)="control.onBlur()"
-               (focus)="control.onFocus()"/>
-    </ng-container>
     <ng-container *ngSwitchCase="'checkbox'">
         <input class="form-control"
                type="checkbox"

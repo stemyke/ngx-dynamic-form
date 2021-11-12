@@ -60,16 +60,6 @@ export class TestModel {
     @FormInput({
         fieldSet: "test",
         classes: "col-sm-6",
-        type: "mask",
-        mask: ["(", /[1-9]/, /\d/, /\d/, ")", " ", /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/, /\d/],
-        unmask: value => value ? value.replace(/[(|)|_|\-| ]/gi, "") : ""
-    })
-    @FormSerializable()
-    masked: string = "";
-
-    @FormInput({
-        fieldSet: "test",
-        classes: "col-sm-6",
         max: 100
     })
     num: number = 0;

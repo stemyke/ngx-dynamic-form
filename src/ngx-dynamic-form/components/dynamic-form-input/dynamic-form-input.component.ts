@@ -35,11 +35,6 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
         this.control.setValue(date)
     }
 
-    onMaskChange(value: string): void {
-        value = ObjectUtils.isFunction(this.data.unmask) ? this.data.unmask(value) : value;
-        this.control.setValue(value)
-    }
-
     onTextChange(value: string): void {
         if (!this.data.useLanguage) {
             this.control.setValue(value);
