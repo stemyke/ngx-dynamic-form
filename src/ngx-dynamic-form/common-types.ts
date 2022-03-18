@@ -193,7 +193,7 @@ class DynamicFormControlHelper {
     }
 
     load(control: IDynamicFormControl): Promise<any> {
-        return !this.ctrlProvider ? Promise.resolve() : this.ctrlProvider.loader(control);
+        return !this.ctrlProvider ? Promise.resolve(null) : this.ctrlProvider.loader(control);
     }
 
     check(control: IDynamicFormControl): Promise<boolean> {
@@ -403,7 +403,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
                         const promise = !ctrl ? Promise.resolve(true) : ctrl.shouldSerialize();
                         promise.then(should => {
                             if (should) result[s.id] = res;
-                            resolve();
+                            resolve(null);
                         });
                     });
                 });
@@ -478,11 +478,11 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
 
     private reloadControlsFrom(control: IDynamicFormControl, controls?: Set<IDynamicFormControl>): Promise<any> {
         const data = control.data;
-        if (!data || !data.reload) return Promise.resolve();
+        if (!data || !data.reload) return Promise.resolve(null);
         const reload = ObjectUtils.isArray(data.reload) ? data.reload : [data.reload];
         return Promise.all(reload.map(id => {
             const nextControl = this.getControl(id);
-            if (!nextControl || controls.has(nextControl)) return Promise.resolve();
+            if (!nextControl || controls.has(nextControl)) return Promise.resolve(null);
             controls.add(nextControl);
             return new Promise<any>(resolve => {
                 nextControl.load().then(() => {
