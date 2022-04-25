@@ -14,7 +14,13 @@ import {DynamicFormService} from "./services/dynamic-form.service";
 
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
-import {validateJSON, validatePhone, validateRequiredTranslation} from "./utils/validators";
+import {
+    validateItemsMaxLength, validateItemsMaxValue,
+    validateItemsMinLength, validateItemsMinValue,
+    validateJSON,
+    validatePhone,
+    validateRequiredTranslation
+} from "./utils/validators";
 
 import {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
 import {DynamicBaseFormControlContainerComponent} from "./components/base/dynamic-base-form-control-container.component";
@@ -59,13 +65,20 @@ export const pipes = [];
         ...pipes,
         {provide: NG_VALIDATORS, useValue: validateJSON, multi: true},
         {provide: NG_VALIDATORS, useValue: validateRequiredTranslation, multi: true},
-        {provide: NG_VALIDATORS, useValue: validatePhone, multi: true},
+        {provide: NG_VALIDATORS, useValue: validateItemsMinLength, multi: true},
+        {provide: NG_VALIDATORS, useValue: validateItemsMaxLength, multi: true},
+        {provide: NG_VALIDATORS, useValue: validateItemsMinValue, multi: true},
+        {provide: NG_VALIDATORS, useValue: validateItemsMaxValue, multi: true},
         {
             provide: DYNAMIC_VALIDATORS,
             useValue: new Map<string, Validator | ValidatorFactory>([
-                ["validateJSON", validateJSON],
-                ["validateRequiredTranslation", validateRequiredTranslation],
-                ["validatePhone", validatePhone],
+                ["json", validateJSON],
+                ["requiredTranslation", validateRequiredTranslation],
+                ["phone", validatePhone],
+                ["itemsMinLength", validateItemsMinLength],
+                ["itemsMaxLength", validateItemsMaxLength],
+                ["itemsMinValue", validateItemsMinValue],
+                ["itemsMaxValue", validateItemsMaxValue],
             ])
         }
     ]

@@ -308,6 +308,7 @@ export class DynamicFormService extends Base {
                 inputType = "number";
                 break;
         }
+        const sub = property.type == "array" ? property.items || property : property;
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
@@ -317,9 +318,9 @@ export class DynamicFormService extends Base {
                 accept: ObjectUtils.isString(property.accept) ? property.accept : null,
                 mask: ObjectUtils.isString(property.mask) ? property.mask : null,
                 pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
-                step: isNaN(property.step) ? 1 : property.step,
-                min: isNaN(property.min) ? Number.MIN_SAFE_INTEGER : property.min,
-                max: isNaN(property.max) ? Number.MAX_SAFE_INTEGER : property.max,
+                step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
+                min: isNaN(sub.minimum) ? (isNaN(sub.minLength) ? Number.MIN_SAFE_INTEGER : sub.minLength) : sub.minimum,
+                max: isNaN(sub.maximum) ? (isNaN(sub.maxLength) ? Number.MAX_SAFE_INTEGER : sub.maxLength) : sub.maximum
             }
         );
     }
@@ -426,23 +427,45 @@ export class DynamicFormService extends Base {
         if (ObjectUtils.isArray(schema.required) && schema.required.indexOf(property.id) >= 0) {
             validators.required = null;
         }
-        if (property.minLength) {
+        this.addPropertyValidators(validators, property);
+        this.addItemsValidators(validators, property.items);
+        return validators;
+    }
+
+    protected addPropertyValidators(validators: DynamicValidatorsConfig, property: IOpenApiSchemaProperty): void {
+        if (!property) return;
+        if (!isNaN(property.minLength)) {
             validators.minLength = property.minLength;
         }
-        if (property.maxLength) {
+        if (!isNaN(property.maxLength)) {
             validators.maxLength = property.maxLength;
         }
-        if (property.min) {
-            validators.min = property.min;
+        if (!isNaN(property.minimum)) {
+            validators.min = property.minimum;
         }
-        if (property.max) {
-            validators.max = property.max;
+        if (!isNaN(property.maximum)) {
+            validators.max = property.maximum;
         }
         switch (property.format) {
             case "email":
                 validators.email = null;
                 break;
         }
-        return validators;
+    }
+
+    protected addItemsValidators(validators: DynamicValidatorsConfig, items: IOpenApiSchemaProperty): void {
+        if (!items) return;
+        if (!isNaN(items.minLength)) {
+            validators.itemsMinLength = items.minLength;
+        }
+        if (!isNaN(items.maxLength)) {
+            validators.itemsMaxLength = items.maxLength;
+        }
+        if (!isNaN(items.minimum)) {
+            validators.itemsMinValue = items.minimum;
+        }
+        if (!isNaN(items.maximum)) {
+            validators.itemsMaxValue = items.maximum;
+        }
     }
 }
