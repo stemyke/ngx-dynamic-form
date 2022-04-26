@@ -6,6 +6,7 @@ import {
     DynamicCheckboxModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
+    DynamicFormArrayModel as DynamicFormArrayModelBase,
     DynamicFormComponent,
     DynamicFormComponentService,
     DynamicFormControlModel,
@@ -23,8 +24,7 @@ import {
     DynamicSelectModelConfig,
     DynamicTextAreaModel,
     DynamicTextAreaModelConfig,
-    DynamicValidatorsConfig,
-    DynamicFormArrayModel as DynamicFormArrayModelBase
+    DynamicValidatorsConfig
 } from "@ng-dynamic-forms/core";
 import {
     IApiService,
@@ -39,6 +39,8 @@ import {
 
 import {IFormControlSerializer} from "../common-types";
 
+import {isStringWithVal} from "../utils/misc";
+import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "../utils/dynamic-form-array.model";
 
@@ -235,7 +237,8 @@ export class DynamicFormService extends Base {
     }
 
     protected getFormControlModel(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormControlModel {
-        if (Array.isArray(property.enum) || ObjectUtils.isString(property.optionsPath)) {
+        const $enum = property.items?.enum || property.enum;
+        if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             return new DynamicSelectModel<any>(this.getFormSelectConfig(property, schema));
         }
         switch (property.type) {
@@ -247,13 +250,9 @@ export class DynamicFormService extends Base {
                 return new DynamicTextAreaModel(this.getFormTextareaConfig(property, schema));
             case "boolean":
                 return new DynamicCheckboxModel(this.getFormCheckboxConfig(property, schema));
-            case "list":
-                return new DynamicSelectModel<any>(this.getFormSelectConfig(property, schema));
             case "array":
                 if (property.items?.$ref || property.$ref) {
                     return new DynamicFormArrayModel(this.getFormArrayConfig(property, schema));
-                } else if (property.items?.enum || property.enum) {
-                    return new DynamicSelectModel<any>(this.getFormSelectConfig(property, schema));
                 } else {
                     return new DynamicInputModel(this.getFormInputConfig(property, schema));
                 }
@@ -367,8 +366,17 @@ export class DynamicFormService extends Base {
 
     protected getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
         const $enum = property.items?.enum || property.enum;
-        if (property.optionsPath) {
-            return new FormSubject((formModel, control) => {
+        if (Array.isArray($enum)) {
+            return new FormSelectSubject(() => {
+                const options = $enum.map(value => {
+                    const label = property.translatable ? `${property.id}.${value}` : value;
+                    return {value, label};
+                });
+                return this.translateOptions(options);
+            });
+        }
+        if (isStringWithVal(property.optionsPath)) {
+            return new FormSelectSubject((formModel, control, index) => {
                 let path = property.optionsPath;
                 let target = control;
                 if (path.startsWith("$root")) {
@@ -383,21 +391,12 @@ export class DynamicFormService extends Base {
                         target = target.parent;
                     }
                 }
-                const value = ObjectUtils.getValue(target.value, path);
-                const options = (!ObjectUtils.isArray(value) ? []: value).map(value => ({value, label: value}));
+                const value = ObjectUtils.getValue(target.value, path.replace(/\$ix/gi, index));
+                const options = (!ObjectUtils.isArray(value) ? [] : value).map(value => ({value, label: value}));
                 return this.translateOptions(options);
             });
         }
-        if (ObjectUtils.isArray($enum)) {
-            return new FormSubject(() => {
-                const options = $enum.map(value => {
-                    const label = property.translatable ? `${property.id}.${value}` : value;
-                    return {value, label};
-                });
-                return this.translateOptions(options);
-            });
-        }
-        return new FormSubject(async () => {
+        return new FormSelectSubject(async () => {
             this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
                 return result.items.map(i => {
                     return {value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id};
