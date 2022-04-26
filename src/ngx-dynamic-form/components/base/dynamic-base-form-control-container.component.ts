@@ -30,10 +30,12 @@ import {
     DynamicFormValidationService,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
+import {ObjectUtils} from "@stemy/ngx-utils";
+
+import {OnCreatedFormControl} from "../../common-types";
+import {collectPathAble} from "../../utils/misc";
 import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 import {DynamicFormService} from "../../services/dynamic-form.service";
-import {ObjectUtils} from "@stemy/ngx-utils";
-import {OnCreatedFormControl} from "../../common-types";
 
 @Component({
     selector: "dynamic-base-form-control",
@@ -102,6 +104,15 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
     ngOnDestroy() {
         super.ngOnDestroy();
         this.onDetectChanges.unsubscribe();
+    }
+
+    getLabel(): string {
+        const label = collectPathAble(this.model, p => p.label);
+        if (label.length == 0) return "";
+        if (this.form?.labelPrefix) {
+            label.unshift(this.form.labelPrefix);
+        }
+        return label.join(".");
     }
 
     protected createFormControlComponent() {

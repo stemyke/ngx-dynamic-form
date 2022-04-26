@@ -10,7 +10,8 @@ import {
     OnChanges,
     Output,
     QueryList,
-    SimpleChanges, ViewChild,
+    SimpleChanges,
+    ViewChild,
     ViewChildren
 } from "@angular/core";
 import {FormArray, FormGroup, NgForm} from "@angular/forms";
@@ -21,6 +22,8 @@ import {
     DynamicFormComponent,
     DynamicFormComponentService,
     DynamicFormControlEvent,
+    DynamicFormControlModel,
+    DynamicFormGroupModel,
     DynamicFormLayout,
     DynamicFormModel,
     DynamicTemplateDirective
@@ -28,6 +31,7 @@ import {
 import {EventsService, ObservableUtils} from "@stemy/ngx-utils";
 import {DynamicFormState, IDynamicForm, IDynamicFormBase} from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {collectPathAble} from "../../utils/misc";
 
 @Component({
     selector: "dynamic-base-form",
@@ -137,6 +141,15 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     clearFormArray(formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.clearFormArray(formArray, formArrayModel);
         this.changeDetectorRef.detectChanges();
+    }
+
+    getClass(model?: DynamicFormControlModel): string {
+        const parts = collectPathAble(model, p => p.id);
+        if (parts.length == 0) return "";
+        if (model instanceof DynamicFormGroupModel) {
+            return `form-group-${parts.join("-")}`;
+        }
+        return `form-control-${parts.join("-")}`;
     }
 
     validate(showErrors: boolean = true): Promise<any> {

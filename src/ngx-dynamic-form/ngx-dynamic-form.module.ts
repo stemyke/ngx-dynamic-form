@@ -4,32 +4,38 @@ import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
 import {
     DYNAMIC_VALIDATORS,
     DynamicFormService as BaseDynamicFormService,
-    DynamicFormValidationService as BaseDynamicFormValidationService,
     Validator,
     ValidatorFactory
 } from "@ng-dynamic-forms/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
-import {DynamicFormService} from "./services/dynamic-form.service";
-
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
 import {
-    validateItemsMaxLength, validateItemsMaxValue,
-    validateItemsMinLength, validateItemsMinValue,
+    validateItemsMaxLength,
+    validateItemsMaxValue,
+    validateItemsMinLength,
+    validateItemsMinValue,
     validateJSON,
     validatePhone,
     validateRequiredTranslation
 } from "./utils/validators";
 
 import {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
-import {DynamicBaseFormControlContainerComponent} from "./components/base/dynamic-base-form-control-container.component";
-import {DynamicFormValidationService} from "./services/dynamic-form-validation.service";
+import {DynamicBaseFormArrayComponent} from "./components/base/dynamic-base-form-array.component";
+import {
+    DynamicBaseFormControlContainerComponent
+} from "./components/base/dynamic-base-form-control-container.component";
+import {DynamicBaseFormGroupComponent} from "./components/base/dynamic-base-form-group.component";
+
+import {DynamicFormService} from "./services/dynamic-form.service";
 
 // --- Components ---
 export const components = [
     DynamicBaseFormComponent,
-    DynamicBaseFormControlContainerComponent
+    DynamicBaseFormArrayComponent,
+    DynamicBaseFormControlContainerComponent,
+    DynamicBaseFormGroupComponent
 ];
 
 // --- Directives ---
@@ -90,14 +96,9 @@ export class NgxDynamicFormModule {
             ngModule: NgxDynamicFormModule,
             providers: [
                 DynamicFormService,
-                DynamicFormValidationService,
                 {
                     provide: BaseDynamicFormService,
                     useExisting: DynamicFormService
-                },
-                {
-                    provide: BaseDynamicFormValidationService,
-                    useExisting: DynamicFormValidationService
                 }
             ]
         }

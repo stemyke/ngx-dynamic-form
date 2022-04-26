@@ -66,8 +66,10 @@ export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.servi
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
 
 export {DynamicBaseFormComponent} from "./ngx-dynamic-form/components/base/dynamic-base-form.component";
+export {DynamicBaseFormArrayComponent} from "./ngx-dynamic-form/components/base/dynamic-base-form-array.component";
 export {
     DynamicBaseFormControlContainerComponent
 } from "./ngx-dynamic-form/components/base/dynamic-base-form-control-container.component";
+export {DynamicBaseFormGroupComponent} from "./ngx-dynamic-form/components/base/dynamic-base-form-group.component";
 
 export {NgxDynamicFormModule} from "./ngx-dynamic-form/ngx-dynamic-form.module";
