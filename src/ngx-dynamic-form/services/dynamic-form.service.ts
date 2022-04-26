@@ -318,8 +318,10 @@ export class DynamicFormService extends Base {
                 mask: ObjectUtils.isString(property.mask) ? property.mask : null,
                 pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
                 step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
-                min: isNaN(sub.minimum) ? (isNaN(sub.minLength) ? Number.MIN_SAFE_INTEGER : sub.minLength) : sub.minimum,
-                max: isNaN(sub.maximum) ? (isNaN(sub.maxLength) ? Number.MAX_SAFE_INTEGER : sub.maxLength) : sub.maximum
+                min: isNaN(sub.minimum) ? Number.MIN_SAFE_INTEGER : sub.minimum,
+                max: isNaN(sub.maximum) ? Number.MAX_SAFE_INTEGER : sub.maximum,
+                minLength: isNaN(sub.minLength) ? Number.MIN_SAFE_INTEGER : sub.minLength,
+                maxLength: isNaN(sub.maxLength) ? Number.MAX_SAFE_INTEGER : sub.maxLength,
             }
         );
     }
