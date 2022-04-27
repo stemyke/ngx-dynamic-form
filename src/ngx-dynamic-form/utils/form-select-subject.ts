@@ -7,6 +7,7 @@ export class FormSelectSubject<T extends DynamicFormOptionConfig<any>[]> extends
     protected handleNotifiedValue(controlModel: DynamicSelectModel<any>, control: AbstractControl, val: Promise<T>) {
         val.then(options => {
             this.next(options);
+            if (options.length == 0) return;
             const currentVal = control.value;
             if (controlModel.multiple) {
                 const correctVal = (currentVal || []).filter(t => options.findIndex(o => o.value == t) >= 0);
