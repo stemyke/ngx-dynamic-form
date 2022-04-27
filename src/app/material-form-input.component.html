@@ -1,9 +1,0 @@
-<mat-form-field>
-    <input matInput
-           [placeholder]="control.label | translate"
-           [formControl]="control"
-           autocomplete="false">
-    <mat-error>
-        <span *ngFor="let error of control.errors | entries" class="help-block">{{ error.key | translate: error.value }}</span>
-    </mat-error>
-</mat-form-field>

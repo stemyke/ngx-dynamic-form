@@ -1,8 +1,6 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
-import {IAsyncMessage, ObjectUtils} from "@stemy/ngx-utils";
+import {IAsyncMessage} from "@stemy/ngx-utils";
 import {IDynamicFormBase, IDynamicFormsConfigs} from "../public_api";
-import {SubModel} from "./sub.model";
-import {TestModel} from "./test.model";
 
 @Component({
     moduleId: module.id,
@@ -35,15 +33,6 @@ export class AppComponent implements OnInit {
     }
 
     newModel(): void {
-        this.data = [
-            {
-                id: "test",
-                data: new SubModel()
-            },
-            {
-                id: "test",
-                data: new TestModel()
-            }
-        ];
+        this.data = [];
     }
 }
