@@ -3,6 +3,7 @@ import {AbstractControl, FormArray} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
     DynamicFormControl,
+    DynamicFormControlModel,
     DynamicFormControlModelConfig,
     DynamicFormGroupModelConfig,
     DynamicFormValueControlModel,
@@ -17,7 +18,6 @@ import {
     ObjectUtils,
     ReflectUtils
 } from "@stemy/ngx-utils";
-import {DynamicFormControlModel} from "@ng-dynamic-forms/core/lib/model/dynamic-form-control.model";
 
 // --- Basic form control interfaces ---
 
