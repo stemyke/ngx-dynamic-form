@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable} from "@angular/core";
+import {EventEmitter, Inject, Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
 import {
@@ -59,7 +59,10 @@ export class DynamicFormService extends Base {
     readonly onDetectChanges: EventEmitter<DynamicFormComponent>;
     protected schemas: IOpenApiSchemas;
 
-    constructor(cs: DynamicFormComponentService, vs: DynamicFormValidationService, readonly openApi: OpenApiService) {
+    constructor(cs: DynamicFormComponentService,
+                vs: DynamicFormValidationService,
+                @Inject(OpenApiService) readonly openApi: OpenApiService,
+                @Inject(Injector) readonly injector: Injector) {
         super(cs, vs);
         this.onDetectChanges = new EventEmitter<DynamicFormComponent>();
     }
@@ -230,7 +233,7 @@ export class DynamicFormService extends Base {
             modelType: ModelType, config: DynamicFormControlModelConfig) => {
             const model = new modelType(config);
             if (!ObjectUtils.isFunction(customizeModel)) return [model];
-            const res = customizeModel(property, schema, model, config);
+            const res = customizeModel(property, schema, model, config, this.injector);
             return Array.isArray(res) ? res : [res];
         };
         return this.getFormModelForSchemaDef(this.schemas[name], customizeModels);
@@ -277,7 +280,7 @@ export class DynamicFormService extends Base {
         return [];
     }
 
-    protected getFormControlConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormValueControlModelConfig<any> {
+    getFormControlConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormValueControlModelConfig<any> {
         const validators = this.getValidators(property, schema);
         const errorMessages = Object.keys(validators).reduce((res, key) => {
             res[key] = `error.${key}`;
@@ -294,19 +297,19 @@ export class DynamicFormService extends Base {
         };
     }
 
-    protected getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormArrayModelConfig {
+    getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormArrayModelConfig {
         const ref = property.items?.$ref || property.$ref || "";
         const subSchema = this.schemas[ref.split("/").pop()];
         return Object.assign(this.getFormControlConfig(property, schema), {groupFactory: () => this.getFormModelForSchemaDef(subSchema, customizeModels)});
     }
 
-    protected getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormGroupModelConfig {
+    getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormGroupModelConfig {
         const ref = property.$ref || "";
         const subSchema = this.schemas[ref.split("/").pop()];
         return Object.assign(this.getFormControlConfig(property, schema), {group: this.getFormModelForSchemaDef(subSchema, customizeModels)});
     }
 
-    protected getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
+    getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
         let inputType = StringUtils.has(property.id, "password", "Password") ? "password" : (property.items?.type || property.type);
         switch (inputType) {
             case "boolean":
@@ -338,7 +341,7 @@ export class DynamicFormService extends Base {
         );
     }
 
-    protected getFormTextareaConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicTextAreaModelConfig {
+    getFormTextareaConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicTextAreaModelConfig {
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
@@ -351,7 +354,7 @@ export class DynamicFormService extends Base {
         );
     }
 
-    protected getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
+    getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
@@ -361,7 +364,7 @@ export class DynamicFormService extends Base {
         );
     }
 
-    protected getFormCheckboxConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicCheckboxModelConfig {
+    getFormCheckboxConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicCheckboxModelConfig {
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {

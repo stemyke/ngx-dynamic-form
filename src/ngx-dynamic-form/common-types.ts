@@ -1,4 +1,4 @@
-import {EventEmitter, TemplateRef} from "@angular/core";
+import {EventEmitter, Injector, TemplateRef} from "@angular/core";
 import {AbstractControl, FormArray} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
@@ -51,7 +51,7 @@ export declare interface ModelType extends Function {
 export type FormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;
 export type FormModelCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-    model: DynamicFormControlModel, config: DynamicFormControlModelConfig
+    model: DynamicFormControlModel, config: DynamicFormControlModelConfig, injector: Injector
 ) => DynamicFormControlModel | DynamicFormControlModel[];
 export type FormModelCustomizerWrap = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
