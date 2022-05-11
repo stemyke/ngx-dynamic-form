@@ -310,7 +310,7 @@ export class DynamicFormService extends Base {
     }
 
     getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
-        let inputType = StringUtils.has(property.id, "password", "Password") ? "password" : (property.items?.type || property.type);
+        let inputType = StringUtils.has(property.id, "password", "Password") ? "password" : (property.format || property.items?.type || property.type);
         switch (inputType) {
             case "boolean":
                 inputType = "checkbox";
@@ -337,6 +337,7 @@ export class DynamicFormService extends Base {
                 max: isNaN(sub.maximum) ? Number.MAX_SAFE_INTEGER : sub.maximum,
                 minLength: isNaN(sub.minLength) ? Number.MIN_SAFE_INTEGER : sub.minLength,
                 maxLength: isNaN(sub.maxLength) ? Number.MAX_SAFE_INTEGER : sub.maxLength,
+                placeholder: property.placeholder || ""
             }
         );
     }
