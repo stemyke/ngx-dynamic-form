@@ -3,6 +3,7 @@ import {
     Component,
     EventEmitter,
     forwardRef,
+    Injector,
     Input,
     Output,
     QueryList,
@@ -17,11 +18,11 @@ import {
     DynamicFormControlLayoutContext,
     DynamicFormControlLayoutPlace,
     DynamicFormControlModel,
-    DynamicFormValueControlModel,
     DynamicFormGroupModel,
     DynamicFormLayout,
     DynamicFormLayoutService,
     DynamicFormValidationService,
+    DynamicFormValueControlModel,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
 import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
@@ -53,9 +54,18 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
     }
 
     constructor(protected layoutService: DynamicFormLayoutService,
-                protected validationService: DynamicFormValidationService) {
+                protected validationService: DynamicFormValidationService,
+                protected injector: Injector) {
 
         super(layoutService, validationService);
+    }
+
+    saveTab(index: number): void {
+        this.model.saveTab(index, this.model, this.injector);
+    }
+
+    restoreTab(): number {
+        return this.model.restoreTab(this.model, this.injector);
     }
 
     getClass(context: DynamicFormControlLayoutContext, place: DynamicFormControlLayoutPlace, model?: DynamicFormControlModel): string {

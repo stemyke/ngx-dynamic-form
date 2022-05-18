@@ -300,7 +300,13 @@ export class DynamicFormService extends Base {
     getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormArrayModelConfig {
         const ref = property.items?.$ref || property.$ref || "";
         const subSchema = this.schemas[ref.split("/").pop()];
-        return Object.assign(this.getFormControlConfig(property, schema), {groupFactory: () => this.getFormModelForSchemaDef(subSchema, customizeModels)});
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                groupFactory: () => this.getFormModelForSchemaDef(subSchema, customizeModels),
+                useTabs: property.useTabs || false
+            }
+        );
     }
 
     getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormGroupModelConfig {

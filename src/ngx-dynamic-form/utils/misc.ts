@@ -4,7 +4,7 @@ export function isStringWithVal(val: any): boolean {
     return typeof val == "string" && val.length > 0;
 }
 
-export function collectPathAble<T extends DynamicPathable>(start: T, getter: (cur: T) => string): string[] {
+export function collectPathAble<T extends DynamicPathable>(start: T, getter: (cur: T & DynamicPathable) => string): string[] {
     if (!start || !getter(start)) return [];
     const parts = [];
     let currentPath = start;
