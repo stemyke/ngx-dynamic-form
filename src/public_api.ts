@@ -1,5 +1,5 @@
 export {
-    IDynamicFormBase,
+    IDynamicFormEvent,
     IDynamicForm,
     OnCreatedFormControl,
     FormControlSerializer,
@@ -42,6 +42,7 @@ export {
     validateItemsMaxValue
 } from "./ngx-dynamic-form/utils/validators";
 
+export {DynamicFormArrayModelConfig, DynamicFormArrayModel} from "./ngx-dynamic-form/utils/dynamic-form-array.model";
 export {FormSelectSubject} from "./ngx-dynamic-form/utils/form-select-subject";
 export {FormSubject} from "./ngx-dynamic-form/utils/form-subject";
 

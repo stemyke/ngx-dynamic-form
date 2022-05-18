@@ -2,7 +2,7 @@ import {EventEmitter, Injector, TemplateRef} from "@angular/core";
 import {AbstractControl, FormArray} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
-    DynamicFormControl,
+    DynamicFormControl, DynamicFormControlEvent,
     DynamicFormControlModel,
     DynamicFormControlModelConfig,
     DynamicFormGroupModelConfig,
@@ -24,20 +24,19 @@ import {
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
 
-export interface IDynamicFormBase {
+export interface IDynamicFormEvent extends DynamicFormControlEvent {
+    form: IDynamicForm;
+}
 
+export interface IDynamicForm {
     status: DynamicFormState;
 
-    onStatusChange: EventEmitter<IDynamicFormBase>;
-    onValueChange: EventEmitter<IDynamicFormBase>;
-    onSubmit: EventEmitter<IDynamicFormBase>;
+    onValueChange: EventEmitter<IDynamicFormEvent>;
+    onStatusChange: EventEmitter<IDynamicForm>;
+    onSubmit: EventEmitter<IDynamicForm>;
 
     validate(): Promise<any>;
     serialize(validate?: boolean): Promise<any>;
-}
-
-export interface IDynamicForm extends IDynamicFormBase {
-
 }
 
 export interface OnCreatedFormControl extends DynamicFormControl {
@@ -98,7 +97,7 @@ export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
 
 export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;
 
-export declare type AsyncSubmitMethod = (form: IDynamicFormBase, context?: any) => Promise<IAsyncMessage>;
+export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
 export interface IDynamicFormInfo {
     name?: string;

@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {IAsyncMessage} from "@stemy/ngx-utils";
-import {IDynamicFormBase, IDynamicFormsConfigs} from "../public_api";
+import {IDynamicForm, IDynamicFormsConfigs} from "../public_api";
 
 @Component({
     moduleId: module.id,
@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
     data: IDynamicFormsConfigs;
 
     @ViewChild("form")
-    private form: IDynamicFormBase;
+    private form: IDynamicForm;
 
     serialize = (): Promise<IAsyncMessage> => {
         return new Promise<IAsyncMessage>(resolve => {

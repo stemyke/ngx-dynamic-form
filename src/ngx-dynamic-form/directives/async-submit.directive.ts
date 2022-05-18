@@ -14,7 +14,7 @@ import {
 } from "@angular/core";
 import {Subscription} from "rxjs";
 import {IAsyncMessage, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
-import {AsyncSubmitMethod, IDynamicFormBase} from "../common-types";
+import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
 
 @Directive({
     selector: "[async-submit]",
@@ -23,7 +23,7 @@ import {AsyncSubmitMethod, IDynamicFormBase} from "../common-types";
 export class AsyncSubmitDirective implements OnInit, OnDestroy {
 
     @Input("async-submit") method: AsyncSubmitMethod;
-    @Input() form: IDynamicFormBase;
+    @Input() form: IDynamicForm;
     @Input() context: any;
 
     @Output() onSuccess: EventEmitter<IAsyncMessage>;

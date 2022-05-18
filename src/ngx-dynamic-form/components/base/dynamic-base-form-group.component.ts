@@ -21,8 +21,10 @@ import {
     DynamicFormLayout,
     DynamicFormLayoutService,
     DynamicFormValidationService,
+    DynamicFormValueControlModel,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
+import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {collectPathAble} from "../../utils/misc";
 
 @Component({
@@ -54,6 +56,7 @@ export class DynamicBaseFormGroupComponent extends DynamicFormGroupComponent {
     getClass(context: DynamicFormControlLayoutContext, place: DynamicFormControlLayoutPlace, model?: DynamicFormControlModel): string {
         return [
             context == "element" ? this.getModelClass(model) : null,
+            context == "element" ? this.getAdditionalClass(model) : null,
             super.getClass(context, place, model)
         ].filter(cls => !!cls).join(" ");
     }
@@ -65,5 +68,15 @@ export class DynamicBaseFormGroupComponent extends DynamicFormGroupComponent {
             return `form-group-${parts.join("-")}`;
         }
         return `form-control-${parts.join("-")}`;
+    }
+
+    protected getAdditionalClass(model?: DynamicFormControlModel): string {
+        if (model instanceof DynamicFormArrayModel) {
+            return model.additional?.classes;
+        }
+        if (model instanceof DynamicFormValueControlModel) {
+            return model.additional?.classes;
+        }
+        return null;
     }
 }

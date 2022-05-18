@@ -11,19 +11,20 @@ import {
 import {FormGroup} from "@angular/forms";
 import {
     DynamicFormArrayComponent,
-    DynamicFormArrayModel,
     DynamicFormControlContainerComponent,
     DynamicFormControlCustomEvent,
     DynamicFormControlLayout,
     DynamicFormControlLayoutContext,
     DynamicFormControlLayoutPlace,
     DynamicFormControlModel,
+    DynamicFormValueControlModel,
     DynamicFormGroupModel,
     DynamicFormLayout,
     DynamicFormLayoutService,
     DynamicFormValidationService,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
+import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {collectPathAble} from "../../utils/misc";
 
 @Component({
@@ -47,6 +48,10 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
     @ViewChildren(forwardRef(() => DynamicFormControlContainerComponent))
     components: QueryList<DynamicFormControlContainerComponent>;
 
+    get useTabs(): boolean {
+        return this.model?.useTabs;
+    }
+
     constructor(protected layoutService: DynamicFormLayoutService,
                 protected validationService: DynamicFormValidationService) {
 
@@ -56,7 +61,9 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
     getClass(context: DynamicFormControlLayoutContext, place: DynamicFormControlLayoutPlace, model?: DynamicFormControlModel): string {
         return [
             context == "element" ? this.getModelClass(model) : null,
-            super.getClass(context, place, model)
+            context == "element" ? this.getAdditionalClass(model) : null,
+            super.getClass(context, place, model),
+            model instanceof DynamicFormValueControlModel ? model.additional?.classes : null
         ].filter(cls => !!cls).join(" ");
     }
 
@@ -67,5 +74,15 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
             return `form-group-${parts.join("-")}`;
         }
         return `form-control-${parts.join("-")}`;
+    }
+
+    protected getAdditionalClass(model?: DynamicFormControlModel): string {
+        if (model instanceof DynamicFormArrayModel) {
+            return model.additional?.classes;
+        }
+        if (model instanceof DynamicFormValueControlModel) {
+            return model.additional?.classes;
+        }
+        return null;
     }
 }

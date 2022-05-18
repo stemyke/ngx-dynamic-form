@@ -29,7 +29,7 @@ import {
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
 import {EventsService, ObservableUtils} from "@stemy/ngx-utils";
-import {DynamicFormState, IDynamicForm, IDynamicFormBase} from "../../common-types";
+import {DynamicFormState, IDynamicForm, IDynamicFormEvent} from "../../common-types";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 import {collectPathAble} from "../../utils/misc";
 
@@ -56,9 +56,9 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         return !this.group ? null : this.group.status as DynamicFormState;
     }
 
-    @Output() readonly onStatusChange: EventEmitter<IDynamicFormBase>;
-    @Output() readonly onValueChange: EventEmitter<IDynamicFormBase>;
-    @Output() readonly onSubmit: EventEmitter<IDynamicFormBase>;
+    @Output() readonly onValueChange: EventEmitter<IDynamicFormEvent>;
+    @Output() readonly onStatusChange: EventEmitter<IDynamicForm>;
+    @Output() readonly onSubmit: EventEmitter<IDynamicForm>;
 
     @ViewChild(NgForm)
     protected ngForm: NgForm;
@@ -73,9 +73,9 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.blur = new EventEmitter<DynamicFormControlEvent>();
         this.change = new EventEmitter<DynamicFormControlEvent>();
         this.focus = new EventEmitter<DynamicFormControlEvent>();
-        this.onStatusChange = new EventEmitter<IDynamicFormBase>();
-        this.onValueChange = new EventEmitter<IDynamicFormBase>();
-        this.onSubmit = new EventEmitter<IDynamicFormBase>();
+        this.onValueChange = new EventEmitter<IDynamicFormEvent>();
+        this.onStatusChange = new EventEmitter<IDynamicForm>();
+        this.onSubmit = new EventEmitter<IDynamicForm>();
         this.templates = new QueryList<DynamicTemplateDirective>();
         this.subscription = new Subscription();
         this.groupSubscription = new Subscription();
@@ -90,8 +90,10 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                     this.onStatusChange.emit(this);
                 }),
                 this.group.valueChanges.subscribe(() => {
-                    this.onValueChange.emit(this);
                     this.formService.notifyChanges(this.model, this.group);
+                }),
+                this.change.subscribe(ev => {
+                    this.onValueChange.emit({...ev, form: this});
                 })
             );
         }
