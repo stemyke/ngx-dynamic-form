@@ -90,7 +90,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                     this.onStatusChange.emit(this);
                 }),
                 this.group.valueChanges.subscribe(() => {
-                    this.formService.notifyChanges(this.model, this.group);
+                    this.formService.notifyChanges(this.model, this.group, this.model);
                 }),
                 this.change.subscribe(ev => {
                     this.onValueChange.emit({...ev, form: this});

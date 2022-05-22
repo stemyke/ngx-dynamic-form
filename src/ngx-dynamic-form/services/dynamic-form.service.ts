@@ -13,7 +13,7 @@ import {
     DynamicFormControlModelConfig,
     DynamicFormGroupModel,
     DynamicFormGroupModelConfig,
-    DynamicFormModel,
+    DynamicFormModel, DynamicFormOption,
     DynamicFormOptionConfig,
     DynamicFormService as Base,
     DynamicFormValidationService,
@@ -44,6 +44,7 @@ import {isStringWithVal} from "../utils/misc";
 import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "../utils/dynamic-form-array.model";
+import {DynamicPathable} from "@ng-dynamic-forms/core/lib/model/misc/dynamic-form-control-path.model";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -83,21 +84,21 @@ export class DynamicFormService extends Base {
         return this.serializeRecursive(formModel, formGroup);
     }
 
-    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup): void {
-        this.notifyChangesRecursive(formModel, formGroup);
+    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup, root: DynamicFormModel): void {
+        this.notifyChangesRecursive(formModel, formGroup, root);
     }
 
-    updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: AbstractControl): void {
+    updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: AbstractControl, root: DynamicFormModel): void {
         if (formControlModel instanceof DynamicSelectModel) {
             let options = formControlModel.options$;
             if (options instanceof FormSubject) {
-                options.notify(formControlModel, formControl);
+                options.notify(formControlModel, formControl, root);
                 return;
             }
             while (options instanceof Subject && options.source) {
                 options = options.source;
                 if (options instanceof FormSubject) {
-                    options.notify(formControlModel, formControl);
+                    options.notify(formControlModel, formControl, root);
                 }
             }
         }
@@ -183,7 +184,7 @@ export class DynamicFormService extends Base {
         return result;
     }
 
-    protected notifyChangesRecursive(formModel: DynamicFormModel, formGroup: FormGroup): void {
+    protected notifyChangesRecursive(formModel: DynamicFormModel, formGroup: FormGroup, root: DynamicFormModel): void {
         if (!formModel || !formGroup) return;
         for (const i in formModel) {
             const subModel = formModel[i] as DynamicFormValueControlModel<any>;
@@ -193,15 +194,15 @@ export class DynamicFormService extends Base {
                 const subArray = subControl as FormArray;
                 for (let i = 0; i < length; i++) {
                     const itemModel = subModel.get(i);
-                    this.notifyChangesRecursive(itemModel.group, subArray.at(i) as FormGroup);
+                    this.notifyChangesRecursive(itemModel.group, subArray.at(i) as FormGroup, root);
                 }
                 continue;
             }
             if (subModel instanceof DynamicFormGroupModel) {
-                this.notifyChangesRecursive(subModel.group, subControl as FormGroup);
+                this.notifyChangesRecursive(subModel.group, subControl as FormGroup, root);
                 continue;
             }
-            this.updateSelectOptions(subModel, subControl);
+            this.updateSelectOptions(subModel, subControl, root);
         }
     }
 
@@ -278,6 +279,21 @@ export class DynamicFormService extends Base {
             return customizeModels(property, schema, DynamicFormGroupModel, this.getFormGroupConfig(property, schema, customizeModels));
         }
         return [];
+    }
+
+    findModelByPath(parent: DynamicPathable | DynamicFormModel, path: string[]): DynamicPathable {
+        if (path.length == 0) return parent as DynamicPathable;
+        const next = path.shift() as any;
+        if (Array.isArray(parent)) {
+            return this.findModelByPath(parent.find(t => t.id == next), path);
+        }
+        if (parent instanceof DynamicFormGroupModel) {
+            return this.findModelByPath(parent.group.find(t => t.id == next), path);
+        }
+        if (parent instanceof DynamicFormArrayModel) {
+            return this.findModelByPath(parent.groups.find(t => t.index == next), path);
+        }
+        return parent;
     }
 
     getFormControlConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormValueControlModelConfig<any> {
@@ -400,23 +416,34 @@ export class DynamicFormService extends Base {
             });
         }
         if (isStringWithVal(property.optionsPath)) {
-            return new FormSelectSubject((formModel, control, index) => {
-                let path = property.optionsPath;
+            return new FormSelectSubject((formModel, control, root, indexes) => {
+                let path = property.optionsPath as string;
                 let target = control;
+                let model: DynamicPathable | DynamicFormModel = formModel;
                 if (path.startsWith("$root")) {
                     path = path.substr(5);
                     while (target.parent) {
                         target = target.parent;
                     }
+                    model = root;
                 }
                 while (path.startsWith(".")) {
                     path = path.substr(1);
                     if (target.parent) {
                         target = target.parent;
                     }
+                    model = (model as DynamicPathable).parent || root;
                 }
-                const value = ObjectUtils.getValue(target.value, path.replace(/\$ix/gi, index));
-                const options = (!ObjectUtils.isArray(value) ? [] : value).map(value => ({value, label: value}));
+                Object.keys(indexes).forEach(key => {
+                    path = path.replace(key, indexes[key]);
+                });
+                model = this.findModelByPath(model, path.split("."));
+                const modelOptions = (model instanceof DynamicSelectModel ? model.options : []) as DynamicFormOption<any>[];
+                const value = ObjectUtils.getValue(target.value, path);
+                const options = (!ObjectUtils.isArray(value) ? [] : value).map(value => {
+                    const modelOption = modelOptions.find(t => t.value == value);
+                    return {value, label: modelOption?.label || value};
+                });
                 return this.translateOptions(options);
             });
         }

@@ -1,13 +1,16 @@
 import {Subject} from "rxjs";
 import {AbstractControl} from "@angular/forms";
-import {DynamicFormControlModel} from "@ng-dynamic-forms/core";
-import {DynamicPathable} from "@ng-dynamic-forms/core/lib/model/misc/dynamic-form-control-path.model";
+import {DynamicFormControlModel, DynamicFormModel, DynamicPathable} from "@ng-dynamic-forms/core";
+
+const indexLabels = ["$ix", "$pix"];
+
+export type NotifyCallback = (controlModel: DynamicFormControlModel, control: AbstractControl, root: DynamicFormModel, indexes: any) => any | Promise<any>;
 
 export class FormSubject<T> extends Subject<T> {
 
-    private readonly notifyCallback: (controlModel: DynamicFormControlModel, control: AbstractControl, index?: number) => T | Promise<T>;
+    private readonly notifyCallback: NotifyCallback;
 
-    constructor(notifyCallback: (formModel: DynamicFormControlModel, control: AbstractControl, index?: number) => T | Promise<T>) {
+    constructor(notifyCallback: NotifyCallback) {
         super();
         this.notifyCallback = notifyCallback;
     }
@@ -16,12 +19,18 @@ export class FormSubject<T> extends Subject<T> {
         val.then(v => this.next(v));
     }
 
-    notify(controlModel: DynamicFormControlModel, control: AbstractControl): void {
+    notify(controlModel: DynamicFormControlModel, control: AbstractControl, root: DynamicFormModel): void {
+        const indexes = {};
         let path = controlModel as DynamicPathable;
-        while (path && isNaN(path.index)) {
+        let ix = 0;
+        while (path) {
+            if (!isNaN(path.index)) {
+                const key = indexLabels[ix++] || `$pix${ix}`;
+                indexes[key] = path.index;
+            }
             path = path.parent;
         }
-        let value = this.notifyCallback(controlModel, control, path?.index);
+        let value = this.notifyCallback(controlModel, control, root, indexes);
         if (!(value instanceof Promise)) {
             value = Promise.resolve(value);
         }
