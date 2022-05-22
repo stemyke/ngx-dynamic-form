@@ -1,50 +1,18 @@
 import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
-import {
-    DYNAMIC_VALIDATORS,
-    DynamicFormService as BaseDynamicFormService,
-    Validator,
-    ValidatorFactory
-} from "@ng-dynamic-forms/core";
+import {DYNAMIC_VALIDATORS, DynamicFormService as BaseDynamicFormService, Validator, ValidatorFactory} from "@ng-dynamic-forms/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
-
-import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
 import {
     validateItemsMaxLength,
     validateItemsMaxValue,
-    validateItemsMinLength,
-    validateItemsMinValue,
+    validateItemsMinLength, validateItemsMinValue,
     validateJSON,
-    validatePhone,
-    validateRequiredTranslation
+    validatePhone, validateRequiredTranslation
 } from "./utils/validators";
-
-import {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
-import {DynamicBaseFormArrayComponent} from "./components/base/dynamic-base-form-array.component";
-import {
-    DynamicBaseFormControlContainerComponent
-} from "./components/base/dynamic-base-form-control-container.component";
-import {DynamicBaseFormGroupComponent} from "./components/base/dynamic-base-form-group.component";
-
 import {DynamicFormService} from "./services/dynamic-form.service";
-
-// --- Components ---
-export const components = [
-    DynamicBaseFormComponent,
-    DynamicBaseFormArrayComponent,
-    DynamicBaseFormControlContainerComponent,
-    DynamicBaseFormGroupComponent
-];
-
-// --- Directives ---
-export const directives = [
-    AsyncSubmitDirective,
-];
-
-// --- Pipes ---
-export const pipes = [];
+import {components, directives, pipes} from "./ngx-dynamic-form.imports";
 
 @NgModule({
     declarations: [

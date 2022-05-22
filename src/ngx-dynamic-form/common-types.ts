@@ -184,7 +184,7 @@ export function createFormInput(id: string, config: DynamicInputModelConfig, typ
     config.inputType = config.inputType || type;
     config.placeholder = config.placeholder || (config.inputType == "mask" ? "_" : "");
     config.step = config.step || 1;
-    config.mask = config.mask || [/\w*/gi];
+    config.mask = config.mask || null;
     return control;
 }
 

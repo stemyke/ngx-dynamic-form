@@ -1,13 +1,13 @@
-const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const program = require('commander');
 const watch = require('node-watch');
 const rimraf = require('rimraf');
 const copy = require('./build/copy');
+const {runCommand} = require("./build/run-command");
 
 program
-    .version('10.x', '-v, --version')
+    .version('13.x', '-v, --version')
     .option('-p, --project [path]', 'Project path where ngx-dynamic-form is used')
     .option('-b, --skip-build', 'Skip first build')
     .option('-m, --skip-modules', 'Skip copying node modules to project')
@@ -36,11 +36,14 @@ function build(type, cb = null) {
         return;
     }
     console.log('Build started:', type || 'All');
-    const child = spawn('node', ['build/build.js', type]);
     builds++;
-    child.stdout.pipe(process.stdout);
-    child.on('exit', () => {
+    runCommand(`node build/build.js ${type}`).then(() => {
         console.log('Build ended:', type || 'All');
+        return null;
+    }, reason => {
+        console.error(reason);
+        return null;
+    }).then(() => {
         builds--;
         if (builds === 0) {
             console.log("All builds are finished");
