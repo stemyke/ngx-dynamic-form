@@ -1,18 +1,27 @@
-import {ModuleWithProviders, NgModule} from "@angular/core";
+import {Injector, ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
-import {DYNAMIC_VALIDATORS, DynamicFormService as BaseDynamicFormService, Validator, ValidatorFactory} from "@ng-dynamic-forms/core";
+import {
+    DYNAMIC_FORM_CONTROL_MAP_FN,
+    DYNAMIC_VALIDATORS,
+    DynamicFormService as BaseDynamicFormService,
+    Validator,
+    ValidatorFactory
+} from "@ng-dynamic-forms/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {
     validateItemsMaxLength,
     validateItemsMaxValue,
-    validateItemsMinLength, validateItemsMinValue,
+    validateItemsMinLength,
+    validateItemsMinValue,
     validateJSON,
-    validatePhone, validateRequiredTranslation
+    validatePhone,
+    validateRequiredTranslation
 } from "./utils/validators";
 import {DynamicFormService} from "./services/dynamic-form.service";
-import {components, directives, pipes} from "./ngx-dynamic-form.imports";
+import {components, defaultFormControlProvider, directives, pipes} from "./ngx-dynamic-form.imports";
+import {IDynamicFormModuleConfig} from "./common-types";
 
 @NgModule({
     declarations: [
@@ -59,7 +68,7 @@ import {components, directives, pipes} from "./ngx-dynamic-form.imports";
 })
 export class NgxDynamicFormModule {
 
-    static forRoot(): ModuleWithProviders<NgxDynamicFormModule> {
+    static forRoot(config?: IDynamicFormModuleConfig): ModuleWithProviders<NgxDynamicFormModule> {
         return {
             ngModule: NgxDynamicFormModule,
             providers: [
@@ -67,6 +76,11 @@ export class NgxDynamicFormModule {
                 {
                     provide: BaseDynamicFormService,
                     useExisting: DynamicFormService
+                },
+                {
+                    provide: DYNAMIC_FORM_CONTROL_MAP_FN,
+                    useFactory: (config?.controlProvider || defaultFormControlProvider),
+                    deps: [Injector]
                 }
             ]
         }

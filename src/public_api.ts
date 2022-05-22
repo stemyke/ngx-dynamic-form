@@ -29,7 +29,8 @@ export {
     createFormSelect,
     createFormStatic,
     createFormModel,
-    createFormControl
+    createFormControl,
+    IDynamicFormModuleConfig
 } from "./ngx-dynamic-form/common-types";
 
 export {

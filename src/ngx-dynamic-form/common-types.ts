@@ -18,6 +18,7 @@ import {
     ObjectUtils,
     ReflectUtils
 } from "@stemy/ngx-utils";
+import {DynamicFormControlMapFn} from "@ng-dynamic-forms/core/lib/service/dynamic-form-component.service";
 
 // --- Basic form control interfaces ---
 
@@ -213,4 +214,8 @@ export function createFormFile(id: string, data: DynamicFileUploadModelConfig): 
     data.multiple = data.multiple || false;
     data.url = ObjectUtils.isString(data.url) ? data.url : "assets";
     return control;
+}
+
+export interface IDynamicFormModuleConfig {
+    controlProvider?: (injector: Injector) => DynamicFormControlMapFn;
 }
