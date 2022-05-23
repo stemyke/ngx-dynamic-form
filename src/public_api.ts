@@ -34,6 +34,11 @@ export {
 } from "./ngx-dynamic-form/common-types";
 
 export {
+    MIN_INPUT_NUM,
+    MAX_INPUT_NUM
+} from "./ngx-dynamic-form/utils/misc";
+
+export {
     validateJSON,
     validateRequiredTranslation,
     validatePhone,

@@ -21,8 +21,12 @@ let builds = 0;
 function deployToProject() {
     if (noProject) return Promise.resolve();
     const stemyPath = path.join(projectPath, 'node_modules', '@stemy');
+    const angularCachePath = path.join(projectPath, '.angular');
     return copy('./dist/', stemyPath, 'dist folder to project').then(() => {
         const targetPath = path.join(stemyPath, 'ngx-dynamic-form');
+        if (fs.existsSync(angularCachePath)) {
+            rimraf.sync(angularCachePath);
+        }
         if (fs.existsSync(targetPath)) {
             rimraf.sync(targetPath);
         }
