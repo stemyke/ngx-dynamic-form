@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "13.0.2",
+    "version": "13.1.0",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -29,7 +29,7 @@
         "invokable": "^1.0.3",
         "ngx-device-detector": "~2.1.1 || ~3.0.0",
         "json5": "^2.2.1",
-        "@stemy/ngx-utils": "^13.0.5",
+        "@stemy/ngx-utils": "^13.0.7",
         "@ng-dynamic-forms/core": "^15.0.0",
         "@ng-dynamic-forms/ui-basic": "^15.0.0",
         "ngx-mask": "^13.1.14"
@@ -52,7 +52,7 @@
         "invokable": "1.0.3",
         "ngx-device-detector": "3.0.0",
         "json5": "2.2.1",
-        "@stemy/ngx-utils": "13.0.5",
+        "@stemy/ngx-utils": "13.0.7",
         "@ng-dynamic-forms/core": "15.0.0",
         "@ng-dynamic-forms/ui-basic": "15.0.0",
         "ngx-mask": "13.1.14",

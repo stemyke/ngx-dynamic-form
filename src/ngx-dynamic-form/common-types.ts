@@ -2,7 +2,9 @@ import {EventEmitter, Injector, TemplateRef} from "@angular/core";
 import {AbstractControl, FormArray} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
-    DynamicFormControl, DynamicFormControlEvent,
+    DynamicFormControl,
+    DynamicFormControlEvent,
+    DynamicFormControlMapFn,
     DynamicFormControlModel,
     DynamicFormControlModelConfig,
     DynamicFormGroupModelConfig,
@@ -18,7 +20,6 @@ import {
     ObjectUtils,
     ReflectUtils
 } from "@stemy/ngx-utils";
-import {DynamicFormControlMapFn} from "@ng-dynamic-forms/core/lib/service/dynamic-form-component.service";
 
 // --- Basic form control interfaces ---
 

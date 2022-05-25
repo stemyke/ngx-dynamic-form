@@ -68,6 +68,10 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
         return this.model.restoreTab(this.model, this.injector);
     }
 
+    getTabLabel(index: number): string {
+        return this.model.getTabLabel(index, this.model, this.array, this.injector);
+    }
+
     getClass(context: DynamicFormControlLayoutContext, place: DynamicFormControlLayoutPlace, model?: DynamicFormControlModel): string {
         return [
             context == "element" ? this.getModelClass(model) : null,

@@ -1,5 +1,5 @@
 import {EventEmitter, Inject, Injectable, Injector} from "@angular/core";
-import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
+import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
 import {
     DynamicCheckboxModel,
@@ -13,16 +13,14 @@ import {
     DynamicFormControlModelConfig,
     DynamicFormGroupModel,
     DynamicFormGroupModelConfig,
-    DynamicFormModel, DynamicFormOption,
-    DynamicFormOptionConfig,
+    DynamicFormModel,
     DynamicFormService as Base,
     DynamicFormValidationService,
     DynamicFormValueControlModel,
     DynamicFormValueControlModelConfig,
     DynamicInputModel,
     DynamicInputModelConfig,
-    DynamicSelectModel,
-    DynamicSelectModelConfig,
+    DynamicPathable,
     DynamicTextAreaModel,
     DynamicTextAreaModelConfig,
     DynamicValidatorsConfig
@@ -40,11 +38,11 @@ import {
 
 import {FormControlSerializer, FormModelCustomizer, FormModelCustomizerWrap, ModelType} from "../common-types";
 
-import {isStringWithVal, MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
 import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "../utils/dynamic-form-array.model";
-import {DynamicPathable} from "@ng-dynamic-forms/core/lib/model/misc/dynamic-form-control-path.model";
+import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -88,7 +86,7 @@ export class DynamicFormService extends Base {
         this.notifyChangesRecursive(formModel, formGroup, root);
     }
 
-    updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: AbstractControl, root: DynamicFormModel): void {
+    updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: FormControl, root: DynamicFormModel): void {
         if (formControlModel instanceof DynamicSelectModel) {
             let options = formControlModel.options$;
             if (options instanceof FormSubject) {
@@ -131,7 +129,7 @@ export class DynamicFormService extends Base {
                     this.removeFormArrayGroup(0, subArray, subModel);
                 }
                 while (subModel.size < length) {
-                    this.insertFormArrayGroup(subModel.size, subArray, subModel);
+                    this.insertFormArrayGroup(subModel.size, subArray, subModel as DynamicFormArrayModel);
                 }
                 for (let i = 0; i < length; i++) {
                     const itemModel = subModel.get(i);
@@ -202,7 +200,7 @@ export class DynamicFormService extends Base {
                 this.notifyChangesRecursive(subModel.group, subControl as FormGroup, root);
                 continue;
             }
-            this.updateSelectOptions(subModel, subControl, root);
+            this.updateSelectOptions(subModel, subControl as FormControl, root);
         }
     }
 
@@ -267,7 +265,7 @@ export class DynamicFormService extends Base {
             case "boolean":
                 return customizeModels(property, schema, DynamicCheckboxModel, this.getFormCheckboxConfig(property, schema));
             case "array":
-                if (property.items?.$ref || property.$ref) {
+                if (findRefs(property).length > 0) {
                     return customizeModels(property, schema, DynamicFormArrayModel, this.getFormArrayConfig(property, schema, customizeModels));
                 } else {
                     return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema));
@@ -314,21 +312,24 @@ export class DynamicFormService extends Base {
     }
 
     getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormArrayModelConfig {
-        const ref = property.items?.$ref || property.$ref || "";
-        const subSchema = this.schemas[ref.split("/").pop()];
+        const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
-                groupFactory: () => this.getFormModelForSchemaDef(subSchema, customizeModels),
+                groupFactory: () => mergeFormModels(subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))),
                 useTabs: property.useTabs || false
             }
         );
     }
 
     getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormGroupModelConfig {
-        const ref = property.$ref || "";
-        const subSchema = this.schemas[ref.split("/").pop()];
-        return Object.assign(this.getFormControlConfig(property, schema), {group: this.getFormModelForSchemaDef(subSchema, customizeModels)});
+        const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                group: mergeFormModels(subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels)))
+            }
+        );
     }
 
     getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
@@ -382,7 +383,9 @@ export class DynamicFormService extends Base {
             this.getFormControlConfig(property, schema),
             {
                 options: this.getFormSelectOptions(property, schema),
-                multiple: property.type == "array"
+                multiple: property.type == "array",
+                groupBy: property.groupBy,
+                inline: property.inline
             }
         );
     }
@@ -396,9 +399,15 @@ export class DynamicFormService extends Base {
         );
     }
 
-    protected async translateOptions(options: DynamicFormOptionConfig<any>[]): Promise<DynamicFormOptionConfig<any>[]> {
+    cloneFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel) {
+        this.insertFormArrayGroup(index, formArray, formArrayModel);
+        this.patchGroup(formArray.at(index + 1).value, formArrayModel.groups[index].group, formArray.at(index) as FormGroup);
+    }
+
+    protected async fixSelectOptions(model: DynamicSelectModel<any>, control: FormControl, options: DynamicFormOptionConfig<any>[]): Promise<DynamicFormOptionConfig<any>[]> {
         if (!options) return [];
         for (const option of options) {
+            option.classes = [option.classes, model.getClasses(option, model, control, this.injector)].filter(isStringWithVal).join(" ");
             option.label = await this.language.getTranslation(option.label);
         }
         return options;
@@ -407,19 +416,19 @@ export class DynamicFormService extends Base {
     protected getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum)) {
-            return new FormSelectSubject(() => {
+            return new FormSelectSubject((selectModel, formControl) => {
                 const options = $enum.map(value => {
                     const label = property.translatable ? `${property.id}.${value}` : `${value}`;
                     return {value, label};
                 });
-                return this.translateOptions(options);
+                return this.fixSelectOptions(selectModel, formControl, options);
             });
         }
         if (isStringWithVal(property.optionsPath)) {
-            return new FormSelectSubject((formModel, control, root, indexes) => {
+            return new FormSelectSubject((selectModel, control, root, indexes) => {
                 let path = property.optionsPath as string;
-                let target = control;
-                let model: DynamicPathable | DynamicFormModel = formModel;
+                let target = control as AbstractControl;
+                let model: DynamicPathable | DynamicFormModel = selectModel;
                 if (path.startsWith("$root")) {
                     path = path.substr(5);
                     while (target.parent) {
@@ -438,23 +447,26 @@ export class DynamicFormService extends Base {
                     path = path.replace(key, indexes[key]);
                 });
                 model = this.findModelByPath(model, path.split("."));
-                const modelOptions = (model instanceof DynamicSelectModel ? model.options : []) as DynamicFormOption<any>[];
+                const modelOptions = (model instanceof DynamicSelectModel ? model.options : []);
                 const value = ObjectUtils.getValue(target.value, path);
                 const options = (!ObjectUtils.isArray(value) ? [] : value).map(value => {
                     const modelOption = modelOptions.find(t => t.value == value);
                     return {value, label: modelOption?.label || value};
                 });
-                return this.translateOptions(options);
+                return this.fixSelectOptions(selectModel, control, options);
             });
         }
-        return new FormSelectSubject(async () => {
+        return new FormSelectSubject(async (selectModel, control) => {
             this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
                 return result.items.map(i => {
-                    return {value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id};
+                    return {
+                        ...i,
+                        value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id
+                    };
                 });
             });
             const options = (await this.api.cache[property.endpoint]).map(t => Object.assign({}, t));
-            return this.translateOptions(options);
+            return this.fixSelectOptions(selectModel, control, options);
         });
     }
 

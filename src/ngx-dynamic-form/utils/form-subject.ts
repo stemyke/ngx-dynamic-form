@@ -1,25 +1,25 @@
 import {Subject} from "rxjs";
-import {AbstractControl} from "@angular/forms";
+import {FormControl} from "@angular/forms";
 import {DynamicFormControlModel, DynamicFormModel, DynamicPathable} from "@ng-dynamic-forms/core";
 
 const indexLabels = ["$ix", "$pix"];
 
-export type NotifyCallback = (controlModel: DynamicFormControlModel, control: AbstractControl, root: DynamicFormModel, indexes: any) => any | Promise<any>;
+export type NotifyCallback<M extends DynamicFormControlModel> = (controlModel: M, control: FormControl, root: DynamicFormModel, indexes: any) => any | Promise<any>;
 
-export class FormSubject<T> extends Subject<T> {
+export class FormSubject<M extends DynamicFormControlModel, T> extends Subject<T> {
 
-    private readonly notifyCallback: NotifyCallback;
+    private readonly notifyCallback: NotifyCallback<M>;
 
-    constructor(notifyCallback: NotifyCallback) {
+    constructor(notifyCallback: NotifyCallback<M>) {
         super();
         this.notifyCallback = notifyCallback;
     }
 
-    protected handleNotifiedValue(controlModel: DynamicFormControlModel, control: AbstractControl, val: Promise<T>) {
+    protected handleNotifiedValue(controlModel: M, control: FormControl, val: Promise<T>) {
         val.then(v => this.next(v));
     }
 
-    notify(controlModel: DynamicFormControlModel, control: AbstractControl, root: DynamicFormModel): void {
+    notify(controlModel: M, control: FormControl, root: DynamicFormModel): void {
         const indexes = {};
         let path = controlModel as DynamicPathable;
         let ix = 0;

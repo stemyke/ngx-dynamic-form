@@ -18,7 +18,6 @@ import {FormArray, FormGroup, NgForm} from "@angular/forms";
 import {Subscription} from "rxjs";
 import {first} from "rxjs/operators";
 import {
-    DynamicFormArrayModel,
     DynamicFormComponent,
     DynamicFormComponentService,
     DynamicFormControlEvent,
@@ -30,8 +29,9 @@ import {
 } from "@ng-dynamic-forms/core";
 import {EventsService, ObservableUtils} from "@stemy/ngx-utils";
 import {DynamicFormState, IDynamicForm, IDynamicFormEvent} from "../../common-types";
-import {DynamicFormService} from "../../services/dynamic-form.service";
 import {collectPathAble} from "../../utils/misc";
+import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
     selector: "dynamic-base-form",
@@ -127,6 +127,11 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
 
     insertFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.insertFormArrayGroup(index, formArray, formArrayModel);
+        this.changeDetectorRef.detectChanges();
+    }
+
+    cloneFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
+        this.formService.cloneFormArrayGroup(index, formArray, formArrayModel);
         this.changeDetectorRef.detectChanges();
     }
 

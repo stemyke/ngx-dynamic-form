@@ -1,8 +1,8 @@
 import {AbstractControl} from "@angular/forms";
-import {DynamicFormOptionConfig, DynamicSelectModel} from "@ng-dynamic-forms/core";
+import {DynamicFormOptionConfig, DynamicSelectModel} from "./dynamic-select.model";
 import {FormSubject} from "./form-subject";
 
-export class FormSelectSubject<T extends DynamicFormOptionConfig<any>[]> extends FormSubject<T> {
+export class FormSelectSubject<T extends DynamicFormOptionConfig<any>[]> extends FormSubject<DynamicSelectModel<any>, T> {
 
     protected handleNotifiedValue(controlModel: DynamicSelectModel<any>, control: AbstractControl, val: Promise<T>) {
         val.then(options => {
