@@ -12,6 +12,10 @@ export function findRefs(property: IOpenApiSchemaProperty): string[] {
     return refs.map(t => t.split("/").pop());
 }
 
+export function replaceSpecialChars(str: string, to: string = "-"): string {
+    return (str || "").replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, to);
+}
+
 export function mergeFormModels(formModels: DynamicFormModel[]): DynamicFormModel {
     const res: DynamicFormModel = [];
     for (const formModel of formModels) {

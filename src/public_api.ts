@@ -34,6 +34,8 @@ export {
 } from "./ngx-dynamic-form/common-types";
 
 export {
+    replaceSpecialChars,
+    mergeFormModels,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM
 } from "./ngx-dynamic-form/utils/misc";
@@ -52,7 +54,7 @@ export {
     SaveTabFunc, RestoreTabFunc, TabLabelFunc, DynamicFormArrayModelConfig, DynamicFormArrayModel
 } from "./ngx-dynamic-form/utils/dynamic-form-array.model";
 export {
-    DynamicFormOptionConfig, DynamicFormOption, OptionClassesFunc, DynamicSelectModelConfig, DynamicSelectModel
+    DynamicFormOptionConfig, DynamicFormOption, DynamicFormOptionGroup, OptionClassesFunc, DynamicSelectModelConfig, DynamicSelectModel
 } from "./ngx-dynamic-form/utils/dynamic-select.model";
 export {FormSelectSubject} from "./ngx-dynamic-form/utils/form-select-subject";
 export {FormSubject} from "./ngx-dynamic-form/utils/form-subject";

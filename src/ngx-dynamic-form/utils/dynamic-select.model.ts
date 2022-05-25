@@ -34,6 +34,11 @@ export class DynamicFormOption<T> extends BaseOption<T> {
     }
 }
 
+export interface DynamicFormOptionGroup<T> {
+    group: string;
+    options: ReadonlyArray<DynamicFormOption<T>>;
+}
+
 export type OptionClassesFunc<T> = (option: DynamicFormOptionConfig<T>, model: DynamicSelectModel<T>, control: FormControl, injector: Injector) => string;
 
 export interface DynamicSelectModelConfig<T> extends BaseConfig<T> {

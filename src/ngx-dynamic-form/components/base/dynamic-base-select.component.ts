@@ -1,13 +1,43 @@
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from "@angular/core";
+import {BehaviorSubject, Subscription} from "rxjs";
 import {DynamicBaseFormControlComponent} from "./dynamic-base-form-control.component";
-import {DynamicFormOption, DynamicSelectModel} from "../../utils/dynamic-select.model";
+import {DynamicFormOption, DynamicFormOptionGroup, DynamicSelectModel} from "../../utils/dynamic-select.model";
+import {replaceSpecialChars} from "../../utils/misc";
 
 @Component({
     selector: "dynamic-base-select",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicBaseSelectComponent extends DynamicBaseFormControlComponent<DynamicSelectModel<any>> {
+export class DynamicBaseSelectComponent extends DynamicBaseFormControlComponent<DynamicSelectModel<any>> implements OnInit, OnDestroy {
+
+    groups$: BehaviorSubject<DynamicFormOptionGroup<any>[]>;
+
+    protected subscription: Subscription;
+
+    ngOnInit(): void {
+        this.groups$ = new BehaviorSubject<DynamicFormOptionGroup<any>[]>([]);
+        this.subscription = this.model.options$.subscribe(options => {
+            const groupBy = this.model.inline || !this.model.multiple ? this.model.groupBy : null;
+            const groups = options.reduce((res, option) => {
+                const key = replaceSpecialChars(groupBy ? option.props[this.model.groupBy] || "default" : "default", "-");
+                res[key] = res[key] || [];
+                res[key].push(option);
+                return res;
+            }, {});
+            this.groups$.next(Object.keys(groups).map(group => {
+                return {
+                    group,
+                    options: groups[group]
+                };
+            }));
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.subscription)
+            this.subscription.unsubscribe();
+    }
 
     isSelected(option: DynamicFormOption<any>): boolean {
         if (this.model.multiple) {
