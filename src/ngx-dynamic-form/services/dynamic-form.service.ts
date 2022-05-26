@@ -358,7 +358,7 @@ export class DynamicFormService extends Base {
                 step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
                 min: isNaN(sub.minimum) ? MIN_INPUT_NUM : sub.minimum,
                 max: isNaN(sub.maximum) ? MAX_INPUT_NUM : sub.maximum,
-                minLength: isNaN(sub.minLength) ? MIN_INPUT_NUM : sub.minLength,
+                minLength: isNaN(sub.minLength) ? 0 : sub.minLength,
                 maxLength: isNaN(sub.maxLength) ? MAX_INPUT_NUM : sub.maxLength,
                 placeholder: property.placeholder || ""
             }
