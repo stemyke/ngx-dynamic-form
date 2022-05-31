@@ -1,4 +1,4 @@
-import {EventEmitter, Injector, TemplateRef} from "@angular/core";
+import {ChangeDetectorRef, EventEmitter, Injector} from "@angular/core";
 import {AbstractControl, FormArray} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
@@ -41,10 +41,6 @@ export interface IDynamicForm {
     serialize(validate?: boolean): Promise<any>;
 }
 
-export interface OnCreatedFormControl extends DynamicFormControl {
-    onCreated(): any;
-}
-
 export declare interface ModelType extends Function {
     new (config: DynamicFormControlModelConfig): DynamicFormControlModel;
 }
@@ -65,48 +61,14 @@ export interface IFormControl {
     config?: DynamicFormControlModelConfig;
 }
 
-export interface IFormControlOption {
-    id: any;
-    label: string;
-    selectable?: boolean;
+export interface DynamicFormInitControl extends DynamicFormControl {
+    initialize(cdr?: ChangeDetectorRef): void;
 }
-
-// --- Basic form interfaces ---
-
-export interface IDynamicFormTemplates {
-    [id: string]: TemplateRef<any>;
-}
-
-export interface IDynamicFormConfig {
-    path?: string | number | Array<string | number>;
-    name?: string;
-    classes?: string;
-    formClasses?: string;
-    innerFormClasses?: string;
-    id: string;
-}
-
-export interface IDynamicSingleFormConfig extends IDynamicFormConfig, IDynamicFormInfo {
-    data: any;
-    controlData?: DynamicFormGroupModelConfig;
-    multi?: false;
-}
-
-export interface IDynamicMultiFormConfig extends IDynamicFormConfig {
-    data: IDynamicFormsConfigs;
-    multi: true;
-}
-
-export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMultiFormConfig>;
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
-export interface IDynamicFormInfo {
-    name?: string;
-    controls?: IFormControl[];
-}
-
 // --- Decorator functions ---
+
 export function defaultSerializer(id: string, parent: FormArray): Promise<any> {
     const control = parent.get(id);
     return !control ? null: control.value;

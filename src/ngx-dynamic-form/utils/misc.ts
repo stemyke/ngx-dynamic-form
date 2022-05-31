@@ -13,7 +13,7 @@ export function findRefs(property: IOpenApiSchemaProperty): string[] {
 }
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
-    return (str || "").replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
+    return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
 }
 
 export function mergeFormModels(formModels: DynamicFormModel[]): DynamicFormModel {

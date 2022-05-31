@@ -18,7 +18,6 @@ import {FormGroup} from "@angular/forms";
 import {Subscription} from "rxjs";
 import {
     DYNAMIC_FORM_CONTROL_TYPE_ARRAY,
-    DynamicFormArrayGroupModel,
     DynamicFormComponentService,
     DynamicFormControl,
     DynamicFormControlContainerComponent,
@@ -32,10 +31,11 @@ import {
 } from "@ng-dynamic-forms/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
 
-import {OnCreatedFormControl} from "../../common-types";
+import {DynamicFormInitControl} from "../../common-types";
 import {collectPathAble} from "../../utils/misc";
-import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
+import {DynamicFormArrayGroupModel} from "../../utils/dynamic-form-array.model";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 
 @Component({
     selector: "dynamic-base-form-control",
@@ -59,9 +59,10 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
     @Output() change: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
     @Output() focus: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
 
-    @ViewChild("componentViewContainer", {read: ViewContainerRef, static: true}) componentViewContainerRef: ViewContainerRef;
-
-    protected onDetectChanges: Subscription;
+    @ViewChild("componentViewContainer", {
+        read: ViewContainerRef,
+        static: true
+    }) componentViewContainerRef: ViewContainerRef;
 
     get componentType(): Type<DynamicFormControl> | null {
         return this.componentService.getCustomComponentType(this.model) ?? this.getComponentType(this.model);
@@ -93,19 +94,6 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
         super(changeDetectorRef, componentFactoryResolver, layoutService, validationService, componentService, relationService);
     }
 
-    ngOnInit(): void {
-        this.onDetectChanges = this.formService.onDetectChanges.subscribe(form => {
-            if (form !== this.form) return;
-            this.changeDetectorRef.detectChanges();
-            this.formService.updateSelectOptions(this.model, this.control, this.form.model);
-        });
-    }
-
-    ngOnDestroy() {
-        super.ngOnDestroy();
-        this.onDetectChanges.unsubscribe();
-    }
-
     getLabel(): string {
         const label = collectPathAble(this.model, p => p.label);
         if (label.length == 0) return "";
@@ -115,11 +103,30 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
         return label.join(".");
     }
 
+    getLabelIcon(): string {
+        if (this.context instanceof DynamicFormArrayGroupModel) {
+            const arrayModel = this.context.context;
+            if (arrayModel && arrayModel.sortBy == this.model.id) {
+                return arrayModel.sortOrder;
+            }
+        }
+        return null;
+    }
+
+    clickLabel(): void {
+        if (this.context instanceof DynamicFormArrayGroupModel) {
+            const arrayModel = this.context.context;
+            if (arrayModel) {
+                arrayModel.sortBy = this.model.id;
+            }
+        }
+    }
+
     protected createFormControlComponent() {
         super.createFormControlComponent();
-        const component = this.componentRef?.instance as OnCreatedFormControl;
-        if (!component || !ObjectUtils.isFunction(component.onCreated)) return;
-        component.onCreated();
+        const component = this.componentRef?.instance as DynamicFormInitControl;
+        if (!component || !ObjectUtils.isFunction(component.initialize)) return;
+        component.initialize(this.changeDetectorRef);
     }
 
     protected getComponentType(model: DynamicFormControlModel): Type<DynamicFormControl> | null {

@@ -1,15 +1,18 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     EventEmitter,
     forwardRef,
     Injector,
     Input,
+    OnDestroy,
     Output,
     QueryList,
     ViewChildren
 } from "@angular/core";
 import {FormGroup} from "@angular/forms";
+import {lastValueFrom, Subscription} from "rxjs";
 import {
     DynamicFormArrayComponent,
     DynamicFormControlContainerComponent,
@@ -25,15 +28,16 @@ import {
     DynamicFormValueControlModel,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
-import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
+import {DynamicFormArrayGroupModel, DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {collectPathAble} from "../../utils/misc";
+import {DynamicFormInitControl} from "../../common-types";
 
 @Component({
     selector: "dynamic-base-form-array",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
+export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent implements DynamicFormInitControl, OnDestroy {
 
     @Input() formLayout: DynamicFormLayout;
     @Input() group: FormGroup;
@@ -53,23 +57,35 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
         return this.model?.useTabs;
     }
 
-    constructor(protected layoutService: DynamicFormLayoutService,
-                protected validationService: DynamicFormValidationService,
-                protected injector: Injector) {
+    protected subscription: Subscription;
 
+    constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService,
+                readonly injector: Injector, readonly cdr: ChangeDetectorRef) {
         super(layoutService, validationService);
     }
 
+    initialize(cdr: ChangeDetectorRef): void {
+        this.subscription = this.model.filteredGroups.subscribe(filteredGroups => {
+            this.updateGroups(filteredGroups);
+        });
+        this.model.initialize(this.array);
+    }
+
+    ngOnDestroy(): void {
+        if (this.subscription)
+            this.subscription.unsubscribe();
+    }
+
     saveTab(index: number): void {
-        this.model.saveTab(index, this.model, this.injector);
+        this.model.saveTab(index, this.model.getFiltered(index), this.model, this.injector);
     }
 
     restoreTab(): number {
         return this.model.restoreTab(this.model, this.injector);
     }
 
-    getTabLabel(index: number): string {
-        return this.model.getTabLabel(index, this.model, this.array, this.injector);
+    getTabLabel(index: number, model: DynamicFormArrayGroupModel): string {
+        return this.model.getTabLabel(index, model, this.model, this.array, this.injector);
     }
 
     getClass(context: DynamicFormControlLayoutContext, place: DynamicFormControlLayoutPlace, model?: DynamicFormControlModel): string {
@@ -98,5 +114,9 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent {
             return model.additional?.classes;
         }
         return null;
+    }
+
+    protected updateGroups(filteredGroups: ReadonlyArray<DynamicFormArrayGroupModel>): void {
+        this.cdr.detectChanges();
     }
 }

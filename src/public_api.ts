@@ -1,20 +1,13 @@
 export {
     IDynamicFormEvent,
     IDynamicForm,
-    OnCreatedFormControl,
     FormControlSerializer,
     FormModelCustomizer,
     DynamicFormState,
     DynamicFormUpdateOn,
     IFormControl,
-    IFormControlOption,
-    IDynamicFormTemplates,
-    IDynamicFormConfig,
-    IDynamicSingleFormConfig,
-    IDynamicMultiFormConfig,
-    IDynamicFormsConfigs,
+    DynamicFormInitControl,
     AsyncSubmitMethod,
-    IDynamicFormInfo,
     defaultSerializer,
     FormSerializable,
     FormInput,
@@ -51,7 +44,7 @@ export {
 } from "./ngx-dynamic-form/utils/validators";
 
 export {
-    SaveTabFunc, RestoreTabFunc, TabLabelFunc, DynamicFormArrayModelConfig, DynamicFormArrayModel
+    SaveTabFunc, RestoreTabFunc, TabLabelFunc, DynamicFormArrayGroupModel, DynamicFormArrayModelConfig, DynamicFormArrayModel
 } from "./ngx-dynamic-form/utils/dynamic-form-array.model";
 export {
     DynamicFormOptionConfig, DynamicFormOption, DynamicFormOptionGroup, OptionClassesFunc, DynamicSelectModelConfig, DynamicSelectModel

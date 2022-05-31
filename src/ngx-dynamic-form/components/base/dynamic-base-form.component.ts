@@ -90,7 +90,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                     this.onStatusChange.emit(this);
                 }),
                 this.group.valueChanges.subscribe(() => {
-                    this.formService.notifyChanges(this.model, this.group, this.model);
+                    this.formService.notifyChanges(this.model, this.group);
                 }),
                 this.change.subscribe(ev => {
                     this.onValueChange.emit({...ev, form: this});
@@ -111,7 +111,8 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 }
             ),
             this.events.languageChanged.subscribe(() => {
-                this.formService.detectChanges(this)
+                this.formService.notifyChanges(this.model, this.group);
+                this.formService.detectChanges(this);
             }),
             this.ngForm.ngSubmit.subscribe(() => {
                 this.onSubmit.emit(this);

@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {IAsyncMessage} from "@stemy/ngx-utils";
-import {IDynamicForm, IDynamicFormsConfigs} from "../public_api";
+import {IDynamicForm} from "../public_api";
 
 @Component({
     moduleId: module.id,
@@ -9,7 +9,7 @@ import {IDynamicForm, IDynamicFormsConfigs} from "../public_api";
 })
 export class AppComponent implements OnInit {
 
-    data: IDynamicFormsConfigs;
+    data: any;
 
     @ViewChild("form")
     private form: IDynamicForm;
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
                 });
             }, () => {
                 console.log("INVALID FORM");
-                resolve();
+                resolve(null);
             });
         });
     };

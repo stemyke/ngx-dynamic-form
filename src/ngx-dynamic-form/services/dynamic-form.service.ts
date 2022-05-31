@@ -1,4 +1,4 @@
-import {EventEmitter, Inject, Injectable, Injector} from "@angular/core";
+import {Inject, Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
 import {
@@ -55,7 +55,6 @@ export class DynamicFormService extends Base {
         return this.api.language;
     }
 
-    readonly onDetectChanges: EventEmitter<DynamicFormComponent>;
     protected schemas: IOpenApiSchemas;
 
     constructor(cs: DynamicFormComponentService,
@@ -63,7 +62,6 @@ export class DynamicFormService extends Base {
                 @Inject(OpenApiService) readonly openApi: OpenApiService,
                 @Inject(Injector) readonly injector: Injector) {
         super(cs, vs);
-        this.onDetectChanges = new EventEmitter<DynamicFormComponent>();
     }
 
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -82,8 +80,8 @@ export class DynamicFormService extends Base {
         return this.serializeRecursive(formModel, formGroup);
     }
 
-    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup, root: DynamicFormModel): void {
-        this.notifyChangesRecursive(formModel, formGroup, root);
+    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup): void {
+        this.notifyChangesRecursive(formModel, formGroup, formModel);
     }
 
     updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: FormControl, root: DynamicFormModel): void {
@@ -105,11 +103,6 @@ export class DynamicFormService extends Base {
     showErrors(form: DynamicFormComponent): void {
         this.showErrorsForGroup(form.group);
         this.detectChanges(form);
-    }
-
-    detectChanges(formComponent?: DynamicFormComponent) {
-        super.detectChanges(formComponent);
-        this.onDetectChanges.emit(formComponent);
     }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -273,7 +266,7 @@ export class DynamicFormService extends Base {
             case "file":
                 return customizeModels(property, schema, DynamicFileUploadModel, this.getFormUploadConfig(property, schema));
         }
-        if (property.$ref) {
+        if (findRefs(property).length > 0) {
             return customizeModels(property, schema, DynamicFormGroupModel, this.getFormGroupConfig(property, schema, customizeModels));
         }
         return [];
@@ -317,7 +310,14 @@ export class DynamicFormService extends Base {
             this.getFormControlConfig(property, schema),
             {
                 groupFactory: () => mergeFormModels(subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))),
-                useTabs: property.useTabs || false
+                sortable: property.sortable || false,
+                useTabs: property.useTabs || false,
+                addItem: property.addItem !== false,
+                insertItem: property.insertItem !== false,
+                cloneItem: property.cloneItem !== false,
+                moveItem: property.moveItem !== false,
+                removeItem: property.removeItem !== false,
+                clearItems: property.clearItems !== false
             }
         );
     }
@@ -378,42 +378,7 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
-        return Object.assign(
-            this.getFormControlConfig(property, schema),
-            {
-                options: this.getFormSelectOptions(property, schema),
-                multiple: property.type == "array",
-                groupBy: property.groupBy,
-                inline: property.inline
-            }
-        );
-    }
-
-    getFormCheckboxConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicCheckboxModelConfig {
-        return Object.assign(
-            this.getFormControlConfig(property, schema),
-            {
-                indeterminate: property.indeterminate === true
-            }
-        );
-    }
-
-    cloneFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel) {
-        this.insertFormArrayGroup(index, formArray, formArrayModel);
-        this.patchGroup(formArray.at(index + 1).value, formArrayModel.groups[index].group, formArray.at(index) as FormGroup);
-    }
-
-    protected async fixSelectOptions(model: DynamicSelectModel<any>, control: FormControl, options: DynamicFormOptionConfig<any>[]): Promise<DynamicFormOptionConfig<any>[]> {
-        if (!options) return [];
-        for (const option of options) {
-            option.classes = [option.classes, model.getClasses(option, model, control, this.injector)].filter(isStringWithVal).join(" ");
-            option.label = await this.language.getTranslation(option.label);
-        }
-        return options;
-    }
-
-    protected getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
+    getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum)) {
             return new FormSelectSubject((selectModel, formControl) => {
@@ -470,7 +435,19 @@ export class DynamicFormService extends Base {
         });
     }
 
-    protected getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {
+    getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                options: this.getFormSelectOptions(property, schema),
+                multiple: property.type == "array",
+                groupBy: property.groupBy,
+                inline: property.inline
+            }
+        );
+    }
+
+    getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {
         const url = this.api.url(property.url || "assets");
         const {accept, autoUpload, maxSize, minSize, removeUrl, showFileList} = property;
         return Object.assign(this.getFormControlConfig(property, schema), {
@@ -482,6 +459,30 @@ export class DynamicFormService extends Base {
             removeUrl,
             showFileList
         });
+    }
+
+    getFormCheckboxConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicCheckboxModelConfig {
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                indeterminate: property.indeterminate || false
+            }
+        );
+    }
+
+    cloneFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel) {
+        this.insertFormArrayGroup(index, formArray, formArrayModel);
+        this.patchGroup(formArray.at(index + 1).value, formArrayModel.groups[index].group, formArray.at(index) as FormGroup);
+        formArrayModel.filterGroups();
+    }
+
+    protected async fixSelectOptions(model: DynamicSelectModel<any>, control: FormControl, options: DynamicFormOptionConfig<any>[]): Promise<DynamicFormOptionConfig<any>[]> {
+        if (!options) return [];
+        for (const option of options) {
+            option.classes = [option.classes, model.getClasses(option, model, control, this.injector)].filter(isStringWithVal).join(" ");
+            option.label = await this.language.getTranslation(option.label);
+        }
+        return options;
     }
 
     protected getValidators(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicValidatorsConfig {
