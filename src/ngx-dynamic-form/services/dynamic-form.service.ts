@@ -1,6 +1,6 @@
 import {Inject, Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
-import {Subject} from "rxjs";
+import {firstValueFrom, Subject} from "rxjs";
 import {
     DynamicCheckboxModel,
     DynamicCheckboxModelConfig,
@@ -39,7 +39,11 @@ import {FormControlSerializer, FormModelCustomizer, FormModelCustomizerWrap, Mod
 import {findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
 import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
-import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "../utils/dynamic-form-array.model";
+import {
+    DynamicFormArrayGroupModel,
+    DynamicFormArrayModel,
+    DynamicFormArrayModelConfig
+} from "../utils/dynamic-form-array.model";
 import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
 import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 
@@ -277,7 +281,7 @@ export class DynamicFormService extends Base {
         if (Array.isArray(parent)) {
             return this.findModelByPath(parent.find(t => t.id == next), path);
         }
-        if (parent instanceof DynamicFormGroupModel) {
+        if (parent instanceof DynamicFormGroupModel || parent instanceof DynamicFormArrayGroupModel) {
             return this.findModelByPath(parent.group.find(t => t.id == next), path);
         }
         if (parent instanceof DynamicFormArrayModel) {
@@ -389,7 +393,7 @@ export class DynamicFormService extends Base {
             });
         }
         if (isStringWithVal(property.optionsPath)) {
-            return new FormSelectSubject((selectModel, control, root, indexes) => {
+            return new FormSelectSubject(async (selectModel, control, root, indexes) => {
                 let path = property.optionsPath as string;
                 let target = control as AbstractControl;
                 let model: DynamicPathable | DynamicFormModel = selectModel;
@@ -411,7 +415,9 @@ export class DynamicFormService extends Base {
                     path = path.replace(key, indexes[key]);
                 });
                 model = this.findModelByPath(model, path.split("."));
-                const modelOptions = (model instanceof DynamicSelectModel ? model.options : []);
+                const modelOptions = model instanceof DynamicSelectModel
+                    ? await firstValueFrom(model.options$) :
+                    [];
                 const value = ObjectUtils.getValue(target.value, path);
                 const options = (!ObjectUtils.isArray(value) ? [] : value).map(value => {
                     const modelOption = modelOptions.find(t => t.value == value);

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {
     DynamicFormControlComponent,
@@ -25,7 +25,7 @@ export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> 
     @Output() change: EventEmitter<any>;
     @Output() focus: EventEmitter<any>;
 
-    constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService) {
+    constructor(readonly cdr: ChangeDetectorRef, layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService) {
         super(layoutService, validationService);
         this.blur = new EventEmitter<any>();
         this.change = new EventEmitter<any>();

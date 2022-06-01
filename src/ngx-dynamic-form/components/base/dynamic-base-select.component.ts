@@ -12,6 +12,7 @@ import {replaceSpecialChars} from "../../utils/misc";
 export class DynamicBaseSelectComponent extends DynamicBaseFormControlComponent<DynamicSelectModel<any>> implements OnInit, OnDestroy {
 
     groups$: BehaviorSubject<DynamicFormOptionGroup<any>[]>;
+    hasOptions: boolean;
 
     protected subscription: Subscription;
 
@@ -19,18 +20,21 @@ export class DynamicBaseSelectComponent extends DynamicBaseFormControlComponent<
         this.groups$ = new BehaviorSubject<DynamicFormOptionGroup<any>[]>([]);
         this.subscription = this.model.options$.subscribe(options => {
             const groupBy = this.model.inline || !this.model.multiple ? this.model.groupBy : null;
-            const groups = options.reduce((res, option) => {
+            const grouped = options.reduce((res, option) => {
                 const key = replaceSpecialChars(groupBy ? option.props[this.model.groupBy] || "default" : "default", "-");
                 res[key] = res[key] || [];
                 res[key].push(option);
                 return res;
             }, {});
-            this.groups$.next(Object.keys(groups).map(group => {
+            const groups = Object.keys(grouped).map(group => {
                 return {
                     group,
-                    options: groups[group]
+                    options: grouped[group]
                 };
-            }));
+            });
+            this.hasOptions = groups.length > 0;
+            this.groups$.next(groups);
+            this.cdr.detectChanges();
         });
     }
 

@@ -175,6 +175,16 @@ export class DynamicFormArrayModel extends Base {
         return group;
     }
 
+    moveGroup(index: number, step: number): void {
+        super.moveGroup(index, step);
+        this.filterGroups();
+    }
+
+    removeGroup(index: number): void {
+        super.removeGroup(index);
+        this.filterGroups();
+    }
+
     protected compareModels(a: DynamicFormArrayGroupModel, b: DynamicFormArrayGroupModel): number {
         const aGroup = this._formArray.at(a.index).get(this._sortBy)?.value || null;
         const bGroup = this._formArray.at(b.index).get(this._sortBy)?.value || null;
