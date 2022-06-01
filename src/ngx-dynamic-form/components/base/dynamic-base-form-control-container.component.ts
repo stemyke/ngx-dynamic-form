@@ -7,7 +7,6 @@ import {
     EventEmitter,
     HostBinding,
     Input,
-    OnInit,
     Output,
     QueryList,
     Type,
@@ -40,9 +39,12 @@ import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 @Component({
     selector: "dynamic-base-form-control",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        {provide: DynamicFormControlContainerComponent, useExisting: DynamicBaseFormControlContainerComponent}
+    ]
 })
-export class DynamicBaseFormControlContainerComponent extends DynamicFormControlContainerComponent implements OnInit {
+export class DynamicBaseFormControlContainerComponent extends DynamicFormControlContainerComponent {
 
     @ContentChildren(DynamicTemplateDirective) contentTemplateList: QueryList<DynamicTemplateDirective>;
 
@@ -84,14 +86,28 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
         return this.form.formService;
     }
 
+    protected onDetectChanges: Subscription;
+
     constructor(readonly form: DynamicBaseFormComponent,
-                readonly changeDetectorRef: ChangeDetectorRef,
-                readonly componentFactoryResolver: ComponentFactoryResolver,
-                readonly layoutService: DynamicFormLayoutService,
-                readonly validationService: DynamicFormValidationService,
-                readonly componentService: DynamicFormComponentService,
-                readonly relationService: DynamicFormRelationService) {
-        super(changeDetectorRef, componentFactoryResolver, layoutService, validationService, componentService, relationService);
+                readonly cdr: ChangeDetectorRef,
+                cfr: ComponentFactoryResolver,
+                layoutService: DynamicFormLayoutService,
+                validationService: DynamicFormValidationService,
+                componentService: DynamicFormComponentService,
+                relationService: DynamicFormRelationService) {
+        super(cdr, cfr, layoutService, validationService, componentService, relationService);
+    }
+
+    ngOnInit(): void {
+        super.ngOnInit();
+        this.onDetectChanges = this.form.onDetectChanges.subscribe(() => {
+            this.changeDetectorRef.detectChanges();
+        });
+    }
+
+    ngOnDestroy(): void {
+        super.ngOnDestroy();
+        this.onDetectChanges.unsubscribe();
     }
 
     getLabel(): string {

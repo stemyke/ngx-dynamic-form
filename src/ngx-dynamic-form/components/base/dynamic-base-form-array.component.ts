@@ -31,6 +31,8 @@ import {
 import {DynamicFormArrayGroupModel, DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {collectPathAble} from "../../utils/misc";
 import {DynamicFormInitControl} from "../../common-types";
+import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
+import {DynamicBaseFormControlContainerComponent} from "./dynamic-base-form-control-container.component";
 
 @Component({
     selector: "dynamic-base-form-array",
@@ -50,8 +52,8 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent imp
     @Output() customEvent: EventEmitter<DynamicFormControlCustomEvent> = new EventEmitter();
     @Output() focus: EventEmitter<any> = new EventEmitter();
 
-    @ViewChildren(forwardRef(() => DynamicFormControlContainerComponent))
-    components: QueryList<DynamicFormControlContainerComponent>;
+    @ViewChildren(forwardRef(() => DynamicBaseFormControlContainerComponent))
+    components: QueryList<DynamicBaseFormControlContainerComponent>;
 
     get useTabs(): boolean {
         return this.model?.useTabs;
@@ -60,7 +62,7 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent imp
     protected subscription: Subscription;
 
     constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService,
-                readonly injector: Injector, readonly cdr: ChangeDetectorRef) {
+                readonly form: DynamicBaseFormComponent, readonly injector: Injector, readonly cdr: ChangeDetectorRef) {
         super(layoutService, validationService);
     }
 
@@ -118,5 +120,6 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent imp
 
     protected updateGroups(filteredGroups: ReadonlyArray<DynamicFormArrayGroupModel>): void {
         this.cdr.detectChanges();
+        this.components.forEach(t => t.cdr.detectChanges());
     }
 }

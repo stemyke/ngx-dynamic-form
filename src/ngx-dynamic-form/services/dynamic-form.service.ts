@@ -6,8 +6,6 @@ import {
     DynamicCheckboxModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
-    DynamicFormArrayModel as DynamicFormArrayModelBase,
-    DynamicFormComponent,
     DynamicFormComponentService,
     DynamicFormControlModel,
     DynamicFormControlModelConfig,
@@ -43,6 +41,7 @@ import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "../utils/dynamic-form-array.model";
 import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
+import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -66,14 +65,14 @@ export class DynamicFormService extends Base {
 
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         this.patchValueRecursive(value, formModel, formGroup);
-        this.detectChanges();
         formGroup.patchValue(ObjectUtils.copy(value));
+        this.detectChanges();
     }
 
-    patchForm(value: any, component: DynamicFormComponent): void {
+    patchForm(value: any, component: DynamicBaseFormComponent): void {
         this.patchValueRecursive(value, component.model, component.group);
-        this.detectChanges(component);
         component.group.patchValue(value);
+        this.detectChanges(component);
     }
 
     serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
@@ -84,23 +83,7 @@ export class DynamicFormService extends Base {
         this.notifyChangesRecursive(formModel, formGroup, formModel);
     }
 
-    updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: FormControl, root: DynamicFormModel): void {
-        if (formControlModel instanceof DynamicSelectModel) {
-            let options = formControlModel.options$;
-            if (options instanceof FormSubject) {
-                options.notify(formControlModel, formControl, root);
-                return;
-            }
-            while (options instanceof Subject && options.source) {
-                options = options.source;
-                if (options instanceof FormSubject) {
-                    options.notify(formControlModel, formControl, root);
-                }
-            }
-        }
-    }
-
-    showErrors(form: DynamicFormComponent): void {
+    showErrors(form: DynamicBaseFormComponent): void {
         this.showErrorsForGroup(form.group);
         this.detectChanges(form);
     }
@@ -115,7 +98,7 @@ export class DynamicFormService extends Base {
                 value[key] = subValue.id || subValue._id || subValue;
                 return;
             }
-            if (subModel instanceof DynamicFormArrayModelBase) {
+            if (subModel instanceof DynamicFormArrayModel) {
                 const length = Array.isArray(subValue) ? subValue.length : 0;
                 const subArray = subControl as FormArray;
                 while (subModel.size > length) {
@@ -147,7 +130,7 @@ export class DynamicFormService extends Base {
                 result[subModel.id] = await serializer(subModel, subControl);
                 continue;
             }
-            if (subModel instanceof DynamicFormArrayModelBase) {
+            if (subModel instanceof DynamicFormArrayModel) {
                 const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
                 const subArray = subControl as FormArray;
                 const resArray = [];
@@ -180,7 +163,7 @@ export class DynamicFormService extends Base {
         for (const i in formModel) {
             const subModel = formModel[i] as DynamicFormValueControlModel<any>;
             const subControl = this.findControlByModel(subModel, formGroup);
-            if (subModel instanceof DynamicFormArrayModelBase) {
+            if (subModel instanceof DynamicFormArrayModel) {
                 const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
                 const subArray = subControl as FormArray;
                 for (let i = 0; i < length; i++) {
@@ -194,6 +177,22 @@ export class DynamicFormService extends Base {
                 continue;
             }
             this.updateSelectOptions(subModel, subControl as FormControl, root);
+        }
+    }
+
+    protected updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: FormControl, root: DynamicFormModel): void {
+        if (formControlModel instanceof DynamicSelectModel) {
+            let options = formControlModel.options$;
+            if (options instanceof FormSubject) {
+                options.notify(formControlModel, formControl, root);
+                return;
+            }
+            while (options instanceof Subject && options.source) {
+                options = options.source;
+                if (options instanceof FormSubject) {
+                    options.notify(formControlModel, formControl, root);
+                }
+            }
         }
     }
 

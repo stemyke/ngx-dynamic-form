@@ -15,7 +15,7 @@ import {
     ViewChildren
 } from "@angular/core";
 import {FormArray, FormGroup, NgForm} from "@angular/forms";
-import {Subscription} from "rxjs";
+import {debounceTime, groupBy, mergeMap, Subscription} from "rxjs";
 import {first} from "rxjs/operators";
 import {
     DynamicFormComponent,
@@ -59,6 +59,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Output() readonly onValueChange: EventEmitter<IDynamicFormEvent>;
     @Output() readonly onStatusChange: EventEmitter<IDynamicForm>;
     @Output() readonly onSubmit: EventEmitter<IDynamicForm>;
+    @Output() readonly onDetectChanges: EventEmitter<IDynamicForm>;
 
     @ViewChild(NgForm)
     protected ngForm: NgForm;
@@ -76,6 +77,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.onValueChange = new EventEmitter<IDynamicFormEvent>();
         this.onStatusChange = new EventEmitter<IDynamicForm>();
         this.onSubmit = new EventEmitter<IDynamicForm>();
+        this.onDetectChanges = new EventEmitter<IDynamicForm>();
         this.templates = new QueryList<DynamicTemplateDirective>();
         this.subscription = new Subscription();
         this.groupSubscription = new Subscription();
@@ -89,12 +91,14 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 this.group.statusChanges.subscribe(() => {
                     this.onStatusChange.emit(this);
                 }),
-                this.group.valueChanges.subscribe(() => {
+                this.group.valueChanges.pipe(debounceTime(500)).subscribe(() => {
                     this.formService.notifyChanges(this.model, this.group);
                 }),
-                this.change.subscribe(ev => {
-                    this.onValueChange.emit({...ev, form: this});
-                })
+                this.change.pipe(groupBy(ev => ev.model))
+                    .pipe(mergeMap(t => t.pipe(debounceTime(500))))
+                    .subscribe(ev => {
+                        this.onValueChange.emit({...ev, form: this});
+                    })
             );
         }
     }
@@ -126,29 +130,34 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.groupSubscription.unsubscribe();
     }
 
+    detectChanges(): void {
+        super.detectChanges();
+        this.onDetectChanges.emit(this);
+    }
+
     insertFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.insertFormArrayGroup(index, formArray, formArrayModel);
-        this.changeDetectorRef.detectChanges();
+        this.detectChanges();
     }
 
     cloneFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.cloneFormArrayGroup(index, formArray, formArrayModel);
-        this.changeDetectorRef.detectChanges();
+        this.detectChanges();
     }
 
     removeFormArrayGroup(index: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.removeFormArrayGroup(index, formArray, formArrayModel);
-        this.changeDetectorRef.detectChanges();
+        this.detectChanges();
     }
 
     moveFormArrayGroup(index: number, step: number, formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.moveFormArrayGroup(index, step, formArray, formArrayModel);
-        this.changeDetectorRef.detectChanges();
+        this.detectChanges();
     }
 
     clearFormArray(formArray: FormArray, formArrayModel: DynamicFormArrayModel): void {
         this.formService.clearFormArray(formArray, formArrayModel);
-        this.changeDetectorRef.detectChanges();
+        this.detectChanges();
     }
 
     getClass(model?: DynamicFormControlModel): string {
