@@ -30,7 +30,8 @@ export {
     replaceSpecialChars,
     mergeFormModels,
     MIN_INPUT_NUM,
-    MAX_INPUT_NUM
+    MAX_INPUT_NUM,
+    EDITOR_FORMATS
 } from "./ngx-dynamic-form/utils/misc";
 
 export {
@@ -44,10 +45,20 @@ export {
 } from "./ngx-dynamic-form/utils/validators";
 
 export {
-    SaveTabFunc, RestoreTabFunc, TabLabelFunc, DynamicFormArrayGroupModel, DynamicFormArrayModelConfig, DynamicFormArrayModel
+    SaveTabFunc,
+    RestoreTabFunc,
+    TabLabelFunc,
+    DynamicFormArrayGroupModel,
+    DynamicFormArrayModelConfig,
+    DynamicFormArrayModel
 } from "./ngx-dynamic-form/utils/dynamic-form-array.model";
 export {
-    DynamicFormOptionConfig, DynamicFormOption, DynamicFormOptionGroup, OptionClassesFunc, DynamicSelectModelConfig, DynamicSelectModel
+    DynamicFormOptionConfig,
+    DynamicFormOption,
+    DynamicFormOptionGroup,
+    OptionClassesFunc,
+    DynamicSelectModelConfig,
+    DynamicSelectModel
 } from "./ngx-dynamic-form/utils/dynamic-select.model";
 export {FormSelectSubject} from "./ngx-dynamic-form/utils/form-select-subject";
 export {FormSubject} from "./ngx-dynamic-form/utils/form-subject";
@@ -79,16 +90,25 @@ export {
     DYNAMIC_FORM_CONTROL_TYPE_RADIO_GROUP,
     DYNAMIC_FORM_CONTROL_TYPE_SELECT,
     DYNAMIC_FORM_CONTROL_TYPE_TEXTAREA,
+    DYNAMIC_FORM_CONTROL_TYPE_EDITOR,
     DynamicTemplateDirective,
     DynamicListDirective,
     DynamicFormModel,
     DynamicFormControlMapFn,
     DynamicFormsCoreModule,
+    DynamicCheckboxModelConfig,
     DynamicCheckboxModel,
     DynamicCheckboxGroupModel,
+    DynamicFileUploadModelConfig,
     DynamicFileUploadModel,
+    DynamicFormGroupModelConfig,
     DynamicFormGroupModel,
+    DynamicInputModelConfig,
     DynamicInputModel,
+    DynamicRadioGroupModelConfig,
     DynamicRadioGroupModel,
-    DynamicTextAreaModel
+    DynamicTextAreaModelConfig,
+    DynamicTextAreaModel,
+    DynamicEditorModelConfig,
+    DynamicEditorModel
 } from "@ng-dynamic-forms/core";

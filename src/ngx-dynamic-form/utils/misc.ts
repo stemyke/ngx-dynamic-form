@@ -48,3 +48,5 @@ export function collectPathAble<T extends DynamicPathable>(start: T, getter: (cu
 export const MIN_INPUT_NUM = -999999999;
 
 export const MAX_INPUT_NUM = 999999999;
+
+export const EDITOR_FORMATS = ["php", "json", "html", "css", "scss"];

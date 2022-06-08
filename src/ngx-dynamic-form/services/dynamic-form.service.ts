@@ -4,6 +4,8 @@ import {firstValueFrom, Subject} from "rxjs";
 import {
     DynamicCheckboxModel,
     DynamicCheckboxModelConfig,
+    DynamicEditorModel,
+    DynamicEditorModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
     DynamicFormComponentService,
@@ -36,7 +38,7 @@ import {
 
 import {FormControlSerializer, FormModelCustomizer, FormModelCustomizerWrap, ModelType} from "../common-types";
 
-import {findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
+import {EDITOR_FORMATS, findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
 import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
 import {
@@ -246,6 +248,11 @@ export class DynamicFormService extends Base {
         return controls.filter(t => null !== t);
     }
 
+    protected checkIsEditorProperty(property: IOpenApiSchemaProperty): boolean {
+        if (!property.format) return false;
+        return EDITOR_FORMATS.indexOf(property.format) >= 0 || property.format.endsWith("script");
+    }
+
     protected getFormControlModels(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormControlModel[] {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
@@ -255,9 +262,14 @@ export class DynamicFormService extends Base {
             case "string":
             case "number":
             case "integer":
-                return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema));
             case "textarea":
-                return customizeModels(property, schema, DynamicTextAreaModel, this.getFormTextareaConfig(property, schema));
+                if (this.checkIsEditorProperty(property)) {
+                    return customizeModels(property, schema, DynamicEditorModel, this.getFormEditorConfig(property, schema));
+                }
+                if (property.format == "textarea") {
+                    return customizeModels(property, schema, DynamicTextAreaModel, this.getFormTextareaConfig(property, schema));
+                }
+                return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema));
             case "boolean":
                 return customizeModels(property, schema, DynamicCheckboxModel, this.getFormCheckboxConfig(property, schema));
             case "array":
@@ -361,6 +373,25 @@ export class DynamicFormService extends Base {
                 step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
                 min: isNaN(sub.minimum) ? MIN_INPUT_NUM : sub.minimum,
                 max: isNaN(sub.maximum) ? MAX_INPUT_NUM : sub.maximum,
+                minLength: isNaN(sub.minLength) ? 0 : sub.minLength,
+                maxLength: isNaN(sub.maxLength) ? MAX_INPUT_NUM : sub.maxLength,
+                placeholder: property.placeholder || ""
+            }
+        );
+    }
+
+    getFormEditorConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicEditorModelConfig {
+        const sub = property.type == "array" ? property.items || property : property;
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                inputType: property.format,
+                autoComplete: property.autoComplete || "off",
+                multiple: property.type == "array",
+                accept: ObjectUtils.isString(property.accept) ? property.accept : null,
+                mask: ObjectUtils.isString(property.mask) ? property.mask : null,
+                pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
+                step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
                 minLength: isNaN(sub.minLength) ? 0 : sub.minLength,
                 maxLength: isNaN(sub.maxLength) ? MAX_INPUT_NUM : sub.maxLength,
                 placeholder: property.placeholder || ""
