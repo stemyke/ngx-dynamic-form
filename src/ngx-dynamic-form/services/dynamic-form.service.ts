@@ -4,8 +4,6 @@ import {firstValueFrom, Subject} from "rxjs";
 import {
     DynamicCheckboxModel,
     DynamicCheckboxModelConfig,
-    DynamicEditorModel,
-    DynamicEditorModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
     DynamicFormComponentService,
@@ -41,6 +39,7 @@ import {FormControlSerializer, FormModelCustomizer, FormModelCustomizerWrap, Mod
 import {EDITOR_FORMATS, findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
 import {FormSelectSubject} from "../utils/form-select-subject";
 import {FormSubject} from "../utils/form-subject";
+import {DynamicEditorModel, DynamicEditorModelConfig} from "../utils/dynamic-editor.model";
 import {
     DynamicFormArrayGroupModel,
     DynamicFormArrayModel,

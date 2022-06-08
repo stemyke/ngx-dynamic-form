@@ -45,6 +45,11 @@ export {
 } from "./ngx-dynamic-form/utils/validators";
 
 export {
+    DynamicEditorModelConfig,
+    DynamicEditorModel
+} from "./ngx-dynamic-form/utils/dynamic-editor.model";
+
+export {
     SaveTabFunc,
     RestoreTabFunc,
     TabLabelFunc,
@@ -52,6 +57,7 @@ export {
     DynamicFormArrayModelConfig,
     DynamicFormArrayModel
 } from "./ngx-dynamic-form/utils/dynamic-form-array.model";
+
 export {
     DynamicFormOptionConfig,
     DynamicFormOption,
@@ -60,6 +66,7 @@ export {
     DynamicSelectModelConfig,
     DynamicSelectModel
 } from "./ngx-dynamic-form/utils/dynamic-select.model";
+
 export {FormSelectSubject} from "./ngx-dynamic-form/utils/form-select-subject";
 export {FormSubject} from "./ngx-dynamic-form/utils/form-subject";
 
@@ -108,7 +115,5 @@ export {
     DynamicRadioGroupModelConfig,
     DynamicRadioGroupModel,
     DynamicTextAreaModelConfig,
-    DynamicTextAreaModel,
-    DynamicEditorModelConfig,
-    DynamicEditorModel
+    DynamicTextAreaModel
 } from "@ng-dynamic-forms/core";
