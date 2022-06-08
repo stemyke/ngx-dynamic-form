@@ -269,6 +269,8 @@ export class DynamicFormService extends Base {
                     return customizeModels(property, schema, DynamicTextAreaModel, this.getFormTextareaConfig(property, schema));
                 }
                 return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema));
+            case "object":
+                return customizeModels(property, schema, DynamicEditorModel, this.getFormEditorConfig(property, schema));
             case "boolean":
                 return customizeModels(property, schema, DynamicCheckboxModel, this.getFormCheckboxConfig(property, schema));
             case "array":
@@ -384,7 +386,8 @@ export class DynamicFormService extends Base {
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
-                inputType: property.format,
+                inputType: property.format || "json",
+                convertObject: property.type !== "string",
                 autoComplete: property.autoComplete || "off",
                 multiple: property.type == "array",
                 accept: ObjectUtils.isString(property.accept) ? property.accept : null,
