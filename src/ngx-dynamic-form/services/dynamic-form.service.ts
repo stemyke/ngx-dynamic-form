@@ -94,6 +94,7 @@ export class DynamicFormService extends Base {
     }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
+        if (!value) return;
         Object.keys(value).forEach(key => {
             const subModel = this.findModelById(key, formModel);
             const subValue = value[key];
