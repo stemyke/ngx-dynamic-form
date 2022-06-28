@@ -229,6 +229,9 @@ export class DynamicFormService extends Base {
             property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
             modelType: ModelType, config: DynamicFormControlModelConfig) => {
             const model = new modelType(config);
+            if (model instanceof DynamicFormValueControlModel) {
+                model.value = property.default;
+            }
             if (!ObjectUtils.isFunction(customizeModel)) return [model];
             const res = customizeModel(property, schema, model, config, this.injector);
             return Array.isArray(res) ? res : [res];
