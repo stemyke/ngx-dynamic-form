@@ -4,6 +4,8 @@ import {firstValueFrom, Subject} from "rxjs";
 import {
     DynamicCheckboxModel,
     DynamicCheckboxModelConfig,
+    DynamicDatePickerModel,
+    DynamicDatePickerModelConfig,
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
     DynamicFormComponentService,
@@ -102,6 +104,10 @@ export class DynamicFormService extends Base {
             const subControl = this.findControlByModel(subModel, formGroup);
             if (subModel instanceof DynamicSelectModel && ObjectUtils.isObject(subValue)) {
                 value[key] = subValue.id || subValue._id || subValue;
+                return;
+            }
+            if (subModel instanceof DynamicDatePickerModel) {
+                value[key] = this.convertToDate(subValue);
                 return;
             }
             if (subModel instanceof DynamicFormArrayModel) {
@@ -222,6 +228,14 @@ export class DynamicFormService extends Base {
         });
     }
 
+    protected convertToDate(value: any): Date {
+        if (ObjectUtils.isNullOrUndefined(value)) return null;
+        const date = ObjectUtils.isDate(value)
+            ? value
+            : new Date(value);
+        return isNaN(date as any) ? new Date() : date;
+    }
+
     async getFormModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormModel> {
         this.api.cache = {};
         this.schemas = await this.openApi.getSchemas();
@@ -230,7 +244,8 @@ export class DynamicFormService extends Base {
             modelType: ModelType, config: DynamicFormControlModelConfig) => {
             const model = new modelType(config);
             if (model instanceof DynamicFormValueControlModel) {
-                model.value = property.default;
+                model.value = (model instanceof DynamicDatePickerModel)
+                    ? this.convertToDate(property.default) : property.default;
             }
             if (!ObjectUtils.isFunction(customizeModel)) return [model];
             const res = customizeModel(property, schema, model, config, this.injector);
@@ -271,6 +286,9 @@ export class DynamicFormService extends Base {
                 }
                 if (property.format == "textarea") {
                     return customizeModels(property, schema, DynamicTextAreaModel, this.getFormTextareaConfig(property, schema));
+                }
+                if (property.format == "date") {
+                    return customizeModels(property, schema, DynamicDatePickerModel, this.getFormDatepickerConfig(property, schema));
                 }
                 return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema));
             case "object":
@@ -414,6 +432,17 @@ export class DynamicFormService extends Base {
                 wrap: property.wrap || false,
                 autoComplete: property.autoComplete || "off",
                 multiple: property.type == "array"
+            }
+        );
+    }
+
+    getFormDatepickerConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicDatePickerModelConfig {
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                format: property.dateFormat || "dd.MM.yyyy",
+                min: this.convertToDate(property.min),
+                max: this.convertToDate(property.max),
             }
         );
     }
