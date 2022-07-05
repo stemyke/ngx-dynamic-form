@@ -142,6 +142,7 @@ export class DynamicFormService extends Base {
                 result[subModel.id] = await serializer(subModel, subControl);
                 continue;
             }
+            if (subModel.hidden && !subModel.additional?.serialize) continue;
             if (subModel instanceof DynamicFormArrayModel) {
                 const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
                 const subArray = subControl as FormArray;
