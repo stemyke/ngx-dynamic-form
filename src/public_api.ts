@@ -18,11 +18,13 @@ export {
     defineFormControl,
     getFormControl,
     getFormSerializer,
+    createFormControl,
     createFormInput,
     createFormSelect,
     createFormStatic,
     createFormModel,
-    createFormControl,
+    createFormFile,
+    GetFormControlComponentType,
     IDynamicFormModuleConfig
 } from "./ngx-dynamic-form/common-types";
 
@@ -118,5 +120,6 @@ export {
     DynamicRadioGroupModelConfig,
     DynamicRadioGroupModel,
     DynamicTextAreaModelConfig,
-    DynamicTextAreaModel
+    DynamicTextAreaModel,
+    DynamicFormControlComponent
 } from "@ng-dynamic-forms/core";

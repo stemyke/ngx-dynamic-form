@@ -1,8 +1,8 @@
-import {ChangeDetectorRef, EventEmitter, Injector} from "@angular/core";
+import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
 import {AbstractControl, FormArray} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
-    DynamicFormControl,
+    DynamicFormControl, DynamicFormControlComponent,
     DynamicFormControlEvent,
     DynamicFormControlMapFn,
     DynamicFormControlModel,
@@ -178,6 +178,8 @@ export function createFormFile(id: string, data: DynamicFileUploadModelConfig): 
     data.url = ObjectUtils.isString(data.url) ? data.url : "assets";
     return control;
 }
+
+export type GetFormControlComponentType = (model: DynamicFormControlModel) => Type<DynamicFormControlComponent>;
 
 export interface IDynamicFormModuleConfig {
     controlProvider?: (injector: Injector) => DynamicFormControlMapFn;

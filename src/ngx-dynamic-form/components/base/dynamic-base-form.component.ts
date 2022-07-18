@@ -11,7 +11,6 @@ import {
     Output,
     QueryList,
     SimpleChanges,
-    Type,
     ViewChild,
     ViewChildren
 } from "@angular/core";
@@ -21,7 +20,6 @@ import {first} from "rxjs/operators";
 import {
     DynamicFormComponent,
     DynamicFormComponentService,
-    DynamicFormControl,
     DynamicFormControlEvent,
     DynamicFormControlModel,
     DynamicFormGroupModel,
@@ -30,7 +28,7 @@ import {
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
 import {EventsService, ObservableUtils} from "@stemy/ngx-utils";
-import {DynamicFormState, IDynamicForm, IDynamicFormEvent} from "../../common-types";
+import {DynamicFormState, GetFormControlComponentType, IDynamicForm, IDynamicFormEvent} from "../../common-types";
 import {collectPathAble} from "../../utils/misc";
 import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {DynamicFormService} from "../../services/dynamic-form.service";
@@ -46,7 +44,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Input() model: DynamicFormModel;
     @Input() layout: DynamicFormLayout;
     @Input() labelPrefix: string;
-    @Input() getComponentType: (model: DynamicFormControlModel) => Type<DynamicFormControl>;
+    @Input() getComponentType: GetFormControlComponentType;
 
     @Output() blur: EventEmitter<DynamicFormControlEvent>;
     @Output() change: EventEmitter<DynamicFormControlEvent>;
