@@ -11,6 +11,7 @@ import {
     Output,
     QueryList,
     SimpleChanges,
+    Type,
     ViewChild,
     ViewChildren
 } from "@angular/core";
@@ -20,6 +21,7 @@ import {first} from "rxjs/operators";
 import {
     DynamicFormComponent,
     DynamicFormComponentService,
+    DynamicFormControl,
     DynamicFormControlEvent,
     DynamicFormControlModel,
     DynamicFormGroupModel,
@@ -44,6 +46,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Input() model: DynamicFormModel;
     @Input() layout: DynamicFormLayout;
     @Input() labelPrefix: string;
+    @Input() getComponentType: (model: DynamicFormControlModel) => Type<DynamicFormControl>;
 
     @Output() blur: EventEmitter<DynamicFormControlEvent>;
     @Output() change: EventEmitter<DynamicFormControlEvent>;
@@ -82,6 +85,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.subscription = new Subscription();
         this.groupSubscription = new Subscription();
         this.labelPrefix = "label";
+        this.getComponentType = () => null;
     }
 
     ngOnChanges(changes: SimpleChanges): void {

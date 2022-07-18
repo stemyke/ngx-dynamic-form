@@ -67,7 +67,7 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
     }) componentViewContainerRef: ViewContainerRef;
 
     get componentType(): Type<DynamicFormControl> | null {
-        return this.componentService.getCustomComponentType(this.model) ?? this.getComponentType(this.model);
+        return this.form.getComponentType(this.model) ?? this.componentService.getCustomComponentType(this.model);
     }
 
     get startTemplate(): DynamicTemplateDirective {
@@ -143,9 +143,5 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
         const component = this.componentRef?.instance as DynamicFormInitControl;
         if (!component || !ObjectUtils.isFunction(component.initialize)) return;
         component.initialize(this.changeDetectorRef);
-    }
-
-    protected getComponentType(model: DynamicFormControlModel): Type<DynamicFormControl> | null {
-        return null;
     }
 }
