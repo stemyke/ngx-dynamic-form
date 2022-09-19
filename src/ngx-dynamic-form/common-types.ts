@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
-import {AbstractControl, FormArray} from "@angular/forms";
+import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {
     DynamicFileUploadModelConfig,
     DynamicFormControl, DynamicFormControlComponent,
@@ -31,6 +31,9 @@ export interface IDynamicFormEvent extends DynamicFormControlEvent {
 }
 
 export interface IDynamicForm {
+
+    readonly group: FormGroup;
+
     status: DynamicFormState;
 
     onValueChange: EventEmitter<IDynamicFormEvent>;

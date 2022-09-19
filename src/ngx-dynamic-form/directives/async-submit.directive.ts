@@ -15,6 +15,7 @@ import {
 import {Subscription} from "rxjs";
 import {IAsyncMessage, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
 import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
+import {getFormValidationErrors} from "../utils/validation-errors";
 
 @Directive({
     selector: "[async-submit]",
@@ -88,6 +89,9 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
     @HostListener("click")
     click(): void {
         this.callback = () => this.callMethod();
+        if (this.form.status === "INVALID") {
+            console.log(getFormValidationErrors(this.form.group.controls));
+        }
         if (this.form.status !== "VALID" && this.form.status !== "INVALID") return;
         this.callback();
         this.callback = null;
