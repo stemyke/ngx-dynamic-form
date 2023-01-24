@@ -4,6 +4,7 @@ import {
     ChangeDetectorRef,
     Component,
     EventEmitter,
+    Injector,
     Input,
     OnDestroy,
     Output
@@ -18,6 +19,7 @@ import {
     DynamicFormLayoutService,
     DynamicFormValidationService
 } from "@ng-dynamic-forms/core";
+import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 
 @Component({
     selector: "dynamic-base-form-control",
@@ -37,7 +39,8 @@ export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> 
 
     protected subscription: Subscription;
 
-    constructor(readonly cdr: ChangeDetectorRef, layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService) {
+    constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService,
+                readonly form: DynamicBaseFormComponent, readonly injector: Injector, readonly cdr: ChangeDetectorRef) {
         super(layoutService, validationService);
         this.blur = new EventEmitter<any>();
         this.change = new EventEmitter<any>();
@@ -53,6 +56,10 @@ export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> 
     ngOnDestroy(): void {
         if (!this.subscription) return;
         this.subscription.unsubscribe();
+    }
+
+    submit(): void {
+        this.form.submit();
     }
 
     protected onValueChanged(value: any): void {

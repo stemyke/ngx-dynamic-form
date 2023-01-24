@@ -13,6 +13,7 @@ import {
     Renderer2
 } from "@angular/core";
 import {Subscription} from "rxjs";
+import {debounceTime} from "rxjs/operators";
 import {IAsyncMessage, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
 import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
 import {getFormValidationErrors} from "../utils/validation-errors";
@@ -78,7 +79,7 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
             }
             this.callback = null;
         });
-        this.onSubmit = this.form.onSubmit.subscribe(() => this.callMethod());
+        this.onSubmit = this.form.onSubmit.pipe(debounceTime(200)).subscribe(() => this.callMethod());
     }
 
     ngOnDestroy(): void {
