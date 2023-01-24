@@ -11,10 +11,9 @@ import {
     Output,
     QueryList,
     SimpleChanges,
-    ViewChild,
     ViewChildren
 } from "@angular/core";
-import {FormArray, FormGroup, NgForm} from "@angular/forms";
+import {FormArray, FormGroup} from "@angular/forms";
 import {debounceTime, groupBy, mergeMap, Subscription} from "rxjs";
 import {first} from "rxjs/operators";
 import {
@@ -62,8 +61,6 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Output() readonly onSubmit: EventEmitter<IDynamicForm>;
     @Output() readonly onDetectChanges: EventEmitter<IDynamicForm>;
 
-    @ViewChild(NgForm)
-    protected ngForm: NgForm;
     protected subscription: Subscription;
     protected groupSubscription: Subscription;
 
@@ -84,6 +81,10 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.groupSubscription = new Subscription();
         this.labelPrefix = "label";
         this.getComponentType = () => null;
+    }
+
+    submit(): void {
+        this.onSubmit.emit(this);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -119,9 +120,6 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
             this.events.languageChanged.subscribe(() => {
                 this.formService.notifyChanges(this.model, this.group);
                 this.formService.detectChanges(this);
-            }),
-            this.ngForm.ngSubmit.subscribe(() => {
-                this.onSubmit.emit(this);
             })
         );
     }
