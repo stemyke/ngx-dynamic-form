@@ -349,6 +349,7 @@ export class DynamicFormService extends Base {
             this.getFormControlConfig(property, schema),
             {
                 groupFactory: () => mergeFormModels(subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))),
+                initialCount: property.initialCount || 0,
                 sortable: property.sortable || false,
                 useTabs: property.useTabs || false,
                 addItem: property.addItem !== false,
@@ -495,10 +496,14 @@ export class DynamicFormService extends Base {
         }
         return new FormSelectSubject(async (selectModel, control) => {
             this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
-                return result.items.map(i => {
+                const items = ObjectUtils.isArray(result)
+                    ? result
+                    : (ObjectUtils.isArray(result.items) ? result.items : []);
+                return items.map(i => {
+                    const item = ObjectUtils.isObject(i) ? i : {id: i};
                     return {
-                        ...i,
-                        value: i.id || i._id, label: i[property.labelField] || i.label || i.id || i._id
+                        ...item,
+                        value: item.id || item._id, label: item[property.labelField] || item.label || item.id || item._id
                     };
                 });
             });
