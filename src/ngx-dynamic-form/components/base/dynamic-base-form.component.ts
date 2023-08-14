@@ -14,7 +14,8 @@ import {
     ViewChildren
 } from "@angular/core";
 import {FormArray, FormGroup} from "@angular/forms";
-import {debounceTime, groupBy, mergeMap, Subscription} from "rxjs";
+import {Subscription} from "rxjs";
+import {debounceTime, groupBy, mergeMap} from "rxjs/operators";
 import {first} from "rxjs/operators";
 import {
     DynamicFormComponent,

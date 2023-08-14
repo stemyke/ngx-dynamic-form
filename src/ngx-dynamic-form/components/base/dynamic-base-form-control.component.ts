@@ -10,7 +10,8 @@ import {
     Output
 } from "@angular/core";
 import {FormGroup} from "@angular/forms";
-import {debounceTime, Subscription} from "rxjs";
+import {Subscription} from "rxjs";
+import {debounceTime} from "rxjs/operators";
 import {
     DynamicFormControlComponent,
     DynamicFormControlLayout,

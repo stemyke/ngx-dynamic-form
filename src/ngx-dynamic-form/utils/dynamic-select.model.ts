@@ -1,6 +1,7 @@
 import {Injector} from "@angular/core";
 import {FormControl} from "@angular/forms";
-import {isObservable, map, Observable, of} from "rxjs";
+import {isObservable, Observable, of} from "rxjs";
+import {map} from "rxjs/operators";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     DynamicFormControlLayout,
