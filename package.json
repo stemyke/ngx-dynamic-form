@@ -1,12 +1,12 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "13.1.19",
+    "version": "13.1.20",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
         "build": "ng-packagr -p ng-package.json",
-        "public": "npm publish dist --access public"
+        "public": "npm publish ./dist --access public --ignore-scripts"
     },
     "public": true,
     "repository": "https://github.com/stemyke/ngx-dynamic-form.git",

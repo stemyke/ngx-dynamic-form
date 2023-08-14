@@ -48,15 +48,16 @@ export declare interface ModelType extends Function {
     new (config: DynamicFormControlModelConfig): DynamicFormControlModel;
 }
 
+export type PromiseOrNot<T> = Promise<T> | T;
 export type FormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;
 export type FormModelCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
     model: DynamicFormControlModel, config: DynamicFormControlModelConfig, injector: Injector
-) => DynamicFormControlModel | DynamicFormControlModel[];
+) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
 export type FormModelCustomizerWrap = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
     modelType: ModelType, config: DynamicFormControlModelConfig
-) => DynamicFormControlModel[];
+) => Promise<DynamicFormControlModel[]>;
 
 export interface IFormControl {
     id: string;

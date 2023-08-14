@@ -240,7 +240,7 @@ export class DynamicFormService extends Base {
     async getFormModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormModel> {
         this.api.cache = {};
         this.schemas = await this.openApi.getSchemas();
-        const customizeModels: FormModelCustomizerWrap = (
+        const customizeModels: FormModelCustomizerWrap = async (
             property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
             modelType: ModelType, config: DynamicFormControlModelConfig) => {
             const model = new modelType(config);
@@ -249,20 +249,25 @@ export class DynamicFormService extends Base {
                     ? this.convertToDate(property.default) : property.default;
             }
             if (!ObjectUtils.isFunction(customizeModel)) return [model];
-            const res = customizeModel(property, schema, model, config, this.injector);
+            let res = customizeModel(property, schema, model, config, this.injector);
+            if (!res) return [model];
+            if (res instanceof Promise) {
+                res = await res;
+            }
             return Array.isArray(res) ? res : [res];
         };
         return this.getFormModelForSchemaDef(this.schemas[name], customizeModels);
     }
 
-    protected getFormModelForSchemaDef(schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormModel {
+    protected async getFormModelForSchemaDef(schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormModel> {
         if (!schema)
             return [];
         const keys = Object.keys(schema.properties || {});
         const controls: DynamicFormModel = [];
         for (const p of keys) {
             const property = schema.properties[p];
-            controls.push(...this.getFormControlModels(property, schema, customizeModels));
+            const models = await this.getFormControlModels(property, schema, customizeModels);
+            controls.push(...models);
         }
         return controls.filter(t => null !== t);
     }
@@ -272,7 +277,7 @@ export class DynamicFormService extends Base {
         return EDITOR_FORMATS.indexOf(property.format) >= 0 || property.format.endsWith("script");
     }
 
-    protected getFormControlModels(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormControlModel[] {
+    protected async getFormControlModels(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormControlModel[]> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             return customizeModels(property, schema, DynamicSelectModel, this.getFormSelectConfig(property, schema));
@@ -298,7 +303,7 @@ export class DynamicFormService extends Base {
                 return customizeModels(property, schema, DynamicCheckboxModel, this.getFormCheckboxConfig(property, schema));
             case "array":
                 if (findRefs(property).length > 0) {
-                    return customizeModels(property, schema, DynamicFormArrayModel, this.getFormArrayConfig(property, schema, customizeModels));
+                    return customizeModels(property, schema, DynamicFormArrayModel, await this.getFormArrayConfig(property, schema, customizeModels));
                 } else {
                     return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema));
                 }
@@ -306,7 +311,7 @@ export class DynamicFormService extends Base {
                 return customizeModels(property, schema, DynamicFileUploadModel, this.getFormUploadConfig(property, schema));
         }
         if (findRefs(property).length > 0) {
-            return customizeModels(property, schema, DynamicFormGroupModel, this.getFormGroupConfig(property, schema, customizeModels));
+            return customizeModels(property, schema, DynamicFormGroupModel, await this.getFormGroupConfig(property, schema, customizeModels));
         }
         return [];
     }
@@ -343,12 +348,15 @@ export class DynamicFormService extends Base {
         };
     }
 
-    getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormArrayModelConfig {
+    async getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormArrayModelConfig> {
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        const subModels = await Promise.all(
+            subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))
+        );
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
-                groupFactory: () => mergeFormModels(subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))),
+                groupFactory: () => mergeFormModels(ObjectUtils.copy(subModels)),
                 initialCount: property.initialCount || 0,
                 sortable: property.sortable || false,
                 useTabs: property.useTabs || false,
@@ -362,12 +370,15 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): DynamicFormGroupModelConfig {
+    async getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormGroupModelConfig> {
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        const subModels = await Promise.all(
+            subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))
+        );
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
-                group: mergeFormModels(subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels)))
+                group: mergeFormModels(subModels)
             }
         );
     }
