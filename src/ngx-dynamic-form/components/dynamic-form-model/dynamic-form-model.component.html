@@ -1,4 +1,5 @@
-<dynamic-form [name]="data.name || form.name"
+<dynamic-form [testId]="form.testId + '-' + control.id"
+              [name]="data.name || form.name"
               [group]="control"
               [data]="value"
               [updateOn]="control.updateOn"

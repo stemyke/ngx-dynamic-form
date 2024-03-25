@@ -7,6 +7,7 @@
                  [hidden]="!config.group?.visible"
                  [ngClass]="config.formClasses || ''"
                  [name]="config.name || form.name"
+                 [testId]="testId + '-' + (config.testId || config.name || name)"
                  [readonly]="form.readonly"
                  [updateOn]="form.updateOn"
                  [classes]="config.innerFormClasses"
@@ -39,6 +40,7 @@
         <div dynamic-forms
              [ngClass]="config.formClasses || ''"
              [name]="config.name || name"
+             [testId]="testId + '-' + (config.testId || config.name || name)"
              [readonly]="form.readonly"
              [updateOn]="form.updateOn"
              [classes]="config.innerFormClasses"

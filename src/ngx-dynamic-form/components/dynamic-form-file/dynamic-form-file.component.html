@@ -1,5 +1,9 @@
 <div class="upload">
-    <input type="file" (change)="onSelect($event.target)" [attr.accept]="data.accept" multiple="multiple"/>
+    <input type="file"
+           multiple="multiple"
+           [attr.data-testid]="testId"
+           [attr.accept]="data.accept"
+           (change)="onSelect($event.target)" />
     <ul class="images" *ngIf="!data.multi">
         <li class="image" *ngIf="value" [ngStyle]="{backgroundImage: getUrl(value)}">
             <a class="btn btn-delete" (click)="delete()"></a>

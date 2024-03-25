@@ -1,5 +1,6 @@
 <ng-template #selectTemplate let-selected="selected">
     <select class="form-control"
+            [attr.data-testid]="testId"
             [multiple]="data.multi"
             [id]="control.formId"
             [name]="control.formId"
@@ -23,6 +24,7 @@
             <li *ngFor="let option of meta.options" class="radio">
                 <label [ngClass]="{checked: value == option.id}">
                     <input type="radio"
+                           [attr.data-testid]="testId + '-' + option.id"
                            [id]="control.formId + '-' + option.id"
                            [name]="control.formId + '-' + option.id"
                            [ngClass]="{disabled: control.disabled}"
@@ -42,6 +44,7 @@
             <li *ngFor="let option of meta.options" class="checkbox">
                 <label [ngClass]="{checked: checkValue(option)}">
                     <input type="checkbox"
+                           [attr.data-testid]="testId + '-' + option.id"
                            [id]="control.formId + '-' + option.id"
                            [name]="control.formId + '-' + option.id"
                            [ngClass]="{disabled: control.disabled}"

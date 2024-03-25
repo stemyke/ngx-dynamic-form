@@ -11,6 +11,7 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
 export abstract class DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit {
 
     @Input() name: string;
+    @Input() testId: string;
     @Input() readonly: boolean;
     @Input() updateOn: "change" | "blur" | "submit";
     @Input() classes: any;
@@ -65,7 +66,7 @@ export abstract class DynamicFormBaseComponent implements IDynamicFormBase, Afte
 
     protected constructor(cdr: ChangeDetectorRef, private formService: DynamicFormService) {
         this.name = "";
-
+        this.testId = "form";
         this.controlTemplates = {};
         this.labelTemplates = {};
         this.inputTemplates = {};

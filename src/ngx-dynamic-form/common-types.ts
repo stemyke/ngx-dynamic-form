@@ -45,6 +45,11 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
         return !this.control ? null : this.control.meta;
     }
 
+    get testId(): string {
+        const prefix = this.form?.testId || "form";
+        return `${prefix}-${this.control?.id || "ctrl"}`;
+    }
+
     @HostBinding("class.form-input")
     get inputClass(): boolean {
         return true;
@@ -678,6 +683,7 @@ export interface IDynamicFormTemplates {
 export interface IDynamicFormConfig {
     path?: string | number | Array<string | number>;
     name?: string;
+    testId?: string;
     classes?: string;
     formClasses?: string;
     innerFormClasses?: string;
@@ -700,6 +706,7 @@ export type IDynamicFormsConfigs = Array<IDynamicSingleFormConfig | IDynamicMult
 export interface IDynamicFormBase {
 
     name?: string;
+    testId?: string;
     readonly?: boolean;
     updateOn?: "change" | "blur" | "submit";
     classes: string;
