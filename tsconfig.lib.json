@@ -1,7 +1,7 @@
 {
     "extends": "./node_modules/ng-packagr/lib/ts/conf/tsconfig.ngc.json",
     "angularCompilerOptions": {
-        "enableIvy": true
+        "enableIvy": false
     },
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
