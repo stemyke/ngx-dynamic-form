@@ -4,6 +4,7 @@ import {
 } from "@angular/core";
 import {ObjectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
+    DYNAMIC_FORM,
     DynamicFormGroup, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormsConfigs,
     IDynamicFormTemplates, IDynamicSingleFormConfig
 } from "../../common-types";
@@ -16,7 +17,16 @@ const statusPriority: DynamicFormState[] = ["LOADING", "PENDING", "DISABLED", "I
     moduleId: module.id,
     selector: "dynamic-forms, [dynamic-forms]",
     templateUrl: "./dynamic-forms.component.html",
-    providers: [{provide: DynamicFormBaseComponent, useExisting: DynamicFormsComponent}]
+    providers: [
+        {
+            provide: DynamicFormBaseComponent,
+            useExisting: DynamicFormsComponent
+        },
+        {
+            provide: DYNAMIC_FORM,
+            useExisting: DynamicFormsComponent
+        }
+    ]
 })
 export class DynamicFormsComponent extends DynamicFormBaseComponent implements IDynamicFormBase, AfterContentInit, OnChanges {
 

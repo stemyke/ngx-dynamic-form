@@ -1,9 +1,8 @@
-import {DynamicFormControl} from "./ngx-dynamic-form/common-types";
-
 export {
     FORM_CONTROL_PROVIDER,
     IFormControlComponent,
     IFormGroupComponent,
+    DYNAMIC_FORM,
     FormControlComponent,
     IFormControlProviderAcceptor,
     IFormControlProviderLoader,
@@ -70,6 +69,7 @@ export {OpenApiService, IOpenApiSchemaProperty, IOpenApiSchema, IDynamicFormInpu
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
 export {DynamicFormControlDirective} from "./ngx-dynamic-form/directives/dynamic-form-control.directive";
 export {DynamicFormTemplateDirective} from "./ngx-dynamic-form/directives/dynamic-form-template.directive";
+export {DynamicFormGroupDirective} from "./ngx-dynamic-form/directives/dynamic-form-group.directive";
 
 export {DynamicFormBaseComponent} from "./ngx-dynamic-form/components/base/dynamic-form-base.component";
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";

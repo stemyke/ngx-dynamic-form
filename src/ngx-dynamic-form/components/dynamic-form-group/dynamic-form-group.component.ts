@@ -1,5 +1,11 @@
-import {Component, HostBinding} from "@angular/core";
-import {IDynamicForm, IDynamicFormControl, IFormGroupComponent} from "../../common-types";
+import {Component, HostBinding, Inject} from "@angular/core";
+import {
+    DYNAMIC_FORM,
+    IDynamicForm,
+    IDynamicFormBase,
+    IDynamicFormControl,
+    IFormGroupComponent
+} from "../../common-types";
 
 @Component({
     moduleId: module.id,
@@ -7,8 +13,11 @@ import {IDynamicForm, IDynamicFormControl, IFormGroupComponent} from "../../comm
     templateUrl: "./dynamic-form-group.component.html"
 })
 export class DynamicFormGroupComponent implements IFormGroupComponent {
-    form: IDynamicForm;
+
     control: IDynamicFormControl;
+
+    constructor(@Inject(DYNAMIC_FORM) readonly form: IDynamicFormBase) {
+    }
 
     @HostBinding("class")
     get classes(): string {

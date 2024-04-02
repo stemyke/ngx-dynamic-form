@@ -24,10 +24,6 @@ export class DynamicFormInputComponent extends FormControlComponent<IFormInputDa
         return this.data.type == "checkbox" && this.value;
     }
 
-    constructor(@Inject(LANGUAGE_SERVICE) private language: ILanguageService) {
-        super();
-    }
-
     onDateChange(value: string): void {
         const date = new Date(value);
         const dateValue = <number>date.valueOf();

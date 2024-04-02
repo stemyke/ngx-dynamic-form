@@ -21,8 +21,7 @@ export class DynamicFormFileComponent extends FormControlComponent<IFormFileData
         return Promise.resolve();
     }
 
-    constructor(readonly api: ApiService, @Inject(TOASTER_SERVICE) readonly toaster: IToasterService) {
-        super();
+    ctrInit() {
         this.fileImageCache = [];
     }
 

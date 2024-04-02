@@ -1,6 +1,7 @@
 import {AfterContentInit, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {first} from "rxjs/operators";
 import {
+    DYNAMIC_FORM,
     DynamicFormGroup,
     DynamicFormState,
     IDynamicForm,
@@ -16,7 +17,16 @@ import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
     moduleId: module.id,
     selector: "dynamic-form, [dynamic-form]",
     templateUrl: "./dynamic-form.component.html",
-    providers: [{provide: DynamicFormBaseComponent, useExisting: DynamicFormComponent}]
+    providers: [
+        {
+            provide: DynamicFormBaseComponent,
+            useExisting: DynamicFormComponent
+        },
+        {
+            provide: DYNAMIC_FORM,
+            useExisting: DynamicFormComponent
+        }
+    ]
 })
 export class DynamicFormComponent extends DynamicFormBaseComponent implements IDynamicForm, AfterContentInit, OnChanges {
 

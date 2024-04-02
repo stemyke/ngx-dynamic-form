@@ -1,5 +1,5 @@
 import {Directive, Input, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
-import {IDynamicForm, IDynamicFormControl, IFormControlComponent, IFormGroupComponent} from "../common-types";
+import {IDynamicFormControl, IFormControlComponent, IFormGroupComponent} from "../common-types";
 import {DynamicFormService} from "../services/dynamic-form.service";
 
 @Directive({
@@ -8,7 +8,6 @@ import {DynamicFormService} from "../services/dynamic-form.service";
 export class DynamicFormGroupDirective implements OnChanges {
 
     @Input("form-group") control: IDynamicFormControl;
-    @Input() form: IDynamicForm;
     @Input() visible: boolean;
 
     get component(): IFormControlComponent {
@@ -30,7 +29,6 @@ export class DynamicFormGroupDirective implements OnChanges {
             this.comp = this.forms.createGroup(this.vcr);
         }
         if (!this.comp) return;
-        this.comp.form = this.form;
         this.comp.control = this.control;
     }
 }

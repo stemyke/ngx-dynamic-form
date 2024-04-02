@@ -1,4 +1,15 @@
-import { ChangeDetectorRef, EventEmitter, HostBinding, InjectionToken, Injector, TemplateRef, Type, ValueProvider, Directive } from "@angular/core";
+import {
+    ChangeDetectorRef,
+    EventEmitter,
+    HostBinding,
+    InjectionToken,
+    Injector,
+    TemplateRef,
+    Type,
+    ValueProvider,
+    Directive,
+    Inject, OnInit
+} from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
 import {
     IResolveFactory,
@@ -8,7 +19,7 @@ import {
     ReflectUtils,
     TimerUtils,
     UniqueUtils,
-    IRequestOptions
+    IRequestOptions, ApiService, TOASTER_SERVICE, IToasterService, LANGUAGE_SERVICE, ILanguageService
 } from "@stemy/ngx-utils";
 
 export const FORM_GROUP_TYPE: InjectionToken<Type<IFormControlComponent>> = new InjectionToken<Type<IFormControlComponent>>("form-group-provider");
@@ -20,17 +31,31 @@ export interface IFormControlComponent {
 }
 
 export interface IFormGroupComponent {
-    form: IDynamicForm;
+    form: IDynamicFormBase;
     control: IDynamicFormControl;
 }
 
+export const DYNAMIC_FORM: InjectionToken<IDynamicFormBase> = new InjectionToken<IDynamicFormBase>("dynamic-form-base");
+
 @Directive()
-export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent {
+export abstract class FormControlComponent<T extends IFormControlData> implements IFormControlComponent, OnInit {
 
     control: IDynamicFormControl;
 
-    get form(): IDynamicFormBase {
-        return !this.control ? null: this.control.form;
+    constructor(readonly api: ApiService,
+                @Inject(DYNAMIC_FORM) readonly form: IDynamicFormBase,
+                @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService,
+                @Inject(TOASTER_SERVICE) readonly toaster: IToasterService) {
+        this.ctrInit();
+    }
+
+    ctrInit(): void {
+
+    }
+
+    ngOnInit(): void {
+        if (!this.control) return;
+        this.control.form = this.form;
     }
 
     get data(): T {
@@ -347,7 +372,7 @@ export class DynamicFormGroup extends FormGroup implements IDynamicFormControl {
         });
     }
 
-    constructor(public readonly form: IDynamicFormBase, control: IFormControl = null) {
+    constructor(public form: IDynamicFormBase, control: IFormControl = null) {
         super({}, {updateOn: ((!control || !control.data) ? null : control.data.updateOn) || form.updateOn || "blur"});
         this.mName = "";
         this.mModel = {};
@@ -520,10 +545,6 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
         return this.helper.meta;
     }
 
-    get form(): IDynamicFormBase {
-        return this.group.form;
-    }
-
     get injector(): Injector {
         return this.form.injector;
     }
@@ -544,11 +565,14 @@ export class DynamicFormControl extends FormControl implements IDynamicFormContr
         return this.helper.formId;
     }
 
+    form: IDynamicFormBase;
+
     private helper: DynamicFormControlHelper;
 
     constructor(private control: IFormControl, public readonly group: DynamicFormGroup) {
         super(group.model[control.id], {updateOn: control.data.updateOn || group.updateOn});
         this.group.addControl(control.id, this);
+        this.form = this.group.form;
         this.helper = new DynamicFormControlHelper(this.form, control);
         this.helper.findProvider(this);
         this.valueChanges.subscribe(() => this.group.updateModel(this));
