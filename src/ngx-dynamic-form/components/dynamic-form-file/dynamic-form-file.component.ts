@@ -1,6 +1,6 @@
-import {Component, Inject} from "@angular/core";
+import {Component} from "@angular/core";
 import {FormControlComponent, IDynamicFormControl, IFormFileData} from "../../common-types";
-import {ApiService, ArrayUtils, FileUtils, IToasterService, ObjectUtils, TOASTER_SERVICE} from "@stemy/ngx-utils";
+import {ArrayUtils, FileUtils, ObjectUtils} from "@stemy/ngx-utils";
 
 @Component({
     selector: "dynamic-form-file",

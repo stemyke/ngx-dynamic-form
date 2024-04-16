@@ -1,25 +1,32 @@
 import {
     ChangeDetectorRef,
+    Directive,
     EventEmitter,
     HostBinding,
+    Inject,
     InjectionToken,
     Injector,
+    OnInit,
     TemplateRef,
     Type,
-    ValueProvider,
-    Directive,
-    Inject, OnInit
+    ValueProvider
 } from "@angular/core";
 import {AbstractControl, FormControl, FormGroup, ValidationErrors} from "@angular/forms";
 import {
+    API_SERVICE,
+    IApiService,
+    IAsyncMessage,
+    ILanguageService,
+    IRequestOptions,
     IResolveFactory,
     ITimer,
-    IAsyncMessage,
+    IToasterService,
+    LANGUAGE_SERVICE,
     ObjectUtils,
     ReflectUtils,
     TimerUtils,
-    UniqueUtils,
-    IRequestOptions, ApiService, TOASTER_SERVICE, IToasterService, LANGUAGE_SERVICE, ILanguageService
+    TOASTER_SERVICE,
+    UniqueUtils
 } from "@stemy/ngx-utils";
 
 export const FORM_GROUP_TYPE: InjectionToken<Type<IFormControlComponent>> = new InjectionToken<Type<IFormControlComponent>>("form-group-provider");
@@ -42,7 +49,7 @@ export abstract class FormControlComponent<T extends IFormControlData> implement
 
     control: IDynamicFormControl;
 
-    constructor(readonly api: ApiService,
+    constructor(@Inject(API_SERVICE) readonly api: IApiService,
                 @Inject(DYNAMIC_FORM) readonly form: IDynamicFormBase,
                 @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService,
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService) {

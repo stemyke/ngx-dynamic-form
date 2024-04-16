@@ -1,5 +1,5 @@
-import {Injectable} from "@angular/core";
-import {ApiService, StringUtils} from "@stemy/ngx-utils";
+import {Inject, Injectable} from "@angular/core";
+import {API_SERVICE, IApiService, StringUtils} from "@stemy/ngx-utils";
 
 import {FormUtilities} from "./form-utilities";
 
@@ -45,7 +45,7 @@ export class OpenApiService {
     private schemasPromise: Promise<any>;
     private schemas: any;
 
-    constructor(private api: ApiService) {
+    constructor(@Inject(API_SERVICE) private api: IApiService) {
         const baseUrl = this.api.url("").replace("api/", "api-docs");
         this.schemas = {};
         this.schemasPromise = new Promise<any>((resolve => {
