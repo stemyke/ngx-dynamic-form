@@ -5,28 +5,23 @@ export {
     FormModelCustomizer,
     DynamicFormState,
     DynamicFormUpdateOn,
-    IFormControl,
     DynamicFormInitControl,
     AsyncSubmitMethod,
-    defaultSerializer,
-    FormSerializable,
-    FormInput,
-    FormSelect,
-    FormStatic,
-    FormModel,
-    FormFile,
-    defineFormControl,
-    getFormControl,
-    getFormSerializer,
-    createFormControl,
+    GetFormControlComponentType,
+    IDynamicFormModuleConfig,
+} from "./ngx-dynamic-form/common-types";
+
+export {
+    createFormCheckbox,
+    createFormDate,
+    createFormEditor,
+    createFormArray,
+    createFormGroup,
     createFormInput,
     createFormSelect,
-    createFormStatic,
-    createFormModel,
+    createFormTextarea,
     createFormFile,
-    GetFormControlComponentType,
-    IDynamicFormModuleConfig
-} from "./ngx-dynamic-form/common-types";
+} from "./ngx-dynamic-form/utils/creators";
 
 export {
     replaceSpecialChars,

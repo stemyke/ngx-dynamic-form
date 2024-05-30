@@ -43,7 +43,6 @@ import {IDynamicFormModuleConfig} from "./common-types";
         ReactiveFormsModule,
         NgxUtilsModule
     ],
-    entryComponents: components,
     providers: [
         ...pipes,
         {provide: NG_VALIDATORS, useValue: validateJSON, multi: true},

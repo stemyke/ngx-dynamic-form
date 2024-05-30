@@ -1,25 +1,30 @@
 import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
-import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
+import {AbstractControl, FormGroup} from "@angular/forms";
 import {
+    DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
-    DynamicFormControl, DynamicFormControlComponent,
+    DynamicFormControl,
+    DynamicFormControlComponent,
     DynamicFormControlEvent,
     DynamicFormControlMapFn,
     DynamicFormControlModel,
     DynamicFormControlModelConfig,
+    DynamicFormGroupModel,
     DynamicFormGroupModelConfig,
     DynamicFormValueControlModel,
+    DynamicInputModel,
     DynamicInputModelConfig,
-    DynamicSelectModelConfig
+    DynamicSelectModelConfig,
+    DynamicFormControlLayout,
+    DynamicCheckboxModel,
+    DynamicCheckboxModelConfig,
+    DynamicDatePickerModel,
+    DynamicDateControlModel
 } from "@ng-dynamic-forms/core";
-import {
-    IAsyncMessage,
-    IOpenApiSchema,
-    IOpenApiSchemaProperty,
-    IResolveFactory,
-    ObjectUtils,
-    ReflectUtils
-} from "@stemy/ngx-utils";
+import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty, ObjectUtils} from "@stemy/ngx-utils";
+import {DynamicSelectModel} from "./utils/dynamic-select.model";
+import {DynamicEditorModel, DynamicEditorModelConfig} from "./utils/dynamic-editor.model";
+import {DynamicFormArrayModelConfig} from "./utils/dynamic-form-array.model";
 
 // --- Basic form control interfaces ---
 
@@ -70,118 +75,6 @@ export interface DynamicFormInitControl extends DynamicFormControl {
 }
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
-
-// --- Decorator functions ---
-
-export function defaultSerializer(id: string, parent: FormArray): Promise<any> {
-    const control = parent.get(id);
-    return !control ? null: control.value;
-}
-
-export function FormSerializable(serializer?: FormControlSerializer | IResolveFactory): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        ReflectUtils.defineMetadata("dynamicFormSerializer", serializer || defaultSerializer, target, propertyKey);
-    };
-}
-
-export function FormInput(data?: DynamicInputModelConfig): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        const meta = ReflectUtils.getOwnMetadata("design:type", target, propertyKey);
-        const type = meta ? meta.name : "";
-        let inputType = propertyKey.indexOf("password") < 0 ? "text" : "password";
-        switch (type) {
-            case "Number":
-                inputType = "number";
-                break;
-            case "Boolean":
-                inputType = "checkbox";
-                break;
-        }
-        defineFormControl(target, propertyKey, createFormInput(propertyKey, data, inputType));
-    };
-}
-
-export function FormSelect(data?: DynamicSelectModelConfig<any>): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormSelect(propertyKey, data));
-    };
-}
-
-export function FormStatic(data?: DynamicFormControlModelConfig): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormStatic(propertyKey, data));
-    };
-}
-
-export function FormModel(data?: DynamicFormGroupModelConfig): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormModel(propertyKey, data));
-    };
-}
-
-export function FormFile(data?: DynamicFileUploadModelConfig): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormFile(propertyKey, data));
-    };
-}
-
-export function defineFormControl(target: any, propertyKey: string, control: IFormControl): void {
-    ReflectUtils.defineMetadata("dynamicFormControl", control, target, propertyKey);
-}
-
-export function getFormControl(target: any, propertyKey: string): IFormControl {
-    return ReflectUtils.getMetadata("dynamicFormControl", target, propertyKey);
-}
-
-export function getFormSerializer(target: any, propertyKey: string): FormControlSerializer | IResolveFactory {
-    return ReflectUtils.getMetadata("dynamicFormSerializer", target, propertyKey);
-}
-
-export function createFormControl(id: string, type: string, config?: DynamicFormControlModelConfig): IFormControl {
-    config = config || {id};
-    config.id = id;
-    config.label = ObjectUtils.isNullOrUndefined(config.label) ? id : config.label;
-    config.disabled = config.disabled || false;
-    config.hidden = config.hidden || false;
-    return {id, type, config};
-}
-
-export function createFormInput(id: string, config: DynamicInputModelConfig, type: string = "text"): IFormControl {
-    const control = createFormControl(id, "input", config);
-    config = control.config;
-    config.inputType = config.inputType || type;
-    config.placeholder = config.placeholder || (config.inputType == "mask" ? "_" : "");
-    config.step = config.step || 1;
-    config.mask = config.mask || null;
-    return control;
-}
-
-export function createFormSelect(id: string, data: DynamicSelectModelConfig<any>): IFormControl {
-    const control = createFormControl(id, "select", data);
-    data = control.config;
-    data.options = data.options || [];
-    return control;
-}
-
-export function createFormStatic(id: string, config: DynamicFormControlModelConfig): IFormControl {
-    return createFormControl(id, "static", config);
-}
-
-export function createFormModel(id: string, data: DynamicFormGroupModelConfig): IFormControl {
-    const control = createFormControl(id, "group", data);
-    data = control.config;
-    data.name = data.name || "";
-    return control;
-}
-
-export function createFormFile(id: string, data: DynamicFileUploadModelConfig): IFormControl {
-    const control = createFormControl(id, "file", data);
-    data = control.config;
-    data.accept = data.accept || ["jpg", "jpeg", "png"];
-    data.multiple = data.multiple || false;
-    data.url = ObjectUtils.isString(data.url) ? data.url : "assets";
-    return control;
-}
 
 export type GetFormControlComponentType = (model: DynamicFormControlModel) => Type<DynamicFormControlComponent>;
 
