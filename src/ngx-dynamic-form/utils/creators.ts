@@ -18,72 +18,76 @@ import {DynamicEditorModel, DynamicEditorModelConfig} from "./dynamic-editor.mod
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "./dynamic-form-array.model";
 import {DynamicSelectModelConfig, DynamicSelectModel} from "./dynamic-select.model";
 
-export function createFormConfig<T extends DynamicFormControlModelConfig>(id: string, config?: T): T {
-    config = config || {id} as T;
-    config.id = id;
-    config.label = ObjectUtils.isNullOrUndefined(config.label) ? id : config.label;
-    config.disabled = config.disabled || false;
-    config.hidden = config.hidden || false;
-    return config;
+export type OmitId<T extends DynamicFormControlModelConfig> = Omit<T, "id">;
+
+export type AddId<T extends OmitId<DynamicFormControlModelConfig>> = T extends OmitId<(infer U)> ? U : never;
+
+export function createFormConfig<T extends DynamicFormControlModelConfig, U extends OmitId<T>>(id: string, config?: U): AddId<U> {
+    const res = (config || {id}) as AddId<U>;
+    res.id = id;
+    res.label = ObjectUtils.isNullOrUndefined(config.label) ? id : config.label;
+    res.disabled = config.disabled || false;
+    res.hidden = config.hidden || false;
+    return res;
 }
 
-export function createFormCheckbox(id: string, config: DynamicCheckboxModelConfig, layout?: DynamicFormControlLayout): DynamicCheckboxModel {
-    config = createFormConfig(id, config);
-    config.indeterminate = config.indeterminate || false;
-    return new DynamicCheckboxModel(config, layout);
+export function createFormCheckbox(id: string, config: OmitId<DynamicCheckboxModelConfig>, layout?: DynamicFormControlLayout): DynamicCheckboxModel {
+    const res = createFormConfig(id, config);
+    res.indeterminate = config.indeterminate || false;
+    return new DynamicCheckboxModel(res, layout);
 }
 
-export function createFormDate(id: string, config: DynamicDatePickerModel, layout?: DynamicFormControlLayout): DynamicDatePickerModel {
-    config = createFormConfig(id, config);
-    config.autoFocus = config.autoFocus || false;
-    config.focusedDate = config.focusedDate || new Date();
-    config.inline = config.inline || false;
-    return new DynamicDatePickerModel(config, layout);
+export function createFormDate(id: string, config: OmitId<DynamicDatePickerModel>, layout?: DynamicFormControlLayout): DynamicDatePickerModel {
+    const res = createFormConfig(id, config);
+    res.autoFocus = config.autoFocus || false;
+    res.focusedDate = config.focusedDate || new Date();
+    res.inline = config.inline || false;
+    return new DynamicDatePickerModel(res, layout);
 }
 
-export function createFormEditor(id: string, config: DynamicEditorModelConfig, layout?: DynamicFormControlLayout): DynamicEditorModel {
-    config = createFormConfig(id, config);
-    return new DynamicEditorModel(config, layout);
+export function createFormEditor(id: string, config: OmitId<DynamicEditorModelConfig>, layout?: DynamicFormControlLayout): DynamicEditorModel {
+    const res = createFormConfig(id, config);
+    return new DynamicEditorModel(res, layout);
 }
 
-export function createFormArray(id: string, config: DynamicFormArrayModelConfig, layout?: DynamicFormControlLayout): DynamicFormArrayModel {
-    config = createFormConfig(id, config);
-    return new DynamicFormArrayModel(config, layout);
+export function createFormArray(id: string, config: OmitId<DynamicFormArrayModelConfig>, layout?: DynamicFormControlLayout): DynamicFormArrayModel {
+    const res = createFormConfig(id, config);
+    return new DynamicFormArrayModel(res, layout);
 }
 
-export function createFormGroup(id: string, config: DynamicFormGroupModelConfig, layout?: DynamicFormControlLayout): DynamicFormGroupModel {
-    config = createFormConfig(id, config);
-    config.name = config.name || "";
-    return new DynamicFormGroupModel(config, layout);
+export function createFormGroup(id: string, config: OmitId<DynamicFormGroupModelConfig>, layout?: DynamicFormControlLayout): DynamicFormGroupModel {
+    const res = createFormConfig(id, config);
+    res.name = config.name || "";
+    return new DynamicFormGroupModel(res, layout);
 }
 
-export function createFormInput(id: string, config: DynamicInputModelConfig, type: string = "text", layout?: DynamicFormControlLayout): DynamicInputModel {
-    config = createFormConfig(id, config);
-    config.inputType = config.inputType || type;
-    config.placeholder = config.placeholder || (config.inputType == "mask" ? "_" : "");
-    config.step = config.step || 1;
-    config.mask = config.mask || null;
-    return new DynamicInputModel(config, layout);
+export function createFormInput(id: string, config: OmitId<DynamicInputModelConfig>, type: string = "text", layout?: DynamicFormControlLayout): DynamicInputModel {
+    const res = createFormConfig(id, config);
+    res.inputType = config.inputType || type;
+    res.placeholder = config.placeholder || (config.inputType == "mask" ? "_" : "");
+    res.step = config.step || 1;
+    res.mask = config.mask || null;
+    return new DynamicInputModel(res, layout);
 }
 
-export function createFormSelect<T = any>(id: string, config: DynamicSelectModelConfig<T>, layout?: DynamicFormControlLayout): DynamicSelectModel<T> {
-    config = createFormConfig(id, config);
-    config.options = config.options || [];
-    return new DynamicSelectModel(config, layout);
+export function createFormSelect<T = any>(id: string, config: OmitId<DynamicSelectModelConfig<T>>, layout?: DynamicFormControlLayout): DynamicSelectModel<T> {
+    const res = createFormConfig(id, config);
+    res.options = config.options || [];
+    return new DynamicSelectModel(res, layout);
 }
 
-export function createFormTextarea(id: string, config: DynamicTextAreaModelConfig, layout?: DynamicFormControlLayout): DynamicTextAreaModel {
-    config = createFormConfig(id, config);
-    config.cols = config.cols || 10;
-    config.rows = config.rows || 3;
-    config.wrap = config.wrap || "soft";
-    return new DynamicTextAreaModel(config, layout);
+export function createFormTextarea(id: string, config: OmitId<DynamicTextAreaModelConfig>, layout?: DynamicFormControlLayout): DynamicTextAreaModel {
+    const res = createFormConfig(id, config);
+    res.cols = config.cols || 10;
+    res.rows = config.rows || 3;
+    res.wrap = config.wrap || "soft";
+    return new DynamicTextAreaModel(res, layout);
 }
 
-export function createFormFile(id: string, config: DynamicFileUploadModelConfig, layout?: DynamicFormControlLayout): DynamicFileUploadModel {
-    config = createFormConfig(id, config);
-    config.accept = config.accept || ["jpg", "jpeg", "png"];
-    config.multiple = config.multiple || false;
-    config.url = ObjectUtils.isString(config.url) ? config.url : "assets";
-    return new DynamicFileUploadModel(config, layout);
+export function createFormFile(id: string, config: OmitId<DynamicFileUploadModelConfig>, layout?: DynamicFormControlLayout): DynamicFileUploadModel {
+    const res = createFormConfig(id, config);
+    res.accept = config.accept || ["jpg", "jpeg", "png"];
+    res.multiple = config.multiple || false;
+    res.url = ObjectUtils.isString(config.url) ? config.url : "assets";
+    return new DynamicFileUploadModel(res, layout);
 }
