@@ -386,6 +386,9 @@ export class DynamicFormService extends Base {
     getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
         let inputType = StringUtils.has(property.id, "password", "Password") ? "password" : (property.format || property.items?.type || property.type);
         switch (inputType) {
+            case "string":
+                inputType = "text";
+                break;
             case "boolean":
                 inputType = "checkbox";
                 break;
