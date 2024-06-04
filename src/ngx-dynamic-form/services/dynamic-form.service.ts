@@ -269,15 +269,12 @@ export class DynamicFormService extends Base {
             const models = await this.getFormControlModels(property, schema, customizeModels);
             controls.push(...models);
         }
-        const config = {id: "root", group: controls} as DynamicFormGroupModelConfig;
+        const config = {id: "root", group: [...controls]} as DynamicFormGroupModelConfig;
         const root = await customizeModels({
             id: "root",
             type: "object",
             properties: schema.properties
         }, schema, DynamicFormGroupModel, config);
-        if (!root) {
-            return controls;
-        }
         if (Array.isArray(root)) {
             controls.length = 0;
             for (const model of root) {
