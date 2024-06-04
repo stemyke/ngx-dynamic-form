@@ -256,7 +256,31 @@ export class DynamicFormService extends Base {
             }
             return Array.isArray(res) ? res : [res];
         };
-        return this.getFormModelForSchemaDef(this.schemas[name], customizeModels);
+        const schema = this.schemas[name];
+        const controls = await this.getFormModelForSchemaDef(schema, customizeModels);
+        // Check if we have controls to customize
+        if (!controls || controls.length == 0) {
+            return [];
+        }
+        // If we have then lets create a root wrapper that contains them
+        const config = {id: "root", group: [...controls]} as DynamicFormGroupModelConfig;
+        const root = await customizeModels({
+            id: "root",
+            type: "object",
+            properties: schema.properties
+        }, schema, DynamicFormGroupModel, config);
+        // Check if the customized root wrapper returned an array
+        if (Array.isArray(root)) {
+            controls.length = 0;
+            for (const model of root) {
+                if (model instanceof DynamicFormGroupModel) {
+                    controls.push(...model.group);
+                } else {
+                    controls.push(model);
+                }
+            }
+        }
+        return controls.filter(t => null !== t);
     }
 
     protected async getFormModelForSchemaDef(schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormModel> {
@@ -268,22 +292,6 @@ export class DynamicFormService extends Base {
             const property = schema.properties[p];
             const models = await this.getFormControlModels(property, schema, customizeModels);
             controls.push(...models);
-        }
-        const config = {id: "root", group: [...controls]} as DynamicFormGroupModelConfig;
-        const root = await customizeModels({
-            id: "root",
-            type: "object",
-            properties: schema.properties
-        }, schema, DynamicFormGroupModel, config);
-        if (Array.isArray(root)) {
-            controls.length = 0;
-            for (const model of root) {
-                if (model instanceof DynamicFormGroupModel) {
-                    controls.push(...model.group);
-                } else {
-                    controls.push(model);
-                }
-            }
         }
         return controls.filter(t => null !== t);
     }
@@ -496,14 +504,14 @@ export class DynamicFormService extends Base {
                 let target = control as AbstractControl;
                 let model: DynamicPathable | DynamicFormModel = selectModel;
                 if (path.startsWith("$root")) {
-                    path = path.substr(5);
+                    path = path.substring(5);
                     while (target.parent) {
                         target = target.parent;
                     }
                     model = root;
                 }
                 while (path.startsWith(".")) {
-                    path = path.substr(1);
+                    path = path.substring(1);
                     if (target.parent) {
                         target = target.parent;
                     }
