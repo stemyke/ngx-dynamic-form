@@ -17,15 +17,15 @@ import {
     DynamicFormControlLayoutPlace,
     DynamicFormControlModel,
     DynamicFormGroupComponent,
-    DynamicFormGroupModel,
     DynamicFormLayout,
     DynamicFormLayoutService,
     DynamicFormValidationService,
     DynamicFormValueControlModel,
     DynamicTemplateDirective
 } from "@ng-dynamic-forms/core";
-import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {collectPathAble} from "../../utils/misc";
+import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
+import {DynamicFormGroupModel} from "../../utils/dynamic-form-group.model";
 
 @Component({
     selector: "dynamic-base-form-group",

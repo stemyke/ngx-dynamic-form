@@ -6,8 +6,6 @@ import {
     DynamicFileUploadModelConfig,
     DynamicFormControlLayout,
     DynamicFormControlModelConfig,
-    DynamicFormGroupModel,
-    DynamicFormGroupModelConfig,
     DynamicInputModel,
     DynamicInputModelConfig,
     DynamicTextAreaModel,
@@ -16,6 +14,7 @@ import {
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {DynamicEditorModel, DynamicEditorModelConfig} from "./dynamic-editor.model";
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "./dynamic-form-array.model";
+import {DynamicFormGroupModel, DynamicFormGroupModelConfig} from "./dynamic-form-group.model";
 import {DynamicSelectModelConfig, DynamicSelectModel} from "./dynamic-select.model";
 
 export type OmitId<T extends DynamicFormControlModelConfig> = Omit<T, "id">;

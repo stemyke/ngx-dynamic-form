@@ -11,8 +11,6 @@ import {
     DynamicFormComponentService,
     DynamicFormControlModel,
     DynamicFormControlModelConfig,
-    DynamicFormGroupModel,
-    DynamicFormGroupModelConfig,
     DynamicFormModel,
     DynamicFormService as Base,
     DynamicFormValidationService,
@@ -47,6 +45,11 @@ import {
     DynamicFormArrayModel,
     DynamicFormArrayModelConfig
 } from "../utils/dynamic-form-array.model";
+import {
+    DynamicFormFieldSet,
+    DynamicFormGroupModel,
+    DynamicFormGroupModelConfig
+} from "../utils/dynamic-form-group.model";
 import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
 import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 
@@ -71,12 +74,14 @@ export class DynamicFormService extends Base {
     }
 
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
+        value = ObjectUtils.copy(value);
         this.patchValueRecursive(value, formModel, formGroup);
-        formGroup.patchValue(ObjectUtils.copy(value));
+        formGroup.patchValue(value);
         this.detectChanges();
     }
 
     patchForm(value: any, component: DynamicBaseFormComponent): void {
+        value = ObjectUtils.copy(value);
         this.patchValueRecursive(value, component.model, component.group);
         component.group.patchValue(value);
         this.detectChanges(component);
@@ -97,10 +102,9 @@ export class DynamicFormService extends Base {
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         if (!value) return;
-        Object.keys(value).forEach(key => {
-            const subModel = this.findModelById(key, formModel);
+        formModel?.forEach(subModel => {
+            const key = subModel.id;
             const subValue = value[key];
-            if (!subModel) return;
             const subControl = this.findControlByModel(subModel, formGroup);
             if (subModel instanceof DynamicSelectModel && ObjectUtils.isObject(subValue)) {
                 value[key] = subValue.id || subValue._id || subValue;
@@ -156,14 +160,14 @@ export class DynamicFormService extends Base {
                 result[subModel.id] = resArray;
                 continue;
             }
-            if (subModel instanceof DynamicFormGroupModel) {
-                result[subModel.id] = await this.serializeRecursive(subModel.group, subControl as FormGroup);
-                continue;
-            }
             if (subModel instanceof DynamicInputModel && !ObjectUtils.isNullOrUndefined(subControl.value)) {
                 result[subModel.id] = subModel.inputType == "number"
                     ? parseFloat((`${subControl.value}` || "0").replace(/,/gi, ".")) ?? null
                     : subControl.value;
+                continue;
+            }
+            if (subModel instanceof DynamicFormGroupModel) {
+                result[subModel.id] = await this.serializeRecursive(subModel.group, subControl as FormGroup);
                 continue;
             }
             result[subModel.id] = subControl.value;
@@ -238,8 +242,13 @@ export class DynamicFormService extends Base {
     }
 
     async getFormModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormModel> {
+        return (await this.getFormGroupModelForSchema(name, customizeModel)).group;
+    }
+
+    async getFormGroupModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormGroupModel> {
         this.api.cache = {};
         this.schemas = await this.openApi.getSchemas();
+        const fieldSets: DynamicFormFieldSet<string>[] = [];
         const customizeModels: FormModelCustomizerWrap = async (
             property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
             modelType: ModelType, config: DynamicFormControlModelConfig) => {
@@ -257,13 +266,12 @@ export class DynamicFormService extends Base {
             return Array.isArray(res) ? res : [res];
         };
         const schema = this.schemas[name];
-        const controls = await this.getFormModelForSchemaDef(schema, customizeModels);
-        // Check if we have controls to customize
-        if (!controls || controls.length == 0) {
-            return [];
-        }
-        // If we have then lets create a root wrapper that contains them
-        const config = {id: "root", group: [...controls]} as DynamicFormGroupModelConfig;
+        const controls = await this.getFormModelForSchemaDef(schema, fieldSets, customizeModels);
+        const config = {
+            id: "root",
+            group: [...controls],
+            fieldSets
+        } as DynamicFormGroupModelConfig;
         const root = await customizeModels({
             id: "root",
             type: "object",
@@ -273,23 +281,37 @@ export class DynamicFormService extends Base {
         if (Array.isArray(root)) {
             controls.length = 0;
             for (const model of root) {
-                if (model instanceof DynamicFormGroupModel) {
-                    controls.push(...model.group);
+                if (model instanceof DynamicFormGroupModel && model.id === "root") {
+                    return model;
                 } else {
                     controls.push(model);
                 }
             }
         }
-        return controls.filter(t => null !== t);
+        return new DynamicFormGroupModel({
+            ...config,
+            group: controls
+        });
     }
 
-    protected async getFormModelForSchemaDef(schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormModel> {
+    protected async getFormModelForSchemaDef(schema: IOpenApiSchema, fieldSets: DynamicFormFieldSet<string>[], customizeModels: FormModelCustomizerWrap): Promise<DynamicFormModel> {
         if (!schema)
             return [];
         const keys = Object.keys(schema.properties || {});
         const controls: DynamicFormModel = [];
         for (const p of keys) {
             const property = schema.properties[p];
+            const fs = String(property.fieldSet || "");
+            if (fs) {
+                const fieldSet = fieldSets.find(fs => {
+                    return fs.id === p;
+                });
+                if (fieldSet) {
+                    fieldSet.fields.push(p);
+                } else {
+                    fieldSets.push({id: fs, legend: `legend.${fs}`, fields: [p]});
+                }
+            }
             const models = await this.getFormControlModels(property, schema, customizeModels);
             controls.push(...models);
         }
@@ -373,9 +395,10 @@ export class DynamicFormService extends Base {
     }
 
     async getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormArrayModelConfig> {
+        const fieldSets: DynamicFormFieldSet<string>[] = [];
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
         const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))
+            subSchemas.map(s => this.getFormModelForSchemaDef(s, fieldSets, customizeModels))
         );
         return Object.assign(
             this.getFormControlConfig(property, schema),
@@ -395,13 +418,15 @@ export class DynamicFormService extends Base {
     }
 
     async getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap): Promise<DynamicFormGroupModelConfig> {
+        const fieldSets: DynamicFormFieldSet<string>[] = [];
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
         const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormModelForSchemaDef(s, customizeModels))
+            subSchemas.map(s => this.getFormModelForSchemaDef(s, fieldSets, customizeModels))
         );
         return Object.assign(
             this.getFormControlConfig(property, schema),
             {
+                fieldSets,
                 group: mergeFormModels(subModels)
             }
         );

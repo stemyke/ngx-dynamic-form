@@ -22,7 +22,6 @@ import {
     DynamicFormComponentService,
     DynamicFormControlEvent,
     DynamicFormControlModel,
-    DynamicFormGroupModel,
     DynamicFormLayout,
     DynamicFormModel,
     DynamicTemplateDirective
@@ -30,6 +29,7 @@ import {
 import {EventsService, ObservableUtils} from "@stemy/ngx-utils";
 import {DynamicFormState, GetFormControlComponentType, IDynamicForm, IDynamicFormEvent} from "../../common-types";
 import {collectPathAble} from "../../utils/misc";
+import {DynamicFormGroupModel} from "../../utils/dynamic-form-group.model";
 import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 
@@ -41,6 +41,7 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
 export class DynamicBaseFormComponent extends DynamicFormComponent implements OnChanges, AfterViewInit, IDynamicForm {
 
     @Input() group: FormGroup;
+    @Input() groupModel: DynamicFormGroupModel;
     @Input() model: DynamicFormModel;
     @Input() layout: DynamicFormLayout;
     @Input() labelPrefix: string;
@@ -104,6 +105,12 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                         this.onValueChange.emit({...ev, form: this});
                     })
             );
+        }
+        if (changes.groupModel) {
+            this.model = this.groupModel?.group;
+        }
+        if (changes.model) {
+            this.groupModel = new DynamicFormGroupModel({id: "root", group: this.model});
         }
     }
 

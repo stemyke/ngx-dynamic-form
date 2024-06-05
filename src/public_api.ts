@@ -56,6 +56,13 @@ export {
 } from "./ngx-dynamic-form/utils/dynamic-form-array.model";
 
 export {
+    DynamicFormFieldSet,
+    DynamicFormFieldSets,
+    DynamicFormGroupModelConfig,
+    DynamicFormGroupModel
+} from "./ngx-dynamic-form/utils/dynamic-form-group.model";
+
+export {
     DynamicFormOptionConfig,
     DynamicFormOption,
     DynamicFormOptionGroup,
@@ -106,8 +113,6 @@ export {
     DynamicCheckboxGroupModel,
     DynamicFileUploadModelConfig,
     DynamicFileUploadModel,
-    DynamicFormGroupModelConfig,
-    DynamicFormGroupModel,
     DynamicInputModelConfig,
     DynamicInputModel,
     DynamicDatePickerModelConfig,
