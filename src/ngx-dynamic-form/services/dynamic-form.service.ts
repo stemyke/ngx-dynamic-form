@@ -301,15 +301,13 @@ export class DynamicFormService extends Base {
         const controls: DynamicFormModel = [];
         for (const p of keys) {
             const property = schema.properties[p];
-            const fs = String(property.fieldSet || "");
-            if (fs) {
-                const fieldSet = fieldSets.find(fs => {
-                    return fs.id === p;
-                });
-                if (fieldSet) {
-                    fieldSet.fields.push(p);
+            const fsName = property.hidden ? null : String(property.fieldSet || "");
+            if (fsName) {
+                const fs = fieldSets.find(t => t.id === fsName);
+                if (fs) {
+                    fs.fields.push(p);
                 } else {
-                    fieldSets.push({id: fs, legend: `legend.${fs}`, fields: [p]});
+                    fieldSets.push({id: fsName, legend: `legend.${fsName}`, fields: [p]});
                 }
             }
             const models = await this.getFormControlModels(property, schema, customizeModels);
