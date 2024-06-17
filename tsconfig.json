@@ -1,7 +1,13 @@
 {
     "compileOnSave": false,
+    "angularCompilerOptions": {
+        "enableIvy": true,
+        "compilationMode": "partial",
+        "strictMetadataEmit": true
+    },
     "compilerOptions": {
-    "module": "esnext",
+        "allowSyntheticDefaultImports": true,
+        "module": "esnext",
         "outDir": "./dist/out-tsc",
         "baseUrl": ".",
         "sourceMap": true,
@@ -9,21 +15,23 @@
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "target": "es5",
+        "skipLibCheck": true,
+        "target": "es2018",
+        "useDefineForClassFields": false,
         "typeRoots": [
             "node_modules/@types"
         ],
+        "paths": {
+            "jszip": [
+                "node_modules/jszip/dist/jszip.js"
+            ],
+            "webpack": [
+                "node_modules/webpack"
+            ],
+        },
         "lib": [
             "es2017",
             "dom"
-        ],
-        "paths": {
-            "@angular/*": ["node_modules/@angular/*"],
-            "rxjs/*": ["node_modules/rxjs/*"]
-        }
-    },
-    "include": [
-        "src/**/*",
-        "node_modules/@stemy/ngx-utils/index.ts"
-    ]
+        ]
+    }
 }
