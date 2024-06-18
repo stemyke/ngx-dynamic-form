@@ -1,4 +1,12 @@
-import {AfterContentInit, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {
+    AfterContentInit,
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    ViewEncapsulation
+} from "@angular/core";
 import {first} from "rxjs/operators";
 import {
     DYNAMIC_FORM,
@@ -14,7 +22,7 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "dynamic-form, [dynamic-form]",
     templateUrl: "./dynamic-form.component.html",
     providers: [

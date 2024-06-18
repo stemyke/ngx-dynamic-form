@@ -1,14 +1,8 @@
-import {Component, HostBinding, Inject} from "@angular/core";
-import {
-    DYNAMIC_FORM,
-    IDynamicForm,
-    IDynamicFormBase,
-    IDynamicFormControl,
-    IFormGroupComponent
-} from "../../common-types";
+import {Component, HostBinding, Inject, ViewEncapsulation} from "@angular/core";
+import {DYNAMIC_FORM, IDynamicFormBase, IDynamicFormControl, IFormGroupComponent} from "../../common-types";
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "div[dynamic-form-group]",
     templateUrl: "./dynamic-form-group.component.html"
 })

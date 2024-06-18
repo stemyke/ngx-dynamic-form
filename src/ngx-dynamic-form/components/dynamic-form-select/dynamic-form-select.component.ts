@@ -1,16 +1,16 @@
-import {Component} from "@angular/core";
+import {Component, ViewEncapsulation} from "@angular/core";
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
     DynamicFormControl,
     FormControlComponent,
-    IDynamicForm, IDynamicFormControl,
-    IFormControl, IFormControlOption,
+    IDynamicFormControl,
+    IFormControlOption,
     IFormControlOptions,
     IFormSelectData
 } from "../../common-types";
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "dynamic-form-select",
     templateUrl: "./dynamic-form-select.component.html"
 })

@@ -1,8 +1,8 @@
-import {Component, ViewChild} from "@angular/core";
+import {Component, ViewChild, ViewEncapsulation} from "@angular/core";
 import {DynamicFormControl, FormControlComponent, IDynamicForm, IFormModelData} from "../../common-types";
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "dynamic-form-model",
     templateUrl: "./dynamic-form-model.component.html"
 })

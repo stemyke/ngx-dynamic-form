@@ -1,9 +1,9 @@
-import {Component, HostBinding, Inject} from "@angular/core";
-import {ILanguageService, ITranslation, LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
+import {Component, HostBinding, ViewEncapsulation} from "@angular/core";
+import {ITranslation, ObjectUtils} from "@stemy/ngx-utils";
 import {DynamicFormControl, FormControlComponent, IFormInputData} from "../../common-types";
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "dynamic-form-input",
     templateUrl: "./dynamic-form-input.component.html"
 })

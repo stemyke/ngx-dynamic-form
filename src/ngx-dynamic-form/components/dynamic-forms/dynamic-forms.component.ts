@@ -1,12 +1,26 @@
 import {
-    AfterContentInit, ChangeDetectorRef, Component, ContentChild, Input, OnChanges, QueryList, SimpleChanges,
-    TemplateRef, ViewChildren
+    AfterContentInit,
+    ChangeDetectorRef,
+    Component,
+    ContentChild,
+    Input,
+    OnChanges,
+    QueryList,
+    SimpleChanges,
+    TemplateRef,
+    ViewChildren,
+    ViewEncapsulation
 } from "@angular/core";
 import {ObjectUtils, UniqueUtils} from "@stemy/ngx-utils";
 import {
     DYNAMIC_FORM,
-    DynamicFormGroup, DynamicFormState, IDynamicFormBase, IDynamicFormControl, IDynamicFormsConfigs,
-    IDynamicFormTemplates, IDynamicSingleFormConfig
+    DynamicFormGroup,
+    DynamicFormState,
+    IDynamicFormBase,
+    IDynamicFormControl,
+    IDynamicFormsConfigs,
+    IDynamicFormTemplates,
+    IDynamicSingleFormConfig
 } from "../../common-types";
 import {DynamicFormBaseComponent} from "../base/dynamic-form-base.component";
 import {DynamicFormService} from "../../services/dynamic-form.service";
@@ -14,7 +28,7 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
 const statusPriority: DynamicFormState[] = ["LOADING", "PENDING", "DISABLED", "INVALID"];
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "dynamic-forms, [dynamic-forms]",
     templateUrl: "./dynamic-forms.component.html",
     providers: [

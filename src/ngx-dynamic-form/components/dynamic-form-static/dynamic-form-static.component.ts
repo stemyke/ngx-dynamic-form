@@ -1,14 +1,8 @@
-import {Component} from "@angular/core";
-import {
-    DynamicFormControl,
-    FormControlComponent,
-    IDynamicForm,
-    IFormControl,
-    IFormStaticData
-} from "../../common-types";
+import {Component, ViewEncapsulation} from "@angular/core";
+import {DynamicFormControl, FormControlComponent, IFormStaticData} from "../../common-types";
 
 @Component({
-    moduleId: module.id,
+    encapsulation: ViewEncapsulation.None,
     selector: "dynamic-form-static",
     templateUrl: "./dynamic-form-static.component.html"
 })
