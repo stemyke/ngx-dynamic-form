@@ -1,30 +1,15 @@
 import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
 import {AbstractControl, FormGroup} from "@angular/forms";
 import {
-    DynamicFileUploadModel,
-    DynamicFileUploadModelConfig,
     DynamicFormControl,
     DynamicFormControlComponent,
     DynamicFormControlEvent,
     DynamicFormControlMapFn,
     DynamicFormControlModel,
     DynamicFormControlModelConfig,
-    DynamicFormGroupModel,
-    DynamicFormGroupModelConfig,
-    DynamicFormValueControlModel,
-    DynamicInputModel,
-    DynamicInputModelConfig,
-    DynamicSelectModelConfig,
-    DynamicFormControlLayout,
-    DynamicCheckboxModel,
-    DynamicCheckboxModelConfig,
-    DynamicDatePickerModel,
-    DynamicDateControlModel
+    DynamicFormValueControlModel
 } from "@ng-dynamic-forms/core";
-import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty, ObjectUtils} from "@stemy/ngx-utils";
-import {DynamicSelectModel} from "./utils/dynamic-select.model";
-import {DynamicEditorModel, DynamicEditorModelConfig} from "./utils/dynamic-editor.model";
-import {DynamicFormArrayModelConfig} from "./utils/dynamic-form-array.model";
+import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
 // --- Basic form control interfaces ---
 
@@ -76,7 +61,7 @@ export interface DynamicFormInitControl extends DynamicFormControl {
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
-export type GetFormControlComponentType = (model: DynamicFormControlModel) => Type<DynamicFormControlComponent>;
+export type GetFormControlComponentType = (model: DynamicFormControlModel, injector: Injector) => Type<DynamicFormControlComponent>;
 
 export interface IDynamicFormModuleConfig {
     controlProvider?: (injector: Injector) => DynamicFormControlMapFn;

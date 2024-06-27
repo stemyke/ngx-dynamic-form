@@ -1,8 +1,30 @@
 import {Type} from "@angular/core";
-import {DynamicFormControlModel, DynamicFormControlModelConfig} from "@ng-dynamic-forms/core";
+import {
+    DynamicFormControlComponent,
+    DynamicFormControlModel,
+    DynamicFormControlModelConfig
+} from "@ng-dynamic-forms/core";
 import {cachedFactory, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
-import {FormModelCustomizer, PromiseOrNot} from "../common-types";
+import {FormModelCustomizer, GetFormControlComponentType, PromiseOrNot} from "../common-types";
+
+export interface IFormComponentCustomizer {
+    getFormComponent(model: DynamicFormControlModel): Type<DynamicFormControlComponent>;
+}
+
+export function getFormComponent(...types: Type<IFormComponentCustomizer>[]): GetFormControlComponentType {
+    const factory = cachedFactory(types);
+    return (model, injector) => {
+        const customizers = factory(injector);
+        for (const customizer of customizers) {
+            const component = customizer.getFormComponent(model);
+            if (component) {
+                return component;
+            }
+        }
+        return null;
+    }
+}
 
 export interface IFormModelCustomizer {
     acceptModel(
@@ -19,7 +41,7 @@ export interface IFormModelCustomizer {
     ): PromiseOrNot<DynamicFormControlModel>;
 }
 
-export function customizeModel(...types: Type<IFormModelCustomizer>[]): FormModelCustomizer {
+export function customizeFormModel(...types: Type<IFormModelCustomizer>[]): FormModelCustomizer {
     const factory = cachedFactory(types);
     return async (property, schema, model, config, injector) => {
         const customizers = factory(injector);

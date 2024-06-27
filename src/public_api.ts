@@ -24,8 +24,10 @@ export {
 } from "./ngx-dynamic-form/utils/creators";
 
 export {
+    IFormComponentCustomizer,
+    getFormComponent,
     IFormModelCustomizer,
-    customizeModel
+    customizeFormModel
 } from "./ngx-dynamic-form/utils/customizer";
 
 export {
