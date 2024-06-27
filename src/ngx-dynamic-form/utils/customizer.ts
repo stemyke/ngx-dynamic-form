@@ -9,6 +9,7 @@ import {cachedFactory, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-
 import {FormModelCustomizer, GetFormControlComponentType, PromiseOrNot} from "../common-types";
 
 export interface IFormComponentCustomizer {
+    acceptModel(model: DynamicFormControlModel): boolean;
     getFormComponent(model: DynamicFormControlModel): Type<DynamicFormControlComponent>;
 }
 
@@ -17,7 +18,7 @@ export function getFormComponent(...types: Type<IFormComponentCustomizer>[]): Ge
     return (model, injector) => {
         const customizers = factory(injector);
         for (const customizer of customizers) {
-            const component = customizer.getFormComponent(model);
+            const component = customizer.acceptModel(model) ? customizer.getFormComponent(model) : null;
             if (component) {
                 return component;
             }
@@ -27,12 +28,7 @@ export function getFormComponent(...types: Type<IFormComponentCustomizer>[]): Ge
 }
 
 export interface IFormModelCustomizer {
-    acceptModel(
-        model: DynamicFormControlModel,
-        config: DynamicFormControlModelConfig,
-        property: IOpenApiSchemaProperty,
-        schema: IOpenApiSchema
-    ): PromiseOrNot<boolean>;
+    acceptModel(model: DynamicFormControlModel): boolean;
     customizeModel(
         model: DynamicFormControlModel,
         config: DynamicFormControlModelConfig,
@@ -46,7 +42,7 @@ export function customizeFormModel(...types: Type<IFormModelCustomizer>[]): Form
     return async (property, schema, model, config, injector) => {
         const customizers = factory(injector);
         for (const customizer of customizers) {
-            const accept = await customizer.acceptModel(model, config, property, schema);
+            const accept = customizer.acceptModel(model);
             if (accept) {
                 return customizer.customizeModel(model, config, property, schema);
             }
