@@ -34,7 +34,7 @@ export interface IFormModelCustomizer {
         config: DynamicFormControlModelConfig,
         property: IOpenApiSchemaProperty,
         schema: IOpenApiSchema
-    ): PromiseOrNot<DynamicFormControlModel>;
+    ): PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
 }
 
 export function customizeFormModel(...types: Type<IFormModelCustomizer>[]): FormModelCustomizer {
