@@ -24,6 +24,11 @@ export {
 } from "./ngx-dynamic-form/utils/creators";
 
 export {
+    IFormModelCustomizer,
+    customizeModel
+} from "./ngx-dynamic-form/utils/customizer";
+
+export {
     replaceSpecialChars,
     mergeFormModels,
     MIN_INPUT_NUM,
@@ -121,5 +126,7 @@ export {
     DynamicRadioGroupModel,
     DynamicTextAreaModelConfig,
     DynamicTextAreaModel,
-    DynamicFormControlComponent
+    DynamicFormControlComponent,
+    DynamicFormControlModelConfig,
+    DynamicFormControlModel,
 } from "@ng-dynamic-forms/core";
