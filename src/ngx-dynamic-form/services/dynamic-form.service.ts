@@ -494,7 +494,10 @@ export class DynamicFormService extends Base {
                 rows: property.rows || 10,
                 wrap: property.wrap || false,
                 autoComplete: property.autoComplete || "off",
-                multiple: property.type == "array"
+                multiple: property.type == "array",
+                minLength: isNaN(property.minLength) ? 0 : property.minLength,
+                maxLength: isNaN(property.maxLength) ? MAX_INPUT_NUM : property.maxLength,
+                placeholder: property.placeholder || ""
             }
         );
     }
