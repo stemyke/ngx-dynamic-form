@@ -33,6 +33,8 @@ export {
 export {
     replaceSpecialChars,
     mergeFormModels,
+    collectPathAble,
+    getDynamicPath,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS
