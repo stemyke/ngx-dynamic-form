@@ -52,6 +52,7 @@ import {
 } from "../utils/dynamic-form-group.model";
 import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
 import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
+import {createFormInput} from "../utils/creators";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -267,9 +268,18 @@ export class DynamicFormService extends Base {
         };
         const schema = this.schemas[name];
         const controls = await this.getFormModelForSchemaDef(schema, fieldSets, customizeModels);
+        const idFields = [
+            createFormInput("id", {hidden: true}),
+            createFormInput("_id", {hidden: true})
+        ].filter(t => !controls.some(c => c.id == t.id));
         const config = {
             id: "root",
-            group: [...controls],
+            group: [
+                // -- Hidden id fields --
+                ...idFields,
+                // -- Main form controls --
+                ...controls
+            ],
             fieldSets
         } as DynamicFormGroupModelConfig;
         const root = await customizeModels({
