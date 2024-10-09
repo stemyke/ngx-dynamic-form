@@ -569,7 +569,11 @@ export class DynamicFormService extends Base {
             });
         }
         return new FormSelectSubject(async (selectModel, control) => {
-            this.api.cache[property.endpoint] = this.api.cache[property.endpoint] || this.api.list(property.endpoint, this.api.makeListParams(1, -1)).then(result => {
+            const entries = Object.entries(control.root?.value || {});
+            const endpoint = entries.reduce((res, [key, value]) => {
+                return res.replace(new RegExp(`$${key}`, "gi"), `${value}`);
+            }, `${property.endpoint}`);
+            this.api.cache[endpoint] = this.api.cache[endpoint] || this.api.list(endpoint, this.api.makeListParams(1, -1)).then(result => {
                 const items = ObjectUtils.isArray(result)
                     ? result
                     : (ObjectUtils.isArray(result.items) ? result.items : []);
