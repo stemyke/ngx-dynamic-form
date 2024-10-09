@@ -47,6 +47,7 @@ export interface DynamicSelectModelConfig<T> extends BaseConfig<T> {
     inline?: boolean;
     options?: DynamicFormOptionConfig<T>[] | Observable<DynamicFormOptionConfig<T>[]>;
     getClasses?: OptionClassesFunc<T>;
+    allowEmpty?: boolean;
 }
 
 export class DynamicSelectModel<T> extends Base<T> {
@@ -54,6 +55,7 @@ export class DynamicSelectModel<T> extends Base<T> {
     readonly groupBy: string;
     readonly inline: boolean;
     readonly getClasses: OptionClassesFunc<T>;
+    readonly allowEmpty: boolean;
 
     options$: Observable<DynamicFormOption<T>[]>;
 
@@ -64,6 +66,7 @@ export class DynamicSelectModel<T> extends Base<T> {
         this.groupBy = config.groupBy || null;
         this.inline = config.inline || false;
         this.getClasses = ObjectUtils.isFunction(config.getClasses) ? config.getClasses : (() => "");
+        this.allowEmpty = config.allowEmpty || false;
         this.mOptions = this.mOptions || [];
     }
 

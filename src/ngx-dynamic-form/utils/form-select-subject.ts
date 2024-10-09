@@ -19,7 +19,10 @@ export class FormSelectSubject<T extends DynamicFormOptionConfig<any>[]> extends
             } else {
                 const option = options.find(t => t.value == currentVal);
                 if (!option) {
-                    control.setValue(options[0]?.value ?? null, {onlySelf: true, emitEvent: false});
+                    control.setValue(
+                        controlModel.allowEmpty ? null : options[0]?.value ?? null,
+                        {onlySelf: true, emitEvent: false}
+                    );
                 }
             }
             this.next(options);

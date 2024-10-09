@@ -597,7 +597,8 @@ export class DynamicFormService extends Base {
                 options: this.getFormSelectOptions(property, schema),
                 multiple: property.type == "array",
                 groupBy: property.groupBy,
-                inline: property.inline
+                inline: property.inline,
+                allowEmpty: property.allowEmpty,
             }
         );
     }
