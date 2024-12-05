@@ -131,7 +131,12 @@ export interface IDynamicFormControl {
     disabled: boolean;
     updateOn: DynamicFormUpdateOn;
 
-    setValue(value: any): void;
+    setValue(value: any, options?: {
+        onlySelf?: boolean;
+        emitEvent?: boolean;
+        emitModelToViewChange?: boolean;
+        emitViewToModelChange?: boolean;
+    }): void;
 
     getData<T extends IFormControlData>(): T;
     getControl(id: string): IDynamicFormControl;
