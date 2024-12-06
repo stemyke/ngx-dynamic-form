@@ -72,6 +72,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 changeDetectorRef: ChangeDetectorRef,
                 componentService: DynamicFormComponentService,) {
         super(changeDetectorRef, componentService);
+        this.templates = new QueryList<DynamicTemplateDirective>();
         this.getComponentType = () => null;
     }
 
