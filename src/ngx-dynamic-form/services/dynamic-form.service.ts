@@ -53,6 +53,7 @@ import {
 import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
 import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 import {createFormInput} from "../utils/creators";
+import {AllValidationErrors, getFormValidationErrors} from "../utils/validation-errors";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -99,6 +100,15 @@ export class DynamicFormService extends Base {
     showErrors(form: DynamicBaseFormComponent): void {
         this.showErrorsForGroup(form.group);
         this.detectChanges(form);
+    }
+
+    getErrors(form: DynamicBaseFormComponent): Promise<AllValidationErrors[]> {
+        this.showErrors(form);
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(getFormValidationErrors(form.group.controls, ""));
+            }, 500);
+        });
     }
 
     protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -581,11 +591,12 @@ export class DynamicFormService extends Base {
                     const item = ObjectUtils.isObject(i) ? i : {id: i};
                     return {
                         ...item,
-                        value: item.id || item._id, label: item[property.labelField] || item.label || item.id || item._id
+                        value: item.id || item._id,
+                        label: item[property.labelField] || item.label || item.id || item._id
                     };
                 });
             });
-            const options = (await this.api.cache[property.endpoint]).map(t => Object.assign({}, t));
+            const options = (await this.api.cache[endpoint]).map(t => Object.assign({}, t));
             return this.fixSelectOptions(selectModel, control, options);
         });
     }

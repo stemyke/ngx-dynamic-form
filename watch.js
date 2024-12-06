@@ -10,7 +10,7 @@ program
     .version('13.x', '-v, --version')
     .option('-p, --project [path]', 'Project path where ngx-dynamic-form is used')
     .option('-b, --skip-build', 'Skip first build')
-    .option('-m, --skip-modules', 'Skip copying node modules to project')
+    .option('-m, --modules', 'Copy node modules to project')
     .parse(process.argv);
 
 const projectPath = typeof program.project !== 'string' ? null : path.resolve(program.project);
@@ -63,7 +63,7 @@ function build(type, cb = null) {
 build('', () => {
     console.log('Watching for file changes started.');
     watch('./src', { delay: 1000, recursive: true, filter: /\.(json|html|scss|ts)$/ }, () => build('ngx-dynamic-form'));
-    if (noProject || program.skipModules) {
+    if (noProject || !program.modules) {
         deployToProject();
         return;
     }

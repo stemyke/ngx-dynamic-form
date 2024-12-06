@@ -2,37 +2,32 @@ import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 
 export interface AllValidationErrors {
     control: AbstractControl;
-    control_name: string;
-    error_name: string;
-    error_value: any;
+    path: string;
+    errorKey: string;
+    errorValue: any;
 }
 
 export interface FormGroupControls {
     [key: string]: AbstractControl;
 }
 
-export function getFormValidationErrors(controls: FormGroupControls): AllValidationErrors[] {
-    let errors: AllValidationErrors[] = [];
-    Object.keys(controls).forEach(key => {
-        const control = controls[key];
+export function getFormValidationErrors(controls: FormGroupControls, parentPath: string = ""): AllValidationErrors[] {
+    const errors: AllValidationErrors[] = [];
+    Object.entries(controls).forEach(([name, control], ix) => {
+        const path = !parentPath ? name : `${parentPath}.${name}`;
         if (control instanceof FormGroup) {
-            errors = errors.concat(getFormValidationErrors(control.controls));
+            getFormValidationErrors(control.controls, path).forEach(error => errors.push(error));
+            return;
         }
         if (control instanceof FormArray) {
-            control.controls.forEach((control: FormGroup) => {
-                errors = errors.concat(getFormValidationErrors(control.controls));
+            control.controls.forEach((control: FormGroup, ix) => {
+                getFormValidationErrors(control.controls, `${path}.${ix}`).forEach(error => errors.push(error));
             });
+            return;
         }
-        if (control.errors !== null) {
-            Object.keys(control.errors).forEach(keyError => {
-                errors.push({
-                    control,
-                    control_name: key,
-                    error_name: keyError,
-                    error_value: control.errors[keyError]
-                });
-            });
-        }
+        Object.entries(control.errors || {}).forEach(([errorKey, errorValue]) => {
+            errors.push({control, path, errorKey, errorValue});
+        });
     });
     return errors;
 }
