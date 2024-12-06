@@ -1,12 +1,13 @@
-const cpy = require('cpy');
-const progress = require('cli-progress');
+import cpy from 'cpy';
+import progress from 'cli-progress';
 
-function copy(src, dist, what) {
-    return new Promise(resolve => {
+export function copy(src, dist, what) {
+    let shouldCopy = true;
+    const promise = new Promise(resolve => {
         let started = false;
         const pb = new progress.Bar({}, progress.Presets.shades_classic);
         console.log(`Copying ${what}...`);
-        cpy(src, dist, {recursive: true, parents: true}).on('progress', prg => {
+        cpy(src, dist, {flat: false, filter: () => shouldCopy}).on('progress', prg => {
             if (!started) {
                 started = true;
                 pb.start(prg.totalFiles, 0);
@@ -16,11 +17,13 @@ function copy(src, dist, what) {
         }).then(() => {
             pb.stop();
             console.log(`Copied ${what}.`);
-            resolve();
+            resolve(void 0);
         }, err => {
             console.log(`Error`, err.message);
         });
     });
+    promise.cancel = () => {
+        shouldCopy = false;
+    };
+    return promise;
 }
-
-module.exports = copy;

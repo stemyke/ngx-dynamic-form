@@ -579,6 +579,7 @@ export class DynamicFormService extends Base {
             });
         }
         return new FormSelectSubject(async (selectModel, control) => {
+            console.log(control.root?.value, "form select subject");
             const entries = Object.entries(control.root?.value || {});
             const endpoint = entries.reduce((res, [key, value]) => {
                 return res.replace(new RegExp(`$${key}`, "gi"), `${value}`);
