@@ -28,17 +28,18 @@ import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {DynamicFormGroupModel} from "../../utils/dynamic-form-group.model";
 
 @Component({
+    standalone: false,
     selector: "dynamic-base-form-group",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DynamicBaseFormGroupComponent extends DynamicFormGroupComponent {
 
-    @Input() formLayout: DynamicFormLayout;
-    @Input() group: FormGroup;
-    @Input() layout: DynamicFormControlLayout;
-    @Input() model: DynamicFormGroupModel;
-    @Input() templates: QueryList<DynamicTemplateDirective> | DynamicTemplateDirective[] | undefined;
+    @Input() formLayout: DynamicFormLayout = null;
+    @Input() group: FormGroup = null;
+    @Input() layout: DynamicFormControlLayout = null;
+    @Input() model: DynamicFormGroupModel = null;
+    @Input() templates: QueryList<DynamicTemplateDirective> | DynamicTemplateDirective[] | undefined = [];
 
     @Output() blur: EventEmitter<any> = new EventEmitter();
     @Output() change: EventEmitter<any> = new EventEmitter();
@@ -46,7 +47,7 @@ export class DynamicBaseFormGroupComponent extends DynamicFormGroupComponent {
     @Output() focus: EventEmitter<any> = new EventEmitter();
 
     @ViewChildren(forwardRef(() => DynamicFormControlContainerComponent))
-    components: QueryList<DynamicFormControlContainerComponent>;
+    components: QueryList<DynamicFormControlContainerComponent> = null;
 
     constructor(protected layoutService: DynamicFormLayoutService,
                 protected validationService: DynamicFormValidationService) {

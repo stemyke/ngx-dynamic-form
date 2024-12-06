@@ -19,6 +19,7 @@ import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
 import {getFormValidationErrors} from "../utils/validation-errors";
 
 @Directive({
+    standalone: false,
     selector: "[async-submit]",
     exportAs: "async-submit"
 })

@@ -62,8 +62,8 @@ export class DynamicFormArrayModel extends Base {
     readonly getTabLabel: TabLabelFunc;
     readonly additional: { [key: string]: any };
 
-    groups: DynamicFormArrayGroupModel[];
-    tabIndex: number
+    groups: DynamicFormArrayGroupModel[] = [];
+    tabIndex: number = 0;
 
     protected _sortBy: string;
     protected _sortDescending: boolean;

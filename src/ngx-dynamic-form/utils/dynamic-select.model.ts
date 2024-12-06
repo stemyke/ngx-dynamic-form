@@ -57,7 +57,7 @@ export class DynamicSelectModel<T> extends Base<T> {
     readonly getClasses: OptionClassesFunc<T>;
     readonly allowEmpty: boolean;
 
-    options$: Observable<DynamicFormOption<T>[]>;
+    options$: Observable<DynamicFormOption<T>[]> = null;
 
     protected mOptions: DynamicFormOption<T>[];
 

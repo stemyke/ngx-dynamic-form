@@ -5,6 +5,7 @@ import {DynamicFormOption, DynamicFormOptionGroup, DynamicSelectModel} from "../
 import {replaceSpecialChars} from "../../utils/misc";
 
 @Component({
+    standalone: false,
     selector: "dynamic-base-select",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -13,8 +14,6 @@ export class DynamicBaseSelectComponent extends DynamicBaseFormControlComponent<
 
     groups$: BehaviorSubject<DynamicFormOptionGroup<any>[]>;
     hasOptions: boolean;
-
-    protected subscription: Subscription;
 
     ngOnInit(): void {
         this.groups$ = new BehaviorSubject<DynamicFormOptionGroup<any>[]>([]);

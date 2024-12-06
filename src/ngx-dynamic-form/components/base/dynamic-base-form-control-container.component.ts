@@ -38,6 +38,7 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
 import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 
 @Component({
+    standalone: false,
     selector: "dynamic-base-form-control",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,16 +48,16 @@ import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 })
 export class DynamicBaseFormControlContainerComponent extends DynamicFormControlContainerComponent {
 
-    @ContentChildren(DynamicTemplateDirective) contentTemplateList: QueryList<DynamicTemplateDirective>;
+    @ContentChildren(DynamicTemplateDirective) contentTemplateList: QueryList<DynamicTemplateDirective> = null;
 
-    @HostBinding("class") klass;
+    @HostBinding("class") klass = null;
 
     @Input() context: DynamicFormArrayGroupModel | null = null;
-    @Input() group: FormGroup;
-    @Input() hostClass: string[];
-    @Input("templates") inputTemplateList: QueryList<DynamicTemplateDirective>;
-    @Input() layout: DynamicFormLayout;
-    @Input() model: DynamicFormControlModel;
+    @Input() group: FormGroup = null;
+    @Input() hostClass: string[] = null;
+    @Input("templates") inputTemplateList: QueryList<DynamicTemplateDirective> = null;
+    @Input() layout: DynamicFormLayout = null;
+    @Input() model: DynamicFormControlModel = null;
 
     @Output() blur: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
     @Output() change: EventEmitter<DynamicFormControlEvent> = new EventEmitter<DynamicFormControlEvent>();
@@ -65,7 +66,7 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
     @ViewChild("componentViewContainer", {
         read: ViewContainerRef,
         static: true
-    }) componentViewContainerRef: ViewContainerRef;
+    }) componentViewContainerRef: ViewContainerRef = null;
 
     get componentType(): Type<DynamicFormControl> | null {
         return this.form.getComponentType?.(this.model, this.injector)

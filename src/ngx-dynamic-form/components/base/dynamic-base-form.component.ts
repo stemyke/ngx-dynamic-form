@@ -34,54 +34,44 @@ import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
+    standalone: false,
     selector: "dynamic-base-form",
     template: "",
     changeDetection: ChangeDetectionStrategy.Default
 })
 export class DynamicBaseFormComponent extends DynamicFormComponent implements OnChanges, AfterViewInit, IDynamicForm {
 
-    @Input() group: FormGroup;
-    @Input() groupModel: DynamicFormGroupModel;
-    @Input() model: DynamicFormModel;
-    @Input() layout: DynamicFormLayout;
-    @Input() labelPrefix: string;
-    @Input() getComponentType: GetFormControlComponentType;
+    @Input() group: FormGroup = null;
+    @Input() groupModel: DynamicFormGroupModel = null;
+    @Input() model: DynamicFormModel = null;
+    @Input() layout: DynamicFormLayout = null;
+    @Input() labelPrefix: string = "label";
+    @Input() getComponentType: GetFormControlComponentType = null;
 
-    @Output() blur: EventEmitter<DynamicFormControlEvent>;
-    @Output() change: EventEmitter<DynamicFormControlEvent>;
-    @Output() focus: EventEmitter<DynamicFormControlEvent>;
+    @Output() blur: EventEmitter<DynamicFormControlEvent> = new EventEmitter();
+    @Output() change: EventEmitter<DynamicFormControlEvent> = new EventEmitter();
+    @Output() focus: EventEmitter<DynamicFormControlEvent> = new EventEmitter();
 
-    @ContentChildren(DynamicTemplateDirective) contentTemplates: QueryList<DynamicTemplateDirective>;
-    @ViewChildren(DynamicTemplateDirective) viewTemplates: QueryList<DynamicTemplateDirective>;
+    @ContentChildren(DynamicTemplateDirective) contentTemplates: QueryList<DynamicTemplateDirective> = null;
+    @ViewChildren(DynamicTemplateDirective) viewTemplates: QueryList<DynamicTemplateDirective> = null;
 
     get status(): DynamicFormState {
         return !this.group ? null : this.group.status as DynamicFormState;
     }
 
-    @Output() readonly onValueChange: EventEmitter<IDynamicFormEvent>;
-    @Output() readonly onStatusChange: EventEmitter<IDynamicForm>;
-    @Output() readonly onSubmit: EventEmitter<IDynamicForm>;
-    @Output() readonly onDetectChanges: EventEmitter<IDynamicForm>;
+    @Output() readonly onValueChange: EventEmitter<IDynamicFormEvent> = new EventEmitter();
+    @Output() readonly onStatusChange: EventEmitter<IDynamicForm> = new EventEmitter();
+    @Output() readonly onSubmit: EventEmitter<IDynamicForm> = new EventEmitter();
+    @Output() readonly onDetectChanges: EventEmitter<IDynamicForm> = new EventEmitter();
 
-    protected subscription: Subscription;
-    protected groupSubscription: Subscription;
+    protected subscription: Subscription = new Subscription();
+    protected groupSubscription: Subscription = new Subscription();
 
     constructor(@Inject(DynamicFormService) readonly formService: DynamicFormService,
                 @Inject(EventsService) readonly events: EventsService,
                 changeDetectorRef: ChangeDetectorRef,
                 componentService: DynamicFormComponentService,) {
         super(changeDetectorRef, componentService);
-        this.blur = new EventEmitter<DynamicFormControlEvent>();
-        this.change = new EventEmitter<DynamicFormControlEvent>();
-        this.focus = new EventEmitter<DynamicFormControlEvent>();
-        this.onValueChange = new EventEmitter<IDynamicFormEvent>();
-        this.onStatusChange = new EventEmitter<IDynamicForm>();
-        this.onSubmit = new EventEmitter<IDynamicForm>();
-        this.onDetectChanges = new EventEmitter<IDynamicForm>();
-        this.templates = new QueryList<DynamicTemplateDirective>();
-        this.subscription = new Subscription();
-        this.groupSubscription = new Subscription();
-        this.labelPrefix = "label";
         this.getComponentType = () => null;
     }
 

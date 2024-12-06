@@ -23,29 +23,27 @@ import {
 import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 
 @Component({
+    standalone: false,
     selector: "dynamic-base-form-control",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> extends DynamicFormControlComponent implements AfterViewInit, OnDestroy {
 
-    @Input() formLayout: DynamicFormLayout;
-    @Input() group: FormGroup;
-    @Input() layout: DynamicFormControlLayout;
-    @Input() model: T;
+    @Input() formLayout: DynamicFormLayout = null;
+    @Input() group: FormGroup = null;
+    @Input() layout: DynamicFormControlLayout = null;
+    @Input() model: T = null;
 
-    @Output() blur: EventEmitter<any>;
-    @Output() change: EventEmitter<any>;
-    @Output() focus: EventEmitter<any>;
+    @Output() blur: EventEmitter<any> = new EventEmitter<any>();
+    @Output() change: EventEmitter<any> = new EventEmitter<any>();
+    @Output() focus: EventEmitter<any> = new EventEmitter<any>();
 
     protected subscription: Subscription;
 
     constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService,
                 readonly form: DynamicBaseFormComponent, readonly injector: Injector, readonly cdr: ChangeDetectorRef) {
         super(layoutService, validationService);
-        this.blur = new EventEmitter<any>();
-        this.change = new EventEmitter<any>();
-        this.focus = new EventEmitter<any>();
     }
 
     ngAfterViewInit(): void {

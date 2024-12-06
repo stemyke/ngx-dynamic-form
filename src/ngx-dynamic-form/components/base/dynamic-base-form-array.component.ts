@@ -34,17 +34,18 @@ import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
 import {DynamicBaseFormControlContainerComponent} from "./dynamic-base-form-control-container.component";
 
 @Component({
+    standalone: false,
     selector: "dynamic-base-form-array",
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent implements DynamicFormInitControl, OnDestroy {
 
-    @Input() formLayout: DynamicFormLayout;
-    @Input() group: FormGroup;
-    @Input() layout: DynamicFormControlLayout;
-    @Input() model: DynamicFormArrayModel;
-    @Input() templates: QueryList<DynamicTemplateDirective> | undefined;
+    @Input() formLayout: DynamicFormLayout = null;
+    @Input() group: FormGroup = null;
+    @Input() layout: DynamicFormControlLayout = null;
+    @Input() model: DynamicFormArrayModel = null;
+    @Input() templates: QueryList<DynamicTemplateDirective> | undefined = null;
 
     @Output() blur: EventEmitter<any> = new EventEmitter();
     @Output() change: EventEmitter<any> = new EventEmitter();
@@ -52,7 +53,7 @@ export class DynamicBaseFormArrayComponent extends DynamicFormArrayComponent imp
     @Output() focus: EventEmitter<any> = new EventEmitter();
 
     @ViewChildren(forwardRef(() => DynamicBaseFormControlContainerComponent))
-    components: QueryList<DynamicBaseFormControlContainerComponent>;
+    components: QueryList<DynamicBaseFormControlContainerComponent> = null;
 
     get useTabs(): boolean {
         return this.model?.useTabs;
