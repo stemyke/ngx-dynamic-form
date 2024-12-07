@@ -70,7 +70,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     constructor(@Inject(DynamicFormService) readonly formService: DynamicFormService,
                 @Inject(EventsService) readonly events: EventsService,
                 changeDetectorRef: ChangeDetectorRef,
-                componentService: DynamicFormComponentService,) {
+                componentService: DynamicFormComponentService) {
         super(changeDetectorRef, componentService);
         this.templates = new QueryList<DynamicTemplateDirective>();
         this.getComponentType = () => null;

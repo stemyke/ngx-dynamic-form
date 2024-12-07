@@ -298,14 +298,12 @@ export class DynamicFormService extends Base {
             properties: schema.properties
         }, schema, DynamicFormGroupModel, config);
         // Check if the customized root wrapper returned an array
-        if (Array.isArray(root)) {
-            controls.length = 0;
-            for (const model of root) {
-                if (model instanceof DynamicFormGroupModel && model.id === "root") {
-                    return model;
-                } else {
-                    controls.push(model);
-                }
+        controls.length = 0;
+        for (const model of root) {
+            if (model instanceof DynamicFormGroupModel && model.id === "root") {
+                return model;
+            } else {
+                controls.push(model);
             }
         }
         return new DynamicFormGroupModel({
@@ -579,10 +577,9 @@ export class DynamicFormService extends Base {
             });
         }
         return new FormSelectSubject(async (selectModel, control) => {
-            console.log(control.root?.value, "form select subject");
-            const entries = Object.entries(control.root?.value || {});
-            const endpoint = entries.reduce((res, [key, value]) => {
-                return res.replace(new RegExp(`$${key}`, "gi"), `${value}`);
+            const entries = Object.entries((control.root as FormGroup)?.controls || {});
+            const endpoint = entries.reduce((res, [key, control]) => {
+                return res.replace(new RegExp(`\\$${key}`, "gi"), `${control?.value ?? ""}`);
             }, `${property.endpoint}`);
             this.api.cache[endpoint] = this.api.cache[endpoint] || this.api.list(endpoint, this.api.makeListParams(1, -1)).then(result => {
                 const items = ObjectUtils.isArray(result)

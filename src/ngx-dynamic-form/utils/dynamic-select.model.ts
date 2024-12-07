@@ -59,7 +59,7 @@ export class DynamicSelectModel<T> extends Base<T> {
 
     options$: Observable<DynamicFormOption<T>[]> = null;
 
-    protected mOptions: DynamicFormOption<T>[];
+    protected mOptions: DynamicFormOption<T>[] = [];
 
     constructor(config: DynamicSelectModelConfig<T>, layout?: DynamicFormControlLayout) {
         super(config, layout);
@@ -67,11 +67,7 @@ export class DynamicSelectModel<T> extends Base<T> {
         this.inline = config.inline || false;
         this.getClasses = ObjectUtils.isFunction(config.getClasses) ? config.getClasses : (() => "");
         this.allowEmpty = config.allowEmpty || false;
-        this.mOptions = this.mOptions || [];
-    }
-
-    protected updateOptions(): void {
-        this.options$ = of(this.mOptions);
+        this.options = config.options;
     }
 
     set options(options: any) {
@@ -103,5 +99,9 @@ export class DynamicSelectModel<T> extends Base<T> {
     remove(...indices: number[]): void {
         indices.forEach(index => this.mOptions.splice(index, 1));
         this.updateOptions();
+    }
+
+    protected updateOptions(): void {
+        this.options$ = of(this.mOptions);
     }
 }
