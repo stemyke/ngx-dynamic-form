@@ -69,18 +69,19 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         if (!this.form) return;
-        this.isDisabled = this.form.status !== "VALID";
+        this.isDisabled = this.form.group?.status !== "VALID";
         this.cdr.detectChanges();
-        this.onStatusChange = this.form.onStatusChange.subscribe(() => {
-            this.isDisabled = this.form.status !== "VALID";
+        this.onStatusChange = this.form.group?.statusChanges.subscribe(() => {
+            const status = this.form.group?.status;
+            this.isDisabled = status !== "VALID";
             this.cdr.detectChanges();
-            if (!this.callback || this.form.status == "PENDING") return;
+            if (!this.callback || status == "PENDING") return;
             if (!this.disabled) {
                 this.callback();
             }
             this.callback = null;
         });
-        this.onSubmit = this.form.onSubmit.pipe(debounceTime(200)).subscribe(() => this.callMethod());
+        this.onSubmit = this.form.onSubmit?.pipe(debounceTime(200)).subscribe(() => this.callMethod());
     }
 
     ngOnDestroy(): void {
@@ -91,10 +92,11 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
     @HostListener("click")
     click(): void {
         this.callback = () => this.callMethod();
-        if (this.form.status === "INVALID") {
+        const status = this.form.group?.status;
+        if (status === "INVALID") {
             console.log(getFormValidationErrors(this.form.group.controls));
         }
-        if (this.form.status !== "VALID" && this.form.status !== "INVALID") return;
+        if (status !== "VALID" && status !== "INVALID") return;
         this.callback();
         this.callback = null;
     }
