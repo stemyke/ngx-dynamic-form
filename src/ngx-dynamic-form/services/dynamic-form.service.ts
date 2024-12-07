@@ -406,7 +406,10 @@ export class DynamicFormService extends Base {
             disabled: property.disabled,
             validators,
             errorMessages,
-            additional: Object.assign({}, property)
+            additional: Object.assign({
+                // For material components
+                appearance: "fill"
+            }, property)
         };
     }
 

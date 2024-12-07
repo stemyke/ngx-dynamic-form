@@ -5,7 +5,7 @@ import {
     DynamicFileUploadModel,
     DynamicFileUploadModelConfig,
     DynamicFormControlLayout,
-    DynamicFormControlModelConfig,
+    DynamicFormValueControlModelConfig,
     DynamicInputModel,
     DynamicInputModelConfig,
     DynamicTextAreaModel,
@@ -15,18 +15,24 @@ import {ObjectUtils} from "@stemy/ngx-utils";
 import {DynamicEditorModel, DynamicEditorModelConfig} from "./dynamic-editor.model";
 import {DynamicFormArrayModel, DynamicFormArrayModelConfig} from "./dynamic-form-array.model";
 import {DynamicFormGroupModel, DynamicFormGroupModelConfig} from "./dynamic-form-group.model";
-import {DynamicSelectModelConfig, DynamicSelectModel} from "./dynamic-select.model";
+import {DynamicSelectModel, DynamicSelectModelConfig} from "./dynamic-select.model";
 
-export type OmitId<T extends DynamicFormControlModelConfig> = Omit<T, "id">;
+export type ValueModelConfig = DynamicFormValueControlModelConfig<any>;
 
-export type AddId<T extends OmitId<DynamicFormControlModelConfig>> = T extends OmitId<(infer U)> ? U : never;
+export type OmitId<T extends ValueModelConfig> = Omit<T, "id">;
 
-export function createFormConfig<T extends DynamicFormControlModelConfig, U extends OmitId<T>>(id: string, config?: U): AddId<U> {
+export type AddId<T extends OmitId<ValueModelConfig>> = T extends OmitId<(infer U)> ? U : never;
+
+export function createFormConfig<T extends ValueModelConfig, U extends OmitId<T>>(id: string, config?: U): AddId<U> {
     const res = (config || {id}) as AddId<U>;
     res.id = id;
     res.label = ObjectUtils.isNullOrUndefined(config.label) ? id : config.label;
     res.disabled = config.disabled || false;
     res.hidden = config.hidden || false;
+    res.additional = Object.assign({
+        // For material components
+        appearance: "fill",
+    }, res.additional || {});
     return res;
 }
 
