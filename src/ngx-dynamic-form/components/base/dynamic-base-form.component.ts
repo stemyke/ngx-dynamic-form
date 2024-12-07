@@ -167,29 +167,4 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         }
         return `form-control-${parts.join("-")}`;
     }
-
-    validate(showErrors: boolean = true): Promise<any> {
-        if (!this.group) return Promise.resolve();
-        return new Promise<any>((resolve, reject) => {
-            this.group.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
-                if (showErrors) {
-                    this.formService.showErrors(this);
-                }
-                if (status == "VALID") {
-                    resolve(null);
-                    return;
-                }
-                reject(null);
-            });
-            this.group.updateValueAndValidity();
-        });
-    }
-
-    async serialize(validate?: boolean): Promise<any> {
-        if (!this.group) return null;
-        if (validate) {
-            await this.validate();
-        }
-        return await this.formService.serialize(this.model, this.group);
-    }
 }

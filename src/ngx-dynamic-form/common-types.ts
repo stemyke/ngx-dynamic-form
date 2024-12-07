@@ -1,13 +1,14 @@
 import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
-import {AbstractControl, FormGroup} from "@angular/forms";
+import {AbstractControl} from "@angular/forms";
 import {
     DynamicFormControl,
     DynamicFormControlComponent,
     DynamicFormControlEvent,
     DynamicFormControlMapFn,
     DynamicFormControlModel,
-    DynamicFormControlModelConfig, DynamicFormModel,
-    DynamicFormValueControlModel
+    DynamicFormControlModelConfig,
+    DynamicFormValueControlModel,
+    DynamicFormComponent
 } from "@ng-dynamic-forms/core";
 import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
@@ -20,18 +21,13 @@ export interface IDynamicFormEvent extends DynamicFormControlEvent {
     form: IDynamicForm;
 }
 
-export interface IDynamicForm {
-    readonly group: FormGroup;
-    readonly model: DynamicFormModel;
+export interface IDynamicForm extends DynamicFormComponent {
 
     onSubmit?: EventEmitter<IDynamicForm>;
     status?: DynamicFormState;
 
     onValueChange?: EventEmitter<IDynamicFormEvent>;
     onStatusChange?: EventEmitter<IDynamicForm>;
-
-    validate?(): Promise<any>;
-    serialize?(validate?: boolean): Promise<any>;
 }
 
 export declare interface ModelType extends Function {

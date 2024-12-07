@@ -34,7 +34,13 @@ import {
     StringUtils
 } from "@stemy/ngx-utils";
 
-import {FormControlSerializer, FormModelCustomizer, FormModelCustomizerWrap, ModelType} from "../common-types";
+import {
+    FormControlSerializer,
+    FormModelCustomizer,
+    FormModelCustomizerWrap,
+    IDynamicForm,
+    ModelType
+} from "../common-types";
 
 import {EDITOR_FORMATS, findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
 import {FormSelectSubject} from "../utils/form-select-subject";
@@ -54,6 +60,7 @@ import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} f
 import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 import {createFormInput} from "../utils/creators";
 import {AllValidationErrors, getFormValidationErrors} from "../utils/validation-errors";
+import {first} from "rxjs/operators";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -89,6 +96,31 @@ export class DynamicFormService extends Base {
         this.detectChanges(component);
     }
 
+    validateForm(form: IDynamicForm, showErrors: boolean = true): Promise<any> {
+        if (!form.group) return Promise.resolve();
+        return new Promise<any>((resolve, reject) => {
+            form.group.statusChanges.pipe(first(status => status == "VALID" || status == "INVALID")).subscribe(status => {
+                if (showErrors) {
+                    this.showErrors(form);
+                }
+                if (status == "VALID") {
+                    resolve(null);
+                    return;
+                }
+                reject(null);
+            });
+            form.group.updateValueAndValidity();
+        });
+    }
+
+    async serializeForm(form: IDynamicForm, validate?: boolean): Promise<any> {
+        if (!form.group) return null;
+        if (validate) {
+            await this.validateForm(form);
+        }
+        return this.serialize(form.model, form.group);
+    }
+
     serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
         return this.serializeRecursive(formModel, formGroup);
     }
@@ -97,7 +129,7 @@ export class DynamicFormService extends Base {
         this.notifyChangesRecursive(formModel, formGroup, formModel);
     }
 
-    showErrors(form: DynamicBaseFormComponent): void {
+    showErrors(form: IDynamicForm): void {
         this.showErrorsForGroup(form.group);
         this.detectChanges(form);
     }
