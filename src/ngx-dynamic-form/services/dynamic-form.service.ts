@@ -107,6 +107,7 @@ export class DynamicFormService extends Base {
                     resolve(null);
                     return;
                 }
+                console.log(`Form errors:`, getFormValidationErrors(form.group.controls));
                 reject(null);
             });
             form.group.updateValueAndValidity();
