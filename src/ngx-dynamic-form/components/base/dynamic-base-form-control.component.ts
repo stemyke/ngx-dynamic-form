@@ -6,7 +6,7 @@ import {
     EventEmitter,
     Injector,
     Input,
-    OnDestroy,
+    OnDestroy, Optional,
     Output
 } from "@angular/core";
 import {FormGroup} from "@angular/forms";
@@ -42,7 +42,9 @@ export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> 
     protected subscription: Subscription;
 
     constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService,
-                readonly form: DynamicBaseFormComponent, readonly injector: Injector, readonly cdr: ChangeDetectorRef) {
+                @Optional() readonly form: DynamicBaseFormComponent,
+                readonly injector: Injector,
+                readonly cdr: ChangeDetectorRef) {
         super(layoutService, validationService);
     }
 
@@ -58,7 +60,7 @@ export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> 
     }
 
     submit(): void {
-        this.form.submit();
+        this.form?.submit();
     }
 
     protected onValueChanged(value: any): void {
