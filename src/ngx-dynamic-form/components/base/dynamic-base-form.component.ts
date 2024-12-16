@@ -87,9 +87,6 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 this.group.statusChanges.subscribe(() => {
                     this.onStatusChange.emit(this);
                 }),
-                this.group.valueChanges.pipe(debounceTime(500)).subscribe(() => {
-                    this.formService.notifyChanges(this.model, this.group);
-                }),
                 this.change.pipe(groupBy(ev => ev.model))
                     .pipe(mergeMap(t => t.pipe(debounceTime(500))))
                     .subscribe(ev => {

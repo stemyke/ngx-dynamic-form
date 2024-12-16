@@ -1,6 +1,7 @@
 import {Inject, Injectable, Injector} from "@angular/core";
-import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
+import {AbstractControl, AbstractControlOptions, FormArray, FormControl, FormGroup} from "@angular/forms";
 import {firstValueFrom, Subject} from "rxjs";
+import {debounceTime, first} from "rxjs/operators";
 import {
     DynamicCheckboxModel,
     DynamicCheckboxModelConfig,
@@ -60,7 +61,6 @@ import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} f
 import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 import {createFormInput} from "../utils/creators";
 import {AllValidationErrors, getFormValidationErrors} from "../utils/validation-errors";
-import {first} from "rxjs/operators";
 
 @Injectable()
 export class DynamicFormService extends Base {
@@ -80,6 +80,16 @@ export class DynamicFormService extends Base {
                 @Inject(OpenApiService) readonly openApi: OpenApiService,
                 @Inject(Injector) readonly injector: Injector) {
         super(cs, vs);
+    }
+
+    createFormGroup(formModel: DynamicFormModel, options?: AbstractControlOptions | null, parent?: DynamicPathable | null) {
+        const group = super.createFormGroup(formModel, options, parent);
+        if (!parent) {
+            group.valueChanges.pipe(debounceTime(500)).subscribe(() => {
+                this.notifyChanges(formModel, group);
+            });
+        }
+        return group;
     }
 
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
@@ -569,6 +579,12 @@ export class DynamicFormService extends Base {
 
     getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
         const $enum = property.items?.enum || property.enum;
+        console.log(
+            property,
+            schema,
+            Array.isArray($enum),
+            isStringWithVal(property.optionsPath)
+        )
         if (Array.isArray($enum)) {
             return new FormSelectSubject((selectModel, formControl) => {
                 const options = $enum.map(value => {
@@ -612,7 +628,9 @@ export class DynamicFormService extends Base {
                 return this.fixSelectOptions(selectModel, control, options);
             });
         }
+        console.log(property.id, "helo");
         return new FormSelectSubject(async (selectModel, control) => {
+            console.log(property.id, "helo2");
             const entries = Object.entries((control.root as FormGroup)?.controls || {});
             const endpoint = entries.reduce((res, [key, control]) => {
                 return res.replace(new RegExp(`\\$${key}`, "gi"), `${control?.value ?? ""}`);
