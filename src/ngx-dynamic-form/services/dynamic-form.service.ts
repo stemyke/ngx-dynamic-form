@@ -579,12 +579,6 @@ export class DynamicFormService extends Base {
 
     getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
         const $enum = property.items?.enum || property.enum;
-        console.log(
-            property,
-            schema,
-            Array.isArray($enum),
-            isStringWithVal(property.optionsPath)
-        )
         if (Array.isArray($enum)) {
             return new FormSelectSubject((selectModel, formControl) => {
                 const options = $enum.map(value => {
@@ -628,9 +622,7 @@ export class DynamicFormService extends Base {
                 return this.fixSelectOptions(selectModel, control, options);
             });
         }
-        console.log(property.id, "helo");
         return new FormSelectSubject(async (selectModel, control) => {
-            console.log(property.id, "helo2");
             const entries = Object.entries((control.root as FormGroup)?.controls || {});
             const endpoint = entries.reduce((res, [key, control]) => {
                 return res.replace(new RegExp(`\\$${key}`, "gi"), `${control?.value ?? ""}`);
