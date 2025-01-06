@@ -82,11 +82,32 @@ export class DynamicFormService extends Base {
         super(cs, vs);
     }
 
+    async serializeForm(form: IDynamicForm, validate?: boolean): Promise<any> {
+        if (!form.group) return null;
+        if (validate) {
+            await this.validateForm(form);
+        }
+        return this.serialize(form.model, form.group);
+    }
+
+    async getFormModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormModel> {
+        return (await this.getFormGroupModelForSchema(name, customizeModel)).group;
+    }
+
+    getErrors(form: DynamicBaseFormComponent): Promise<AllValidationErrors[]> {
+        this.showErrors(form);
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(getFormValidationErrors(form.group.controls, ""));
+            }, 500);
+        });
+    }
+
     createFormGroup(formModel: DynamicFormModel, options?: AbstractControlOptions | null, parent?: DynamicPathable | null) {
         const group = super.createFormGroup(formModel, options, parent);
         if (!parent) {
             group.valueChanges.pipe(debounceTime(500)).subscribe(() => {
-                this.notifyChanges(formModel, group);
+                this.notifyChanges(formModel, group, formModel);
             });
         }
         return group;
@@ -94,14 +115,14 @@ export class DynamicFormService extends Base {
 
     patchGroup(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         value = ObjectUtils.copy(value);
-        this.patchValueRecursive(value, formModel, formGroup);
+        this.patchValues(value, formModel, formGroup);
         formGroup.patchValue(value);
         this.detectChanges();
     }
 
     patchForm(value: any, component: DynamicBaseFormComponent): void {
         value = ObjectUtils.copy(value);
-        this.patchValueRecursive(value, component.model, component.group);
+        this.patchValues(value, component.model, component.group);
         component.group.patchValue(value);
         this.detectChanges(component);
     }
@@ -124,20 +145,44 @@ export class DynamicFormService extends Base {
         });
     }
 
-    async serializeForm(form: IDynamicForm, validate?: boolean): Promise<any> {
-        if (!form.group) return null;
-        if (validate) {
-            await this.validateForm(form);
+    async serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
+        const result = {};
+        if (!formModel || !formGroup || !formGroup.value) return result;
+        for (const i in formModel) {
+            const subModel = formModel[i] as DynamicFormValueControlModel<any>;
+            const subControl = this.findControlByModel(subModel, formGroup);
+            const serializer = subModel.additional?.serializer as FormControlSerializer;
+            if (ObjectUtils.isFunction(serializer)) {
+                result[subModel.id] = await serializer(subModel, subControl);
+                continue;
+            }
+            if (subModel.hidden && !subModel.additional?.serialize) continue;
+            if (subModel instanceof DynamicFormArrayModel) {
+                const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
+                const subArray = subControl as FormArray;
+                const resArray = [];
+                for (let i = 0; i < length; i++) {
+                    const itemModel = subModel.get(i);
+                    resArray.push(
+                        await this.serialize(itemModel.group, subArray.at(i) as FormGroup)
+                    );
+                }
+                result[subModel.id] = resArray;
+                continue;
+            }
+            if (subModel instanceof DynamicInputModel && !ObjectUtils.isNullOrUndefined(subControl.value)) {
+                result[subModel.id] = subModel.inputType == "number"
+                    ? parseFloat((`${subControl.value}` || "0").replace(/,/gi, ".")) ?? null
+                    : subControl.value;
+                continue;
+            }
+            if (subModel instanceof DynamicFormGroupModel) {
+                result[subModel.id] = await this.serialize(subModel.group, subControl as FormGroup);
+                continue;
+            }
+            result[subModel.id] = subControl.value;
         }
-        return this.serialize(form.model, form.group);
-    }
-
-    serialize(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
-        return this.serializeRecursive(formModel, formGroup);
-    }
-
-    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup): void {
-        this.notifyChangesRecursive(formModel, formGroup, formModel);
+        return result;
     }
 
     showErrors(form: IDynamicForm): void {
@@ -145,16 +190,29 @@ export class DynamicFormService extends Base {
         this.detectChanges(form);
     }
 
-    getErrors(form: DynamicBaseFormComponent): Promise<AllValidationErrors[]> {
-        this.showErrors(form);
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve(getFormValidationErrors(form.group.controls, ""));
-            }, 500);
-        });
+    notifyChanges(formModel: DynamicFormModel, formGroup: FormGroup, root: DynamicFormModel): void {
+        if (!formModel || !formGroup) return;
+        for (const i in formModel) {
+            const subModel = formModel[i] as DynamicFormValueControlModel<any>;
+            const subControl = this.findControlByModel(subModel, formGroup);
+            if (subModel instanceof DynamicFormArrayModel) {
+                const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
+                const subArray = subControl as FormArray;
+                for (let i = 0; i < length; i++) {
+                    const itemModel = subModel.get(i);
+                    this.notifyChanges(itemModel.group, subArray.at(i) as FormGroup, root);
+                }
+                continue;
+            }
+            if (subModel instanceof DynamicFormGroupModel) {
+                this.notifyChanges(subModel.group, subControl as FormGroup, root);
+                continue;
+            }
+            this.updateSelectOptions(subModel, subControl as FormControl, root);
+        }
     }
 
-    protected patchValueRecursive(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
+    protected patchValues(value: any, formModel: DynamicFormModel, formGroup: FormGroup): void {
         if (!value) return;
         formModel?.forEach(subModel => {
             const key = subModel.id;
@@ -179,76 +237,14 @@ export class DynamicFormService extends Base {
                 }
                 for (let i = 0; i < length; i++) {
                     const itemModel = subModel.get(i);
-                    this.patchValueRecursive(subValue[i], itemModel.group, subArray.at(i) as FormGroup);
+                    this.patchValues(subValue[i], itemModel.group, subArray.at(i) as FormGroup);
                 }
                 return;
             }
             if (subModel instanceof DynamicFormGroupModel) {
-                this.patchValueRecursive(subValue, subModel.group, subControl as FormGroup);
+                this.patchValues(subValue, subModel.group, subControl as FormGroup);
             }
         });
-    }
-
-    protected async serializeRecursive(formModel: DynamicFormModel, formGroup: FormGroup): Promise<any> {
-        const result = {};
-        if (!formModel || !formGroup || !formGroup.value) return result;
-        for (const i in formModel) {
-            const subModel = formModel[i] as DynamicFormValueControlModel<any>;
-            const subControl = this.findControlByModel(subModel, formGroup);
-            const serializer = subModel.additional?.serializer as FormControlSerializer;
-            if (ObjectUtils.isFunction(serializer)) {
-                result[subModel.id] = await serializer(subModel, subControl);
-                continue;
-            }
-            if (subModel.hidden && !subModel.additional?.serialize) continue;
-            if (subModel instanceof DynamicFormArrayModel) {
-                const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
-                const subArray = subControl as FormArray;
-                const resArray = [];
-                for (let i = 0; i < length; i++) {
-                    const itemModel = subModel.get(i);
-                    resArray.push(
-                        await this.serializeRecursive(itemModel.group, subArray.at(i) as FormGroup)
-                    );
-                }
-                result[subModel.id] = resArray;
-                continue;
-            }
-            if (subModel instanceof DynamicInputModel && !ObjectUtils.isNullOrUndefined(subControl.value)) {
-                result[subModel.id] = subModel.inputType == "number"
-                    ? parseFloat((`${subControl.value}` || "0").replace(/,/gi, ".")) ?? null
-                    : subControl.value;
-                continue;
-            }
-            if (subModel instanceof DynamicFormGroupModel) {
-                result[subModel.id] = await this.serializeRecursive(subModel.group, subControl as FormGroup);
-                continue;
-            }
-            result[subModel.id] = subControl.value;
-        }
-        return result;
-    }
-
-    protected notifyChangesRecursive(formModel: DynamicFormModel, formGroup: FormGroup, root: DynamicFormModel): void {
-        if (!formModel || !formGroup) return;
-        for (const i in formModel) {
-            const subModel = formModel[i] as DynamicFormValueControlModel<any>;
-            const subControl = this.findControlByModel(subModel, formGroup);
-            if (subModel instanceof DynamicFormArrayModel) {
-                const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
-                const subArray = subControl as FormArray;
-                for (let i = 0; i < length; i++) {
-                    const itemModel = subModel.get(i);
-                    this.notifyChangesRecursive(itemModel.group, subArray.at(i) as FormGroup, root);
-                }
-                continue;
-            }
-            if (subModel instanceof DynamicFormGroupModel) {
-                this.notifyChangesRecursive(subModel.group, subControl as FormGroup, root);
-                continue;
-            }
-            this.updateSelectOptions(subModel, subControl as FormControl, root);
-        }
     }
 
     protected updateSelectOptions(formControlModel: DynamicFormControlModel, formControl: FormControl, root: DynamicFormModel): void {
@@ -293,10 +289,6 @@ export class DynamicFormService extends Base {
             ? value
             : new Date(value);
         return isNaN(date as any) ? new Date() : date;
-    }
-
-    async getFormModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormModel> {
-        return (await this.getFormGroupModelForSchema(name, customizeModel)).group;
     }
 
     async getFormGroupModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormGroupModel> {
@@ -625,7 +617,7 @@ export class DynamicFormService extends Base {
         return new FormSelectSubject(async (selectModel, control) => {
             const entries = Object.entries((control.root as FormGroup)?.controls || {});
             const endpoint = entries.reduce((res, [key, control]) => {
-                return res.replace(new RegExp(`\\$${key}`, "gi"), `${control?.value ?? ""}`);
+                return this.replaceOptionsEndpoint(res, key, control?.value);
             }, `${property.endpoint}`);
             this.api.cache[endpoint] = this.api.cache[endpoint] || this.api.list(endpoint, this.api.makeListParams(1, -1)).then(result => {
                 const items = ObjectUtils.isArray(result)
@@ -685,6 +677,20 @@ export class DynamicFormService extends Base {
         this.insertFormArrayGroup(index, formArray, formArrayModel);
         this.patchGroup(formArray.at(index + 1).value, formArrayModel.groups[index].group, formArray.at(index) as FormGroup);
         formArrayModel.filterGroups();
+    }
+
+    protected replaceOptionsEndpoint(endpoint: string, key: string, value: any): string {
+        if (ObjectUtils.isObject(value)) {
+            return Object.entries(value).reduce((res, [k, v]) => {
+                return this.replaceOptionsEndpoint(res, `${key}.${k}`, v);
+            }, endpoint)
+        }
+        if (ObjectUtils.isArray(value)) {
+            return value.reduce((res, v, i) => {
+                return this.replaceOptionsEndpoint(res, `${key}.${i}`, v);
+            }, endpoint)
+        }
+        return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
     }
 
     protected async fixSelectOptions(model: DynamicSelectModel<any>, control: FormControl, options: DynamicFormOptionConfig<any>[]): Promise<DynamicFormOptionConfig<any>[]> {

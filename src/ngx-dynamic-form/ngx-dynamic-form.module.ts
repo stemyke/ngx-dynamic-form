@@ -1,4 +1,11 @@
-import {Injector, ModuleWithProviders, NgModule} from "@angular/core";
+import {
+    EnvironmentProviders,
+    Injector,
+    makeEnvironmentProviders,
+    ModuleWithProviders,
+    NgModule,
+    Provider
+} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, NG_VALIDATORS, ReactiveFormsModule} from "@angular/forms";
 import {
@@ -67,21 +74,29 @@ import {IDynamicFormModuleConfig} from "./common-types";
 })
 export class NgxDynamicFormModule {
 
+    private static getProviders(config?: IDynamicFormModuleConfig): Provider[] {
+        return [
+            DynamicFormService,
+            {
+                provide: BaseDynamicFormService,
+                useExisting: DynamicFormService
+            },
+            {
+                provide: DYNAMIC_FORM_CONTROL_MAP_FN,
+                useFactory: (config?.controlProvider || defaultFormControlProvider),
+                deps: [Injector]
+            }
+        ];
+    }
+
     static forRoot(config?: IDynamicFormModuleConfig): ModuleWithProviders<NgxDynamicFormModule> {
         return {
             ngModule: NgxDynamicFormModule,
-            providers: [
-                DynamicFormService,
-                {
-                    provide: BaseDynamicFormService,
-                    useExisting: DynamicFormService
-                },
-                {
-                    provide: DYNAMIC_FORM_CONTROL_MAP_FN,
-                    useFactory: (config?.controlProvider || defaultFormControlProvider),
-                    deps: [Injector]
-                }
-            ]
+            providers: NgxDynamicFormModule.getProviders(config)
         }
+    }
+
+    static provideForms(config?: IDynamicFormModuleConfig): EnvironmentProviders {
+        return makeEnvironmentProviders(NgxDynamicFormModule.getProviders(config));
     }
 }

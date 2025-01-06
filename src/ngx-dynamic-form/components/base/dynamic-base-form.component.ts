@@ -114,7 +114,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 }
             ),
             this.events.languageChanged.subscribe(() => {
-                this.formService.notifyChanges(this.model, this.group);
+                this.formService.notifyChanges(this.model, this.group, this.model);
                 this.formService.detectChanges(this);
             })
         );
