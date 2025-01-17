@@ -3,6 +3,7 @@ export {
     IDynamicForm,
     FormControlSerializer,
     FormModelCustomizer,
+    IModelForSchemaOptions,
     DynamicFormState,
     DynamicFormUpdateOn,
     DynamicFormInitControl,

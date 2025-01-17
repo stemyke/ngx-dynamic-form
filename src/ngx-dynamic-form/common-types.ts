@@ -45,10 +45,9 @@ export type FormModelCustomizerWrap = (
     modelType: ModelType, config: DynamicFormControlModelConfig
 ) => Promise<DynamicFormControlModel[]>;
 
-export interface IFormControl {
-    id: string;
-    type: string;
-    config?: DynamicFormControlModelConfig;
+export interface IModelForSchemaOptions {
+    labelPrefix?: string;
+    customizer?: FormModelCustomizer;
 }
 
 export interface DynamicFormInitControl extends DynamicFormControl {

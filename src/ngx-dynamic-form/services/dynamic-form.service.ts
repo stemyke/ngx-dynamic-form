@@ -39,7 +39,7 @@ import {
     FormControlSerializer,
     FormModelCustomizer,
     FormModelCustomizerWrap,
-    IDynamicForm,
+    IDynamicForm, IModelForSchemaOptions,
     ModelType
 } from "../common-types";
 
@@ -90,8 +90,8 @@ export class DynamicFormService extends Base {
         return this.serialize(form.model, form.group);
     }
 
-    async getFormModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormModel> {
-        return (await this.getFormGroupModelForSchema(name, customizeModel)).group;
+    async getFormModelForSchema(name: string, customizeOrOptions?: FormModelCustomizer | IModelForSchemaOptions): Promise<DynamicFormModel> {
+        return (await this.getFormGroupModelForSchema(name, customizeOrOptions)).group;
     }
 
     getErrors(form: DynamicBaseFormComponent): Promise<AllValidationErrors[]> {
@@ -291,13 +291,19 @@ export class DynamicFormService extends Base {
         return isNaN(date as any) ? new Date() : date;
     }
 
-    async getFormGroupModelForSchema(name: string, customizeModel?: FormModelCustomizer): Promise<DynamicFormGroupModel> {
+    async getFormGroupModelForSchema(name: string, customizeOrOptions?: FormModelCustomizer | IModelForSchemaOptions): Promise<DynamicFormGroupModel> {
         this.api.cache = {};
         this.schemas = await this.openApi.getSchemas();
         const fieldSets: DynamicFormFieldSet<string>[] = [];
+        const options = ObjectUtils.isObject(customizeOrOptions) ? customizeOrOptions as IModelForSchemaOptions : {};
+        const customizeModel = ObjectUtils.isFunction(customizeOrOptions)
+            ? customizeOrOptions : options.customizer;
         const customizeModels: FormModelCustomizerWrap = async (
             property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
             modelType: ModelType, config: DynamicFormControlModelConfig) => {
+            config.label = !config.label || !options.labelPrefix
+                ? config.label || ""
+                : await this.language.getTranslation(`${options.labelPrefix}.${config.label}`);
             const model = new modelType(config);
             if (model instanceof DynamicFormValueControlModel) {
                 model.value = (model instanceof DynamicDatePickerModel)
