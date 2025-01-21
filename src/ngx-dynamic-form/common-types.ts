@@ -42,7 +42,7 @@ export type FormModelCustomizer = (
 ) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
 export type FormModelCustomizerWrap = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-    modelType: ModelType, config: DynamicFormControlModelConfig
+    modelType: ModelType, config: DynamicFormControlModelConfig, path: string
 ) => Promise<DynamicFormControlModel[]>;
 
 export interface IModelForSchemaOptions {
