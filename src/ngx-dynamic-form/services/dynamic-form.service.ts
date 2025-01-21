@@ -20,9 +20,11 @@ import {
     DynamicInputModel,
     DynamicInputModelConfig,
     DynamicPathable,
+    DynamicRadioGroupModel,
+    DynamicRadioGroupModelConfig,
     DynamicTextAreaModel,
     DynamicTextAreaModelConfig,
-    DynamicValidatorsConfig
+    DynamicValidatorsConfig,
 } from "@ng-dynamic-forms/core";
 import {
     IApiService,
@@ -39,7 +41,8 @@ import {
     FormControlSerializer,
     FormModelCustomizer,
     FormModelCustomizerWrap,
-    IDynamicForm, IModelForSchemaOptions,
+    IDynamicForm,
+    IModelForSchemaOptions,
     ModelType
 } from "../common-types";
 
@@ -218,7 +221,7 @@ export class DynamicFormService extends Base {
             const key = subModel.id;
             const subValue = value[key];
             const subControl = this.findControlByModel(subModel, formGroup);
-            if (subModel instanceof DynamicSelectModel && ObjectUtils.isObject(subValue)) {
+            if ((subModel instanceof DynamicSelectModel || subModel instanceof DynamicRadioGroupModel) && ObjectUtils.isObject(subValue)) {
                 value[key] = subValue.id || subValue._id || subValue;
                 return;
             }
@@ -391,6 +394,9 @@ export class DynamicFormService extends Base {
     protected async getFormControlModels(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap, path: string): Promise<DynamicFormControlModel[]> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
+            if (property.format == "radio") {
+                return customizeModels(property, schema, DynamicRadioGroupModel, this.getFormRadioConfig(property, schema), path);
+            }
             return customizeModels(property, schema, DynamicSelectModel, this.getFormSelectConfig(property, schema), path);
         }
         switch (property.type) {
@@ -653,6 +659,15 @@ export class DynamicFormService extends Base {
             const options = (await this.api.cache[endpoint]).map(t => Object.assign({}, t));
             return this.fixSelectOptions(selectModel, control, options);
         });
+    }
+
+    getFormRadioConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicRadioGroupModelConfig<any> {
+        return Object.assign(
+            this.getFormControlConfig(property, schema),
+            {
+                options: this.getFormSelectOptions(property, schema),
+            }
+        );
     }
 
     getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
