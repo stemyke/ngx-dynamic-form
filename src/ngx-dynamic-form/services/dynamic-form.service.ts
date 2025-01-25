@@ -329,13 +329,14 @@ export class DynamicFormService extends Base {
             return Array.isArray(res) ? res : [res];
         };
         const schema = this.schemas[name];
-        const group = await this.getFormModelForSchemaDef(schema, fieldSets, customizeModels, "");
+        const controls = await this.getFormModelForSchemaDef(schema, fieldSets, customizeModels, "");
+        const group = [...controls];
         // Add id fields if necessary
-        if (group.length > 0) {
+        if (controls.length > 0) {
             const idFields = [
                 createFormInput("id", {hidden: true}),
                 createFormInput("_id", {hidden: true})
-            ].filter(t => !group.some(c => c.id == t.id));
+            ].filter(t => !controls.some(c => c.id == t.id));
             group.unshift(...idFields);
         }
         const config = {
@@ -349,17 +350,17 @@ export class DynamicFormService extends Base {
             properties: schema?.properties || {}
         }, schema, DynamicFormGroupModel, config, "");
         // Check if the customized root wrapper returned an array
-        group.length = 0;
+        controls.length = 0;
         for (const model of root) {
             if (model instanceof DynamicFormGroupModel && model.id === "root") {
                 return model;
             } else {
-                group.push(model);
+                controls.push(model);
             }
         }
         return new DynamicFormGroupModel({
             ...config,
-            group
+            group: controls
         });
     }
 
