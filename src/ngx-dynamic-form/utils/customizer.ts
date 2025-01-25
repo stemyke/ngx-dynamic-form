@@ -41,12 +41,17 @@ export function customizeFormModel(...providers: CachedProvider<IFormModelCustom
     const factory = cachedFactory(providers);
     return async (property, schema, model, config, injector) => {
         const customizers = factory(injector);
+        const models = [model];
         for (const customizer of customizers) {
-            const accept = customizer.acceptModel(model);
-            if (accept) {
-                return customizer.customizeModel(model, config, property, schema);
+            const index = models.findIndex(m => customizer.acceptModel(m));
+            if (index >= 0) {
+                const custom = await customizer.customizeModel(
+                    models[index], config, property, schema
+                );
+                const result = Array.isArray(custom) ? custom : [custom];
+                models.splice(index, 1, ...result);
             }
         }
-        return model;
+        return models;
     }
 }
