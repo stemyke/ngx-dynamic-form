@@ -115,12 +115,15 @@ export class DynamicBaseFormControlContainerComponent extends DynamicFormControl
     }
 
     getLabel(): string {
-        const label = collectPathAble(this.model, p => p.label);
-        if (label.length == 0) return "";
         if (this.form?.labelPrefix) {
+            const label = collectPathAble(this.model, p => p.id);
+            if (label.length == 0) {
+                return this.model.label;
+            }
             label.unshift(this.form.labelPrefix);
+            return label.join(".");
         }
-        return label.join(".");
+        return this.model.label;
     }
 
     getLabelIcon(): string {
