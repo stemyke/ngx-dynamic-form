@@ -347,7 +347,7 @@ export class DynamicFormService extends Base {
         const root = await customizeModels({
             id: "root",
             type: "object",
-            properties: schema.properties
+            properties: schema?.properties || {}
         }, schema, DynamicFormGroupModel, config, "");
         // Check if the customized root wrapper returned an array
         controls.length = 0;
