@@ -76,7 +76,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         this.groupModel = undefined
         this.model = undefined;
         this.layout = undefined;
-        this.labelPrefix = "label";
+        this.labelPrefix = "";
         this.getComponentType = () => null;
         this.blur = new EventEmitter();
         this.change = new EventEmitter();
