@@ -23,11 +23,11 @@ export interface IDynamicFormEvent extends DynamicFormControlEvent {
 
 export interface IDynamicForm extends DynamicFormComponent {
 
-    onSubmit?: EventEmitter<IDynamicForm>;
     status?: DynamicFormState;
 
     onValueChange?: EventEmitter<IDynamicFormEvent>;
     onStatusChange?: EventEmitter<IDynamicForm>;
+    onSubmit?: EventEmitter<IDynamicForm>;
 }
 
 export declare interface ModelType extends Function {

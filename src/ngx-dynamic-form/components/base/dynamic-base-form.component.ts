@@ -16,7 +16,6 @@ import {
 import {FormArray, FormGroup} from "@angular/forms";
 import {Subscription} from "rxjs";
 import {debounceTime, groupBy, mergeMap} from "rxjs/operators";
-import {first} from "rxjs/operators";
 import {
     DynamicFormComponent,
     DynamicFormComponentService,
@@ -41,16 +40,17 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
 })
 export class DynamicBaseFormComponent extends DynamicFormComponent implements OnChanges, AfterViewInit, IDynamicForm {
 
-    @Input() group: FormGroup;
+    @Input() group: FormGroup = null;
+    @Input() model: DynamicFormModel = null;
+    @Input() layout: DynamicFormLayout = null;
+
+    @Output() blur: EventEmitter<DynamicFormControlEvent> = new EventEmitter();
+    @Output() change: EventEmitter<DynamicFormControlEvent> = new EventEmitter();
+    @Output() focus: EventEmitter<DynamicFormControlEvent> = new EventEmitter();
+
     @Input() groupModel: DynamicFormGroupModel;
-    @Input() model: DynamicFormModel;
-    @Input() layout: DynamicFormLayout;
     @Input() labelPrefix: string;
     @Input() getComponentType: GetFormControlComponentType;
-
-    @Output() blur: EventEmitter<DynamicFormControlEvent>;
-    @Output() change: EventEmitter<DynamicFormControlEvent>;
-    @Output() focus: EventEmitter<DynamicFormControlEvent>;
 
     @ContentChildren(DynamicTemplateDirective) contentTemplates: QueryList<DynamicTemplateDirective>;
     @ViewChildren(DynamicTemplateDirective) viewTemplates: QueryList<DynamicTemplateDirective>;
@@ -59,10 +59,10 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
         return !this.group ? null : this.group.status as DynamicFormState;
     }
 
-    @Output() readonly onValueChange: EventEmitter<IDynamicFormEvent> = new EventEmitter();
-    @Output() readonly onStatusChange: EventEmitter<IDynamicForm> = new EventEmitter();
-    @Output() readonly onSubmit: EventEmitter<IDynamicForm> = new EventEmitter();
-    @Output() readonly onDetectChanges: EventEmitter<IDynamicForm> = new EventEmitter();
+    @Output() readonly onValueChange: EventEmitter<IDynamicFormEvent>;
+    @Output() readonly onStatusChange: EventEmitter<IDynamicForm>;
+    @Output() readonly onSubmit: EventEmitter<IDynamicForm>;
+    @Output() readonly onDetectChanges: EventEmitter<IDynamicForm>;
 
     protected subscription: Subscription = new Subscription();
     protected groupSubscription: Subscription = new Subscription();
@@ -72,16 +72,14 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
                 changeDetectorRef: ChangeDetectorRef,
                 componentService: DynamicFormComponentService) {
         super(changeDetectorRef, componentService);
-        this.group = undefined;
         this.groupModel = undefined
-        this.model = undefined;
-        this.layout = undefined;
         this.labelPrefix = "";
         this.getComponentType = () => null;
-        this.blur = new EventEmitter();
-        this.change = new EventEmitter();
-        this.focus = new EventEmitter();
         this.templates = new QueryList<DynamicTemplateDirective>();
+        this.onValueChange = new EventEmitter();
+        this.onStatusChange = new EventEmitter();
+        this.onSubmit = new EventEmitter();
+        this.onDetectChanges = new EventEmitter();
     }
 
     submit(): void {
