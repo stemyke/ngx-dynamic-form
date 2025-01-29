@@ -104,7 +104,7 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
             this.model = this.groupModel?.group;
         }
         if (changes.model) {
-            this.groupModel = new DynamicFormGroupModel({id: "root", group: this.model});
+            this.groupModel = new DynamicFormGroupModel({id: "root", group: this.model || []});
         }
     }
 
