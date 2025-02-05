@@ -11,7 +11,6 @@ import {
     DynamicFileUploadModelConfig,
     DynamicFormComponentService,
     DynamicFormControlModel,
-    DynamicFormControlModelConfig,
     DynamicFormModel,
     DynamicFormService as Base,
     DynamicFormValidationService,
@@ -24,7 +23,7 @@ import {
     DynamicRadioGroupModelConfig,
     DynamicTextAreaModel,
     DynamicTextAreaModelConfig,
-    DynamicValidatorsConfig,
+    DynamicValidatorsConfig, isString,
 } from "@ng-dynamic-forms/core";
 import {
     IApiService,
@@ -40,10 +39,9 @@ import {
 import {
     FormControlSerializer,
     FormModelCustomizer,
-    FormModelCustomizerWrap,
     IDynamicForm,
-    IModelForSchemaOptions,
-    ModelType
+    ModelForSchemaOptions,
+    ModelForSchemaWrapOptions
 } from "../common-types";
 
 import {EDITOR_FORMATS, findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormModels, MIN_INPUT_NUM} from "../utils/misc";
@@ -93,7 +91,7 @@ export class DynamicFormService extends Base {
         return this.serialize(form.model, form.group);
     }
 
-    async getFormModelForSchema(name: string, customizeOrOptions?: FormModelCustomizer | IModelForSchemaOptions): Promise<DynamicFormModel> {
+    async getFormModelForSchema(name: string, customizeOrOptions?: FormModelCustomizer | ModelForSchemaOptions): Promise<DynamicFormModel> {
         return (await this.getFormGroupModelForSchema(name, customizeOrOptions)).group;
     }
 
@@ -294,42 +292,43 @@ export class DynamicFormService extends Base {
         return isNaN(date as any) ? new Date() : date;
     }
 
-    async getFormGroupModelForSchema(name: string, customizeOrOptions?: FormModelCustomizer | IModelForSchemaOptions): Promise<DynamicFormGroupModel> {
+    async getFormGroupModelForSchema(name: string, customizeOrOptions?: FormModelCustomizer | ModelForSchemaOptions): Promise<DynamicFormGroupModel> {
         this.api.cache = {};
         this.schemas = await this.openApi.getSchemas();
         const fieldSets: DynamicFormFieldSet<string>[] = [];
-        const options = ObjectUtils.isObject(customizeOrOptions) ? customizeOrOptions as IModelForSchemaOptions : {};
-        const customizeModel = ObjectUtils.isFunction(customizeOrOptions)
-            ? customizeOrOptions : options.customizer;
-        const customizeModels: FormModelCustomizerWrap = async (
-            property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-            modelType: ModelType, config: DynamicFormControlModelConfig, path: string) => {
-            const pathPrefix = !path ? `` : `${path}.`;
-            config.label = !config.label || !options.labelPrefix
-                ? config.label || ""
-                : await this.language.getTranslation(`${options.labelPrefix}.${pathPrefix}${config.label}`);
-            const model = new modelType(config);
-            if (model instanceof DynamicFormValueControlModel) {
-                model.value = (model instanceof DynamicDatePickerModel)
-                    ? this.convertToDate(property.default) : property.default;
-            }
-            const layout = `${pathPrefix}${model.id}`.toLowerCase().replace(/\./g, "-");
-            model.layout = {
-                grid: {
-                    host: `${layout} control-${model.id}`,
-                    container: `${layout}-container`
-                }
-            };
-            if (!ObjectUtils.isFunction(customizeModel)) return [model];
-            let res = customizeModel(property, schema, model, config, this.injector);
-            if (!res) return [model];
-            if (res instanceof Promise) {
-                res = await res;
-            }
-            return Array.isArray(res) ? res : [res];
-        };
+        const schemaOptions = ObjectUtils.isObject(customizeOrOptions) ? customizeOrOptions as ModelForSchemaOptions : {};
+        const customizeModel = ObjectUtils.isFunction(customizeOrOptions) ? customizeOrOptions : schemaOptions.customizer;
         const schema = this.schemas[name];
-        const controls = await this.getFormModelForSchemaDef(schema, fieldSets, customizeModels, "");
+        const wrapOptions = {
+            ...schemaOptions,
+            schema,
+            customizer: async (property, options, modelType, config, path: string) => {
+                const pathPrefix = !path ? `` : `${path}.`;
+                config.label = !config.label || !options.labelPrefix
+                    ? config.label || ""
+                    : await this.language.getTranslation(`${options.labelPrefix}.${pathPrefix}${config.label}`);
+                const model = new modelType(config);
+                if (model instanceof DynamicFormValueControlModel) {
+                    model.value = (model instanceof DynamicDatePickerModel)
+                        ? this.convertToDate(property.default) : property.default;
+                }
+                const layout = `${pathPrefix}${model.id}`.toLowerCase().replace(/\./g, "-");
+                model.layout = {
+                    grid: {
+                        host: `${layout} control-${model.id}`,
+                        container: `${layout}-container`
+                    }
+                };
+                if (!ObjectUtils.isFunction(customizeModel)) return [model];
+                let res = customizeModel(property, schema, model, config, this.injector);
+                if (!res) return [model];
+                if (res instanceof Promise) {
+                    res = await res;
+                }
+                return Array.isArray(res) ? res : [res];
+            }
+        } as ModelForSchemaWrapOptions;
+        const controls = await this.getFormModelForSchemaDef(schema, fieldSets, wrapOptions, "");
         const group = [...controls];
         // Add id fields if necessary
         if (controls.length > 0) {
@@ -344,11 +343,11 @@ export class DynamicFormService extends Base {
             group,
             fieldSets
         } as DynamicFormGroupModelConfig;
-        const root = await customizeModels({
+        const root = await wrapOptions.customizer({
             id: "root",
             type: "object",
             properties: schema?.properties || {}
-        }, schema, DynamicFormGroupModel, config, "");
+        }, wrapOptions, DynamicFormGroupModel, config, "");
         // Check if the customized root wrapper returned an array
         controls.length = 0;
         for (const model of root) {
@@ -364,7 +363,7 @@ export class DynamicFormService extends Base {
         });
     }
 
-    protected async getFormModelForSchemaDef(schema: IOpenApiSchema, fieldSets: DynamicFormFieldSet<string>[], customizeModels: FormModelCustomizerWrap, path: string): Promise<DynamicFormModel> {
+    protected async getFormModelForSchemaDef(schema: IOpenApiSchema, fieldSets: DynamicFormFieldSet<string>[], options: ModelForSchemaWrapOptions, path: string): Promise<DynamicFormModel> {
         if (!schema)
             return [];
         const keys = Object.keys(schema.properties || {});
@@ -380,7 +379,7 @@ export class DynamicFormService extends Base {
                     fieldSets.push({id: fsName, legend: `legend.${fsName}`, fields: [p]});
                 }
             }
-            const models = await this.getFormControlModels(property, schema, customizeModels, path);
+            const models = await this.getFormControlModels(property, options, path);
             controls.push(...models);
         }
         return controls.filter(t => null !== t);
@@ -391,13 +390,13 @@ export class DynamicFormService extends Base {
         return EDITOR_FORMATS.indexOf(property.format) >= 0 || property.format.endsWith("script");
     }
 
-    protected async getFormControlModels(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap, path: string): Promise<DynamicFormControlModel[]> {
+    protected async getFormControlModels(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions, path: string): Promise<DynamicFormControlModel[]> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             if (property.format == "radio") {
-                return customizeModels(property, schema, DynamicRadioGroupModel, this.getFormRadioConfig(property, schema), path);
+                return options.customizer(property, options, DynamicRadioGroupModel, this.getFormRadioConfig(property, options), path);
             }
-            return customizeModels(property, schema, DynamicSelectModel, this.getFormSelectConfig(property, schema), path);
+            return options.customizer(property, options, DynamicSelectModel, this.getFormSelectConfig(property, options), path);
         }
         switch (property.type) {
             case "string":
@@ -405,32 +404,32 @@ export class DynamicFormService extends Base {
             case "integer":
             case "textarea":
                 if (this.checkIsEditorProperty(property)) {
-                    return customizeModels(property, schema, DynamicEditorModel, this.getFormEditorConfig(property, schema), path);
+                    return options.customizer(property, options, DynamicEditorModel, this.getFormEditorConfig(property, options), path);
                 }
                 if (property.format == "textarea") {
-                    return customizeModels(property, schema, DynamicTextAreaModel, this.getFormTextareaConfig(property, schema), path);
+                    return options.customizer(property, options, DynamicTextAreaModel, this.getFormTextareaConfig(property, options), path);
                 }
                 if (property.format == "date") {
-                    return customizeModels(property, schema, DynamicDatePickerModel, this.getFormDatepickerConfig(property, schema), path);
+                    return options.customizer(property, options, DynamicDatePickerModel, this.getFormDatepickerConfig(property, options), path);
                 }
-                return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema), path);
+                return options.customizer(property, options, DynamicInputModel, this.getFormInputConfig(property, options), path);
             case "object":
-                return customizeModels(property, schema, DynamicEditorModel, this.getFormEditorConfig(property, schema), path);
+                return options.customizer(property, options, DynamicEditorModel, this.getFormEditorConfig(property, options), path);
             case "boolean":
-                return customizeModels(property, schema, DynamicCheckboxModel, this.getFormCheckboxConfig(property, schema), path);
+                return options.customizer(property, options, DynamicCheckboxModel, this.getFormCheckboxConfig(property, options), path);
             case "array":
                 if (findRefs(property).length > 0) {
-                    return customizeModels(property, schema, DynamicFormArrayModel, await this.getFormArrayConfig(property, schema, customizeModels, path), path);
+                    return options.customizer(property, options, DynamicFormArrayModel, await this.getFormArrayConfig(property, options, path), path);
                 } else {
-                    return customizeModels(property, schema, DynamicInputModel, this.getFormInputConfig(property, schema), path);
+                    return options.customizer(property, options, DynamicInputModel, this.getFormInputConfig(property, options), path);
                 }
             case "file":
-                return customizeModels(property, schema, DynamicFileUploadModel, this.getFormUploadConfig(property, schema), path);
+                return options.customizer(property, options, DynamicFileUploadModel, this.getFormUploadConfig(property, options), path);
         }
         if (findRefs(property).length > 0) {
-            return customizeModels(
-                property, schema, DynamicFormGroupModel,
-                await this.getFormGroupConfig(property, schema, customizeModels, !path ? property.id : `${path}.${property.id}`),
+            return options.customizer(
+                property, options, DynamicFormGroupModel,
+                await this.getFormGroupConfig(property, options, !path ? property.id : `${path}.${property.id}`),
                 path
             );
         }
@@ -452,10 +451,11 @@ export class DynamicFormService extends Base {
         return parent;
     }
 
-    getFormControlConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFormValueControlModelConfig<any> {
-        const validators = this.getValidators(property, schema);
+    getFormControlConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicFormValueControlModelConfig<any> {
+        const validators = this.getValidators(property, options);
         const errorMessages = Object.keys(validators).reduce((res, key) => {
-            res[key] = `error.${key}`;
+            res[key] = options.labelPrefix
+                ? this.language.getTranslationSync(`${options.labelPrefix}.error.${key}`) : `error.${key}`;
             return res;
         }, {});
         return {
@@ -472,14 +472,14 @@ export class DynamicFormService extends Base {
         };
     }
 
-    async getFormArrayConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap, path: string): Promise<DynamicFormArrayModelConfig> {
+    async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions, path: string): Promise<DynamicFormArrayModelConfig> {
         const fieldSets: DynamicFormFieldSet<string>[] = [];
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
         const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormModelForSchemaDef(s, fieldSets, customizeModels, path))
+            subSchemas.map(s => this.getFormModelForSchemaDef(s, fieldSets, options, path))
         );
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 groupFactory: () => mergeFormModels(ObjectUtils.copy(subModels)),
                 initialCount: property.initialCount || 0,
@@ -495,14 +495,14 @@ export class DynamicFormService extends Base {
         );
     }
 
-    async getFormGroupConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema, customizeModels: FormModelCustomizerWrap, path: string): Promise<DynamicFormGroupModelConfig> {
+    async getFormGroupConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions, path: string): Promise<DynamicFormGroupModelConfig> {
         const fieldSets: DynamicFormFieldSet<string>[] = [];
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
         const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormModelForSchemaDef(s, fieldSets, customizeModels, path))
+            subSchemas.map(s => this.getFormModelForSchemaDef(s, fieldSets, options, path))
         );
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 fieldSets,
                 group: mergeFormModels(subModels)
@@ -510,7 +510,7 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormInputConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicInputModelConfig {
+    getFormInputConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicInputModelConfig {
         let inputType = StringUtils.has(property.id, "password", "Password") ? "password" : (property.format || property.items?.type || property.type);
         switch (inputType) {
             case "string":
@@ -528,7 +528,7 @@ export class DynamicFormService extends Base {
         }
         const sub = property.type == "array" ? property.items || property : property;
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 inputType,
                 autoComplete: property.autoComplete || "off",
@@ -546,10 +546,10 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormEditorConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicEditorModelConfig {
+    getFormEditorConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicEditorModelConfig {
         const sub = property.type == "array" ? property.items || property : property;
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 inputType: property.format || "json",
                 convertObject: property.type !== "string",
@@ -566,9 +566,9 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormTextareaConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicTextAreaModelConfig {
+    getFormTextareaConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicTextAreaModelConfig {
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 cols: property.cols || null,
                 rows: property.rows || 10,
@@ -582,9 +582,9 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormDatepickerConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicDatePickerModelConfig {
+    getFormDatepickerConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicDatePickerModelConfig {
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 format: property.dateFormat || "dd.MM.yyyy",
                 min: this.convertToDate(property.min),
@@ -593,15 +593,17 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormSelectOptions(property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
+    getFormSelectOptions(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions) {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum)) {
             return new FormSelectSubject((selectModel, formControl) => {
-                const options = $enum.map(value => {
-                    const label = property.translatable ? `${property.id}.${value}` : `${value}`;
+                const selectOptions = $enum.map(value => {
+                    const label = options.labelPrefix
+                        ? this.language.getTranslationSync(`${options.labelPrefix}.${property.id}.${value}`)
+                        : `${property.id}.${value}`;
                     return {value, label};
                 });
-                return this.fixSelectOptions(selectModel, formControl, options);
+                return this.fixSelectOptions(selectModel, formControl, selectOptions);
             });
         }
         if (isStringWithVal(property.optionsPath)) {
@@ -661,20 +663,20 @@ export class DynamicFormService extends Base {
         });
     }
 
-    getFormRadioConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicRadioGroupModelConfig<any> {
+    getFormRadioConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicRadioGroupModelConfig<any> {
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
-                options: this.getFormSelectOptions(property, schema),
+                options: this.getFormSelectOptions(property, options),
             }
         );
     }
 
-    getFormSelectConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicSelectModelConfig<any> {
+    getFormSelectConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicSelectModelConfig<any> {
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
-                options: this.getFormSelectOptions(property, schema),
+                options: this.getFormSelectOptions(property, options),
                 multiple: property.type == "array",
                 groupBy: property.groupBy,
                 inline: property.inline,
@@ -683,10 +685,10 @@ export class DynamicFormService extends Base {
         );
     }
 
-    getFormUploadConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicFileUploadModelConfig {
+    getFormUploadConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicFileUploadModelConfig {
         const url = this.api.url(property.url || "assets");
         const {accept, autoUpload, maxSize, minSize, removeUrl, showFileList} = property;
-        return Object.assign(this.getFormControlConfig(property, schema), {
+        return Object.assign(this.getFormControlConfig(property, options), {
             url,
             accept,
             autoUpload,
@@ -697,9 +699,9 @@ export class DynamicFormService extends Base {
         });
     }
 
-    getFormCheckboxConfig(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicCheckboxModelConfig {
+    getFormCheckboxConfig(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicCheckboxModelConfig {
         return Object.assign(
-            this.getFormControlConfig(property, schema),
+            this.getFormControlConfig(property, options),
             {
                 indeterminate: property.indeterminate || false
             }
@@ -735,8 +737,9 @@ export class DynamicFormService extends Base {
         return options;
     }
 
-    protected getValidators(property: IOpenApiSchemaProperty, schema: IOpenApiSchema): DynamicValidatorsConfig {
+    protected getValidators(property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions): DynamicValidatorsConfig {
         const validators: DynamicValidatorsConfig = {};
+        const schema = options.schema;
         if (ObjectUtils.isArray(schema.required) && schema.required.indexOf(property.id) >= 0) {
             validators.required = null;
         }
@@ -758,6 +761,9 @@ export class DynamicFormService extends Base {
         }
         if (!isNaN(property.maximum)) {
             validators.max = property.maximum;
+        }
+        if (isString(property.pattern) && property.pattern.length) {
+            validators.pattern = property.pattern;
         }
         switch (property.format) {
             case "email":

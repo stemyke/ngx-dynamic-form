@@ -40,14 +40,18 @@ export type FormModelCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
     model: DynamicFormControlModel, config: DynamicFormControlModelConfig, injector: Injector
 ) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
-export type FormModelCustomizerWrap = (
-    property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-    modelType: ModelType, config: DynamicFormControlModelConfig, path: string
-) => Promise<DynamicFormControlModel[]>;
 
-export interface IModelForSchemaOptions {
+export interface ModelForSchemaOptions {
     labelPrefix?: string;
     customizer?: FormModelCustomizer;
+}
+
+export interface ModelForSchemaWrapOptions extends Omit<ModelForSchemaOptions, "customizer"> {
+    schema: IOpenApiSchema;
+    customizer?: (
+        property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions,
+        modelType: ModelType, config: DynamicFormControlModelConfig, path: string
+    ) => Promise<DynamicFormControlModel[]>;
 }
 
 export interface DynamicFormInitControl extends DynamicFormControl {

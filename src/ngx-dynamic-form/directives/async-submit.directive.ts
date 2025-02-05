@@ -7,14 +7,16 @@ import {
     HostListener,
     Inject,
     Input,
+    NgZone,
+    OnChanges,
     OnDestroy,
-    OnInit,
     Output,
-    Renderer2
+    Renderer2,
+    SimpleChanges
 } from "@angular/core";
 import {Subscription} from "rxjs";
 import {debounceTime} from "rxjs/operators";
-import {IAsyncMessage, IToasterService, TOASTER_SERVICE} from "@stemy/ngx-utils";
+import {IAsyncMessage, IToasterService, ObservableUtils, TOASTER_SERVICE} from "@stemy/ngx-utils";
 import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
 
 @Directive({
@@ -22,7 +24,7 @@ import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
     selector: "[async-submit]",
     exportAs: "async-submit"
 })
-export class AsyncSubmitDirective implements OnInit, OnDestroy {
+export class AsyncSubmitDirective implements OnChanges, OnDestroy {
 
     @Input("async-submit") method: AsyncSubmitMethod;
     @Input() form: IDynamicForm;
@@ -31,11 +33,10 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
     @Output() onSuccess: EventEmitter<IAsyncMessage>;
     @Output() onError: EventEmitter<IAsyncMessage>;
 
-    private loading: boolean;
-    private disabled: boolean;
-    private callback: Function;
-    private onStatusChange: Subscription;
-    private onSubmit: Subscription;
+    protected loading: boolean;
+    protected disabled: boolean;
+    protected callback: Function;
+    protected subscription: Subscription;
 
     @HostBinding("class.disabled")
     get isDisabled(): boolean {
@@ -58,7 +59,8 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
 
     constructor(@Inject(TOASTER_SERVICE) private toaster: IToasterService,
                 readonly cdr: ChangeDetectorRef,
-                readonly elem: ElementRef,
+                readonly zone: NgZone,
+                readonly elem: ElementRef<HTMLElement>,
                 readonly renderer: Renderer2) {
         this.onSuccess = new EventEmitter<IAsyncMessage>();
         this.onError = new EventEmitter<IAsyncMessage>();
@@ -66,26 +68,43 @@ export class AsyncSubmitDirective implements OnInit, OnDestroy {
         renderer.setAttribute(elem.nativeElement, "type", "button");
     }
 
-    ngOnInit(): void {
+    ngOnChanges(changes: SimpleChanges): void {
+        // Clear old subscription
+        this.subscription?.unsubscribe();
+        // Check if form changed
+        if (changes.form) {
+            const form = changes.form.currentValue as IDynamicForm;
+            if (!form) return;
+            // Force form for checking changes after fields get autofilled by the browser
+            // setTimeout(() => {
+            //     console.log(
+            //         this.elem.nativeElement,
+            //         this.elem.nativeElement.focus
+            //     );
+            //     this.elem.nativeElement.focus?.();
+            // }, 1500);
+        }
+        // Handle other things if we have a form instance
         if (!this.form) return;
         this.isDisabled = this.form.group?.status !== "VALID";
         this.cdr.detectChanges();
-        this.onStatusChange = this.form.group?.statusChanges.subscribe(() => {
-            const status = this.form.group?.status;
-            this.isDisabled = status !== "VALID";
-            this.cdr.detectChanges();
-            if (!this.callback || status == "PENDING") return;
-            if (!this.disabled) {
-                this.callback();
-            }
-            this.callback = null;
-        });
-        this.onSubmit = this.form.onSubmit?.pipe(debounceTime(200)).subscribe(() => this.callMethod());
+        this.subscription = ObservableUtils.multiSubscription(
+            this.form.group?.statusChanges.subscribe(() => {
+                const status = this.form.group?.status;
+                this.isDisabled = status !== "VALID";
+                this.cdr.detectChanges();
+                if (!this.callback || status == "PENDING") return;
+                if (!this.disabled) {
+                    this.callback();
+                }
+                this.callback = null;
+            }),
+            this.form.onSubmit?.pipe(debounceTime(200)).subscribe(() => this.callMethod())
+        )
     }
 
     ngOnDestroy(): void {
-        if (this.onStatusChange) this.onStatusChange.unsubscribe();
-        if (this.onSubmit) this.onSubmit.unsubscribe();
+        this.subscription?.unsubscribe();
     }
 
     @HostListener("click")
