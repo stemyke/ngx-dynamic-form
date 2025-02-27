@@ -20,9 +20,9 @@
             "node_modules/@types"
         ],
         "paths": {
-            "jszip": [
-                "node_modules/jszip/dist/jszip.js"
-            ]
+            "@stemy/ngx-dynamic-form": [
+                "src/ngx-dynamic-form"
+            ],
         },
         "lib": [
             "es2017",

@@ -20,7 +20,7 @@ import {
     DynamicFormLayoutService,
     DynamicFormValidationService
 } from "@ng-dynamic-forms/core";
-import {DynamicBaseFormComponent} from "./dynamic-base-form.component";
+import {DynamicFormComponent} from "../form/dynamic-form.component";
 
 @Component({
     standalone: false,
@@ -42,7 +42,7 @@ export class DynamicBaseFormControlComponent<T extends DynamicFormControlModel> 
     protected subscription: Subscription;
 
     constructor(layoutService: DynamicFormLayoutService, validationService: DynamicFormValidationService,
-                @Optional() readonly form: DynamicBaseFormComponent,
+                @Optional() readonly form: DynamicFormComponent,
                 readonly injector: Injector,
                 readonly cdr: ChangeDetectorRef) {
         super(layoutService, validationService);

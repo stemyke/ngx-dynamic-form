@@ -2,22 +2,22 @@ import {DynamicFormControlMapFn} from "@ng-dynamic-forms/core";
 
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
-import {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
 import {DynamicBaseFormArrayComponent} from "./components/base/dynamic-base-form-array.component";
 import {DynamicBaseFormControlComponent} from "./components/base/dynamic-base-form-control.component";
 import {
     DynamicBaseFormControlContainerComponent
 } from "./components/base/dynamic-base-form-control-container.component";
-import {DynamicBaseFormGroupComponent} from "./components/base/dynamic-base-form-group.component";
 import {DynamicBaseSelectComponent} from "./components/base/dynamic-base-select.component";
+import {DynamicFormComponent} from "./components/form/dynamic-form.component";
+import {DynamicFormGroupComponent} from "./components/form-group/dynamic-form-group.component";
 
 // --- Components ---
 export const components = [
-    DynamicBaseFormComponent,
+    DynamicFormComponent,
     DynamicBaseFormArrayComponent,
     DynamicBaseFormControlComponent,
     DynamicBaseFormControlContainerComponent,
-    DynamicBaseFormGroupComponent,
+    DynamicFormGroupComponent,
     DynamicBaseSelectComponent
 ];
 

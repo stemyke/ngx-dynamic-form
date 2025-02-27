@@ -17,7 +17,7 @@ import {FormArray, FormGroup} from "@angular/forms";
 import {Subscription} from "rxjs";
 import {debounceTime, groupBy, mergeMap} from "rxjs/operators";
 import {
-    DynamicFormComponent,
+    DynamicFormComponent as Base,
     DynamicFormComponentService,
     DynamicFormControlEvent,
     DynamicFormControlModel,
@@ -31,6 +31,7 @@ import {collectPathAble} from "../../utils/misc";
 import {DynamicFormGroupModel} from "../../utils/dynamic-form-group.model";
 import {DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {DynamicFormControlContainerComponent} from "../form-control-container/dynamic-form-control-container.component";
 
 @Component({
     standalone: false,
@@ -38,7 +39,7 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
     template: "",
     changeDetection: ChangeDetectionStrategy.Default
 })
-export class DynamicBaseFormComponent extends DynamicFormComponent implements OnChanges, AfterViewInit, IDynamicForm {
+export class DynamicFormComponent extends Base implements OnChanges, AfterViewInit, IDynamicForm {
 
     @Input() group: FormGroup = null;
     @Input() model: DynamicFormModel = null;
@@ -52,9 +53,6 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Input() labelPrefix: string;
     @Input() getComponentType: GetFormControlComponentType;
 
-    @ContentChildren(DynamicTemplateDirective) contentTemplates: QueryList<DynamicTemplateDirective>;
-    @ViewChildren(DynamicTemplateDirective) viewTemplates: QueryList<DynamicTemplateDirective>;
-
     get status(): DynamicFormState {
         return !this.group ? null : this.group.status as DynamicFormState;
     }
@@ -63,6 +61,12 @@ export class DynamicBaseFormComponent extends DynamicFormComponent implements On
     @Output() readonly onStatusChange: EventEmitter<IDynamicForm>;
     @Output() readonly onSubmit: EventEmitter<IDynamicForm>;
     @Output() readonly onDetectChanges: EventEmitter<IDynamicForm>;
+
+    @ContentChildren(DynamicTemplateDirective) contentTemplates: QueryList<DynamicTemplateDirective>;
+    @ViewChildren(DynamicTemplateDirective) viewTemplates: QueryList<DynamicTemplateDirective>;
+
+    @ViewChildren(DynamicFormControlContainerComponent)
+    components: QueryList<DynamicFormControlContainerComponent>;
 
     protected subscription: Subscription = new Subscription();
     protected groupSubscription: Subscription = new Subscription();

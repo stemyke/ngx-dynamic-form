@@ -30,7 +30,9 @@
         "@stemy/ngx-utils": "^17.1.5 || ^19.0.0",
         "@ng-dynamic-forms/core": "^18.0.0",
         "@ng-dynamic-forms/ui-basic": "^18.0.0",
-        "ngx-mask": "^17.1.8"
+        "ngx-mask": "^17.1.8",
+        "@nebular/bootstrap": "9.0.3",
+        "@nebular/theme": "^15.0.0"
     },
     "devDependencies": {
         "@angular/animations": "19.0.3",
@@ -80,6 +82,8 @@
         "@ng-dynamic-forms/core": "18.0.0",
         "@ng-dynamic-forms/ui-basic": "18.0.0",
         "ngx-mask": "17.1.8",
+        "@nebular/bootstrap": "9.0.3",
+        "@nebular/theme": "^15.0.0",
         "jasmine": "3.1.0",
         "jasmine-core": "3.1.0",
         "jasmine-spec-reporter": "4.2.1",

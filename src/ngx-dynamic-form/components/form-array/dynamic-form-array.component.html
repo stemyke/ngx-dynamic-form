@@ -1,0 +1,51 @@
+<ng-template #itemTemplate let-groupModel="groupModel" let-group="group">
+    <ng-container *ngIf="group">
+        <ng-container [ngxTemplateOutlet]="startTemplate?.templateRef"
+                      [context]="groupModel"
+                      [additionalContext]="{array: array, model: model}"></ng-container>
+
+        <ng-container *ngFor="let _model of groupModel.group">
+            <dynamic-core-form-control [context]="groupModel"
+                                          [group]="group"
+                                          [layout]="formLayout"
+                                          [model]="_model"
+                                          [templates]="templates"
+                                          [hostClass]="[getClass('element','children', _model), getClass('grid','children', _model)]"
+                                          (blur)="onBlur($event)"
+                                          (change)="onChange($event)"
+                                          (focus)="onFocus($event)"
+                                          *ngIf="!_model.hidden"></dynamic-core-form-control>
+        </ng-container>
+
+        <ng-container [ngxTemplateOutlet]="endTemplate?.templateRef"
+                      [context]="groupModel"
+                      [additionalContext]="{array: array, model: model}"></ng-container>
+    </ng-container>
+</ng-template>
+
+<ng-container [formGroup]="group">
+    <div [formArrayName]="model.id" [id]="id" [ngClass]="getClass('element', 'control', model)">
+<!--        <nb-tabset #tabSet (changeTab)="onTabChange(tabSet)" fullWidth *ngFor="let tabGroup of tabbedGroups">-->
+<!--            <nb-tab [active]="selectedTab == index" *ngFor="let groupModel of tabGroup; let index = index">-->
+<!--                <ng-template nbTabTitle>-->
+<!--                    <span>{{ getTabLabel(index, groupModel) }}</span>-->
+<!--                </ng-template>-->
+<!--                <div role="group"-->
+<!--                     [formGroupName]="index"-->
+<!--                     [ngClass]="['array-item', getClass('grid', 'group')]">-->
+<!--                    <ng-container [ngTemplateOutlet]="itemTemplate"-->
+<!--                                  [ngTemplateOutletContext]="{groupModel: groupModel, group: array.at(groupModel.index)}"></ng-container>-->
+<!--                </div>-->
+<!--            </nb-tab>-->
+<!--        </nb-tabset>-->
+        <ng-container *ngIf="!model.useTabs">
+            <div role="group"
+                 [formGroupName]="index"
+                 [ngClass]="['array-item', getClass('grid', 'group')]"
+                 *ngFor="let groupModel of model.filteredGroups | async; let index = index">
+                <ng-container [ngTemplateOutlet]="itemTemplate"
+                              [ngTemplateOutletContext]="{groupModel: groupModel, group: array.at(groupModel.index)}"></ng-container>
+            </div>
+        </ng-container>
+    </div>
+</ng-container>

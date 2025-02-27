@@ -1,0 +1,39 @@
+dynamic-core-form-control {
+
+    > div > ul {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: rgba(255, 0, 0, 0.5);
+        color: white;
+        padding: 2px 5px;
+        margin-top: 5px;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    label {
+        margin: 10px 0;
+        display: block;
+    }
+
+    .numeric-stepper-buttons {
+        flex-direction: column-reverse;
+        justify-content: space-between;
+
+        .btn {
+            min-width: 24px;
+            flex: 1;
+            padding: 0;
+        }
+
+        .svg-icon {
+            font-size: 10px;
+        }
+
+        .svg-icon svg {
+            width: 10px;
+            height: 10px;
+        }
+    }
+}

@@ -30,16 +30,17 @@ import {
 import {DynamicFormArrayGroupModel, DynamicFormArrayModel} from "../../utils/dynamic-form-array.model";
 import {collectPathAble} from "../../utils/misc";
 import {DynamicFormInitControl} from "../../common-types";
-import {DynamicBaseFormControlContainerComponent} from "./dynamic-base-form-control-container.component";
+import {DynamicFormControlContainerComponent} from "../form-control-container/dynamic-form-control-container.component";
 import {DynamicFormComponent} from "../form/dynamic-form.component";
+import {DynamicBaseFormControlContainerComponent} from "@stemy/ngx-dynamic-form";
 
 @Component({
     standalone: false,
-    selector: "dynamic-base-form-array",
-    template: "",
+    selector: "dynamic-core-form-array",
+    templateUrl: "./dynamic-form-array.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicBaseFormArrayComponent extends Base implements DynamicFormInitControl, OnDestroy {
+export class DynamicFormArrayComponent  extends Base implements DynamicFormInitControl, OnDestroy {
 
     @Input() formLayout: DynamicFormLayout = null;
     @Input() group: FormGroup = null;

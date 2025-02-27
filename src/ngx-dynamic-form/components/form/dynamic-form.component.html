@@ -1,0 +1,62 @@
+<form [formGroup]="group" autocomplete="off" (submit)="submit()" *ngIf="group">
+    <ng-container *ngFor="let fs of groupModel.groups">
+        <fieldset [ngClass]="'fieldset-' + fs.id">
+
+            <legend *ngIf="fs.legend" [innerHTML]="fs.legend | translate"></legend>
+
+            <ng-container *ngFor="let controlModel of fs.fields; trackBy: trackByFn">
+                <dynamic-core-form-control
+                    [hostClass]="[getClass(controlModel)]"
+                    [group]="group"
+                    [layout]="layout"
+                    [model]="controlModel"
+                    [templates]="templates"
+                    (blur)="onBlur($event)"
+                    (change)="onChange($event)"
+                    (focus)="onFocus($event)"
+                    *ngIf="!controlModel.hidden"></dynamic-core-form-control>
+            </ng-container>
+
+        </fieldset>
+    </ng-container>
+</form>
+
+<ng-template modelType="ARRAY" let-index="index" let-model="model" let-array="array">
+    <div class="array-buttons">
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="removeFormArrayGroup(index, array, model)" *ngIf="model.removeItem && index >= 0">
+            <i icon="trash-outline"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="insertFormArrayGroup(index, array, model)" *ngIf="model.insertItem">
+            <i icon="plus-outline"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="cloneFormArrayGroup(index, array, model)" *ngIf="model.cloneItem">
+            <i icon="copy-outline"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="moveFormArrayGroup(index, -1, array, model)" *ngIf="model.moveItem && index > 0">
+            <i icon="arrow-up-outline"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="moveFormArrayGroup(index, 1, array, model)" *ngIf="model.moveItem && index < array?.length - 1">
+            <i icon="arrow-down-outline"></i>
+        </button>
+    </div>
+</ng-template>
+
+<ng-template modelType="ARRAY" align="ARRAY_END" let-model="model" let-array="array">
+    <div class="array-buttons">
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="clearFormArray(array, model)" *ngIf="model.clearItems && array?.length > 0">
+            <i icon="trash-outline"></i>
+            {{ 'button.clear-items' | translate }}
+        </button>
+        <button type="button" class="btn btn-sm btn-primary"
+                (click)="insertFormArrayGroup(array?.length, array, model)" *ngIf="model.addItem">
+            <i icon="plus-outline"></i>
+            {{ 'button.insert-item' | translate }}
+        </button>
+    </div>
+</ng-template>

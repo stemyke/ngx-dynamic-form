@@ -1,22 +1,26 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {IAsyncMessage} from "@stemy/ngx-utils";
-import {IDynamicForm} from "../public_api";
+import {IDynamicForm, DynamicFormService, createFormInput} from "@stemy/ngx-dynamic-form";
+import {FormGroup} from "@angular/forms";
+import {DynamicFormModel} from "@ng-dynamic-forms/core";
 
 @Component({
-    moduleId: module.id,
+    standalone: false,
     selector: "app-root",
     templateUrl: "./app.component.html"
 })
 export class AppComponent implements OnInit {
 
-    data: any;
+    formModel: DynamicFormModel;
+    formGroup: FormGroup;
 
-    @ViewChild("form")
-    private form: IDynamicForm;
+    constructor(private forms: DynamicFormService) {
 
-    serialize = (): Promise<IAsyncMessage> => {
+    }
+
+    serialize = (form: IDynamicForm): Promise<IAsyncMessage> => {
         return new Promise<IAsyncMessage>(resolve => {
-            this.form.serialize(true).then(res => {
+            this.forms.serializeForm(form, true).then(res => {
                 console.log(res);
                 resolve({
                     message: "Jejj"
@@ -33,6 +37,9 @@ export class AppComponent implements OnInit {
     }
 
     newModel(): void {
-        this.data = [];
+        this.formModel = [
+            createFormInput("test", {})
+        ];
+        this.formGroup = this.forms.createFormGroup(this.formModel);
     }
 }

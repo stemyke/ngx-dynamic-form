@@ -16,7 +16,7 @@ import {
     DynamicFormControlLayoutContext,
     DynamicFormControlLayoutPlace,
     DynamicFormControlModel,
-    DynamicFormGroupComponent,
+    DynamicFormGroupComponent as Base,
     DynamicFormLayout,
     DynamicFormLayoutService,
     DynamicFormValidationService,
@@ -29,11 +29,24 @@ import {DynamicFormGroupModel} from "../../utils/dynamic-form-group.model";
 
 @Component({
     standalone: false,
-    selector: "dynamic-base-form-group",
-    template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    selector: "dynamic-core-form-group",
+    styleUrls: ["./dynamic-form-group.component.scss"],
+    templateUrl: "./dynamic-form-group.component.html",
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        {provide: Base, useExisting: DynamicFormGroupComponent}
+    ]
 })
-export class DynamicBaseFormGroupComponent extends DynamicFormGroupComponent {
+export class DynamicFormGroupComponent extends Base {
+
+    get controlGroup(): FormGroup {
+        return this.control as FormGroup;
+    }
+
+    get subTemplates(): any {
+        return this.templates;
+    }
+
 
     @Input() formLayout: DynamicFormLayout = null;
     @Input() group: FormGroup = null;

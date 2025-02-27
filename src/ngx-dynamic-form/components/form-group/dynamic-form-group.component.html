@@ -1,0 +1,25 @@
+<ng-container [formGroup]="group">
+    <ng-container *ngFor="let fs of model.groups">
+        <fieldset [formGroupName]="model.id"
+                  [id]="id"
+                  [name]="model.name"
+                  [ngClass]="[getClass('element', 'control', model), 'fieldset-' + fs.id]">
+
+            <legend *ngIf="fs.legend" [innerHTML]="fs.legend | translate"></legend>
+
+            <ng-container *ngFor="let _model of fs.fields">
+                <dynamic-form-control-container
+                    [group]="controlGroup"
+                    [layout]="formLayout"
+                    [model]="_model"
+                    [templates]="subTemplates"
+                    [hostClass]="[getClass('element','children', _model), getClass('grid','children', _model)]"
+                    (blur)="onBlur($event)"
+                    (change)="onChange($event)"
+                    (focus)="onFocus($event)"
+                    *ngIf="!_model.hidden"></dynamic-form-control-container>
+            </ng-container>
+
+        </fieldset>
+    </ng-container>
+</ng-container>
