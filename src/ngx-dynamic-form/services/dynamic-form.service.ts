@@ -312,7 +312,8 @@ export class DynamicFormService extends Base {
                     model.value = (model instanceof DynamicDatePickerModel)
                         ? this.convertToDate(property.default) : property.default;
                 }
-                const layout = `${pathPrefix}${model.id}`.toLowerCase().replace(/\./g, "-");
+                const modelPath = `${pathPrefix}${model.id}`;
+                const layout = modelPath.toLowerCase().replace(/\./g, "-");
                 model.layout = {
                     grid: {
                         host: `${layout} control-${model.id}`,
@@ -320,7 +321,7 @@ export class DynamicFormService extends Base {
                     }
                 };
                 if (!ObjectUtils.isFunction(customizeModel)) return [model];
-                let res = customizeModel(property, schema, model, config, path, this.injector);
+                let res = customizeModel(property, schema, model, config, modelPath, this.injector);
                 if (!res) return [model];
                 if (res instanceof Promise) {
                     res = await res;
