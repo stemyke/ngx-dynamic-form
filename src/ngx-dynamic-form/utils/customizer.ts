@@ -33,20 +33,21 @@ export interface IFormModelCustomizer {
         model: DynamicFormControlModel,
         config: DynamicFormControlModelConfig,
         property: IOpenApiSchemaProperty,
-        schema: IOpenApiSchema
+        schema: IOpenApiSchema,
+        path: string,
     ): PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
 }
 
 export function customizeFormModel(...providers: CachedProvider<IFormModelCustomizer>[]): FormModelCustomizer {
     const factory = cachedFactory(providers);
-    return async (property, schema, model, config, injector) => {
+    return async (property, schema, model, config, path, injector) => {
         const customizers = factory(injector);
         const models = [model];
         for (const customizer of customizers) {
             const index = models.findIndex(m => customizer.acceptModel(m));
             if (index >= 0) {
                 const custom = await customizer.customizeModel(
-                    models[index], config, property, schema
+                    models[index], config, property, schema, path
                 );
                 const result = Array.isArray(custom) ? custom : [custom];
                 models.splice(index, 1, ...result);

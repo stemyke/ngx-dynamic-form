@@ -38,7 +38,7 @@ export type PromiseOrNot<T> = Promise<T> | T;
 export type FormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;
 export type FormModelCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-    model: DynamicFormControlModel, config: DynamicFormControlModelConfig, injector: Injector
+    model: DynamicFormControlModel, config: DynamicFormControlModelConfig, path: string, injector: Injector
 ) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
 
 export interface ModelForSchemaOptions {

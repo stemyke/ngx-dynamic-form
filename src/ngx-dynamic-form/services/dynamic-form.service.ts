@@ -320,7 +320,7 @@ export class DynamicFormService extends Base {
                     }
                 };
                 if (!ObjectUtils.isFunction(customizeModel)) return [model];
-                let res = customizeModel(property, schema, model, config, this.injector);
+                let res = customizeModel(property, schema, model, config, path, this.injector);
                 if (!res) return [model];
                 if (res instanceof Promise) {
                     res = await res;
