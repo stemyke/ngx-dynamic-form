@@ -410,7 +410,7 @@ export class DynamicFormService extends Base {
                 if (property.format == "textarea") {
                     return options.customizer(property, options, DynamicTextAreaModel, this.getFormTextareaConfig(property, options), path);
                 }
-                if (property.format == "date") {
+                if (property.format == "date" || property.format == "date-time") {
                     return options.customizer(property, options, DynamicDatePickerModel, this.getFormDatepickerConfig(property, options), path);
                 }
                 return options.customizer(property, options, DynamicInputModel, this.getFormInputConfig(property, options), path);
