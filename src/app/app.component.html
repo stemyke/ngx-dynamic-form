@@ -1,6 +1,12 @@
-<dynamic-table filterLabel="blab"
-               [itemsPerPage]="5"
-               [showFilter]="true"
-               [showItems]="[5, 10, 25, 50, 100]"
-               [data]="tableData" [columns]="tableColumns">
-</dynamic-table>
+<dropdown-box componentClass="sort-dropdown" #sortDd>
+    <ng-container toggle-content>
+        {{ schema }}
+    </ng-container>
+    <ul>
+        <ng-container *ngFor="let s of schemas">
+            <li [ngClass]="{active: s === schema}" (click)="schema = s">
+                {{ s }}
+            </li>
+        </ng-container>
+    </ul>
+</dropdown-box>

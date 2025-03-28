@@ -11,3 +11,8 @@ dynamic-table {
     display: block;
     max-width: 800px;
 }
+
+.dropdown-box-content {
+    max-height: 150px;
+    overflow-y: auto;
+}

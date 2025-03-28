@@ -2,6 +2,7 @@
 
 # compiled output
 /.out
+/.angular
 /dist
 /dist-server
 /tmp
