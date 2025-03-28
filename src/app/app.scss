@@ -1,0 +1,18 @@
+body {
+    font-family: Roboto, sans-serif;
+}
+
+.text-canvas {
+    border: 1px solid green;
+}
+
+dynamic-table {
+    margin: 20px auto;
+    display: block;
+    max-width: 800px;
+}
+
+.dropdown-box-content {
+    max-height: 150px;
+    overflow-y: auto;
+}

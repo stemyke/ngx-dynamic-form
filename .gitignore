@@ -2,6 +2,7 @@
 
 # compiled output
 /.out
+/.angular
 /dist
 /dist-server
 /tmp
@@ -43,3 +44,4 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+/src/config
