@@ -1,32 +1,6 @@
-<div class="container">
-    <div class="bd-example">
-
-        <button class="btn btn-secondary mb-2" type="button" (click)="newModel()">New model</button>
-
-            <dynamic-forms #form [data]="data">
-                <ng-template prefix="date">This is prefix!!!</ng-template>
-                <ng-template suffix="textarea">This is suffix!!!</ng-template>
-                <ng-template formPrefix="test"><div class="col-sm-6">Test modell prefix</div></ng-template>
-                <ng-template formPrefix="sub"><div class="col-sm-6">Sub model prefix</div></ng-template>
-                <ng-template innerFormPrefix="test">Test inner model prefix</ng-template>
-                <ng-template innerFormPrefix="sub">Sub inner model prefix</ng-template>
-                <button class="btn btn-primary" [async-submit]="serialize" [form]="form">Serialize</button>
-            </dynamic-forms>
-
-        {{ 'Form status: ' + form.status }}
-
-<!--        TestModel:-->
-
-<!--        <pre>-->
-<!--            {{ testModel | json }}-->
-<!--        </pre>-->
-
-
-<!--        TestModel2:-->
-
-<!--        <pre>-->
-<!--            {{ testModel2 | json }}-->
-<!--        </pre>-->
-
-    </div>
-</div>
+<dynamic-table filterLabel="blab"
+               [itemsPerPage]="5"
+               [showFilter]="true"
+               [showItems]="[5, 10, 25, 50, 100]"
+               [data]="tableData" [columns]="tableColumns">
+</dynamic-table>
