@@ -4,13 +4,22 @@ export {
     FormControlSerializer,
     FormModelCustomizer,
     ModelForSchemaOptions,
+    FormlyFieldCustomizer,
+    ConfigForSchemaOptions,
+    ValidationMessageFn,
+    ValidatorFn,
+    ValidatorExpression,
+    Validators,
+    AsyncValidatorFn,
+    AsyncValidatorExpression,
+    AsyncValidators,
     DynamicFormState,
     DynamicFormUpdateOn,
     DynamicFormInitControl,
     AsyncSubmitMethod,
     GetFormControlComponentType,
     IDynamicFormModuleConfig,
-} from "./common-types";
+} from "./ngx-dynamic-form/common-types";
 
 export {
     createFormCheckbox,
@@ -22,14 +31,14 @@ export {
     createFormSelect,
     createFormTextarea,
     createFormFile,
-} from "./utils/creators";
+} from "./ngx-dynamic-form/utils/creators";
 
 export {
     IFormComponentCustomizer,
     getFormComponent,
     IFormModelCustomizer,
     customizeFormModel
-} from "./utils/customizer";
+} from "./ngx-dynamic-form/utils/customizer";
 
 export {
     replaceSpecialChars,
@@ -39,7 +48,7 @@ export {
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS
-} from "./utils/misc";
+} from "./ngx-dynamic-form/utils/misc";
 
 export {
     validateJSON,
@@ -49,12 +58,12 @@ export {
     validateItemsMaxLength,
     validateItemsMinValue,
     validateItemsMaxValue
-} from "./utils/validators";
+} from "./ngx-dynamic-form/utils/validators";
 
 export {
     DynamicEditorModelConfig,
     DynamicEditorModel
-} from "./utils/dynamic-editor.model";
+} from "./ngx-dynamic-form/utils/dynamic-editor.model";
 
 export {
     SaveTabFunc,
@@ -63,14 +72,14 @@ export {
     DynamicFormArrayGroupModel,
     DynamicFormArrayModelConfig,
     DynamicFormArrayModel
-} from "./utils/dynamic-form-array.model";
+} from "./ngx-dynamic-form/utils/dynamic-form-array.model";
 
 export {
     DynamicFormFieldSet,
     DynamicFormFieldSets,
     DynamicFormGroupModelConfig,
     DynamicFormGroupModel
-} from "./utils/dynamic-form-group.model";
+} from "./ngx-dynamic-form/utils/dynamic-form-group.model";
 
 export {
     DynamicFormOptionConfig,
@@ -79,27 +88,29 @@ export {
     OptionClassesFunc,
     DynamicSelectModelConfig,
     DynamicSelectModel
-} from "./utils/dynamic-select.model";
+} from "./ngx-dynamic-form/utils/dynamic-select.model";
 
-export {FormSelectSubject} from "./utils/form-select-subject";
-export {FormSubject} from "./utils/form-subject";
+export {FormSelectSubject} from "./ngx-dynamic-form/utils/form-select-subject";
+export {FormSubject} from "./ngx-dynamic-form/utils/form-subject";
 
-export {DynamicFormService} from "./services/dynamic-form.service";
+export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 
-export {AsyncSubmitDirective} from "./directives/async-submit.directive";
+export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
 
-export {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
-export {DynamicBaseFormArrayComponent} from "./components/base/dynamic-base-form-array.component";
-export {
-    DynamicBaseFormControlComponent
-} from "./components/base/dynamic-base-form-control.component";
-export {
-    DynamicBaseFormControlContainerComponent
-} from "./components/base/dynamic-base-form-control-container.component";
-export {DynamicBaseFormGroupComponent} from "./components/base/dynamic-base-form-group.component";
-export {DynamicBaseSelectComponent} from "./components/base/dynamic-base-select.component";
+// export {DynamicBaseFormComponent} from "./components/base/dynamic-base-form.component";
+// export {DynamicBaseFormArrayComponent} from "./components/base/dynamic-base-form-array.component";
+// export {
+//     DynamicBaseFormControlComponent
+// } from "./components/base/dynamic-base-form-control.component";
+// export {
+//     DynamicBaseFormControlContainerComponent
+// } from "./components/base/dynamic-base-form-control-container.component";
+// export {DynamicBaseFormGroupComponent} from "./components/base/dynamic-base-form-group.component";
+// export {DynamicBaseSelectComponent} from "./components/base/dynamic-base-select.component";
 
-export {NgxDynamicFormModule} from "./ngx-dynamic-form.module";
+export {FormlyArrayComponent} from "./ngx-dynamic-form/components/formly-array/formly-array.component";
+
+export {NgxDynamicFormModule} from "./ngx-dynamic-form/ngx-dynamic-form.module";
 
 export {
     DYNAMIC_FORM_CONTROL_TYPE_ARRAY,

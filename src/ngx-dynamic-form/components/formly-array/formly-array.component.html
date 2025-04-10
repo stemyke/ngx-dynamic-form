@@ -1,0 +1,40 @@
+<div class="form-array">
+    <legend *ngIf="props.label">{{ props.label }}</legend>
+    <p class="form-array-description" *ngIf="props.description">{{ props.description }}</p>
+
+    <div *ngFor="let field of field.fieldGroup; let i = index" class="form-array-item">
+        <formly-field [field]="field"></formly-field>
+        <div class="array-buttons">
+            <button type="button" class="btn btn-sm btn-primary" (click)="remove(i)">
+                <i icon="trash-outline"></i>
+            </button>
+<!--            <button type="button" class="btn btn-sm btn-primary"-->
+<!--                    (click)="insertFormArrayGroup(index, array, model)" *ngIf="model.insertItem">-->
+<!--                <i icon="plus-outline"></i>-->
+<!--            </button>-->
+<!--            <button type="button" class="btn btn-sm btn-primary"-->
+<!--                    (click)="cloneFormArrayGroup(index, array, model)" *ngIf="model.cloneItem">-->
+<!--                <i icon="copy-outline"></i>-->
+<!--            </button>-->
+<!--            <button type="button" class="btn btn-sm btn-primary"-->
+<!--                    (click)="moveFormArrayGroup(index, -1, array, model)" *ngIf="model.moveItem && index > 0">-->
+<!--                <i icon="arrow-up-outline"></i>-->
+<!--            </button>-->
+<!--            <button type="button" class="btn btn-sm btn-primary"-->
+<!--                    (click)="moveFormArrayGroup(index, 1, array, model)" *ngIf="model.moveItem && index < array?.length - 1">-->
+<!--                <i icon="arrow-down-outline"></i>-->
+<!--            </button>-->
+        </div>
+    </div>
+    <div class="array-buttons">
+<!--        <button type="button" class="btn btn-sm btn-primary"-->
+<!--                (click)="clearFormArray(array, model)" *ngIf="model.clearItems && array?.length > 0">-->
+<!--            <i icon="trash-outline"></i>-->
+<!--            {{ 'button.clear-items' | translate }}-->
+<!--        </button>-->
+        <button type="button" class="btn btn-sm btn-primary" (click)="add()">
+            <i icon="plus-outline"></i>
+            {{ 'button.insert-item' | translate }}
+        </button>
+    </div>
+</div>

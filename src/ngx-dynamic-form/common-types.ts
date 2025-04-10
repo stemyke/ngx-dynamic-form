@@ -1,5 +1,6 @@
 import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
 import {AbstractControl} from "@angular/forms";
+import {Observable} from "rxjs";
 import {
     DynamicFormControl,
     DynamicFormControlComponent,
@@ -10,6 +11,7 @@ import {
     DynamicFormValueControlModel,
     DynamicFormComponent
 } from "@ng-dynamic-forms/core";
+import {FormlyFieldConfig} from "@ngx-formly/core";
 import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
 // --- Basic form control interfaces ---
@@ -35,6 +37,9 @@ export declare interface ModelType extends Function {
 }
 
 export type PromiseOrNot<T> = Promise<T> | T;
+
+// --- OLD UDOS ---
+
 export type FormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;
 export type FormModelCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
@@ -53,6 +58,58 @@ export interface ModelForSchemaWrapOptions extends Omit<ModelForSchemaOptions, "
         modelType: ModelType, config: DynamicFormControlModelConfig, path: string
     ) => Promise<DynamicFormControlModel[]>;
 }
+
+// --- NEW FORMLY ---
+
+export type FormlyFieldCustomizer = (
+    property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
+    field: FormlyFieldConfig, path: string, injector: Injector
+) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
+
+export interface ConfigForSchemaOptions {
+    labelPrefix?: string;
+    customizer?: FormlyFieldCustomizer;
+}
+
+export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions, "customizer"> {
+    schema: IOpenApiSchema;
+    injector?: Injector;
+    customizer?: (
+        property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions,
+        field: FormlyFieldConfig, path: string
+    ) => Promise<FormlyFieldConfig[]>;
+}
+
+type FormlyValidatorFn<T> = (control: AbstractControl, field?: FormlyFieldConfig) => T;
+
+export type ValidationMessageFn = (error: any, field: FormlyFieldConfig) => string | Observable<string>;
+
+interface FormlyValidatorExpression<T> {
+    expression: FormlyValidatorFn<T>;
+    message: ValidationMessageFn;
+}
+
+type FormlyValidation<T, R> = {
+    validation?: (string | T)[];
+} & {
+    [key: string]: FormlyValidatorFn<R> | FormlyValidatorExpression<R>;
+}
+
+export type ValidatorFn = FormlyValidatorFn<boolean>;
+
+export type ValidatorExpression = FormlyValidatorExpression<boolean>;
+
+export type Validators = FormlyValidation<ValidatorFn, boolean>;
+
+export type AsyncBoolean = Promise<boolean> | Observable<boolean>;
+
+export type AsyncValidatorFn = FormlyValidatorFn<AsyncBoolean>;
+
+export type AsyncValidatorExpression = FormlyValidatorExpression<AsyncBoolean>;
+
+export type AsyncValidators = FormlyValidation<AsyncValidatorFn, AsyncBoolean>;
+
+// --- NOT CHANGED ---
 
 export interface DynamicFormInitControl extends DynamicFormControl {
     initialize(cdr?: ChangeDetectorRef): void;

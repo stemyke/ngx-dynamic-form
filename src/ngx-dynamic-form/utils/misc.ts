@@ -1,5 +1,6 @@
 import {DynamicFormModel, DynamicPathable} from "@ng-dynamic-forms/core";
 import {IOpenApiSchemaProperty} from "@stemy/ngx-utils";
+import {FormlyFieldConfig} from "@ngx-formly/core";
 
 export function isStringWithVal(val: any): boolean {
     return typeof val == "string" && val.length > 0;
@@ -21,6 +22,21 @@ export function mergeFormModels(formModels: DynamicFormModel[]): DynamicFormMode
     for (const formModel of formModels) {
         for (const subModel of formModel) {
             const index = res.findIndex(t => t.id == subModel.id);
+            if (index >= 0) {
+                res[index] = subModel;
+                continue;
+            }
+            res.push(subModel);
+        }
+    }
+    return res;
+}
+
+export function mergeFormFields(formFields: FormlyFieldConfig[][]): FormlyFieldConfig[] {
+    const res: FormlyFieldConfig[] = [];
+    for (const formModel of formFields) {
+        for (const subModel of formModel) {
+            const index = res.findIndex(t => t.key == subModel.key);
             if (index >= 0) {
                 res[index] = subModel;
                 continue;

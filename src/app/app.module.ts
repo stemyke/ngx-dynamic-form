@@ -1,26 +1,28 @@
 import {BrowserModule} from "@angular/platform-browser";
+import {provideHttpClient} from "@angular/common/http";
 import {NgModule} from "@angular/core";
+import {FormsModule} from "@angular/forms";
+import {NgxUtilsModule} from "@stemy/ngx-utils";
+import {NgxDynamicFormModule} from "../public_api";
 
 import {AppComponent} from "./app.component";
-import {NgxDynamicFormModule} from "@ng-dynamic-forms/core";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {NgxUtilsModule} from "@stemy/ngx-utils";
+import {FormlyBootstrapModule} from "@ngx-formly/bootstrap";
 
 @NgModule({
     declarations: [
         AppComponent
     ],
-    entryComponents: [
-    ],
     imports: [
         BrowserModule,
-        BrowserAnimationsModule,
+        FormsModule,
         NgxUtilsModule.forRoot(),
+        FormlyBootstrapModule,
         NgxDynamicFormModule.forRoot()
     ],
-    providers: [],
+    providers: [
+        provideHttpClient()
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule {
-
 }

@@ -15,6 +15,7 @@ import {
     Validator,
     ValidatorFactory
 } from "@ng-dynamic-forms/core";
+import {FormlyModule} from "@ngx-formly/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {
@@ -28,7 +29,11 @@ import {
 } from "./utils/validators";
 import {DynamicFormService} from "./services/dynamic-form.service";
 import {components, defaultFormControlProvider, directives, pipes} from "./ngx-dynamic-form.imports";
+
 import {IDynamicFormModuleConfig} from "./common-types";
+import {FormlyService} from "./services/formly.service";
+import {FormlyArrayComponent} from "./components/formly-array/formly-array.component";
+import {FormlyGroupComponent} from "./components/formly-group/formly-group.component";
 
 @NgModule({
     declarations: [
@@ -40,7 +45,8 @@ import {IDynamicFormModuleConfig} from "./common-types";
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgxUtilsModule
+        NgxUtilsModule,
+        FormlyModule
     ],
     exports: [
         ...components,
@@ -48,7 +54,8 @@ import {IDynamicFormModuleConfig} from "./common-types";
         ...pipes,
         FormsModule,
         ReactiveFormsModule,
-        NgxUtilsModule
+        NgxUtilsModule,
+        FormlyModule
     ],
     providers: [
         ...pipes,
@@ -75,8 +82,17 @@ import {IDynamicFormModuleConfig} from "./common-types";
 export class NgxDynamicFormModule {
 
     private static getProviders(config?: IDynamicFormModuleConfig): Provider[] {
+        const {providers} = FormlyModule.forRoot({
+            types: [
+                {name: "array", component: FormlyArrayComponent},
+            ],
+            wrappers: [{ name: "form-group", component: FormlyGroupComponent }],
+            validationMessages: [{name: "required", message: "This field is required"}],
+        });
         return [
+            ...(providers as Provider[]),
             DynamicFormService,
+            FormlyService,
             {
                 provide: BaseDynamicFormService,
                 useExisting: DynamicFormService

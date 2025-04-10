@@ -59,7 +59,6 @@ import {
     DynamicFormGroupModelConfig
 } from "../utils/dynamic-form-group.model";
 import {DynamicFormOptionConfig, DynamicSelectModel, DynamicSelectModelConfig} from "../utils/dynamic-select.model";
-import {DynamicBaseFormComponent} from "../components/base/dynamic-base-form.component";
 import {createFormInput} from "../utils/creators";
 import {AllValidationErrors, getFormValidationErrors} from "../utils/validation-errors";
 
@@ -95,7 +94,7 @@ export class DynamicFormService extends Base {
         return (await this.getFormGroupModelForSchema(name, customizeOrOptions)).group;
     }
 
-    getErrors(form: DynamicBaseFormComponent): Promise<AllValidationErrors[]> {
+    getErrors(form: IDynamicForm): Promise<AllValidationErrors[]> {
         this.showErrors(form);
         return new Promise(resolve => {
             setTimeout(() => {
@@ -121,7 +120,7 @@ export class DynamicFormService extends Base {
         this.detectChanges();
     }
 
-    patchForm(value: any, component: DynamicBaseFormComponent): void {
+    patchForm(value: any, component: IDynamicForm): void {
         value = ObjectUtils.copy(value);
         this.patchValues(value, component.model, component.group);
         component.group.patchValue(value);

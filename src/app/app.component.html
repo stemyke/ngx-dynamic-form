@@ -1,7 +1,17 @@
-<div class="container">
-    <div class="bd-example">
-
-
-
-    </div>
-</div>
+<dropdown-box componentClass="sort-dropdown" #sortDd>
+    <ng-container toggle-content>
+        {{ schema() }}
+    </ng-container>
+    <ul>
+        @for (s of schemas(); track s) {
+            <li [ngClass]="{active: s === schema()}" (click)="schema.set(s)">
+                {{ s }}
+            </li>
+        }
+    </ul>
+</dropdown-box>
+<form [formGroup]="form" (ngSubmit)="submit()" *ngIf="fields.hasValue()">
+    <formly-form [model]="model" [fields]="fields.value()" [options]="options" [form]="form"></formly-form>
+    <button type="submit" class="btn btn-primary submit-button">Submit</button>
+    <button type="button" class="btn btn-default" (click)="options.resetModel()">Reset</button>
+</form>

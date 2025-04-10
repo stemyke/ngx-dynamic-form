@@ -1,5 +1,16 @@
+@import "bootstrap/scss/bootstrap.scss";
+
 body {
     font-family: Roboto, sans-serif;
+    background: grey;
+    padding: 10px 50px;
+}
+
+form {
+    background: lightgray;
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
 }
 
 .text-canvas {
@@ -12,7 +23,7 @@ dynamic-table {
     max-width: 800px;
 }
 
-.dropdown-box-content {
-    max-height: 150px;
-    overflow-y: auto;
+.dropdown-content-wrap .dropdown-box-content ul {
+    max-height: 200px;
+    overflow: auto;
 }

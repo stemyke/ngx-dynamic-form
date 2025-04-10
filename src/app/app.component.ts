@@ -1,45 +1,62 @@
-import {Component, OnInit, ViewChild} from "@angular/core";
-import {IAsyncMessage} from "@stemy/ngx-utils";
-import {IDynamicForm, DynamicFormService, createFormInput} from "@stemy/ngx-dynamic-form";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    linkedSignal,
+    OnInit,
+    resource,
+    signal,
+    ViewEncapsulation
+} from "@angular/core";
 import {FormGroup} from "@angular/forms";
-import {DynamicFormModel} from "@ng-dynamic-forms/core";
+import {OpenApiService} from "@stemy/ngx-utils";
+import {FormlyFieldConfig, FormlyFormOptions} from "@ngx-formly/core";
+import {FormlyService} from "../ngx-dynamic-form/services/formly.service";
 
 @Component({
     standalone: false,
     selector: "app-root",
-    templateUrl: "./app.component.html"
+    templateUrl: "./app.component.html",
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
 
-    formModel: DynamicFormModel;
-    formGroup: FormGroup;
-
-    constructor(private forms: DynamicFormService) {
-
-    }
-
-    serialize = (form: IDynamicForm): Promise<IAsyncMessage> => {
-        return new Promise<IAsyncMessage>(resolve => {
-            this.forms.serializeForm(form, true).then(res => {
-                console.log(res);
-                resolve({
-                    message: "Jejj"
-                });
-            }, () => {
-                console.log("INVALID FORM");
-                resolve(null);
+    schemas = signal([] as string[]);
+    schema = linkedSignal<string[], string>({
+        source: () => this.schemas(),
+        computation: (schemas, prev) => {
+            const value = prev?.value || "AddJewelerDto";
+            return !schemas.length || schemas.includes(value) ? value : schemas[0] ?? "-";
+        }
+    });
+    fields = resource({
+        request: () => this.schema(),
+        loader: async p => {
+            return this.formly.getFormModelForSchema(p.request, {
+                labelPrefix: "form"
             });
-        });
+        }
+    })
+
+    form = new FormGroup({});
+    model: any = {};
+    options: FormlyFormOptions = {
+        formState: {
+            awesomeIsForced: false,
+        },
     };
 
-    ngOnInit(): void {
-        this.newModel();
+    constructor(private openApi: OpenApiService, private formly: FormlyService) {
+
     }
 
-    newModel(): void {
-        this.formModel = [
-            createFormInput("test", {})
-        ];
-        this.formGroup = this.forms.createFormGroup(this.formModel);
+    ngOnInit(): void {
+        this.openApi.getSchemas().then(s => this.schemas.set(Object.keys(s)));
+    }
+
+    submit() {
+        if (this.form.valid) {
+            alert(JSON.stringify(this.model));
+        }
     }
 }

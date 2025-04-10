@@ -14,15 +14,13 @@
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "target": "es2018",
+        "target": "ES2022",
         "useDefineForClassFields": false,
         "typeRoots": [
             "node_modules/@types"
         ],
         "paths": {
-            "@stemy/ngx-dynamic-form": [
-                "src/ngx-dynamic-form"
-            ],
+            "@angular/*": ["node_modules/@angular"]
         },
         "lib": [
             "es2017",
