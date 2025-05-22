@@ -8,9 +8,8 @@ import {
     ViewEncapsulation
 } from "@angular/core";
 import {FormGroup} from "@angular/forms";
-import {OpenApiService} from "@stemy/ngx-utils";
-import {FormlyFieldConfig, FormlyFormOptions} from "@ngx-formly/core";
-import {FormlyService} from "../ngx-dynamic-form/services/formly.service";
+import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
+import {DynamicFormService, IDynamicForm} from "../public_api";
 
 @Component({
     standalone: false,
@@ -25,28 +24,23 @@ export class AppComponent implements OnInit {
     schema = linkedSignal<string[], string>({
         source: () => this.schemas(),
         computation: (schemas, prev) => {
-            const value = prev?.value || "AddJewelerDto";
+            const value = prev?.value || localStorage.getItem("selectedSchema");
             return !schemas.length || schemas.includes(value) ? value : schemas[0] ?? "-";
         }
     });
     fields = resource({
         request: () => this.schema(),
         loader: async p => {
-            return this.formly.getFormModelForSchema(p.request, {
+            localStorage.setItem("selectedSchema", p.request);
+            return this.forms.getFormModelForSchema(p.request, {
                 labelPrefix: "form"
             });
         }
     })
 
-    form = new FormGroup({});
-    model: any = {};
-    options: FormlyFormOptions = {
-        formState: {
-            awesomeIsForced: false,
-        },
-    };
+    group = new FormGroup({});
 
-    constructor(private openApi: OpenApiService, private formly: FormlyService) {
+    constructor(private openApi: OpenApiService, private forms: DynamicFormService) {
 
     }
 
@@ -54,9 +48,10 @@ export class AppComponent implements OnInit {
         this.openApi.getSchemas().then(s => this.schemas.set(Object.keys(s)));
     }
 
-    submit() {
-        if (this.form.valid) {
-            alert(JSON.stringify(this.model));
-        }
+    submit = async (form: IDynamicForm): Promise<IAsyncMessage> =>  {
+        this.forms.serializeForm(form).then(res => {
+            console.log("res", res);
+        });
+        return null;
     }
 }

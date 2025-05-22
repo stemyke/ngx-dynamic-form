@@ -1,10 +1,12 @@
 export {
-    IDynamicFormEvent,
+    FormBaseFieldConfig,
+    FormFieldSerializer,
+    FormFieldConfig,
+    FormSerializeResult,
     IDynamicForm,
-    FormControlSerializer,
-    FormModelCustomizer,
-    ModelForSchemaOptions,
-    FormlyFieldCustomizer,
+    FormSelectOption,
+    FormSelectOptions,
+    FormFieldCustomizer,
     ConfigForSchemaOptions,
     ValidationMessageFn,
     ValidatorFn,
@@ -15,9 +17,7 @@ export {
     AsyncValidators,
     DynamicFormState,
     DynamicFormUpdateOn,
-    DynamicFormInitControl,
     AsyncSubmitMethod,
-    GetFormControlComponentType,
     IDynamicFormModuleConfig,
 } from "./ngx-dynamic-form/common-types";
 
@@ -34,10 +34,8 @@ export {
 } from "./ngx-dynamic-form/utils/creators";
 
 export {
-    IFormComponentCustomizer,
-    getFormComponent,
-    IFormModelCustomizer,
-    customizeFormModel
+    IFormFieldCustomizer,
+    customizeFormField
 } from "./ngx-dynamic-form/utils/customizer";
 
 export {
@@ -49,16 +47,6 @@ export {
     MAX_INPUT_NUM,
     EDITOR_FORMATS
 } from "./ngx-dynamic-form/utils/misc";
-
-export {
-    validateJSON,
-    validateRequiredTranslation,
-    validatePhone,
-    validateItemsMinLength,
-    validateItemsMaxLength,
-    validateItemsMinValue,
-    validateItemsMaxValue
-} from "./ngx-dynamic-form/utils/validators";
 
 export {
     DynamicEditorModelConfig,
@@ -108,7 +96,7 @@ export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.d
 // export {DynamicBaseFormGroupComponent} from "./components/base/dynamic-base-form-group.component";
 // export {DynamicBaseSelectComponent} from "./components/base/dynamic-base-select.component";
 
-export {FormlyArrayComponent} from "./ngx-dynamic-form/components/formly-array/formly-array.component";
+export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
 
 export {NgxDynamicFormModule} from "./ngx-dynamic-form/ngx-dynamic-form.module";
 

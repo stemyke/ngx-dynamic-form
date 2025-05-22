@@ -1,126 +1,103 @@
 import {
-    ChangeDetectorRef,
+    computed,
     Directive,
+    effect,
     ElementRef,
-    EventEmitter,
     HostBinding,
     HostListener,
-    Inject,
-    Input,
-    NgZone,
-    OnChanges,
-    OnDestroy,
-    Output,
+    inject,
+    input,
+    output,
     Renderer2,
-    SimpleChanges
+    signal
 } from "@angular/core";
-import {Subscription} from "rxjs";
 import {debounceTime} from "rxjs/operators";
-import {IAsyncMessage, IToasterService, ObservableUtils, TOASTER_SERVICE} from "@stemy/ngx-utils";
+import {IAsyncMessage, TOASTER_SERVICE} from "@stemy/ngx-utils";
+
 import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
+import {toObservable} from "../utils/signals";
 
 @Directive({
     standalone: false,
     selector: "[async-submit]",
     exportAs: "async-submit"
 })
-export class AsyncSubmitDirective implements OnChanges, OnDestroy {
+export class AsyncSubmitDirective {
 
-    @Input("async-submit") method: AsyncSubmitMethod;
-    @Input() form: IDynamicForm;
-    @Input() context: any;
+    method = input<AsyncSubmitMethod>(null, {alias: "async-submit"});
+    form = input<IDynamicForm>();
+    context = input<any>();
 
-    @Output() onSuccess: EventEmitter<IAsyncMessage>;
-    @Output() onError: EventEmitter<IAsyncMessage>;
+    onSuccess = output<IAsyncMessage>();
+    onError = output<IAsyncMessage>();
 
-    protected loading: boolean;
-    protected disabled: boolean;
-    protected callback: Function;
-    protected subscription: Subscription;
+    toaster = inject(TOASTER_SERVICE);
+    renderer = inject(Renderer2);
+    elem = inject<ElementRef<HTMLElement>>(ElementRef);
+
+    protected status = computed(() => {
+        const form = this.form();
+        return form?.status() || null;
+    });
+
+    protected loading = signal(false);
+    protected callback = signal<() => void>(null);
 
     @HostBinding("class.disabled")
     get isDisabled(): boolean {
-        return this.disabled;
-    }
-
-    set isDisabled(value: boolean) {
-        this.disabled = value;
-        if (value) {
-            this.renderer.setAttribute(this.elem.nativeElement, "disabled", "disabled");
-            return;
-        }
-        this.renderer.removeAttribute(this.elem.nativeElement, "disabled");
+        return this.status() !== "VALID";
     }
 
     @HostBinding("class.loading")
     get isLoading(): boolean {
-        return this.loading;
+        return this.loading();
     }
 
-    constructor(@Inject(TOASTER_SERVICE) private toaster: IToasterService,
-                readonly cdr: ChangeDetectorRef,
-                readonly zone: NgZone,
-                readonly elem: ElementRef<HTMLElement>,
-                readonly renderer: Renderer2) {
-        this.onSuccess = new EventEmitter<IAsyncMessage>();
-        this.onError = new EventEmitter<IAsyncMessage>();
-        if (elem.nativeElement.tagName !== "BUTTON") return;
-        renderer.setAttribute(elem.nativeElement, "type", "button");
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        // Clear old subscription
-        this.subscription?.unsubscribe();
-        // Check if form changed
-        if (changes.form) {
-            const form = changes.form.currentValue as IDynamicForm;
+    constructor() {
+        effect(() => {
+            if (this.elem.nativeElement.tagName === "BUTTON") {
+                this.renderer.setAttribute(this.elem.nativeElement, "type", "button");
+            }
+        });
+        effect(() => {
+            if (this.status() !== "VALID") {
+                this.renderer.setAttribute(this.elem.nativeElement, "disabled", "disabled");
+                return;
+            }
+            this.renderer.removeAttribute(this.elem.nativeElement, "disabled");
+        });
+        effect(() => {
+            const status = this.status();
+            const cb = this.callback();
+            if (!cb || status == "PENDING") return;
+            if (status === "VALID") {
+                cb();
+            }
+            this.callback.set(null);
+        });
+        effect(() => {
+            const form = this.form();
             if (!form) return;
-            // Force form for checking changes after fields get autofilled by the browser
-            // setTimeout(() => {
-            //     console.log(
-            //         this.elem.nativeElement,
-            //         this.elem.nativeElement.focus
-            //     );
-            //     this.elem.nativeElement.focus?.();
-            // }, 1500);
-        }
-        // Handle other things if we have a form instance
-        if (!this.form) return;
-        this.isDisabled = this.form.group?.status !== "VALID";
-        this.cdr.detectChanges();
-        this.subscription = ObservableUtils.multiSubscription(
-            this.form.group?.statusChanges.subscribe(() => {
-                const status = this.form.group?.status;
-                this.isDisabled = status !== "VALID";
-                this.cdr.detectChanges();
-                if (!this.callback || status == "PENDING") return;
-                if (!this.disabled) {
-                    this.callback();
-                }
-                this.callback = null;
-            }),
-            this.form.onSubmit?.pipe(debounceTime(200)).subscribe(() => this.callMethod())
-        )
-    }
-
-    ngOnDestroy(): void {
-        this.subscription?.unsubscribe();
+            const sub = toObservable(form.onSubmit)
+                .pipe(debounceTime(200)).subscribe(() => this.callMethod());
+            return () => sub.unsubscribe();
+        });
     }
 
     @HostListener("click")
     click(): void {
-        this.callback = () => this.callMethod();
-        const status = this.form.group?.status;
-        if (status !== "VALID" && status !== "INVALID") return;
-        this.callback();
-        this.callback = null;
+        const status = this.status();
+        if (status !== "VALID" && status !== "INVALID") {
+            this.callback.set(() => this.callMethod());
+        }
+        this.callMethod();
     }
 
     callMethod(): void {
-        if (this.loading) return;
-        this.loading = true;
-        this.method(this.form, this.context).then(result => {
-            this.loading = false;
+        if (this.loading()) return;
+        this.loading.set(true);
+        this.method()(this.form(), this.context).then(result => {
+            this.loading.set(false);
             if (result) {
                 this.onSuccess.emit(result);
                 this.toaster.success(result.message, result.context);
@@ -128,7 +105,7 @@ export class AsyncSubmitDirective implements OnChanges, OnDestroy {
         }, reason => {
             if (!reason || !reason.message)
                 throw new Error("Reason must implement IAsyncMessage interface");
-            this.loading = false;
+            this.loading.set(false);
             this.onError.emit(reason);
             this.toaster.error(reason.message, reason.context);
         });

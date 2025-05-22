@@ -1,17 +1,8 @@
-import {ChangeDetectorRef, EventEmitter, Injector, Type} from "@angular/core";
-import {AbstractControl} from "@angular/forms";
+import {Injector, OutputRef, Signal} from "@angular/core";
+import {AbstractControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {
-    DynamicFormControl,
-    DynamicFormControlComponent,
-    DynamicFormControlEvent,
-    DynamicFormControlMapFn,
-    DynamicFormControlModel,
-    DynamicFormControlModelConfig,
-    DynamicFormValueControlModel,
-    DynamicFormComponent
-} from "@ng-dynamic-forms/core";
 import {FormlyFieldConfig} from "@ngx-formly/core";
+import {FormlySelectOption} from "@ngx-formly/core/select";
 import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
 // --- Basic form control interfaces ---
@@ -19,56 +10,45 @@ import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
 
-export interface IDynamicFormEvent extends DynamicFormControlEvent {
-    form: IDynamicForm;
+export interface FormBaseFieldConfig extends FormlyFieldConfig {
+
 }
 
-export interface IDynamicForm extends DynamicFormComponent {
+export type FormFieldSerializer = (field: FormBaseFieldConfig) => Promise<any>;
 
-    status?: DynamicFormState;
-
-    onValueChange?: EventEmitter<IDynamicFormEvent>;
-    onStatusChange?: EventEmitter<IDynamicForm>;
-    onSubmit?: EventEmitter<IDynamicForm>;
+export interface FormFieldConfig extends FormBaseFieldConfig {
+    serializer?: FormFieldSerializer;
 }
 
-export declare interface ModelType extends Function {
-    new (config: DynamicFormControlModelConfig): DynamicFormControlModel;
+export interface FormSerializeResult {
+    [key: string]: any;
+}
+
+export interface IDynamicForm {
+
+    readonly fields: Signal<FormFieldConfig[]>;
+    readonly group: Signal<FormGroup>;
+    readonly status: Signal<DynamicFormState>;
+    readonly onSubmit: OutputRef<IDynamicForm>;
+
 }
 
 export type PromiseOrNot<T> = Promise<T> | T;
 
-// --- OLD UDOS ---
-
-export type FormControlSerializer = (model: DynamicFormValueControlModel<any>, control: AbstractControl) => Promise<any>;
-export type FormModelCustomizer = (
-    property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-    model: DynamicFormControlModel, config: DynamicFormControlModelConfig, path: string, injector: Injector
-) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
-
-export interface ModelForSchemaOptions {
-    labelPrefix?: string;
-    customizer?: FormModelCustomizer;
+export interface FormSelectOption extends FormlySelectOption {
+    classes?: string[];
 }
 
-export interface ModelForSchemaWrapOptions extends Omit<ModelForSchemaOptions, "customizer"> {
-    schema: IOpenApiSchema;
-    customizer?: (
-        property: IOpenApiSchemaProperty, options: ModelForSchemaWrapOptions,
-        modelType: ModelType, config: DynamicFormControlModelConfig, path: string
-    ) => Promise<DynamicFormControlModel[]>;
-}
+export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption[]>;
 
-// --- NEW FORMLY ---
-
-export type FormlyFieldCustomizer = (
+export type FormFieldCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
     field: FormlyFieldConfig, path: string, injector: Injector
-) => PromiseOrNot<DynamicFormControlModel | DynamicFormControlModel[]>;
+) => PromiseOrNot<FormlyFieldConfig | FormlyFieldConfig[]>;
 
 export interface ConfigForSchemaOptions {
     labelPrefix?: string;
-    customizer?: FormlyFieldCustomizer;
+    customizer?: FormFieldCustomizer;
 }
 
 export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions, "customizer"> {
@@ -109,16 +89,8 @@ export type AsyncValidatorExpression = FormlyValidatorExpression<AsyncBoolean>;
 
 export type AsyncValidators = FormlyValidation<AsyncValidatorFn, AsyncBoolean>;
 
-// --- NOT CHANGED ---
-
-export interface DynamicFormInitControl extends DynamicFormControl {
-    initialize(cdr?: ChangeDetectorRef): void;
-}
-
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
-export type GetFormControlComponentType = (model: DynamicFormControlModel, injector: Injector) => Type<DynamicFormControlComponent>;
-
 export interface IDynamicFormModuleConfig {
-    controlProvider?: (injector: Injector) => DynamicFormControlMapFn;
+    // controlProvider?: (injector: Injector) => DynamicFormControlMapFn;
 }
