@@ -16,6 +16,7 @@ import {
 import {
     ConfigForSchemaOptions,
     ConfigForSchemaWrapOptions,
+    FormFieldConfig,
     FormFieldCustomizer,
     FormSelectOption,
     FormSelectOptions,
@@ -66,12 +67,29 @@ export class DynamicFormService {
         return this.serialize(fields);
     }
 
-    async serialize(fields: FormlyFieldConfig[]): Promise<FormSerializeResult> {
+    async serialize(fields: FormFieldConfig[]): Promise<FormSerializeResult> {
         const result = {};
         if (!fields) return result;
         for (const field of fields) {
+            const serializer = field.serializer;
+            const key = `${field.key}`;
+            const props = field.props || {};
+            if (ObjectUtils.isFunction(serializer)) {
+                result[key] = await serializer(field);
+                continue;
+            }
+            if (props.hidden && !props.serialize) continue;
             const control = field.formControl;
-            result[`${field.key}`] = control.value;
+            if (field.fieldGroup) {
+                const group = await this.serialize(field.fieldGroup);
+                if (field.key) {
+                    result[key] = !field.fieldArray ? group : Object.values(group);
+                    continue;
+                }
+                Object.assign(result, group);
+                continue;
+            }
+            result[key] = control.value;
         }
         return result;
         // const result = {};
@@ -272,14 +290,13 @@ export class DynamicFormService {
                     return res;
                 }, {})
             },
-            props: Object.assign({
+            props: {
+                ...property,
                 // For material components
                 appearance: "fill",
                 required: !!validators.required,
                 label: ObjectUtils.isString(property.label) ? property.label : property.id,
-                hidden: property.hidden,
-                disabled: property.disabled,
-            }, property)
+            }
         }, custom);
     }
 

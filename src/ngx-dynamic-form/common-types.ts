@@ -5,6 +5,8 @@ import {FormlyFieldConfig} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
+export type PromiseOrNot<T> = Promise<T> | T;
+
 // --- Basic form control interfaces ---
 
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
@@ -14,7 +16,7 @@ export interface FormBaseFieldConfig extends FormlyFieldConfig {
 
 }
 
-export type FormFieldSerializer = (field: FormBaseFieldConfig) => Promise<any>;
+export type FormFieldSerializer = (field: FormBaseFieldConfig) => PromiseOrNot<any>;
 
 export interface FormFieldConfig extends FormBaseFieldConfig {
     serializer?: FormFieldSerializer;
@@ -32,8 +34,6 @@ export interface IDynamicForm {
     readonly onSubmit: OutputRef<IDynamicForm>;
 
 }
-
-export type PromiseOrNot<T> = Promise<T> | T;
 
 export interface FormSelectOption extends FormlySelectOption {
     classes?: string[];
