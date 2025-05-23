@@ -19,7 +19,7 @@ export function rxToSignal<T>(source: Signal<Observable<T>>, initial: T): Signal
                 result.set(value);
             });
         });
-        return sub?.unsubscribe();
+        return () => sub?.unsubscribe();
     });
     return result;
 }

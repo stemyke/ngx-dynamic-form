@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
             return !schemas.length || schemas.includes(value) ? value : schemas[0] ?? "-";
         }
     });
+
     fields = resource({
         request: () => this.schema(),
         loader: async p => {

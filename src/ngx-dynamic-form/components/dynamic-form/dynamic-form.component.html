@@ -1,7 +1,10 @@
-<form [formGroup]="group()" (ngSubmit)="submit()" *ngIf="fields()">
-    <formly-form [model]="data()"
-                 [fields]="fields()"
-                 [form]="group()"></formly-form>
-    <ng-content></ng-content>
-    <h1>{{ status() }}</h1>
-</form>
+@if (fields() && group()) {
+    <form [formGroup]="group()" (ngSubmit)="submit()">
+        <input type="submit" [hidden]="true" />
+        <formly-form [model]="data()"
+                     [fields]="fields()"
+                     [form]="group()"
+                     [options]="options"></formly-form>
+        <ng-content></ng-content>
+    </form>
+}

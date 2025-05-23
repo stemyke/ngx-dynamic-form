@@ -275,6 +275,7 @@ export class DynamicFormService {
             props: Object.assign({
                 // For material components
                 appearance: "fill",
+                required: !!validators.required,
                 label: ObjectUtils.isString(property.label) ? property.label : property.id,
                 hidden: property.hidden,
                 disabled: property.disabled,

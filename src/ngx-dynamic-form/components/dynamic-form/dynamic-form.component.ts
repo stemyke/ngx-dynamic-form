@@ -1,6 +1,6 @@
 import {Component, computed, input, output, viewChild, ViewEncapsulation} from "@angular/core";
 import {FormGroup} from "@angular/forms";
-import {FormlyForm} from "@ngx-formly/core";
+import {FormlyForm, FormlyFormOptions} from "@ngx-formly/core";
 import {FormFieldConfig, IDynamicForm} from "../../common-types";
 import {rxToSignal} from "../../utils/signals";
 
@@ -12,10 +12,12 @@ import {rxToSignal} from "../../utils/signals";
 })
 export class DynamicFormComponent implements IDynamicForm {
 
-    fields = input<FormFieldConfig[]>([]);
-    group = input<FormGroup>(new FormGroup({}));
+    fields = input<FormFieldConfig[]>();
+    group = input<FormGroup>();
     data = input<any>({});
     form = viewChild(FormlyForm);
+
+    options: FormlyFormOptions = {};
 
     readonly status$ = computed(() => this.group()?.statusChanges);
 

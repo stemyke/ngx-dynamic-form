@@ -89,6 +89,7 @@ export class AsyncSubmitDirective {
         const status = this.status();
         if (status !== "VALID" && status !== "INVALID") {
             this.callback.set(() => this.callMethod());
+            return;
         }
         this.callMethod();
     }
