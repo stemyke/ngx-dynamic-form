@@ -78,7 +78,10 @@ export class DynamicFormService {
                 result[key] = await serializer(field);
                 continue;
             }
-            if (props.hidden && !props.serialize) continue;
+            if (props.hidden && !props.serialize) {
+                console.log(field, key);
+                continue;
+            }
             const control = field.formControl;
             if (field.fieldGroup) {
                 const group = await this.serialize(field.fieldGroup);

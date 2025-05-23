@@ -14,7 +14,6 @@ export class DynamicFormComponent implements IDynamicForm {
 
     fields = input<FormFieldConfig[]>();
     group = input<FormGroup>();
-    data = input<any>({});
     form = viewChild(FormlyForm);
 
     options: FormlyFormOptions = {};

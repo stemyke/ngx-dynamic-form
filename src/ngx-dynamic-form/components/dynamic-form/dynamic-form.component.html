@@ -1,8 +1,7 @@
 @if (fields() && group()) {
     <form [formGroup]="group()" (ngSubmit)="submit()">
         <input type="submit" [hidden]="true" />
-        <formly-form [model]="data()"
-                     [fields]="fields()"
+        <formly-form [fields]="fields()"
                      [form]="group()"
                      [options]="options"></formly-form>
         <ng-content></ng-content>

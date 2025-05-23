@@ -41,7 +41,15 @@ export class AppComponent implements OnInit {
 
     group = computed(() => {
         this.schema();
-        return new FormGroup({});
+        const group = new FormGroup({});
+        group.patchValue({
+            currency: "PLN",
+            openingHours: [
+                {lang: "hu", translation: "Hétfő"},
+                {lang: "en", translation: "Monday"},
+            ]
+        });
+        return group;
     });
 
     constructor(private openApi: OpenApiService, private forms: DynamicFormService) {
