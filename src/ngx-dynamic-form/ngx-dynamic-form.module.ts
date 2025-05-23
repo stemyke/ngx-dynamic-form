@@ -10,6 +10,7 @@ import {IDynamicFormModuleConfig} from "./common-types";
 import {DynamicFormService} from "./services/dynamic-form.service";
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
+import {DynamicFormFieldComponent} from "./components/dynamic-form-field/dynamic-form-field.component";
 
 @NgModule({
     declarations: [
@@ -44,8 +45,10 @@ export class NgxDynamicFormModule {
             types: [
                 {name: "array", component: DynamicFormArrayComponent},
             ],
-            wrappers: [{ name: "form-group", component: DynamicFormGroupComponent }],
-            validationMessages: [{name: "required", message: "This field is required"}],
+            wrappers: [
+                { name: "form-group", component: DynamicFormGroupComponent },
+                { name: "form-field", component: DynamicFormFieldComponent },
+            ]
         });
         return [
             ...(providers as Provider[]),

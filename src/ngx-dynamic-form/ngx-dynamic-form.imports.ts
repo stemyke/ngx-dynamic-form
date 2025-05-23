@@ -2,12 +2,14 @@ import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
+import {DynamicFormFieldComponent} from "./components/dynamic-form-field/dynamic-form-field.component";
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
 
 // --- Components ---
 export const components = [
     DynamicFormComponent,
     DynamicFormArrayComponent,
+    DynamicFormFieldComponent,
     DynamicFormGroupComponent
 ];
 

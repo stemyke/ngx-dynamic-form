@@ -433,10 +433,10 @@ export class DynamicFormService {
         );
     }
 
-    getFormSelectOptions(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, config: FormlyFieldConfig): FormSelectOptions {
+    getFormSelectOptions(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum)) {
-            return from(this.fixSelectOptions($enum.map(value => {
+            return from(this.fixSelectOptions(field, $enum.map(value => {
                 const label = options.labelPrefix
                     ? this.language.getTranslationSync(`${options.labelPrefix}.${property.id}.${value}`)
                     : `${property.id}.${value}`;
@@ -444,7 +444,7 @@ export class DynamicFormService {
             })));
         }
         if (isStringWithVal(property.endpoint)) {
-            const entries = Object.entries((config.formControl.root as FormGroup)?.controls || {});
+            const entries = Object.entries((field.formControl.root as FormGroup)?.controls || {});
             const endpoint = entries.reduce((res, [key, control]) => {
                 return this.replaceOptionsEndpoint(res, key, control?.value);
             }, `${property.endpoint}`);
@@ -463,35 +463,35 @@ export class DynamicFormService {
             });
             const options = this.api.cache[endpoint] as Promise<FormSelectOption[]>;
             return from(options.then(opts => {
-                return this.fixSelectOptions(opts.map(o => Object.assign({}, o)))
+                return this.fixSelectOptions(field, opts.map(o => Object.assign({}, o)))
             }));
         }
         let path = property.optionsPath as string;
-        let control = config.formControl;
-        let field = config;
+        let control = field.formControl;
+        let current = field;
         if (path.startsWith("$root")) {
             path = path.substring(5);
             control = control.root || control;
-            while (field.parent) {
-                field = field.parent;
+            while (current.parent) {
+                current = current.parent;
             }
         }
         while (path.startsWith(".")) {
             path = path.substring(1);
             control = control.parent || control;
-            field = field.parent || field;
+            current = current.parent || current;
         }
         control = !path ? control : control.get(path);
         return control.valueChanges.pipe(
             startWith(control.value),
             distinctUntilChanged(),
             switchMap(async (controlVal) => {
-                const fieldOptions = field.props.options;
-                const finalOptions = isObservable(fieldOptions)
-                    ? await firstValueFrom(fieldOptions)
-                    : (Array.isArray(fieldOptions) ? fieldOptions : []);
-                return this.fixSelectOptions((!Array.isArray(controlVal) ? [] : controlVal).map(value => {
-                    const modelOption = finalOptions.find(t => t.value == value);
+                const currentOpts = current.props.options;
+                const finalOpts = isObservable(currentOpts)
+                    ? await firstValueFrom(currentOpts)
+                    : (Array.isArray(currentOpts) ? currentOpts : []);
+                return this.fixSelectOptions(field, (!Array.isArray(controlVal) ? [] : controlVal).map(value => {
+                    const modelOption = finalOpts.find(t => t.value == value);
                     return {value, label: modelOption?.label || value};
                 }));
             })
@@ -515,6 +515,7 @@ export class DynamicFormService {
         return this.getFormControlConfig(
             property, options,
             {
+                type: "select",
                 props: {
                     multiple: property.type == "array",
                     groupBy: property.groupBy,
@@ -574,12 +575,13 @@ export class DynamicFormService {
         return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
     }
 
-    protected async fixSelectOptions(options: any[]): Promise<FormSelectOption[]> {
+    protected async fixSelectOptions(field: FormFieldConfig, options: any[]): Promise<FormSelectOption[]> {
         if (!options) return [];
         for (const option of options) {
             option.classes = [option.classes].filter(isStringWithVal).join(" ");
             option.label = await this.language.getTranslation(option.label);
         }
+        if (field.props.multiple) {}
         return options;
     }
 

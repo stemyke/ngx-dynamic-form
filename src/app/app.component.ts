@@ -1,6 +1,6 @@
 import {
     ChangeDetectionStrategy,
-    Component,
+    Component, computed,
     linkedSignal,
     OnInit,
     resource,
@@ -37,9 +37,12 @@ export class AppComponent implements OnInit {
                 labelPrefix: "form"
             });
         }
-    })
+    });
 
-    group = new FormGroup({});
+    group = computed(() => {
+        this.schema();
+        return new FormGroup({});
+    });
 
     constructor(private openApi: OpenApiService, private forms: DynamicFormService) {
 

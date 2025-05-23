@@ -1,5 +1,7 @@
 <div class="form-group">
-    <legend *ngIf="props.label">{{ props.label }}</legend>
-    <p class="form-group-description" *ngIf="props.description">{{ props.description }}</p>
+    <label class="form-label" *ngIf="props.label">
+        {{ props.label }}
+        <p class="form-group-description" *ngIf="props.description">{{ props.description }}</p>
+    </label>
     <ng-container #fieldComponent></ng-container>
 </div>

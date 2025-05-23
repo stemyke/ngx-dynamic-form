@@ -4,9 +4,9 @@ import {FieldWrapper} from "@ngx-formly/core";
 @Component({
     standalone: false,
     selector: "dynamic-form-field",
-    templateUrl: "./dynamic-form-group.component.html",
+    templateUrl: "./dynamic-form-field.component.html",
     encapsulation: ViewEncapsulation.None
 })
-export class DynamicFormGroupComponent extends FieldWrapper {
+export class DynamicFormFieldComponent extends FieldWrapper {
 
 }
