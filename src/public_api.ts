@@ -28,9 +28,7 @@ export {
 
 export {
     replaceSpecialChars,
-    mergeFormModels,
-    collectPathAble,
-    getDynamicPath,
+    mergeFormFields,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS
