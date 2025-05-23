@@ -575,13 +575,16 @@ export class DynamicFormService {
         return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
     }
 
-    protected async fixSelectOptions(field: FormFieldConfig, options: any[]): Promise<FormSelectOption[]> {
+    protected async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {
         if (!options) return [];
         for (const option of options) {
-            option.classes = [option.classes].filter(isStringWithVal).join(" ");
+            const classes = Array.isArray(option.classes) ? option.classes : [`${option.classes}`];
+            option.className = classes.filter(isStringWithVal).join(" ");
             option.label = await this.language.getTranslation(option.label);
         }
-        if (field.props.multiple) {}
+        const control = field.formControl;
+        if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
+        control.setValue(options[0].value);
         return options;
     }
 

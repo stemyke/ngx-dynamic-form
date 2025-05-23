@@ -1,4 +1,5 @@
 export {
+    FormFieldProps,
     FormBaseFieldConfig,
     FormFieldSerializer,
     FormFieldConfig,

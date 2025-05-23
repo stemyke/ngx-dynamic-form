@@ -1,7 +1,7 @@
 import {Injector, OutputRef, Signal} from "@angular/core";
 import {AbstractControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {FormlyFieldConfig} from "@ngx-formly/core";
+import {FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
 
@@ -12,13 +12,18 @@ export type PromiseOrNot<T> = Promise<T> | T;
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
 
-export interface FormBaseFieldConfig extends FormlyFieldConfig {
+export interface FormFieldProps extends FormlyFieldProps {
+    multiple?: boolean;
+    [additional: string]: any;
+}
+
+export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
 
 }
 
 export type FormFieldSerializer = (field: FormBaseFieldConfig) => PromiseOrNot<any>;
 
-export interface FormFieldConfig extends FormBaseFieldConfig {
+export interface FormFieldConfig<T = FormFieldProps> extends FormBaseFieldConfig<T> {
     serializer?: FormFieldSerializer;
 }
 
@@ -36,7 +41,8 @@ export interface IDynamicForm {
 }
 
 export interface FormSelectOption extends FormlySelectOption {
-    classes?: string[];
+    className?: string;
+    classes?: string[] | string;
 }
 
 export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption[]>;
