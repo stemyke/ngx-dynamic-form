@@ -347,10 +347,10 @@ export class DynamicFormService {
                 type: "input",
                 props: {
                     type,
-                    autoComplete: property.autoComplete || "off",
-                    multiple: property.type == "array",
-                    accept: ObjectUtils.isString(property.accept) ? property.accept : null,
-                    mask: ObjectUtils.isString(property.mask) ? property.mask : null,
+                    attributes: {
+                        autocomplete: property.autocomplete || "off",
+                        accept: ObjectUtils.isString(property.accept) ? property.accept : null,
+                    },
                     pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
                     step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
                     min: isNaN(sub.minimum) ? MIN_INPUT_NUM : sub.minimum,

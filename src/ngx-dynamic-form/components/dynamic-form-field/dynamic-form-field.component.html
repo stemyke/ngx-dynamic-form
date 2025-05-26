@@ -8,6 +8,13 @@
         </label>
         <div class="ngx-dynamic-form-control">
             <ng-container #fieldComponent></ng-container>
+            <div *ngIf="showError" class="invalid-feedback">
+                <formly-validation-message
+                    id="{{ id }}-formly-validation-error"
+                    [field]="field"
+                    role="alert"
+                ></formly-validation-message>
+            </div>
         </div>
     </div>
 }
