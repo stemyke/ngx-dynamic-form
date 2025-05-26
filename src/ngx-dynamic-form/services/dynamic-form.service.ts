@@ -179,34 +179,36 @@ export class DynamicFormService {
         if (!schema)
             return [];
         const keys = Object.keys(schema.properties || {});
-        const fields: FormFieldConfig[] = [];
+        const others: FormFieldConfig[] = [];
         const groups: {[fs: string]: FormFieldConfig[]} = {};
         // Collect all properties of this schema def
         for (const p of keys) {
             const property = schema.properties[p];
             const fsName = property.hidden ? null : String(property.fieldSet || "");
-            const propFields = await this.getFormFieldsForProp(property, options, path);
-            // If we have a fieldset name defined then push the property fields into a group
-            if (fsName) {
-                let group = groups[fsName];
-                // If the group does not exist we create it and then push it to the main fields
-                if (!group) {
-                    group = [];
-                    groups[fsName] = group;
-                    fields.push({
-                        fieldGroup: group,
-                        wrappers: ["form-fieldset"],
-                        props: {
-                            label: this.getLabel(fsName, options, path),
-                        }
-                    });
-                }
-                group.push(...propFields);
+            const fields = (await this.getFormFieldsForProp(property, options, path))
+                .filter(f => null !== f);
+            // If we have a fieldset name defined and have actual fields for it
+            // then push the property fields into a group
+            if (fsName && fields.length) {
+                const group = groups[fsName] || [];
+                groups[fsName] = group;
+                group.push(...fields);
                 continue;
             }
-            fields.push(...propFields);
+            // Otherwise just push the fields to the others
+            others.push(...fields);
         }
-        return fields.filter(t => null !== t);
+        // Create a field-set wrapper for each group and concat the other fields to the end
+        return Object.keys(groups).map(group => {
+            return {
+                fieldGroup: groups[group],
+                wrappers: ["form-fieldset"],
+                id: !path ? group : `${path}.${group}`,
+                props: {
+                    label: this.getLabel(group, options, path),
+                }
+            } as FormFieldConfig;
+        }).concat(others);
     }
 
     protected async getFormFieldsForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
