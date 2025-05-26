@@ -10,6 +10,6 @@
         }
     </ul>
 </dropdown-box>
-<dynamic-form [fields]="fields.value()" [group]="group()" #form>
+<dynamic-form [fields]="fields.value()" [model]="model()" #form>
     <button [async-submit]="submit" [form]="form" class="btn btn-primary submit-button">Submit</button>
 </dynamic-form>

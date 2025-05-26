@@ -1,4 +1,4 @@
-import {Component, computed, input, output, viewChild, ViewEncapsulation} from "@angular/core";
+import {Component, computed, input, output, signal, viewChild, ViewEncapsulation} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {FormlyForm, FormlyFormOptions} from "@ngx-formly/core";
 import {FormFieldConfig, IDynamicForm} from "../../common-types";
@@ -12,17 +12,24 @@ import {rxToSignal} from "../../utils/signals";
 })
 export class DynamicFormComponent implements IDynamicForm {
 
-    fields = input<FormFieldConfig[]>();
-    group = input<FormGroup>();
-    form = viewChild(FormlyForm);
+    readonly model = input<any>({});
 
-    options: FormlyFormOptions = {};
+    readonly fields = input<FormFieldConfig[]>([]);
+
+    readonly group = computed(() => {
+        this.fields();
+        return new FormGroup({});
+    });
 
     readonly status$ = computed(() => this.group()?.statusChanges);
 
     readonly status = rxToSignal(this.status$, "PENDING");
 
-    onSubmit = output<IDynamicForm>();
+    readonly onSubmit = output<IDynamicForm>();
+
+    readonly options: FormlyFormOptions = {};
+
+    readonly form = viewChild(FormlyForm);
 
     submit() {
         this.onSubmit.emit(this);

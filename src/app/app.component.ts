@@ -10,6 +10,7 @@ import {
 import {FormGroup} from "@angular/forms";
 import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
 import {DynamicFormService, IDynamicForm} from "../public_api";
+import {firstValueFrom} from "rxjs";
 
 @Component({
     standalone: false,
@@ -39,25 +40,28 @@ export class AppComponent implements OnInit {
         }
     });
 
-    group = computed(() => {
-        this.schema();
-        const group = new FormGroup({});
-        group.patchValue({
-            currency: "PLN",
-            openingHours: [
-                {lang: "hu", translation: "Hétfő"},
-                {lang: "en", translation: "Monday"},
-            ]
-        });
-        return group;
+    model = signal<any>({
+        externalId: "X",
+        attachments: [],
+        openingHours: [
+            {lang: "hu", translation: "Hétfő"},
+            {lang: "en", translation: "Monday"},
+        ]
     });
 
     constructor(private openApi: OpenApiService, private forms: DynamicFormService) {
-
+        setTimeout(() => {
+            this.model.update(value => {
+                return {
+                    ...value,
+                    email: "test@mail.com"
+                };
+            });
+        }, 1000);
     }
 
     ngOnInit(): void {
-        this.openApi.getSchemas().then(s => this.schemas.set(Object.keys(s)));
+        this.openApi.getSchemas().then(s => this.schemas.set(Object.keys(s).sort()));
     }
 
     submit = async (form: IDynamicForm): Promise<IAsyncMessage> =>  {

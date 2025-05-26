@@ -1,7 +1,7 @@
-import {Inject, Injectable, Injector} from "@angular/core";
+import {Injectable, Injector} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {distinctUntilChanged, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
-import {FormlyFieldConfig} from "@ngx-formly/core";
+import {FormlyFieldConfig, FormlyFormBuilder} from "@ngx-formly/core";
 import {
     IApiService,
     ILanguageService,
@@ -49,8 +49,9 @@ export class DynamicFormService {
 
     protected schemas: IOpenApiSchemas;
 
-    constructor(@Inject(OpenApiService) readonly openApi: OpenApiService,
-                @Inject(Injector) readonly injector: Injector) {
+    constructor(readonly openApi: OpenApiService,
+                readonly injector: Injector,
+                protected readonly builder: FormlyFormBuilder) {
     }
 
     async getFormModelForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
