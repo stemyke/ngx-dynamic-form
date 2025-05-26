@@ -107,6 +107,7 @@ export class DynamicFormService {
     }
 
     protected getLabel(label: string, options: ConfigForSchemaWrapOptions, path: string): string {
+        label = label || "";
         const pathPrefix = !path ? `` : `${path}.`;
         return !label || !options.labelPrefix
             ? `${label}`
@@ -236,11 +237,7 @@ export class DynamicFormService {
             case "boolean":
                 return options.customizer(property, options, this.getFormCheckboxConfig(property, options, path), path);
             case "array":
-                if (findRefs(property).length > 0) {
-                    return options.customizer(property, options, await this.getFormArrayConfig(property, options, path), path);
-                } else {
-                    return options.customizer(property, options, this.getFormInputConfig(property, options, path), path);
-                }
+                return options.customizer(property, options, await this.getFormArrayConfig(property, options, path), path);
             case "file":
                 return options.customizer(property, options, this.getFormFileConfig(property, options, path), path);
         }
@@ -277,11 +274,21 @@ export class DynamicFormService {
     }
 
     async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig> {
-        const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        let fieldArray: FormFieldConfig = null;
         const subPath = !path ? property.id : `${path}.${property.id}`;
-        const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, subPath))
-        );
+        const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        if (subSchemas.length > 0) {
+            const subModels = await Promise.all(
+                subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, subPath))
+            );
+            fieldArray = {
+                fieldGroup: mergeFormFields(ObjectUtils.copy(subModels))
+            };
+        } else {
+            const propFields = await this.getFormFieldsForProp(property.items, options, subPath);
+            fieldArray = propFields.pop();
+        }
+
         return this.getFormControlConfig(
             property, options, path,
             {
@@ -297,9 +304,7 @@ export class DynamicFormService {
                     removeItem: property.removeItem !== false,
                     clearItems: property.clearItems !== false
                 },
-                fieldArray: {
-                    fieldGroup: mergeFormFields(ObjectUtils.copy(subModels))
-                }
+                fieldArray
             }
         );
     }
@@ -320,7 +325,7 @@ export class DynamicFormService {
     }
 
     getFormInputConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
-        let type = StringUtils.has(property.id, "password", "Password") ? "password" : (property.format || property.items?.type || property.type);
+        let type = StringUtils.has(property.id || "", "password", "Password") ? "password" : (property.format || property.type);
         switch (type) {
             case "string":
                 type = "text";
