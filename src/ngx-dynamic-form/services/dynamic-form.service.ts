@@ -199,7 +199,6 @@ export class DynamicFormService {
                             label: this.getLabel(fsName, options, path),
                         }
                     });
-                    console.log(fsName, group);
                 }
                 group.push(...propFields);
                 continue;
@@ -243,7 +242,7 @@ export class DynamicFormService {
                     return options.customizer(property, options, this.getFormInputConfig(property, options, path), path);
                 }
             case "file":
-                return options.customizer(property, options, this.getFormUploadConfig(property, options, path), path);
+                return options.customizer(property, options, this.getFormFileConfig(property, options, path), path);
         }
         if (findRefs(property).length > 0) {
             return options.customizer(
@@ -383,6 +382,7 @@ export class DynamicFormService {
         return this.getFormControlConfig(
             property, options, path,
             {
+                type: "textarea",
                 props: {
                     cols: property.cols || null,
                     rows: property.rows || 10,
@@ -481,6 +481,7 @@ export class DynamicFormService {
         return this.getFormControlConfig(
             property, options, path,
             {
+                type: "radio",
                 hooks: {
                     onInit: field => {
                         field.props.options = this.getFormSelectOptions(property, options, field);
@@ -510,12 +511,13 @@ export class DynamicFormService {
         );
     }
 
-    getFormUploadConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    getFormFileConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         const url = this.api.url(property.url || "assets");
         const {accept, autoUpload, maxSize, minSize, removeUrl, showFileList} = property;
         return this.getFormControlConfig(
             property, options, path,
             {
+                type: "file",
                 props: {
                     url: url,
                     accept,
@@ -533,7 +535,9 @@ export class DynamicFormService {
         return this.getFormControlConfig(
             property, options, path,
             {
+                type: "checkbox",
                 props: {
+                    formCheck: "nolabel",
                     indeterminate: property.indeterminate || false
                 }
             }

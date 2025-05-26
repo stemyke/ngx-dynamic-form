@@ -45,6 +45,8 @@ export class NgxDynamicFormModule {
         const {providers} = FormlyModule.forRoot({
             types: [
                 {name: "array", component: DynamicFormArrayComponent},
+                {name: "file", extends: "input"},
+                {name: "translation", extends: "array"},
             ],
             wrappers: [
                 { name: "form-field", component: DynamicFormFieldComponent },
