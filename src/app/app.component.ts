@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
         request: () => this.schema(),
         loader: async p => {
             localStorage.setItem("selectedSchema", p.request);
-            return this.forms.getFormModelForSchema(p.request, {
+            return this.forms.getFormFieldsForSchema(p.request, {
                 labelPrefix: "form"
             });
         }

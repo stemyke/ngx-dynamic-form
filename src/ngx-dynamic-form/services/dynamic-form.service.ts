@@ -25,7 +25,7 @@ import {
     Validators
 } from "../common-types";
 
-import {EDITOR_FORMATS, findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormFields, MIN_INPUT_NUM} from "../utils/misc";
+import {findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormFields, MIN_INPUT_NUM} from "../utils/misc";
 import {
     emailValidation,
     maxLengthValidation,
@@ -35,6 +35,7 @@ import {
     requiredValidation,
     validationMessage
 } from "../utils/validator-fns";
+import * as path from "node:path";
 
 @Injectable()
 export class DynamicFormService {
@@ -54,8 +55,8 @@ export class DynamicFormService {
                 protected readonly builder: FormlyFormBuilder) {
     }
 
-    async getFormModelForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
-        const group = await this.getFormGroupModelForSchema(name, customizeOrOptions);
+    async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
+        const group = await this.getFormFieldGroupForSchema(name, customizeOrOptions);
         return group.fieldGroup;
     }
 
@@ -80,7 +81,6 @@ export class DynamicFormService {
                 continue;
             }
             if (props.hidden && !props.serialize) {
-                console.log(field, key);
                 continue;
             }
             const control = field.formControl;
@@ -96,43 +96,6 @@ export class DynamicFormService {
             result[key] = control.value;
         }
         return result;
-        // const result = {};
-        // if (!field || !formGroup || !formGroup.value) return result;
-        // for (const i in formModel) {
-        //     const subModel = formModel[i] as DynamicFormValueControlModel<any>;
-        //     const subControl = this.findControlByModel(subModel, formGroup);
-        //     const serializer = subModel.additional?.serializer as FormControlSerializer;
-        //     if (ObjectUtils.isFunction(serializer)) {
-        //         result[subModel.id] = await serializer(subModel, subControl);
-        //         continue;
-        //     }
-        //     if (subModel.hidden && !subModel.additional?.serialize) continue;
-        //     if (subModel instanceof DynamicFormArrayModel) {
-        //         const length = Array.isArray(subControl.value) ? subControl.value.length : 0;
-        //         const subArray = subControl as FormArray;
-        //         const resArray = [];
-        //         for (let i = 0; i < length; i++) {
-        //             const itemModel = subModel.get(i);
-        //             resArray.push(
-        //                 await this.serialize(itemModel.group, subArray.at(i) as FormGroup)
-        //             );
-        //         }
-        //         result[subModel.id] = resArray;
-        //         continue;
-        //     }
-        //     if (subModel instanceof DynamicInputModel && !ObjectUtils.isNullOrUndefined(subControl.value)) {
-        //         result[subModel.id] = subModel.inputType == "number"
-        //             ? parseFloat((`${subControl.value}` || "0").replace(/,/gi, ".")) ?? null
-        //             : subControl.value;
-        //         continue;
-        //     }
-        //     if (subModel instanceof DynamicFormGroupModel) {
-        //         result[subModel.id] = await this.serialize(subModel.group, subControl as FormGroup);
-        //         continue;
-        //     }
-        //     result[subModel.id] = subControl.value;
-        // }
-        // return result;
     }
 
     protected convertToDate(value: any): any {
@@ -143,7 +106,14 @@ export class DynamicFormService {
         return isNaN(date as any) ? new Date() : date;
     }
 
-    async getFormGroupModelForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig> {
+    protected getLabel(label: string, options: ConfigForSchemaWrapOptions, path: string): string {
+        const pathPrefix = !path ? `` : `${path}.`;
+        return !label || !options.labelPrefix
+            ? `${label}`
+            : `${options.labelPrefix}.${pathPrefix}${label}`;
+    }
+
+    async getFormFieldGroupForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig> {
         this.schemas = await this.openApi.getSchemas();
         const schemaOptions = ObjectUtils.isObject(customizeOrOptions) ? customizeOrOptions as ConfigForSchemaOptions : {};
         const customizeConfig = ObjectUtils.isFunction(customizeOrOptions) ? customizeOrOptions : schemaOptions.customizer;
@@ -154,16 +124,9 @@ export class DynamicFormService {
             injector: this.injector,
             customizer: async (property, options, config, path: string) => {
                 const pathPrefix = !path ? `` : `${path}.`;
-                const props = config.props || {};
-                props.label = !props.label || !options.labelPrefix
-                    ? props.label || ""
-                    : await this.language.getTranslation(`${options.labelPrefix}.${pathPrefix}${props.label}`);
                 config.defaultValue = `${config.type}`.startsWith("date")
                     ? this.convertToDate(property.default) : property.default;
-                config.props = props;
-
                 if (!ObjectUtils.isFunction(customizeConfig)) return [config];
-
                 let res = customizeConfig(property, schema, config, `${pathPrefix}${config.key}`, this.injector);
                 if (!res) return [config];
                 if (res instanceof Promise) {
@@ -172,7 +135,7 @@ export class DynamicFormService {
                 return Array.isArray(res) ? res : [res];
             }
         } as ConfigForSchemaWrapOptions;
-        const fields = await this.getFormModelForSchemaDef(schema, wrapOptions, "");
+        const fields = await this.getFormFieldsForSchemaDef(schema, wrapOptions, "");
         const fieldGroup = [...fields];
         // Add id fields if necessary
         if (fields.length > 0) {
@@ -186,6 +149,7 @@ export class DynamicFormService {
         }
         const config = {
             key: "root",
+            wrappers: ["form-group"],
             fieldGroup
         } as FormlyFieldConfig;
 
@@ -210,40 +174,48 @@ export class DynamicFormService {
         };
     }
 
-    protected async getFormModelForSchemaDef(schema: IOpenApiSchema, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
+    protected async getFormFieldsForSchemaDef(schema: IOpenApiSchema, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
         if (!schema)
             return [];
         const keys = Object.keys(schema.properties || {});
-        const fields: FormlyFieldConfig[] = [];
+        const fields: FormFieldConfig[] = [];
+        const groups: {[fs: string]: FormFieldConfig[]} = {};
+        // Collect all properties of this schema def
         for (const p of keys) {
             const property = schema.properties[p];
-            // const fsName = property.hidden ? null : String(property.fieldSet || "");
-            // if (fsName) {
-            //     const fs = fieldSets.find(t => t.id === fsName);
-            //     if (fs) {
-            //         fs.fields.push(p);
-            //     } else {
-            //         fieldSets.push({id: fsName, legend: `legend.${fsName}`, fields: [p]});
-            //     }
-            // }
-            const models = await this.getFormControlModels(property, options, path);
-            fields.push(...models);
+            const fsName = property.hidden ? null : String(property.fieldSet || "");
+            const propFields = await this.getFormFieldsForProp(property, options, path);
+            // If we have a fieldset name defined then push the property fields into a group
+            if (fsName) {
+                let group = groups[fsName];
+                // If the group does not exist we create it and then push it to the main fields
+                if (!group) {
+                    group = [];
+                    groups[fsName] = group;
+                    fields.push({
+                        fieldGroup: group,
+                        wrappers: ["form-fieldset"],
+                        props: {
+                            label: this.getLabel(fsName, options, path),
+                        }
+                    });
+                    console.log(fsName, group);
+                }
+                group.push(...propFields);
+                continue;
+            }
+            fields.push(...propFields);
         }
         return fields.filter(t => null !== t);
     }
 
-    protected checkIsEditorProperty(property: IOpenApiSchemaProperty): boolean {
-        if (!property.format) return false;
-        return EDITOR_FORMATS.indexOf(property.format) >= 0 || property.format.endsWith("script");
-    }
-
-    protected async getFormControlModels(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
+    protected async getFormFieldsForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             if (property.format == "radio") {
-                return options.customizer(property, options, this.getFormRadioConfig(property, options), path);
+                return options.customizer(property, options, this.getFormRadioConfig(property, options, path), path);
             }
-            return options.customizer(property, options, this.getFormSelectConfig(property, options), path);
+            return options.customizer(property, options, this.getFormSelectConfig(property, options, path), path);
         }
         switch (property.type) {
             case "string":
@@ -254,37 +226,38 @@ export class DynamicFormService {
                 //     return options.customizer(property, options, this.getFormEditorConfig(property, options), path);
                 // }
                 if (property.format == "textarea") {
-                    return options.customizer(property, options, this.getFormTextareaConfig(property, options), path);
+                    return options.customizer(property, options, this.getFormTextareaConfig(property, options, path), path);
                 }
                 if (property.format == "date" || property.format == "date-time") {
-                    return options.customizer(property, options, this.getFormDatepickerConfig(property, options), path);
+                    return options.customizer(property, options, this.getFormDatepickerConfig(property, options, path), path);
                 }
-                return options.customizer(property, options, this.getFormInputConfig(property, options), path);
+                return options.customizer(property, options, this.getFormInputConfig(property, options, path), path);
             // case "object":
             //     return options.customizer(property, options, this.getFormEditorConfig(property, options), path);
             case "boolean":
-                return options.customizer(property, options, this.getFormCheckboxConfig(property, options), path);
+                return options.customizer(property, options, this.getFormCheckboxConfig(property, options, path), path);
             case "array":
                 if (findRefs(property).length > 0) {
                     return options.customizer(property, options, await this.getFormArrayConfig(property, options, path), path);
                 } else {
-                    return options.customizer(property, options, this.getFormInputConfig(property, options), path);
+                    return options.customizer(property, options, this.getFormInputConfig(property, options, path), path);
                 }
             case "file":
-                return options.customizer(property, options, this.getFormUploadConfig(property, options), path);
+                return options.customizer(property, options, this.getFormUploadConfig(property, options, path), path);
         }
         if (findRefs(property).length > 0) {
             return options.customizer(
                 property, options,
-                await this.getFormGroupConfig(property, options, !path ? property.id : `${path}.${property.id}`),
+                await this.getFormGroupConfig(property, options, path),
                 path
             );
         }
         return [];
     }
 
-    getFormControlConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, custom: FormlyFieldConfig): FormlyFieldConfig {
+    getFormControlConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string, custom: FormlyFieldConfig): FormlyFieldConfig {
         const validators = this.getValidators(property, options);
+        const label = !property.label? property.id : property.label;
         return ObjectUtils.assign({
             key: property.id,
             validators,
@@ -299,18 +272,19 @@ export class DynamicFormService {
                 // For material components
                 appearance: "fill",
                 required: !!validators.required,
-                label: ObjectUtils.isString(property.label) ? property.label : property.id,
+                label: this.getLabel(label, options, path),
             }
         }, custom);
     }
 
     async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig> {
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        const subPath = !path ? property.id : `${path}.${property.id}`;
         const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormModelForSchemaDef(s, options, path))
+            subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, subPath))
         );
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 type: "array",
                 props: {
@@ -333,11 +307,12 @@ export class DynamicFormService {
 
     async getFormGroupConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig> {
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+        const subPath = !path ? property.id : `${path}.${property.id}`;
         const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormModelForSchemaDef(s, options, path))
+            subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, subPath))
         );
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 wrappers: ["form-group"],
                 fieldGroup: mergeFormFields(subModels)
@@ -345,7 +320,7 @@ export class DynamicFormService {
         );
     }
 
-    getFormInputConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormInputConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         let type = StringUtils.has(property.id, "password", "Password") ? "password" : (property.format || property.items?.type || property.type);
         switch (type) {
             case "string":
@@ -363,7 +338,7 @@ export class DynamicFormService {
         }
         const sub = property.type == "array" ? property.items || property : property;
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 type: "input",
                 props: {
@@ -404,9 +379,9 @@ export class DynamicFormService {
     //     );
     // }
 
-    getFormTextareaConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormTextareaConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 props: {
                     cols: property.cols || null,
@@ -422,9 +397,9 @@ export class DynamicFormService {
         );
     }
 
-    getFormDatepickerConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormDatepickerConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 type: "input",
                 props: {
@@ -502,9 +477,9 @@ export class DynamicFormService {
         );
     }
 
-    getFormRadioConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormRadioConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 hooks: {
                     onInit: field => {
@@ -515,9 +490,9 @@ export class DynamicFormService {
         );
     }
 
-    getFormSelectConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormSelectConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 type: "select",
                 props: {
@@ -535,11 +510,11 @@ export class DynamicFormService {
         );
     }
 
-    getFormUploadConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormUploadConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         const url = this.api.url(property.url || "assets");
         const {accept, autoUpload, maxSize, minSize, removeUrl, showFileList} = property;
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 props: {
                     url: url,
@@ -554,9 +529,9 @@ export class DynamicFormService {
         );
     }
 
-    getFormCheckboxConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormlyFieldConfig {
+    getFormCheckboxConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
         return this.getFormControlConfig(
-            property, options,
+            property, options, path,
             {
                 props: {
                     indeterminate: property.indeterminate || false

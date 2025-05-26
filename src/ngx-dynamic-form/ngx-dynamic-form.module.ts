@@ -11,6 +11,7 @@ import {DynamicFormService} from "./services/dynamic-form.service";
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
 import {DynamicFormFieldComponent} from "./components/dynamic-form-field/dynamic-form-field.component";
+import {DynamicFormFieldsetComponent} from "./components/dynamic-form-fieldset/dynamic-form-fieldset.component";
 
 @NgModule({
     declarations: [
@@ -46,8 +47,9 @@ export class NgxDynamicFormModule {
                 {name: "array", component: DynamicFormArrayComponent},
             ],
             wrappers: [
-                { name: "form-group", component: DynamicFormGroupComponent },
                 { name: "form-field", component: DynamicFormFieldComponent },
+                { name: "form-fieldset", component: DynamicFormFieldsetComponent },
+                { name: "form-group", component: DynamicFormGroupComponent },
             ]
         });
         return [
