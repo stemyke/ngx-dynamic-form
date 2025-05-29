@@ -1,4 +1,5 @@
 export {
+    FormBuilderOptions,
     FormFieldProps,
     FormBaseFieldConfig,
     FormFieldSerializer,
@@ -26,6 +27,29 @@ export {
     IFormFieldCustomizer,
     customizeFormField
 } from "./ngx-dynamic-form/utils/customizer";
+
+export {
+    FormSerializable,
+    FormInput,
+    FormSelect,
+    FormUpload,
+    FormFile,
+    FormGroup,
+    FormModel
+} from "./ngx-dynamic-form/utils/decorators";
+
+export {
+    validationMessage,
+    jsonValidation,
+    requiredValidation,
+    translationValidation,
+    phoneValidation,
+    emailValidation,
+    minLengthValidation,
+    maxLengthValidation,
+    minValueValidation,
+    maxValueValidation
+} from "./ngx-dynamic-form/utils/validation";
 
 export {
     replaceSpecialChars,

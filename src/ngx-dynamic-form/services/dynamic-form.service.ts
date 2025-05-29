@@ -1,7 +1,7 @@
 import {Injectable, Injector} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {distinctUntilChanged, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
-import {FormlyFieldConfig, FormlyFormBuilder} from "@ngx-formly/core";
+import {FormlyFieldConfig} from "@ngx-formly/core";
 import {
     IApiService,
     ILanguageService,
@@ -34,8 +34,7 @@ import {
     minValueValidation,
     requiredValidation,
     validationMessage
-} from "../utils/validator-fns";
-import * as path from "node:path";
+} from "../utils/validation";
 
 @Injectable()
 export class DynamicFormService {
@@ -51,8 +50,7 @@ export class DynamicFormService {
     protected schemas: IOpenApiSchemas;
 
     constructor(readonly openApi: OpenApiService,
-                readonly injector: Injector,
-                protected readonly builder: FormlyFormBuilder) {
+                readonly injector: Injector) {
     }
 
     async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
@@ -77,7 +75,7 @@ export class DynamicFormService {
             const key = `${field.key}`;
             const props = field.props || {};
             if (ObjectUtils.isFunction(serializer)) {
-                result[key] = await serializer(field);
+                result[key] = await serializer(field, this.injector);
                 continue;
             }
             if (props.hidden && !props.serialize) {
@@ -206,6 +204,7 @@ export class DynamicFormService {
                 id: !path ? group : `${path}.${group}`,
                 props: {
                     label: this.getLabel(group, options, path),
+                    hidden: false
                 }
             } as FormFieldConfig;
         }).concat(others);

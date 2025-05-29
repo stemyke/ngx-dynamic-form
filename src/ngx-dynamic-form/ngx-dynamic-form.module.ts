@@ -52,7 +52,10 @@ export class NgxDynamicFormModule {
                 { name: "form-field", component: DynamicFormFieldComponent },
                 { name: "form-fieldset", component: DynamicFormFieldsetComponent },
                 { name: "form-group", component: DynamicFormGroupComponent },
-            ]
+            ],
+            extras: {
+                renderFormlyFieldElement: false
+            }
         });
         return [
             ...(providers as Provider[]),

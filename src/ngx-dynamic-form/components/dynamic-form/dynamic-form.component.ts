@@ -1,4 +1,14 @@
-import {Component, computed, input, output, signal, viewChild, ViewEncapsulation} from "@angular/core";
+import {
+    Component,
+    computed,
+    inject,
+    Injector,
+    input,
+    output,
+    signal,
+    viewChild,
+    ViewEncapsulation
+} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {FormlyForm, FormlyFormOptions} from "@ngx-formly/core";
 import {FormFieldConfig, IDynamicForm} from "../../common-types";
@@ -27,7 +37,11 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly onSubmit = output<IDynamicForm>();
 
-    readonly options: FormlyFormOptions = {};
+    readonly options: FormlyFormOptions = {
+        formState: {
+            injector: inject(Injector)
+        }
+    };
 
     readonly form = viewChild(FormlyForm);
 

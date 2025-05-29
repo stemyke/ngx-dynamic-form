@@ -7,21 +7,26 @@ import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-
 
 export type PromiseOrNot<T> = Promise<T> | T;
 
-// --- Basic form control interfaces ---
+// --- Basic form types ---
 
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
 
+// --- Basic form field interfaces ---
+
+export interface FormBuilderOptions {
+    labelPrefix?: string;
+}
+
 export interface FormFieldProps extends FormlyFieldProps {
     multiple?: boolean;
-    [additional: string]: any;
 }
 
 export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
 
 }
 
-export type FormFieldSerializer = (field: FormBaseFieldConfig) => PromiseOrNot<any>;
+export type FormFieldSerializer = (field: FormBaseFieldConfig, injector: Injector) => PromiseOrNot<any>;
 
 export interface FormFieldConfig<T = FormFieldProps> extends FormBaseFieldConfig<T> {
     serializer?: FormFieldSerializer;
@@ -43,17 +48,76 @@ export interface IDynamicForm {
 export interface FormSelectOption extends FormlySelectOption {
     className?: string;
     classes?: string[] | string;
+    id?: any;
 }
 
 export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption[]>;
+
+// --- Validation types ---
+
+type FormFieldValidatorFn<T> = (control: AbstractControl, field?: FormlyFieldConfig) => T;
+
+export type ValidationMessageFn = (error: any, field: FormFieldConfig) => string | Observable<string>;
+
+interface FormFieldValidatorExpression<T> {
+    expression: FormFieldValidatorFn<T>;
+    message: ValidationMessageFn;
+}
+
+type FormFieldValidation<T, R> = {
+    validation?: (string | T)[];
+} & {
+    [key: string]: FormFieldValidatorFn<R> | FormFieldValidatorExpression<R>;
+}
+
+export type ValidatorFn = FormFieldValidatorFn<boolean>;
+
+export type ValidatorExpression = FormFieldValidatorExpression<boolean>;
+
+export type Validators = FormFieldValidation<ValidatorFn, boolean>;
+
+export type AsyncBoolean = Promise<boolean> | Observable<boolean>;
+
+export type AsyncValidatorFn = FormFieldValidatorFn<AsyncBoolean>;
+
+export type AsyncValidatorExpression = FormFieldValidatorExpression<AsyncBoolean>;
+
+export type AsyncValidators = FormFieldValidation<AsyncValidatorFn, AsyncBoolean>;
+
+// --- Form field data types ---
+
+export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden">
+    & {
+    validators?: Validators | ValidatorFn[],
+    serializer?: FormFieldSerializer,
+    fieldSet?: string,
+    classes?: string
+};
+
+export type FormInputData = FormFieldData
+    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
+    & { autocomplete?: string, accept?: string };
+
+export type FormSelectData = FormFieldData
+    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
+    & { autocomplete?: string };
+
+export type FormUploadData = FormFieldData
+    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
+    & { autocomplete?: string };
+
+export type FormGroupData = FormFieldData
+    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
+    & { autocomplete?: string };
+
+// --- JSON schema interfaces ---
 
 export type FormFieldCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
     field: FormlyFieldConfig, path: string, injector: Injector
 ) => PromiseOrNot<FormlyFieldConfig | FormlyFieldConfig[]>;
 
-export interface ConfigForSchemaOptions {
-    labelPrefix?: string;
+export interface ConfigForSchemaOptions extends FormBuilderOptions {
     customizer?: FormFieldCustomizer;
 }
 
@@ -66,34 +130,6 @@ export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions,
     ) => Promise<FormlyFieldConfig[]>;
 }
 
-type FormlyValidatorFn<T> = (control: AbstractControl, field?: FormlyFieldConfig) => T;
-
-export type ValidationMessageFn = (error: any, field: FormlyFieldConfig) => string | Observable<string>;
-
-interface FormlyValidatorExpression<T> {
-    expression: FormlyValidatorFn<T>;
-    message: ValidationMessageFn;
-}
-
-type FormlyValidation<T, R> = {
-    validation?: (string | T)[];
-} & {
-    [key: string]: FormlyValidatorFn<R> | FormlyValidatorExpression<R>;
-}
-
-export type ValidatorFn = FormlyValidatorFn<boolean>;
-
-export type ValidatorExpression = FormlyValidatorExpression<boolean>;
-
-export type Validators = FormlyValidation<ValidatorFn, boolean>;
-
-export type AsyncBoolean = Promise<boolean> | Observable<boolean>;
-
-export type AsyncValidatorFn = FormlyValidatorFn<AsyncBoolean>;
-
-export type AsyncValidatorExpression = FormlyValidatorExpression<AsyncBoolean>;
-
-export type AsyncValidators = FormlyValidation<AsyncValidatorFn, AsyncBoolean>;
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
