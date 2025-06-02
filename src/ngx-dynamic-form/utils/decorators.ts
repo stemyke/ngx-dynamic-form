@@ -1,24 +1,22 @@
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
-import {
-    FormFieldData,
-    FormFieldSerializer,
-    FormGroupData,
-    FormInputData,
-    FormSelectData,
-    FormUploadData
-} from "../common-types";
+import {FormFieldSerializer, FormGroupData, FormInputData, FormSelectData, FormUploadData} from "../common-types";
+import {FormFieldBuilder} from "../services/dynamic-form-builder.service";
 
-export function defineFormControl(target: any, propertyKey: string, data: FormFieldData): void {
-    const fieldData: FormFieldData = ReflectUtils.getMetadata("dynamicFormField", target, propertyKey) || {
-        type: "input"
-    };
-    ObjectUtils.assign(fieldData, data);
-    ReflectUtils.defineMetadata("dynamicFormField", fieldData, target, propertyKey);
+function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilder): void {
+    const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target) || new Set();
+    const existing: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", target, propertyKey);
+    const builder: FormFieldBuilder = !ObjectUtils.isFunction(existing) ? cb : ((fb, opts, path) => {
+        const data = existing(fb, opts, path);
+        return ObjectUtils.assign(data || {}, cb(fb, opts, path) || {});
+    });
+    fields.add(propertyKey);
+    ReflectUtils.defineMetadata("dynamicFormField", builder, target, propertyKey);
+    ReflectUtils.defineMetadata("dynamicFormFields", fields, target);
 }
 
 export function FormSerializable(serializer?: FormFieldSerializer): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, {serializer});
+        defineFormControl(target, propertyKey, () => ({serializer}));
     };
 }
 
@@ -35,19 +33,32 @@ export function FormInput(data?: FormInputData): PropertyDecorator {
                 inputType = "checkbox";
                 break;
         }
-        defineFormControl(target, propertyKey, createFormInput(propertyKey, data, inputType));
+        data.type = data.type || inputType;
+        defineFormControl(
+            target, propertyKey,
+            (fb, path, options) =>
+                fb.createFormInput(propertyKey, data, path, options)
+        );
     };
 }
 
 export function FormSelect(data?: FormSelectData): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormSelect(propertyKey, data));
+        defineFormControl(
+            target, propertyKey,
+            (fb, path, options) =>
+                fb.createFormSelect(propertyKey, data, path, options)
+        );
     };
 }
 
 export function FormUpload(data?: FormUploadData): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormFile(propertyKey, data));
+        defineFormControl(
+            target, propertyKey,
+            (fb, path, options) =>
+                fb.createFormUpload(propertyKey, data, path, options)
+        );
     };
 }
 
@@ -58,7 +69,19 @@ export function FormFile(data?: FormUploadData): PropertyDecorator {
 
 export function FormGroup(data?: FormGroupData): PropertyDecorator {
     return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, createFormModel(propertyKey, data));
+        defineFormControl(
+            target, propertyKey,
+            (fb, path, options) => {
+                const propClass = ReflectUtils.getOwnMetadata("design:type", target, propertyKey);
+                const fields = fb.resolveFormFields(
+                    propClass, !path ? propertyKey : `${path}.${propertyKey}`, options
+                );
+                return {
+                    key: propertyKey,
+                    fieldGroup: fields
+                };
+            }
+        );
     };
 }
 

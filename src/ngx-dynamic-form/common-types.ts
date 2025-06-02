@@ -30,6 +30,7 @@ export type FormFieldSerializer = (field: FormBaseFieldConfig, injector: Injecto
 
 export interface FormFieldConfig<T = FormFieldProps> extends FormBaseFieldConfig<T> {
     serializer?: FormFieldSerializer;
+    serialize?: boolean;
 }
 
 export interface FormSerializeResult {
@@ -95,7 +96,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden"
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
     & { autocomplete?: string, accept?: string };
 
 export type FormSelectData = FormFieldData

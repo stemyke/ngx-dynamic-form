@@ -13,6 +13,7 @@ import {FormGroup} from "@angular/forms";
 import {FormlyForm, FormlyFormOptions} from "@ngx-formly/core";
 import {FormFieldConfig, IDynamicForm} from "../../common-types";
 import {rxToSignal} from "../../utils/signals";
+import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 
 @Component({
     standalone: false,
@@ -22,12 +23,23 @@ import {rxToSignal} from "../../utils/signals";
 })
 export class DynamicFormComponent implements IDynamicForm {
 
+    readonly builder = inject(DynamicFormBuilderService);
+
+    readonly labelPrefix = input<string>("label");
+
     readonly model = input<any>({});
 
-    readonly fields = input<FormFieldConfig[]>([]);
+    readonly fields = input<FormFieldConfig[]>(null);
+
+    readonly config = computed(() => {
+        console.log("")
+        return this.fields() || this.builder.resolveFormFields(this.model()?.constructor, "", {
+            labelPrefix: this.labelPrefix()
+        });
+    });
 
     readonly group = computed(() => {
-        this.fields();
+        this.config();
         return new FormGroup({});
     });
 

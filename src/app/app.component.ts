@@ -11,6 +11,7 @@ import {FormGroup} from "@angular/forms";
 import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
 import {DynamicFormService, IDynamicForm} from "../public_api";
 import {firstValueFrom} from "rxjs";
+import {OrderModel} from "./model";
 
 @Component({
     standalone: false,
@@ -48,6 +49,8 @@ export class AppComponent implements OnInit {
             {lang: "en", translation: "Monday"},
         ]
     });
+
+    decoratorModel = signal<any>(new OrderModel());
 
     constructor(private openApi: OpenApiService, private forms: DynamicFormService) {
         setTimeout(() => {

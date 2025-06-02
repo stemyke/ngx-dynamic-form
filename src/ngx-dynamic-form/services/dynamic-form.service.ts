@@ -36,6 +36,8 @@ import {
     validationMessage
 } from "../utils/validation";
 
+import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
+
 @Injectable()
 export class DynamicFormService {
 
@@ -50,7 +52,8 @@ export class DynamicFormService {
     protected schemas: IOpenApiSchemas;
 
     constructor(readonly openApi: OpenApiService,
-                readonly injector: Injector) {
+                readonly injector: Injector,
+                readonly builder: DynamicFormBuilderService) {
     }
 
     async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
@@ -78,7 +81,7 @@ export class DynamicFormService {
                 result[key] = await serializer(field, this.injector);
                 continue;
             }
-            if (props.hidden && !props.serialize) {
+            if (props.hidden && !field.serialize) {
                 continue;
             }
             const control = field.formControl;
@@ -342,26 +345,18 @@ export class DynamicFormService {
                 break;
         }
         const sub = property.type == "array" ? property.items || property : property;
-        return this.getFormControlConfig(
-            property, options, path,
-            {
-                type: "input",
-                props: {
-                    type,
-                    attributes: {
-                        autocomplete: property.autocomplete || "off",
-                        accept: ObjectUtils.isString(property.accept) ? property.accept : null,
-                    },
-                    pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
-                    step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
-                    min: isNaN(sub.minimum) ? MIN_INPUT_NUM : sub.minimum,
-                    max: isNaN(sub.maximum) ? MAX_INPUT_NUM : sub.maximum,
-                    minLength: isNaN(sub.minLength) ? 0 : sub.minLength,
-                    maxLength: isNaN(sub.maxLength) ? MAX_INPUT_NUM : sub.maxLength,
-                    placeholder: property.placeholder || ""
-                }
-            }
-        );
+        return this.builder.createFormInput(property.id, {
+            type,
+            autocomplete: property.autocomplete,
+            accept: ObjectUtils.isString(property.accept) ? property.accept : null,
+            pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
+            step: isNaN(sub.step) ? property.step : sub.step,
+            min: sub.minimum,
+            max: sub.maximum,
+            minLength: sub.minLength,
+            maxLength: sub.maxLength,
+            placeholder: property.placeholder
+        }, path, options);
     }
 
     // getFormEditorConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): DynamicEditorModelConfig {

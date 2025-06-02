@@ -10,6 +10,9 @@
         }
     </ul>
 </dropdown-box>
-<dynamic-form [fields]="fields.value()" [model]="model()" #form>
-    <button [async-submit]="submit" [form]="form" class="btn btn-primary submit-button">Submit</button>
+<dynamic-form [model]="decoratorModel()" #decoratorForm>
+    <button [async-submit]="submit" [form]="decoratorForm" class="btn btn-primary submit-button">Submit</button>
 </dynamic-form>
+<!--<dynamic-form [fields]="fields.value()" [model]="model()" #form>-->
+<!--    <button [async-submit]="submit" [form]="form" class="btn btn-primary submit-button">Submit</button>-->
+<!--</dynamic-form>-->

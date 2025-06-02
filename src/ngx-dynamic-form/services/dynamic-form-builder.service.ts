@@ -1,16 +1,18 @@
-import {Injectable, Injector} from "@angular/core";
-import {ObjectUtils} from "@stemy/ngx-utils";
+import {Injectable, Injector, Type} from "@angular/core";
+import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 
 import {
     FormBuilderOptions,
     FormFieldConfig,
     FormFieldData,
-    FormFieldProps,
-    FormInputData,
+    FormFieldProps, FormGroupData,
+    FormInputData, FormSelectData, FormUploadData,
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
 import {MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+
+export type FormFieldBuilder = (fb: DynamicFormBuilderService, path: string, options: FormBuilderOptions) => FormFieldConfig;
 
 @Injectable()
 export class DynamicFormBuilderService {
@@ -18,7 +20,7 @@ export class DynamicFormBuilderService {
     constructor(readonly injector: Injector) {
     }
 
-    protected getLabel(label: string, options: FormBuilderOptions, path: string): string {
+    protected getLabel(label: string, path: string, options: FormBuilderOptions): string {
         label = label || "";
         const pathPrefix = !path ? `` : `${path}.`;
         return !label || !options.labelPrefix
@@ -35,7 +37,7 @@ export class DynamicFormBuilderService {
                 return res;
             }, {} as Validators)
             : data.validators || {};
-        const label = !data.label? data.key : data.label;
+        const label = !data.label? key : data.label;
         return {
             key,
             type,
@@ -49,24 +51,67 @@ export class DynamicFormBuilderService {
             props: {
                 ...props,
                 required: !!validators.required,
-                label: this.getLabel(label, options, path),
+                label: this.getLabel(label, path, options),
             }
         }
+    }
+
+    resolveFormFields(target: Type<any>, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig[] {
+        const prototype = target?.prototype || {};
+        const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target?.prototype || {});
+        const result: FormFieldConfig[] = [];
+        for (const key of fields) {
+            const builder: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", prototype, key);
+            const field = builder(this, path, options);
+            result.push(field);
+        }
+        console.log(result);
+        return result;
     }
 
     createFormInput(key: string, data: FormInputData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
         return this.createFormField(key, "input", data, {
             type: data.type,
             pattern: data.pattern,
-            step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
-            min: isNaN(sub.minimum) ? MIN_INPUT_NUM : sub.minimum,
-            max: isNaN(sub.maximum) ? MAX_INPUT_NUM : sub.maximum,
-            minLength: isNaN(sub.minLength) ? 0 : sub.minLength,
-            maxLength: isNaN(sub.maxLength) ? MAX_INPUT_NUM : sub.maxLength,
-            placeholder: property.placeholder || "",
+            step: data.step,
+            min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
+            max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
+            minLength: isNaN(data.minLength) ? 0 : data.minLength,
+            maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
+            placeholder: data.placeholder || "",
             attributes: {
                 autocomplete: data.autocomplete || "off",
                 accept: ObjectUtils.isString(data.accept) ? data.accept : null,
+            },
+        }, path, options);
+    }
+
+    createFormSelect(key: string, data: FormSelectData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        return this.createFormField(key, "input", data, {
+            type: data.type,
+            step: data.step,
+            min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
+            max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
+            minLength: isNaN(data.minLength) ? 0 : data.minLength,
+            maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
+            placeholder: data.placeholder || "",
+            attributes: {
+                autocomplete: data.autocomplete || "off",
+            },
+        }, path, options);
+    }
+
+    createFormUpload(key: string, data: FormUploadData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        return this.createFormField(key, "input", data, {
+            type: data.type,
+            step: data.step,
+            min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
+            max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
+            minLength: isNaN(data.minLength) ? 0 : data.minLength,
+            maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
+            placeholder: data.placeholder || "",
+            attributes: {
+                autocomplete: data.autocomplete || "off",
             },
         }, path, options);
     }

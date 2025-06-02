@@ -59,6 +59,8 @@ export {
     EDITOR_FORMATS
 } from "./ngx-dynamic-form/utils/misc";
 
+export {DynamicFormBuilderService} from "./ngx-dynamic-form/services/dynamic-form-builder.service";
+
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";

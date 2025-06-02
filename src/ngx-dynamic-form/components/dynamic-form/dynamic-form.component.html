@@ -1,8 +1,8 @@
-@if (fields() && group()) {
+@if (config() && group()) {
     <form [formGroup]="group()" (ngSubmit)="submit()">
         <input type="submit" [hidden]="true" />
         <formly-form [model]="model()"
-                     [fields]="fields()"
+                     [fields]="config()"
                      [form]="group()"
                      [options]="options"></formly-form>
         <ng-content></ng-content>

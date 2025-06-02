@@ -2,13 +2,14 @@ import {DatePipe} from "@angular/common";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     emailValidation,
-    FormFieldSerializer,
+    FormFieldSerializer, FormGroup,
     FormInput,
     FormSelect,
     FormSelectOption,
     FormSerializable,
     requiredValidation
 } from "../public_api";
+import {Injectable} from "@angular/core";
 
 function getPreferredContacts(): Promise<FormSelectOption[]> {
     return new Promise<FormSelectOption[]>(resolve => {
@@ -29,6 +30,31 @@ function serializeDate(format: string = "yyyy-MM-dd", defaultValue: string = "")
     };
 }
 
+export class AddressModel {
+
+    @FormInput({
+        fieldSet: "address",
+        placeholder: "label.buyerStreet"
+    })
+    @FormSerializable()
+    street: string = "";
+
+    @FormInput({
+        fieldSet: "address",
+        classes: "form-group-sm",
+        placeholder: "label.buyerZipCode"
+    })
+    @FormSerializable()
+    zip: string = "";
+
+    @FormInput({
+        fieldSet: "address",
+        classes: "form-group-sm",
+        placeholder: "label.buyerCity"
+    })
+    @FormSerializable()
+    city: string = "";
+}
 export class OrderModel {
 
     @FormInput({
@@ -54,35 +80,12 @@ export class OrderModel {
     @FormSerializable()
     buyerLastName: string = "";
 
-    @FormDate()
+    // @FormDate()
     @FormSerializable(serializeDate())
     buyerBirthday: Date = null;
 
-    @FormInput({
-        label: "",
-        fieldSet: "address",
-        placeholder: "label.buyerStreet"
-    })
-    @FormSerializable()
-    buyerStreet: string = "";
-
-    @FormInput({
-        label: "",
-        fieldSet: "address",
-        classes: "form-group-sm",
-        placeholder: "label.buyerZipCode"
-    })
-    @FormSerializable()
-    buyerZipCode: string = "";
-
-    @FormInput({
-        label: "",
-        fieldSet: "address",
-        classes: "form-group-sm",
-        placeholder: "label.buyerCity"
-    })
-    @FormSerializable()
-    buyerCity: string = "";
+    @FormGroup()
+    buyerAddress: AddressModel = new AddressModel();
 
     @FormInput({
         label: "",
@@ -117,16 +120,16 @@ export class OrderModel {
     @FormSerializable()
     buyerMobile: string = "";
 
-    @FormDate()
+    // @FormDate()
     @FormSerializable(serializeDate())
     desiredDeliveryDate: Date = null;
 
-    @FormDate()
+    // @FormDate()
     @FormSerializable(serializeDate())
     weddingDate: Date = null;
 
     @FormSelect({
-        options: FormOptions.getPreferredContacts
+        // options: FormOptions.getPreferredContacts
     })
     @FormSerializable()
     preferredContact: string = "";

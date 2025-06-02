@@ -7,7 +7,10 @@ import {NgxUtilsModule} from "@stemy/ngx-utils";
 import {components, directives, pipes} from "./ngx-dynamic-form.imports";
 
 import {IDynamicFormModuleConfig} from "./common-types";
+
 import {DynamicFormService} from "./services/dynamic-form.service";
+import {DynamicFormBuilderService} from "./services/dynamic-form-builder.service";
+
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
 import {DynamicFormFieldComponent} from "./components/dynamic-form-field/dynamic-form-field.component";
@@ -59,7 +62,8 @@ export class NgxDynamicFormModule {
         });
         return [
             ...(providers as Provider[]),
-            DynamicFormService
+            DynamicFormService,
+            DynamicFormBuilderService
         ];
     }
 
