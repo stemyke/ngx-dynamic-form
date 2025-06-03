@@ -19,7 +19,14 @@ export interface FormBuilderOptions {
 }
 
 export interface FormFieldProps extends FormlyFieldProps {
+    // --- Input props ---
+    autocomplete?: string;
+    accept?: string;
+    // --- Select props ---
     multiple?: boolean;
+    inline?: boolean;
+    allowEmpty?: boolean;
+    groupBy?: string;
 }
 
 export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
@@ -28,22 +35,26 @@ export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConf
 
 export type FormFieldSerializer = (field: FormBaseFieldConfig, injector: Injector) => PromiseOrNot<any>;
 
+export declare type FormHookFn = (field: FormBaseFieldConfig) => void;
+
+export interface FormHookConfig {
+    onInit?: FormHookFn | ((field: FormBaseFieldConfig) => Observable<any>);
+    onChanges?: FormHookFn;
+    afterContentInit?: FormHookFn;
+    afterViewInit?: FormHookFn;
+    onDestroy?: FormHookFn;
+}
+
 export interface FormFieldConfig<T = FormFieldProps> extends FormBaseFieldConfig<T> {
     serializer?: FormFieldSerializer;
     serialize?: boolean;
+    fieldSet?: string;
+    classes?: string;
+    hooks?: FormHookConfig;
 }
 
 export interface FormSerializeResult {
     [key: string]: any;
-}
-
-export interface IDynamicForm {
-
-    readonly fields: Signal<FormFieldConfig[]>;
-    readonly group: Signal<FormGroup>;
-    readonly status: Signal<DynamicFormState>;
-    readonly onSubmit: OutputRef<IDynamicForm>;
-
 }
 
 export interface FormSelectOption extends FormlySelectOption {
@@ -54,9 +65,18 @@ export interface FormSelectOption extends FormlySelectOption {
 
 export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption[]>;
 
+export interface IDynamicForm {
+
+    readonly fields: Signal<FormFieldConfig[]>;
+    readonly group: Signal<FormGroup>;
+    readonly status: Signal<DynamicFormState>;
+    readonly onSubmit: OutputRef<IDynamicForm>;
+
+}
+
 // --- Validation types ---
 
-type FormFieldValidatorFn<T> = (control: AbstractControl, field?: FormlyFieldConfig) => T;
+type FormFieldValidatorFn<T> = ((control: AbstractControl, field?: FormlyFieldConfig) => T) & {validatorName?: string};
 
 export type ValidationMessageFn = (error: any, field: FormFieldConfig) => string | Observable<string>;
 
@@ -87,29 +107,29 @@ export type AsyncValidators = FormFieldValidation<AsyncValidatorFn, AsyncBoolean
 
 // --- Form field data types ---
 
+export type FormFieldCustom = Pick<FormFieldConfig, "hooks" | "fieldGroup" | "fieldArray">;
+
 export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden">
     & {
-    validators?: Validators | ValidatorFn[],
-    serializer?: FormFieldSerializer,
-    fieldSet?: string,
-    classes?: string
+    validators?: Validators | ValidatorFn[];
+    serializer?: FormFieldSerializer;
+    fieldSet?: string;
+    classes?: string;
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
-    & { autocomplete?: string, accept?: string };
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "accept">;
 
 export type FormSelectData = FormFieldData
-    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
-    & { autocomplete?: string };
+    & Pick<FormFieldProps, "multiple" | "inline" | "allowEmpty" | "groupBy"> & {
+    options: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
+};
 
 export type FormUploadData = FormFieldData
-    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
-    & { autocomplete?: string };
+    & Pick<FormFieldProps, "accept">;
 
 export type FormGroupData = FormFieldData
-    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">
-    & { autocomplete?: string };
+    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">;
 
 // --- JSON schema interfaces ---
 

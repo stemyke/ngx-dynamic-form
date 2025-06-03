@@ -15,16 +15,16 @@ function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilde
 }
 
 export function FormSerializable(serializer?: FormFieldSerializer): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        defineFormControl(target, propertyKey, () => ({serializer}));
+    return (target: any, key: string): void => {
+        defineFormControl(target, key, () => ({key, serializer, serialize: true}));
     };
 }
 
 export function FormInput(data?: FormInputData): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
-        const meta = ReflectUtils.getOwnMetadata("design:type", target, propertyKey);
+    return (target: any, key: string): void => {
+        const meta = ReflectUtils.getOwnMetadata("design:type", target, key);
         const type = meta ? meta.name : "";
-        let inputType = propertyKey.indexOf("password") < 0 ? "text" : "password";
+        let inputType = key.indexOf("password") < 0 ? "text" : "password";
         switch (type) {
             case "Number":
                 inputType = "number";
@@ -35,29 +35,29 @@ export function FormInput(data?: FormInputData): PropertyDecorator {
         }
         data.type = data.type || inputType;
         defineFormControl(
-            target, propertyKey,
+            target, key,
             (fb, path, options) =>
-                fb.createFormInput(propertyKey, data, path, options)
+                fb.createFormInput(key, data, path, options)
         );
     };
 }
 
 export function FormSelect(data?: FormSelectData): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
+    return (target: any, key: string): void => {
         defineFormControl(
-            target, propertyKey,
+            target, key,
             (fb, path, options) =>
-                fb.createFormSelect(propertyKey, data, path, options)
+                fb.createFormSelect(key, data, path, options)
         );
     };
 }
 
 export function FormUpload(data?: FormUploadData): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
+    return (target: any, key: string): void => {
         defineFormControl(
-            target, propertyKey,
+            target, key,
             (fb, path, options) =>
-                fb.createFormUpload(propertyKey, data, path, options)
+                fb.createFormUpload(key, data, path, options)
         );
     };
 }
@@ -68,16 +68,16 @@ export function FormFile(data?: FormUploadData): PropertyDecorator {
 }
 
 export function FormGroup(data?: FormGroupData): PropertyDecorator {
-    return (target: any, propertyKey: string): void => {
+    return (target: any, key: string): void => {
         defineFormControl(
-            target, propertyKey,
+            target, key,
             (fb, path, options) => {
-                const propClass = ReflectUtils.getOwnMetadata("design:type", target, propertyKey);
+                const propClass = ReflectUtils.getOwnMetadata("design:type", target, key);
                 const fields = fb.resolveFormFields(
-                    propClass, !path ? propertyKey : `${path}.${propertyKey}`, options
+                    propClass, !path ? key : `${path}.${key}`, options
                 );
                 return {
-                    key: propertyKey,
+                    key: key,
                     fieldGroup: fields
                 };
             }

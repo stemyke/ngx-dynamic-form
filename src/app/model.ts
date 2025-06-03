@@ -2,14 +2,14 @@ import {DatePipe} from "@angular/common";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     emailValidation,
-    FormFieldSerializer, FormGroup,
+    FormFieldSerializer,
+    FormGroup,
     FormInput,
     FormSelect,
     FormSelectOption,
     FormSerializable,
     requiredValidation
 } from "../public_api";
-import {Injectable} from "@angular/core";
 
 function getPreferredContacts(): Promise<FormSelectOption[]> {
     return new Promise<FormSelectOption[]>(resolve => {
@@ -129,7 +129,7 @@ export class OrderModel {
     weddingDate: Date = null;
 
     @FormSelect({
-        // options: FormOptions.getPreferredContacts
+        options: getPreferredContacts
     })
     @FormSerializable()
     preferredContact: string = "";

@@ -1,23 +1,29 @@
-import {Injectable, Injector, Type} from "@angular/core";
-import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
+import {Inject, Injectable, Injector, Type} from "@angular/core";
+import {from} from "rxjs";
+import {ILanguageService, LANGUAGE_SERVICE, ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 
 import {
     FormBuilderOptions,
-    FormFieldConfig,
+    FormFieldConfig, FormFieldCustom,
     FormFieldData,
     FormFieldProps, FormGroupData,
-    FormInputData, FormSelectData, FormUploadData,
+    FormHookConfig,
+    FormInputData,
+    FormSelectData,
+    FormSelectOption,
+    FormUploadData,
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
-import {MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {isStringWithVal, MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, path: string, options: FormBuilderOptions) => FormFieldConfig;
 
 @Injectable()
 export class DynamicFormBuilderService {
 
-    constructor(readonly injector: Injector) {
+    constructor(readonly injector: Injector,
+                @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
     }
 
     protected getLabel(label: string, path: string, options: FormBuilderOptions): string {
@@ -29,11 +35,12 @@ export class DynamicFormBuilderService {
     }
 
     protected createFormField(
-        key: string, type: string, data: FormFieldData, props: FormFieldProps, path: string, options: FormBuilderOptions
+        key: string, type: string, data: FormFieldData, props: FormFieldProps, path: string, options: FormBuilderOptions,
+        custom?: FormFieldCustom
     ): FormFieldConfig {
         const validators = Array.isArray(data.validators)
             ? data.validators.reduce((res, validator, ix) => {
-                res[`validator_${ix}`] = validator;
+                res[validator.validatorName || `validator_${ix}`] = validator;
                 return res;
             }, {} as Validators)
             : data.validators || {};
@@ -52,7 +59,8 @@ export class DynamicFormBuilderService {
                 ...props,
                 required: !!validators.required,
                 label: this.getLabel(label, path, options),
-            }
+            },
+            ...custom
         }
     }
 
@@ -65,7 +73,6 @@ export class DynamicFormBuilderService {
             const field = builder(this, path, options);
             result.push(field);
         }
-        console.log(result);
         return result;
     }
 
@@ -87,32 +94,65 @@ export class DynamicFormBuilderService {
     }
 
     createFormSelect(key: string, data: FormSelectData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
-        return this.createFormField(key, "input", data, {
-            type: data.type,
-            step: data.step,
-            min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
-            max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
-            minLength: isNaN(data.minLength) ? 0 : data.minLength,
-            maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
-            placeholder: data.placeholder || "",
-            attributes: {
-                autocomplete: data.autocomplete || "off",
-            },
-        }, path, options);
+        return this.createFormField(key, "select", data, {
+            multiple: data.multiple,
+            groupBy: data.groupBy,
+            inline: data.inline,
+            allowEmpty: data.allowEmpty
+        }, path, options, {
+            hooks: {
+                onInit: field => {
+                    const options = data.options(field);
+                    field.props.options = options instanceof Promise ? from(options.then(res => {
+                        return this.fixSelectOptions(field, res);
+                    })) : options;
+                }
+            }
+        });
     }
 
     createFormUpload(key: string, data: FormUploadData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
-        return this.createFormField(key, "input", data, {
-            type: data.type,
-            step: data.step,
-            min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
-            max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
-            minLength: isNaN(data.minLength) ? 0 : data.minLength,
-            maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
-            placeholder: data.placeholder || "",
-            attributes: {
-                autocomplete: data.autocomplete || "off",
-            },
+        return this.createFormField(key, "upload", data, {
+            // accept: data.type,
+            // step: data.step,
+            // min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
+            // max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
+            // minLength: isNaN(data.minLength) ? 0 : data.minLength,
+            // maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
+            // placeholder: data.placeholder || "",
+            // attributes: {
+            //     autocomplete: data.autocomplete || "off",
+            // },
         }, path, options);
+    }
+
+    createFormGroup(key: string, data: FormGroupData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        return this.createFormField(key, null, data, {
+            // accept: data.type,
+            // step: data.step,
+            // min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
+            // max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
+            // minLength: isNaN(data.minLength) ? 0 : data.minLength,
+            // maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
+            // placeholder: data.placeholder || "",
+            // attributes: {
+            //     autocomplete: data.autocomplete || "off",
+            // },
+        }, path, options, {
+
+        });
+    }
+
+    async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {
+        if (!options) return [];
+        for (const option of options) {
+            const classes = Array.isArray(option.classes) ? option.classes : [`${option.classes}`];
+            option.className = classes.filter(isStringWithVal).join(" ");
+            option.label = await this.language.getTranslation(option.label);
+        }
+        const control = field.formControl;
+        if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
+        control.setValue(options[0].value);
+        return options;
     }
 }

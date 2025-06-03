@@ -2,6 +2,7 @@
     <div [ngClass]="['ngx-dynamic-form-field', 'ngx-dynamic-form-' + field.type]">
         <label class="control-label ng-star-inserted" *ngIf="props.label">
             {{ props.label | translate }}
+            <span class="form-field-required" *ngIf="props.required && props.hideRequiredMarker !== true" aria-hidden="true">*</span>
             <p class="form-field-description" *ngIf="props.description">
                 {{ props.description | translate }}
             </p>

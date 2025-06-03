@@ -390,8 +390,8 @@ export class DynamicFormService {
                     wrap: property.wrap || false,
                     autoComplete: property.autoComplete || "off",
                     multiple: property.type == "array",
-                    minLength: isNaN(property.minLength) ? 0 : property.minLength,
-                    maxLength: isNaN(property.maxLength) ? MAX_INPUT_NUM : property.maxLength,
+                    minLength: property.minLength,
+                    maxLength: property.maxLength,
                     placeholder: property.placeholder || ""
                 }
             }
@@ -416,7 +416,7 @@ export class DynamicFormService {
     getFormSelectOptions(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum)) {
-            return from(this.fixSelectOptions(field, $enum.map(value => {
+            return from(this.builder.fixSelectOptions(field, $enum.map(value => {
                 const label = options.labelPrefix
                     ? this.language.getTranslationSync(`${options.labelPrefix}.${property.id}.${value}`)
                     : `${property.id}.${value}`;
@@ -443,7 +443,7 @@ export class DynamicFormService {
             });
             const options = this.api.cache[endpoint] as Promise<FormSelectOption[]>;
             return from(options.then(opts => {
-                return this.fixSelectOptions(field, opts.map(o => Object.assign({}, o)))
+                return this.builder.fixSelectOptions(field, opts.map(o => Object.assign({}, o)))
             }));
         }
         let path = property.optionsPath as string;
@@ -470,7 +470,7 @@ export class DynamicFormService {
                 const finalOpts = isObservable(currentOpts)
                     ? await firstValueFrom(currentOpts)
                     : (Array.isArray(currentOpts) ? currentOpts : []);
-                return this.fixSelectOptions(field, (!Array.isArray(controlVal) ? [] : controlVal).map(value => {
+                return this.builder.fixSelectOptions(field, (!Array.isArray(controlVal) ? [] : controlVal).map(value => {
                     const modelOption = finalOpts.find(t => t.value == value);
                     return {value, label: modelOption?.label || value};
                 }));
@@ -557,19 +557,6 @@ export class DynamicFormService {
             }, endpoint)
         }
         return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
-    }
-
-    protected async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {
-        if (!options) return [];
-        for (const option of options) {
-            const classes = Array.isArray(option.classes) ? option.classes : [`${option.classes}`];
-            option.className = classes.filter(isStringWithVal).join(" ");
-            option.label = await this.language.getTranslation(option.label);
-        }
-        const control = field.formControl;
-        if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
-        control.setValue(options[0].value);
-        return options;
     }
 
     protected getValidators(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): Validators {
