@@ -35,7 +35,7 @@ a.dropdown-box-toggle-link {
     text-decoration: none;
 }
 
-.ngx-dynamic-form-group, .ngx-dynamic-form-field {
+.ngx-dynamic-form-group, .ngx-dynamic-form-array, .ngx-dynamic-form-field {
     display: flex;
     margin-bottom: 10px;
 
@@ -48,6 +48,26 @@ a.dropdown-box-toggle-link {
     }
 
     > div {
+        flex: 1;
+    }
+}
+
+.ngx-dynamic-form-group, .ngx-dynamic-form-array {
+    border-bottom: 1px solid #a6a6a6;
+}
+
+.form-array-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+
+    > dynamic-form-group {
+        display: block;
+        min-width: 100%;
+    }
+
+    > dynamic-form-field {
         flex: 1;
     }
 }

@@ -154,6 +154,7 @@ export class DynamicFormBuilderService {
             clearItems: data.clearItems !== false
         }, path, options, {
             fieldArray: Array.isArray(array) ? {
+                wrappers: ["form-group"],
                 fieldGroup: array,
             } : array
         });

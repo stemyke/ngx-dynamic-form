@@ -3,7 +3,7 @@ import {FieldWrapper} from "@ngx-formly/core";
 
 @Component({
     standalone: false,
-    selector: "dynamic-form-field",
+    selector: "dynamic-form-group",
     templateUrl: "./dynamic-form-group.component.html",
     encapsulation: ViewEncapsulation.None
 })

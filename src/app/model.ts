@@ -94,6 +94,12 @@ export class OrderModel {
     @FormArray("text")
     lines: string[] = [];
 
+    @FormArray({
+        type: "number",
+        step: 0.05
+    })
+    nums: number[] = [];
+
     @FormInput({
         label: "",
         fieldSet: "contact-1",

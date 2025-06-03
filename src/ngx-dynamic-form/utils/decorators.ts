@@ -90,14 +90,14 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
     };
 }
 
-export function FormArray(itemType: string | Type<any>, data?: FormArrayData): PropertyDecorator {
+export function FormArray(itemType: string | FormInputData | Type<any>, data?: FormArrayData): PropertyDecorator {
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
             (fb, path, options) => {
                 const array = typeof itemType === "function" ? fb.resolveFormFields(
                     itemType, !path ? key : `${path}.${key}`, options
-                ) : fb.createFormInput("", {type: `${itemType}`}, path, options);
+                ) : fb.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, path, options);
                 return fb.createFormArray(key, array, data, path, options);
             }
         );
