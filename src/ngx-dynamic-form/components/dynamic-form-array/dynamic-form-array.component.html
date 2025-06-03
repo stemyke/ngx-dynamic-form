@@ -8,28 +8,31 @@
             <div *ngFor="let field of field.fieldGroup; let i = index" class="form-array-item">
                 <formly-field [field]="field"></formly-field>
                 <div class="form-array-buttons">
-                    <button type="button" class="btn btn-sm btn-primary" (click)="remove(i)">
-                        <i icon="trash-outline"></i>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-primary" (click)="add(i)">
-                        <i icon="plus-outline"></i>
-                    </button>
+                    @if (props.removeItem) {
+                        <button type="button" class="btn btn-sm btn-primary" (click)="remove(i)">
+                            <i icon="trash-outline"></i>
+                        </button>
+                    }
+                    @if (props.insertItem) {
+                        <button type="button" class="btn btn-sm btn-primary" (click)="add(i)">
+                            <i icon="plus-outline"></i>
+                        </button>
+                    }
                 </div>
             </div>
             <div class="form-array-buttons">
-                <!--        <button type="button" class="btn btn-sm btn-primary"-->
-                <!--                (click)="clearFormArray(array, model)" *ngIf="model.clearItems && array?.length > 0">-->
-                <!--            <i icon="trash-outline"></i>-->
-                <!--            {{ 'button.clear-items' | translate }}-->
-                <!--        </button>-->
-                <button type="button" class="btn btn-sm btn-primary" (click)="clear()">
-                    <i icon="trash-outline"></i>
-                    {{ 'button.clear-items' | translate }}
-                </button>
-                <button type="button" class="btn btn-sm btn-primary" (click)="add()">
-                    <i icon="plus-outline"></i>
-                    {{ 'button.insert-item' | translate }}
-                </button>
+                @if (props.clearItems) {
+                    <button type="button" class="btn btn-sm btn-primary" (click)="clear()">
+                        <i icon="trash-outline"></i>
+                        {{ 'button.clear-items' | translate }}
+                    </button>
+                }
+                @if (props.addItem) {
+                    <button type="button" class="btn btn-sm btn-primary" (click)="add()">
+                        <i icon="plus-outline"></i>
+                        {{ 'button.insert-item' | translate }}
+                    </button>
+                }
             </div>
         </div>
     </div>
