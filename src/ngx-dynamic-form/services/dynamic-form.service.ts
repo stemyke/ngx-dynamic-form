@@ -62,7 +62,7 @@ export class DynamicFormService {
     }
 
     async serializeForm(form: IDynamicForm, validate?: boolean): Promise<FormSerializeResult> {
-        const fields = form.fields();
+        const fields = form.config();
         if (!fields) return null;
         if (validate) {
             // await this.validateForm(form);

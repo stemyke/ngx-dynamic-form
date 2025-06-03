@@ -10,6 +10,7 @@ import {
     FormSerializable,
     requiredValidation
 } from "../public_api";
+import {FormArray} from "../ngx-dynamic-form/utils/decorators";
 
 function getPreferredContacts(): Promise<FormSelectOption[]> {
     return new Promise<FormSelectOption[]>(resolve => {
@@ -86,6 +87,12 @@ export class OrderModel {
 
     @FormGroup()
     buyerAddress: AddressModel = new AddressModel();
+
+    @FormArray(AddressModel)
+    addresses: AddressModel[] = [];
+
+    @FormArray("text")
+    lines: string[] = [];
 
     @FormInput({
         label: "",

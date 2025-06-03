@@ -1,6 +1,7 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {FormArray} from "@angular/forms";
 import {FieldArrayType} from "@ngx-formly/core";
+import {FormFieldConfig} from "../../common-types";
 
 @Component({
     standalone: false,
@@ -8,7 +9,7 @@ import {FieldArrayType} from "@ngx-formly/core";
     templateUrl: "./dynamic-form-array.component.html",
     encapsulation: ViewEncapsulation.None
 })
-export class DynamicFormArrayComponent extends FieldArrayType {
+export class DynamicFormArrayComponent extends FieldArrayType<FormFieldConfig> {
     clear(): void {
         const control = this.formControl as FormArray;
         while (control.length > 0) {

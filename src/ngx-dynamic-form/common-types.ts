@@ -27,6 +27,13 @@ export interface FormFieldProps extends FormlyFieldProps {
     inline?: boolean;
     allowEmpty?: boolean;
     groupBy?: string;
+    // --- Array props ---
+    addItem?: boolean;
+    insertItem?: boolean;
+    cloneItem?: boolean;
+    moveItem?: boolean;
+    removeItem?: boolean;
+    clearItems?: boolean;
 }
 
 export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
@@ -67,7 +74,7 @@ export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption
 
 export interface IDynamicForm {
 
-    readonly fields: Signal<FormFieldConfig[]>;
+    readonly config: Signal<FormFieldConfig[]>;
     readonly group: Signal<FormGroup>;
     readonly status: Signal<DynamicFormState>;
     readonly onSubmit: OutputRef<IDynamicForm>;
@@ -107,7 +114,7 @@ export type AsyncValidators = FormFieldValidation<AsyncValidatorFn, AsyncBoolean
 
 // --- Form field data types ---
 
-export type FormFieldCustom = Pick<FormFieldConfig, "hooks" | "fieldGroup" | "fieldArray">;
+export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
 export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden">
     & {
@@ -128,8 +135,10 @@ export type FormSelectData = FormFieldData
 export type FormUploadData = FormFieldData
     & Pick<FormFieldProps, "accept">;
 
-export type FormGroupData = FormFieldData
-    & Pick<FormFieldProps, "type" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength">;
+export type FormGroupData = FormFieldData;
+
+export type FormArrayData = FormFieldData
+    & Pick<FormFieldProps, "addItem" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "clearItems">;
 
 // --- JSON schema interfaces ---
 

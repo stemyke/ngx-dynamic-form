@@ -11,6 +11,8 @@ form {
     max-width: 800px;
     margin: 50px auto;
     padding: 20px;
+    border: 1px solid gray;
+    border-radius: 15px;
 }
 
 .text-canvas {
@@ -31,4 +33,21 @@ dynamic-table {
 a.dropdown-box-toggle-link {
     color: inherit;
     text-decoration: none;
+}
+
+.ngx-dynamic-form-group, .ngx-dynamic-form-field {
+    display: flex;
+    margin-bottom: 10px;
+
+    > label {
+        width: 200px;
+
+        .form-field-required {
+            color: red;
+        }
+    }
+
+    > div {
+        flex: 1;
+    }
 }

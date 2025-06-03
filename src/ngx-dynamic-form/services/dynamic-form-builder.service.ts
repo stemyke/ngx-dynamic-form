@@ -3,6 +3,7 @@ import {from} from "rxjs";
 import {ILanguageService, LANGUAGE_SERVICE, ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 
 import {
+    FormArrayData,
     FormBuilderOptions,
     FormFieldConfig, FormFieldCustom,
     FormFieldData,
@@ -77,6 +78,7 @@ export class DynamicFormBuilderService {
     }
 
     createFormInput(key: string, data: FormInputData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        data = data || {};
         return this.createFormField(key, "input", data, {
             type: data.type,
             pattern: data.pattern,
@@ -94,6 +96,7 @@ export class DynamicFormBuilderService {
     }
 
     createFormSelect(key: string, data: FormSelectData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        data = data || {options: () => []};
         return this.createFormField(key, "select", data, {
             multiple: data.multiple,
             groupBy: data.groupBy,
@@ -112,6 +115,7 @@ export class DynamicFormBuilderService {
     }
 
     createFormUpload(key: string, data: FormUploadData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        data = data || {};
         return this.createFormField(key, "upload", data, {
             // accept: data.type,
             // step: data.step,
@@ -126,20 +130,32 @@ export class DynamicFormBuilderService {
         }, path, options);
     }
 
-    createFormGroup(key: string, data: FormGroupData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
-        return this.createFormField(key, null, data, {
-            // accept: data.type,
-            // step: data.step,
-            // min: isNaN(data.min) ? MIN_INPUT_NUM : data.min,
-            // max: isNaN(data.max) ? MAX_INPUT_NUM : data.max,
-            // minLength: isNaN(data.minLength) ? 0 : data.minLength,
-            // maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
-            // placeholder: data.placeholder || "",
-            // attributes: {
-            //     autocomplete: data.autocomplete || "off",
-            // },
-        }, path, options, {
+    createFormGroup(key: string, fields: FormFieldConfig[], data: FormGroupData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        data = data || {};
+        return this.createFormField(key, undefined, data, {
 
+        }, path, options, {
+            wrappers: ["form-group"],
+            fieldGroup: fields
+        });
+    }
+
+    createFormArray(key: string, array: FormFieldConfig | FormFieldConfig[], data: FormArrayData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        data = data || {};
+        return this.createFormField(key, "array", data, {
+            // initialCount: data.initialCount || 0,
+            // sortable: data.sortable || false,
+            // useTabs: data.useTabs || false,
+            addItem: data.addItem !== false,
+            insertItem: data.insertItem !== false,
+            cloneItem: data.cloneItem !== false,
+            moveItem: data.moveItem !== false,
+            removeItem: data.removeItem !== false,
+            clearItems: data.clearItems !== false
+        }, path, options, {
+            fieldArray: Array.isArray(array) ? {
+                fieldGroup: array,
+            } : array
         });
     }
 

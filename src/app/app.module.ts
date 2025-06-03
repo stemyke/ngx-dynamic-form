@@ -7,6 +7,7 @@ import {NgxDynamicFormModule} from "../public_api";
 
 import {AppComponent} from "./app.component";
 import {FormlyBootstrapModule} from "@ngx-formly/bootstrap";
+import {DatePipe} from "@angular/common";
 
 @NgModule({
     declarations: [
@@ -20,7 +21,8 @@ import {FormlyBootstrapModule} from "@ngx-formly/bootstrap";
         NgxDynamicFormModule.forRoot()
     ],
     providers: [
-        provideHttpClient()
+        provideHttpClient(),
+        DatePipe
     ],
     bootstrap: [AppComponent]
 })

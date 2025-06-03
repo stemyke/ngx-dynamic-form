@@ -26,6 +26,7 @@ export {
     FormSelectData,
     FormUploadData,
     FormGroupData,
+    FormArrayData,
 
     FormFieldCustomizer,
     ConfigForSchemaOptions,

@@ -1,6 +1,14 @@
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
-import {FormFieldSerializer, FormGroupData, FormInputData, FormSelectData, FormUploadData} from "../common-types";
+import {
+    FormArrayData,
+    FormFieldSerializer,
+    FormGroupData,
+    FormInputData,
+    FormSelectData,
+    FormUploadData
+} from "../common-types";
 import {FormFieldBuilder} from "../services/dynamic-form-builder.service";
+import {Type} from "@angular/core";
 
 function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilder): void {
     const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target) || new Set();
@@ -76,10 +84,21 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
                 const fields = fb.resolveFormFields(
                     propClass, !path ? key : `${path}.${key}`, options
                 );
-                return {
-                    key: key,
-                    fieldGroup: fields
-                };
+                return fb.createFormGroup(key, fields, data, path, options);
+            }
+        );
+    };
+}
+
+export function FormArray(itemType: string | Type<any>, data?: FormArrayData): PropertyDecorator {
+    return (target: any, key: string): void => {
+        defineFormControl(
+            target, key,
+            (fb, path, options) => {
+                const array = typeof itemType === "function" ? fb.resolveFormFields(
+                    itemType, !path ? key : `${path}.${key}`, options
+                ) : fb.createFormInput("", {type: `${itemType}`}, path, options);
+                return fb.createFormArray(key, array, data, path, options);
             }
         );
     };
