@@ -8,8 +8,8 @@ import {
     ViewEncapsulation
 } from "@angular/core";
 import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
-import {DynamicFormService, IDynamicForm} from "../public_api";
-import {OrderModel} from "./model";
+import {DynamicFormBuilderService, DynamicFormService, IDynamicForm} from "../public_api";
+import {AddressModel, OrderModel} from "./model";
 
 @Component({
     standalone: false,
@@ -34,7 +34,14 @@ export class AppComponent implements OnInit {
         loader: async p => {
             localStorage.setItem("selectedSchema", p.request);
             return this.forms.getFormFieldsForSchema(p.request, {
-                labelPrefix: "form"
+                labelPrefix: "form",
+                customizer: (_p, _s, field, path, options) => {
+                    if (field.key === "__root") {
+                        field.fieldGroup.unshift(this.fb.resolveFormGroup("address", AddressModel, {}, path, options));
+                        return field;
+                    }
+                    return field;
+                }
             });
         }
     });
@@ -50,7 +57,9 @@ export class AppComponent implements OnInit {
 
     decoratorModel = signal<any>(new OrderModel());
 
-    constructor(private openApi: OpenApiService, private forms: DynamicFormService) {
+    constructor(private openApi: OpenApiService,
+                private fb: DynamicFormBuilderService,
+                private forms: DynamicFormService) {
         setTimeout(() => {
             this.model.update(value => {
                 return {

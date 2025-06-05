@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {distinctUntilChanged, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
+import {distinctUntilChanged, startWith, switchMap} from "rxjs";
 import {
     API_SERVICE,
     IApiService,
@@ -86,6 +86,20 @@ export class DynamicFormBuilderService {
             result.push(field);
         }
         return result;
+    }
+
+    resolveFormGroup(key: string, target: Type<any>, data: FormGroupData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        const fields = this.resolveFormFields(
+            target, !path ? key : `${path}.${key}`, options
+        );
+        return this.createFormGroup(key, fields, data, path, options);
+    }
+
+    resolveFormArray(key: string, itemType: string | FormInputData | Type<any>, data: FormArrayData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
+        const array = typeof itemType === "function" ? this.resolveFormFields(
+            itemType, !path ? key : `${path}.${key}`, options
+        ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, path, options);
+        return this.createFormArray(key, array, data, path, options);
     }
 
     createFormInput(key: string, data: FormInputData, path: string, options: FormBuilderOptions): FormFieldConfig {

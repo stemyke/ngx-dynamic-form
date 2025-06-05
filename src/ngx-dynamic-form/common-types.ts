@@ -7,6 +7,9 @@ import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty, IRequestOptions} 
 
 export type PromiseOrNot<T> = Promise<T> | T;
 
+// --- Basic frm constants ---
+export const FORM_ROOT_KEY = "__root";
+
 // --- Basic form types ---
 
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
@@ -161,8 +164,8 @@ export type FormArrayData = FormFieldData
 // --- JSON schema interfaces ---
 
 export type FormFieldCustomizer = (
-    property: IOpenApiSchemaProperty, schema: IOpenApiSchema,
-    field: FormlyFieldConfig, path: string, injector: Injector
+    property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormlyFieldConfig,
+    path: string, options: FormBuilderOptions, injector: Injector
 ) => PromiseOrNot<FormlyFieldConfig | FormlyFieldConfig[]>;
 
 export interface ConfigForSchemaOptions extends FormBuilderOptions {

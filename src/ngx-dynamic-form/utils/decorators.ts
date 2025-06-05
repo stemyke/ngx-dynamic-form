@@ -80,11 +80,8 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
         defineFormControl(
             target, key,
             (fb, path, options) => {
-                const propClass = ReflectUtils.getOwnMetadata("design:type", target, key);
-                const fields = fb.resolveFormFields(
-                    propClass, !path ? key : `${path}.${key}`, options
-                );
-                return fb.createFormGroup(key, fields, data, path, options);
+                const targetType = ReflectUtils.getOwnMetadata("design:type", target, key);
+                return fb.resolveFormGroup(key, targetType, data, path, options);
             }
         );
     };
@@ -95,10 +92,7 @@ export function FormArray(itemType: string | FormInputData | Type<any>, data?: F
         defineFormControl(
             target, key,
             (fb, path, options) => {
-                const array = typeof itemType === "function" ? fb.resolveFormFields(
-                    itemType, !path ? key : `${path}.${key}`, options
-                ) : fb.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, path, options);
-                return fb.createFormArray(key, array, data, path, options);
+                return fb.resolveFormArray(key, itemType, data, path, options);
             }
         );
     };

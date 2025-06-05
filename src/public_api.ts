@@ -1,4 +1,6 @@
 export {
+    FORM_ROOT_KEY,
+
     FormBuilderOptions,
     FormFieldProps,
     FormBaseFieldConfig,

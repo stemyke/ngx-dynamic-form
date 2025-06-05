@@ -16,8 +16,10 @@ import {
 import {
     ConfigForSchemaOptions,
     ConfigForSchemaWrapOptions,
+    FORM_ROOT_KEY,
     FormFieldConfig,
-    FormFieldCustomizer, FormFieldData,
+    FormFieldCustomizer,
+    FormFieldData,
     FormSelectOption,
     FormSelectOptions,
     FormSerializeResult,
@@ -25,15 +27,14 @@ import {
     Validators
 } from "../common-types";
 
-import {findRefs, isStringWithVal, MAX_INPUT_NUM, mergeFormFields, MIN_INPUT_NUM} from "../utils/misc";
+import {findRefs, isStringWithVal, mergeFormFields} from "../utils/misc";
 import {
     emailValidation,
     maxLengthValidation,
     maxValueValidation,
     minLengthValidation,
     minValueValidation,
-    requiredValidation,
-    validationMessage
+    requiredValidation
 } from "../utils/validation";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
@@ -125,11 +126,15 @@ export class DynamicFormService {
             schema,
             injector: this.injector,
             customizer: async (property, options, config, path: string) => {
-                const pathPrefix = !path ? `` : `${path}.`;
                 config.defaultValue = `${config.type}`.startsWith("date")
                     ? this.convertToDate(property.default) : property.default;
                 if (!ObjectUtils.isFunction(customizeConfig)) return [config];
-                let res = customizeConfig(property, schema, config, `${pathPrefix}${config.key}`, this.injector);
+                let res = customizeConfig(
+                    property, schema, config,
+                    config.key === FORM_ROOT_KEY ? `` : (!path ? `${config.key}` : `${path}.${config.key}`),
+                    options,
+                    this.injector
+                );
                 if (!res) return [config];
                 if (res instanceof Promise) {
                     res = await res;
@@ -182,7 +187,7 @@ export class DynamicFormService {
             return [];
         const keys = Object.keys(schema.properties || {});
         const others: FormFieldConfig[] = [];
-        const groups: {[fs: string]: FormFieldConfig[]} = {};
+        const groups: { [fs: string]: FormFieldConfig[] } = {};
         // Collect all properties of this schema def
         for (const p of keys) {
             const property = schema.properties[p];
