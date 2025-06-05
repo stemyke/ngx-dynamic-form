@@ -19,7 +19,6 @@
         @for (field of field.fieldGroup; track field.key; let ix = $index) {
             @if (!props.useTabs || ix === currentTab()) {
                 <div class="form-array-item">
-                    <formly-field [field]="field"></formly-field>
                     <div class="form-array-buttons">
                         @if (props.removeItem) {
                             <button type="button" class="btn btn-sm btn-primary" (click)="remove(ix)">
@@ -32,6 +31,7 @@
                             </button>
                         }
                     </div>
+                    <formly-field [field]="field"></formly-field>
                 </div>
             }
         }

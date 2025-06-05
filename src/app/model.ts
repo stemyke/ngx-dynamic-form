@@ -36,8 +36,6 @@ function serializeDate(format: string = "yyyy-MM-dd", defaultValue: string = "")
 export class AddressModel {
 
     @FormInput({
-        fieldSet: "fds",
-        hidden: true,
         placeholder: "label.buyerStreet"
     })
     @FormSerializable()
