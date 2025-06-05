@@ -11,11 +11,11 @@ import {
     Renderer2,
     signal
 } from "@angular/core";
+import {outputToObservable} from "@angular/core/rxjs-interop";
 import {debounceTime} from "rxjs/operators";
 import {IAsyncMessage, TOASTER_SERVICE} from "@stemy/ngx-utils";
 
 import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
-import {toObservable} from "../utils/signals";
 
 @Directive({
     standalone: false,
@@ -78,7 +78,7 @@ export class AsyncSubmitDirective {
         effect(() => {
             const form = this.form();
             if (!form) return;
-            const sub = toObservable(form.onSubmit)
+            const sub = outputToObservable(form.onSubmit)
                 .pipe(debounceTime(200)).subscribe(() => this.callMethod());
             return () => sub.unsubscribe();
         });

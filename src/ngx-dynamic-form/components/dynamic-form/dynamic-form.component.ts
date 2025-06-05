@@ -1,15 +1,26 @@
-import {Component, computed, inject, Injector, input, output, resource, ViewEncapsulation} from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    Injector,
+    input,
+    output,
+    resource,
+    ViewEncapsulation
+} from "@angular/core";
+import {rxResource} from "@angular/core/rxjs-interop";
 import {FormGroup} from "@angular/forms";
 import {FormlyFormOptions} from "@ngx-formly/core";
 import {FormFieldConfig, IDynamicForm} from "../../common-types";
-import {rxToSignal} from "../../utils/signals";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 
 @Component({
     standalone: false,
     selector: "dynamic-form",
     templateUrl: "./dynamic-form.component.html",
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DynamicFormComponent implements IDynamicForm {
 
@@ -41,9 +52,12 @@ export class DynamicFormComponent implements IDynamicForm {
         return new FormGroup({});
     });
 
-    protected readonly status$ = computed(() => this.group()?.statusChanges);
+    protected readonly status$ = rxResource({
+        request: () => this.group(),
+        loader: p => p.request.statusChanges
+    });
 
-    readonly status = rxToSignal(this.status$, "PENDING");
+    readonly status = computed(() => this.status$.value());
 
     readonly onSubmit = output<IDynamicForm>();
 
