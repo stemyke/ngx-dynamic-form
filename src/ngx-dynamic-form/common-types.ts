@@ -1,9 +1,9 @@
 import {Injector, OutputRef, Signal} from "@angular/core";
 import {AbstractControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
+import {FieldTypeConfig, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
-import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
+import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty, IRequestOptions} from "@stemy/ngx-utils";
 
 export type PromiseOrNot<T> = Promise<T> | T;
 
@@ -11,6 +11,7 @@ export type PromiseOrNot<T> = Promise<T> | T;
 
 export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
+export type UploadData = Record<string, any> | ArrayBuffer | FormData;
 
 // --- Basic form field interfaces ---
 
@@ -21,19 +22,33 @@ export interface FormBuilderOptions {
 export interface FormFieldProps extends FormlyFieldProps {
     // --- Input props ---
     autocomplete?: string;
-    accept?: string;
+    // --- Checkbox props ---
+    formCheck?: string;
+    indeterminate?: boolean;
     // --- Select props ---
     multiple?: boolean;
     inline?: boolean;
     allowEmpty?: boolean;
     groupBy?: string;
     // --- Array props ---
+    useTabs?: boolean;
+    tabsLabel?: string;
     addItem?: boolean;
     insertItem?: boolean;
     cloneItem?: boolean;
     moveItem?: boolean;
     removeItem?: boolean;
     clearItems?: boolean;
+    // --- Upload props ---
+    accept?: string | string[];
+    url?: string;
+    maxSize?: number;
+    uploadOptions?: IRequestOptions;
+    createUploadData?: (file: File) => UploadData | Promise<UploadData>;
+    // --- Old upload props
+    multi?: boolean;
+    asFile?: boolean;
+    uploadUrl?: string;
 }
 
 export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
@@ -56,8 +71,11 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormBaseFieldConfig
     serializer?: FormFieldSerializer;
     serialize?: boolean;
     fieldSet?: string;
-    classes?: string;
     hooks?: FormHookConfig;
+}
+
+export interface FormFieldType<T = FormFieldProps> extends FieldTypeConfig<T> {
+
 }
 
 export interface FormSerializeResult {
@@ -121,24 +139,24 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden"
     validators?: Validators | ValidatorFn[];
     serializer?: FormFieldSerializer;
     fieldSet?: string;
-    classes?: string;
+    classes?: string[] | string;
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "accept">;
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "formCheck" | "indeterminate" | "cols" | "rows">;
 
 export type FormSelectData = FormFieldData
-    & Pick<FormFieldProps, "multiple" | "inline" | "allowEmpty" | "groupBy"> & {
+    & Pick<FormFieldProps, "multiple" | "type" | "inline" | "allowEmpty" | "groupBy"> & {
     options: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
 };
 
 export type FormUploadData = FormFieldData
-    & Pick<FormFieldProps, "accept">;
+    & Pick<FormFieldProps, "inline" | "multiple" | "accept" | "url" | "maxSize" | "uploadOptions" | "createUploadData" | "multi" | "asFile" | "uploadUrl">;
 
 export type FormGroupData = FormFieldData;
 
 export type FormArrayData = FormFieldData
-    & Pick<FormFieldProps, "addItem" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "clearItems">;
+    & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "addItem" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "clearItems">;
 
 // --- JSON schema interfaces ---
 

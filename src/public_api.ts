@@ -6,6 +6,7 @@ export {
     FormHookFn,
     FormHookConfig,
     FormFieldConfig,
+    FormFieldType,
     FormSerializeResult,
     FormSelectOption,
     FormSelectOptions,

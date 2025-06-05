@@ -32,7 +32,6 @@ export class DynamicFormComponent implements IDynamicForm {
     readonly fields = input<FormFieldConfig[]>(null);
 
     readonly config = computed(() => {
-        console.log("")
         return this.fields() || this.builder.resolveFormFields(this.model()?.constructor, "", {
             labelPrefix: this.labelPrefix()
         });

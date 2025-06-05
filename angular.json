@@ -60,9 +60,13 @@
                         "buildTarget": "ngx-dynamic-form:build",
                         "port": 4100
                     },
+                    "defaultConfiguration": "development",
                     "configurations": {
                         "production": {
                             "buildTarget": "ngx-dynamic-form:build:production"
+                        },
+                        "development": {
+                            "buildTarget": "ngx-dynamic-form:build:development"
                         }
                     }
                 },

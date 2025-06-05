@@ -5,6 +5,7 @@ import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic
 import {DynamicFormFieldComponent} from "./components/dynamic-form-field/dynamic-form-field.component";
 import {DynamicFormFieldsetComponent} from "./components/dynamic-form-fieldset/dynamic-form-fieldset.component";
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
+import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynamic-form-upload.component";
 
 // --- Components ---
 export const components = [
@@ -12,7 +13,8 @@ export const components = [
     DynamicFormArrayComponent,
     DynamicFormFieldComponent,
     DynamicFormFieldsetComponent,
-    DynamicFormGroupComponent
+    DynamicFormGroupComponent,
+    DynamicFormUploadComponent
 ];
 
 // --- Directives ---

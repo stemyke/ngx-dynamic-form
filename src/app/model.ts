@@ -8,6 +8,7 @@ import {
     FormSelect,
     FormSelectOption,
     FormSerializable,
+    FormUpload,
     requiredValidation
 } from "../public_api";
 import {FormArray} from "../ngx-dynamic-form/utils/decorators";
@@ -88,7 +89,7 @@ export class OrderModel {
     @FormGroup()
     buyerAddress: AddressModel = new AddressModel();
 
-    @FormArray(AddressModel)
+    @FormArray(AddressModel, {useTabs: true, tabsLabel: "street"})
     addresses: AddressModel[] = [];
 
     @FormArray("text")
@@ -147,6 +148,13 @@ export class OrderModel {
     @FormSerializable()
     preferredContact: string = "";
 
+    @FormSelect({
+        options: getPreferredContacts,
+        type: "radio"
+    })
+    @FormSerializable()
+    radioContact: string = "";
+
     @FormSerializable()
     individualEngravingOptionLeft: string = "none";
 
@@ -159,6 +167,10 @@ export class OrderModel {
     })
     @FormSerializable()
     message: string = "";
+
+    @FormUpload()
+    @FormSerializable()
+    file: string = "";
 
     constructor(data?: any) {
         if (data) Object.assign(this, data);

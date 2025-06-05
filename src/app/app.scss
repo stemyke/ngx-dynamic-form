@@ -40,7 +40,9 @@ a.dropdown-box-toggle-link {
     margin-bottom: 10px;
 
     > label {
-        width: 200px;
+        width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
         .form-field-required {
             color: red;
