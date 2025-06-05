@@ -9,6 +9,7 @@ import {
     FormSelectOption,
     FormSerializable,
     FormUpload,
+    minValueValidation,
     requiredValidation
 } from "../public_api";
 import {FormArray} from "../ngx-dynamic-form/utils/decorators";
@@ -60,7 +61,6 @@ export class AddressModel {
 export class OrderModel {
 
     @FormInput({
-        label: "",
         fieldSet: "commission",
         validators: [requiredValidation()]
     })
@@ -68,7 +68,7 @@ export class OrderModel {
     commission: string = "";
 
     @FormInput({
-        label: "",
+        label: "buyerName",
         fieldSet: "buyer",
         classes: "form-group-sm"
     })
@@ -76,7 +76,6 @@ export class OrderModel {
     buyerFirstName: string = "";
 
     @FormInput({
-        label: "",
         fieldSet: "buyer",
     })
     @FormSerializable()
@@ -86,7 +85,7 @@ export class OrderModel {
     @FormSerializable(serializeDate())
     buyerBirthday: Date = null;
 
-    @FormGroup()
+    @FormGroup({label: ""})
     buyerAddress: AddressModel = new AddressModel();
 
     @FormArray(AddressModel, {useTabs: true, tabsLabel: "street"})
@@ -97,12 +96,13 @@ export class OrderModel {
 
     @FormArray({
         type: "number",
-        step: 0.05
+        step: 0.05,
+        min: 3,
+        validators: [minValueValidation(5)]
     })
     nums: number[] = [];
 
     @FormInput({
-        label: "",
         fieldSet: "contact-1",
         placeholder: "label.buyerEmail",
         validators: [emailValidation()]
@@ -111,7 +111,6 @@ export class OrderModel {
     buyerEmail: string = "";
 
     @FormInput({
-        label: "",
         fieldSet: "contact-1",
         placeholder: "label.buyerPhone"
     })
@@ -119,7 +118,6 @@ export class OrderModel {
     buyerPhone: string = "";
 
     @FormInput({
-        label: "",
         fieldSet: "contact-2",
         placeholder: "label.buyerFax"
     })
@@ -127,7 +125,6 @@ export class OrderModel {
     buyerFax: string = "";
 
     @FormInput({
-        label: "",
         fieldSet: "contact-2",
         placeholder: "label.buyerMobile"
     })

@@ -1,16 +1,6 @@
-import {
-    Component,
-    computed,
-    inject,
-    Injector,
-    input,
-    output,
-    signal,
-    viewChild,
-    ViewEncapsulation
-} from "@angular/core";
+import {Component, computed, inject, Injector, input, output, resource, ViewEncapsulation} from "@angular/core";
 import {FormGroup} from "@angular/forms";
-import {FormlyForm, FormlyFormOptions} from "@ngx-formly/core";
+import {FormlyFormOptions} from "@ngx-formly/core";
 import {FormFieldConfig, IDynamicForm} from "../../common-types";
 import {rxToSignal} from "../../utils/signals";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
@@ -23,7 +13,7 @@ import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.ser
 })
 export class DynamicFormComponent implements IDynamicForm {
 
-    readonly builder = inject(DynamicFormBuilderService);
+    protected readonly builder = inject(DynamicFormBuilderService);
 
     readonly labelPrefix = input<string>("label");
 
@@ -31,18 +21,27 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly fields = input<FormFieldConfig[]>(null);
 
-    readonly config = computed(() => {
-        return this.fields() || this.builder.resolveFormFields(this.model()?.constructor, "", {
+    protected readonly config$ = resource({
+        request: () => ({
+            fields: this.fields(),
             labelPrefix: this.labelPrefix()
-        });
+        }),
+        loader: async p => {
+            const {fields, labelPrefix} = p.request;
+            return fields || this.builder.resolveFormFields(this.model()?.constructor, null, {
+                labelPrefix
+            });
+        }
     });
+
+    readonly config = computed(() => this.config$.value());
 
     readonly group = computed(() => {
         this.config();
         return new FormGroup({});
     });
 
-    readonly status$ = computed(() => this.group()?.statusChanges);
+    protected readonly status$ = computed(() => this.group()?.statusChanges);
 
     readonly status = rxToSignal(this.status$, "PENDING");
 
@@ -53,8 +52,6 @@ export class DynamicFormComponent implements IDynamicForm {
             injector: inject(Injector)
         }
     };
-
-    readonly form = viewChild(FormlyForm);
 
     submit() {
         this.onSubmit.emit(this);

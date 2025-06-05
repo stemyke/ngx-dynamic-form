@@ -13,7 +13,6 @@ import {
     FormArrayData,
     FormBuilderOptions,
     FormFieldConfig,
-    FormFieldCustom,
     FormFieldData,
     FormFieldProps,
     FormGroupData,
@@ -21,12 +20,13 @@ import {
     FormSelectData,
     FormSelectOption,
     FormUploadData,
+    PromiseOrNot,
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
 import {isStringWithVal, MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
 
-export type FormFieldBuilder = (fb: DynamicFormBuilderService, path: string, options: FormBuilderOptions) => FormFieldConfig;
+export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => FormFieldConfig;
 
 @Injectable()
 export class DynamicFormBuilderService {
@@ -36,25 +36,22 @@ export class DynamicFormBuilderService {
                 @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
     }
 
-    protected getLabel(label: string, path: string, options: FormBuilderOptions): string {
-        label = label || "";
-        const pathPrefix = !path ? `` : `${path}.`;
-        return !label || !options.labelPrefix
-            ? `${label}`
-            : `${options.labelPrefix}.${pathPrefix}${label}`;
+    protected getLabel(key: string, label: string, parent: FormFieldConfig, options: FormBuilderOptions): string {
+        const labelPrefix = !ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix;
+        const pathPrefix = `${parent?.props?.label || labelPrefix}`;
+        const labelItems = ObjectUtils.isString(label)
+            ? (!label ? [] : [labelPrefix, label])
+            : [pathPrefix, `${key || ""}`]
+        return labelItems.filter(l => l.length > 0).join(".");
     }
 
-    protected createFormField(
-        key: string, type: string, data: FormFieldData, props: FormFieldProps, path: string, options: FormBuilderOptions,
-        custom?: FormFieldCustom
-    ): FormFieldConfig {
+    protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         const validators = Array.isArray(data.validators)
             ? data.validators.reduce((res, validator, ix) => {
                 res[validator.validatorName || `validator_${ix}`] = validator;
                 return res;
             }, {} as Validators)
             : data.validators || {};
-        const label = !data.label? key : data.label;
         return {
             key,
             type,
@@ -70,41 +67,40 @@ export class DynamicFormBuilderService {
             props: {
                 ...props,
                 required: !!validators.required,
-                label: this.getLabel(label, path, options),
-            },
-            ...custom
+                label: this.getLabel(key, data.label, parent, options),
+            }
         }
     }
 
-    resolveFormFields(target: Type<any>, path: string, options: FormBuilderOptions): FormFieldConfig[] {
+    resolveFormFields(target: Type<any>, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
         const prototype = target?.prototype || {};
         const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target?.prototype || {}) || new Set();
         const result: FormFieldConfig[] = [];
         for (const key of fields) {
             const builder: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", prototype, key);
-            const field = builder(this, path, options);
+            const field = builder(this, parent, options);
             result.push(field);
         }
         return result;
     }
 
-    resolveFormGroup(key: string, target: Type<any>, data: FormGroupData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
-        const fields = this.resolveFormFields(
-            target, !path ? key : `${path}.${key}`, options
-        );
-        return this.createFormGroup(key, fields, data, path, options);
+    resolveFormGroup(key: string, target: Type<any>, data: FormGroupData, parent: FormFieldConfig = null, options: FormBuilderOptions = {}): FormFieldConfig {
+        return this.createFormGroup(key, sp => this.resolveFormFields(
+            target, sp, options
+        ), data, parent, options);
     }
 
-    resolveFormArray(key: string, itemType: string | FormInputData | Type<any>, data: FormArrayData, path: string = "", options: FormBuilderOptions = {}): FormFieldConfig {
-        const array = typeof itemType === "function" ? this.resolveFormFields(
-            itemType, !path ? key : `${path}.${key}`, options
-        ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, path, options);
-        return this.createFormArray(key, array, data, path, options);
+    resolveFormArray(key: string, itemType: string | FormInputData | Type<any>, data: FormArrayData, parent: FormFieldConfig = null, options: FormBuilderOptions = {}): FormFieldConfig {
+        return this.createFormArray(key, sp => {
+            return typeof itemType === "function" ? this.resolveFormFields(
+                itemType, sp, options
+            ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, sp, options);
+        }, data, parent, options);
     }
 
-    createFormInput(key: string, data: FormInputData, path: string, options: FormBuilderOptions): FormFieldConfig {
+    createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {};
-        return this.createFormField(key, "input", data, {
+        return this.createFormField(key, data.type === "checkbox" ? "checkbox" : "input", data, {
             type: `${data.type || "text"}`,
             pattern: ObjectUtils.isString(data.pattern) ? data.pattern : "",
             step: data.step,
@@ -118,36 +114,36 @@ export class DynamicFormBuilderService {
             attributes: {
                 autocomplete: data.autocomplete || "off"
             },
-        }, path, options);
+        }, parent, options);
     }
 
-    createFormSelect(key: string, data: FormSelectData, path: string, options: FormBuilderOptions): FormFieldConfig {
+    createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {options: () => []};
-        return this.createFormField(key, data.type === "radio" ? "radio" : "select", data, {
+        const select = this.createFormField(key, data.type === "radio" ? "radio" : "select", data, {
             multiple: data.multiple,
             type: data.type,
             groupBy: data.groupBy,
             inline: data.inline,
             allowEmpty: data.allowEmpty
-        }, path, options, {
-            hooks: {
-                onInit: field => {
-                    const options = data.options(field);
-                    const control = field.formControl.root;
-                    field.props.options = options instanceof Promise ? control.valueChanges.pipe(
-                        startWith(control.value),
-                        distinctUntilChanged(),
-                        switchMap(async () => {
-                            const results: FormSelectOption[] = await data.options(field) as any;
-                            return this.fixSelectOptions(field, results);
-                        })
-                    ) : options;
-                }
+        }, parent, options);
+        select.hooks = {
+            onInit: field => {
+                const options = data.options(field);
+                const control = field.formControl.root;
+                field.props.options = options instanceof Promise ? control.valueChanges.pipe(
+                    startWith(control.value),
+                    distinctUntilChanged(),
+                    switchMap(async () => {
+                        const results: FormSelectOption[] = await data.options(field) as any;
+                        return this.fixSelectOptions(field, results);
+                    })
+                ) : options;
             }
-        });
+        };
+        return select;
     }
 
-    createFormUpload(key: string, data: FormUploadData, path: string, options: FormBuilderOptions): FormFieldConfig {
+    createFormUpload(key: string, data: FormUploadData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {};
 
         if (data.asFile) {
@@ -168,22 +164,33 @@ export class DynamicFormBuilderService {
             maxSize: isNaN(data.maxSize) ? MAX_INPUT_NUM : data.maxSize,
             uploadOptions: data.uploadOptions || {},
             createUploadData: data.createUploadData
-        }, path, options);
+        }, parent, options);
     }
 
-    createFormGroup(key: string, fields: FormFieldConfig[], data: FormGroupData, path: string, options: FormBuilderOptions): FormFieldConfig {
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig[], data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): PromiseOrNot<FormFieldConfig> {
         data = data || {};
-        return this.createFormField(key, undefined, data, {
+        const group = this.createFormField(key, undefined, data, {
 
-        }, path, options, {
-            wrappers: ["form-group"],
-            fieldGroup: fields
-        });
+        }, parent, options);
+        group.wrappers = ["form-group"];
+        const result = fields(group);
+        if (result instanceof Promise) {
+            return result.then(fieldGroup => {
+                group.fieldGroup = fieldGroup;
+                return group;
+            });
+        }
+        group.fieldGroup = result;
+        return group;
     }
 
-    createFormArray(key: string, array: FormFieldConfig | FormFieldConfig[], data: FormArrayData, path: string, options: FormBuilderOptions): FormFieldConfig {
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig | FormFieldConfig[], data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig | FormFieldConfig[]>, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => any, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): PromiseOrNot<FormFieldConfig> {
         data = data || {};
-        return this.createFormField(key, "array", data, {
+        const array = this.createFormField(key, "array", data, {
             // initialCount: data.initialCount || 0,
             // sortable: data.sortable || false,
             useTabs: data.useTabs || false,
@@ -194,12 +201,22 @@ export class DynamicFormBuilderService {
             moveItem: data.moveItem !== false,
             removeItem: data.removeItem !== false,
             clearItems: data.clearItems !== false
-        }, path, options, {
-            fieldArray: Array.isArray(array) ? {
-                wrappers: ["form-group"],
-                fieldGroup: array,
-            } : array
-        });
+        }, parent, options);
+        const result = fields(array);
+        if (result instanceof Promise) {
+            return result.then(items => {
+                array.fieldArray = Array.isArray(items) ? {
+                    wrappers: ["form-group"],
+                    fieldGroup: items,
+                } : items;
+                return array;
+            });
+        }
+        array.fieldArray = Array.isArray(result) ? {
+            wrappers: ["form-group"],
+            fieldGroup: result,
+        } : result;
+        return array;
     }
 
     async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {

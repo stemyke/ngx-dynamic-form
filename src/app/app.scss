@@ -38,9 +38,10 @@ a.dropdown-box-toggle-link {
 .ngx-dynamic-form-group, .ngx-dynamic-form-array, .ngx-dynamic-form-field {
     display: flex;
     margin-bottom: 10px;
+    overflow: hidden;
 
     > label {
-        width: 150px;
+        width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
 

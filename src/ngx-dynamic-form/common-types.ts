@@ -165,7 +165,7 @@ export type FormArrayData = FormFieldData
 
 export type FormFieldCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormlyFieldConfig,
-    path: string, options: FormBuilderOptions, injector: Injector
+    parent: FormFieldConfig, options: FormBuilderOptions, injector: Injector
 ) => PromiseOrNot<FormlyFieldConfig | FormlyFieldConfig[]>;
 
 export interface ConfigForSchemaOptions extends FormBuilderOptions {
@@ -177,8 +177,8 @@ export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions,
     injector?: Injector;
     customizer?: (
         property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions,
-        field: FormlyFieldConfig, path: string
-    ) => Promise<FormlyFieldConfig[]>;
+        field: FormFieldConfig, parent: FormFieldConfig
+    ) => Promise<FormFieldConfig[]>;
 }
 
 

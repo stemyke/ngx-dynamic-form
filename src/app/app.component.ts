@@ -35,9 +35,9 @@ export class AppComponent implements OnInit {
             localStorage.setItem("selectedSchema", p.request);
             return this.forms.getFormFieldsForSchema(p.request, {
                 labelPrefix: "form",
-                customizer: (_p, _s, field, path, options) => {
-                    if (field.key === "__root") {
-                        field.fieldGroup.unshift(this.fb.resolveFormGroup("address", AddressModel, {}, path, options));
+                customizer: (_p, _s, field, parent, options) => {
+                    if (!parent) {
+                        field.fieldGroup.unshift(this.fb.resolveFormGroup("address", AddressModel, {}, parent, options));
                         return field;
                     }
                     return field;

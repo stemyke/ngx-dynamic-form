@@ -108,14 +108,6 @@ export class DynamicFormService {
         return isNaN(date as any) ? new Date() : date;
     }
 
-    protected getLabel(label: string, options: ConfigForSchemaWrapOptions, path: string): string {
-        label = label || "";
-        const pathPrefix = !path ? `` : `${path}.`;
-        return !label || !options.labelPrefix
-            ? `${label}`
-            : `${options.labelPrefix}.${pathPrefix}${label}`;
-    }
-
     async getFormFieldGroupForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig> {
         this.schemas = await this.openApi.getSchemas();
         const schemaOptions = ObjectUtils.isObject(customizeOrOptions) ? customizeOrOptions as ConfigForSchemaOptions : {};
@@ -125,13 +117,13 @@ export class DynamicFormService {
             ...schemaOptions,
             schema,
             injector: this.injector,
-            customizer: async (property, options, config, path: string) => {
+            customizer: async (property, options, config, parent: FormFieldConfig) => {
                 config.defaultValue = `${config.type}`.startsWith("date")
                     ? this.convertToDate(property.default) : property.default;
                 if (!ObjectUtils.isFunction(customizeConfig)) return [config];
                 let res = customizeConfig(
                     property, schema, config,
-                    config.key === FORM_ROOT_KEY ? `` : (!path ? `${config.key}` : `${path}.${config.key}`),
+                    parent,
                     options,
                     this.injector
                 );
@@ -142,11 +134,17 @@ export class DynamicFormService {
                 return Array.isArray(res) ? res : [res];
             }
         } as ConfigForSchemaWrapOptions;
-        const fields = await this.getFormFieldsForSchemaDef(schema, wrapOptions, "");
+        const config = {
+            key: FORM_ROOT_KEY,
+            wrappers: ["form-group"]
+        } as FormFieldConfig;
+
+        const fields = await this.getFormFieldsForSchemaDef(schema, wrapOptions, config);
         const fieldGroup = [...fields];
+
         // Add id fields if necessary
         if (fields.length > 0) {
-            const idFields: FormlyFieldConfig[] = [
+            const idFields: FormFieldConfig[] = [
                 {key: "id", props: {hidden: true}},
                 {key: "_id", props: {hidden: true}},
             ];
@@ -154,22 +152,18 @@ export class DynamicFormService {
                 .filter(t => !fields.some(c => c.key == t.key))
             );
         }
-        const config = {
-            key: "__root",
-            wrappers: ["form-group"],
-            fieldGroup
-        } as FormlyFieldConfig;
+        config.fieldGroup = fieldGroup;
 
         const root = await wrapOptions.customizer({
-            id: "__root",
+            id: FORM_ROOT_KEY,
             type: "object",
             properties: schema?.properties || {}
-        }, wrapOptions, config, "");
+        }, wrapOptions, config, null);
         // Check if the customized root wrapper returned an array
         fields.length = 0;
 
         for (const model of root) {
-            if (model.key === "__root") {
+            if (model.key === FORM_ROOT_KEY) {
                 return model;
             } else {
                 fields.push(model);
@@ -182,50 +176,64 @@ export class DynamicFormService {
         };
     }
 
-    protected async getFormFieldsForSchemaDef(schema: IOpenApiSchema, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
+    protected async getFormFieldsForSchemaDef(schema: IOpenApiSchema, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig[]> {
         if (!schema)
             return [];
         const keys = Object.keys(schema.properties || {});
-        const others: FormFieldConfig[] = [];
-        const groups: { [fs: string]: FormFieldConfig[] } = {};
+        const fields: FormFieldConfig[] = [];
         // Collect all properties of this schema def
-        for (const p of keys) {
-            const property = schema.properties[p];
-            const fsName = property.hidden ? null : String(property.fieldSet || "");
-            const fields = (await this.getFormFieldsForProp(property, options, path))
-                .filter(f => null !== f);
-            // If we have a fieldset name defined and have actual fields for it
-            // then push the property fields into a group
-            if (fsName && fields.length) {
-                const group = groups[fsName] || [];
-                groups[fsName] = group;
-                group.push(...fields);
-                continue;
-            }
-            // Otherwise just push the fields to the others
-            others.push(...fields);
+        for (const key of keys) {
+            const property = schema.properties[key];
+            const propFields = await this.getFormFieldsForProp(property, options, parent);
+            fields.push(...propFields);
         }
-        // Create a field-set wrapper for each group and concat the other fields to the end
-        return Object.keys(groups).map(group => {
-            return {
-                fieldGroup: groups[group],
-                wrappers: ["form-fieldset"],
-                id: !path ? group : `${path}.${group}`,
-                props: {
-                    label: this.getLabel(group, options, path),
-                    hidden: false
-                }
-            } as FormFieldConfig;
-        }).concat(others);
+        return fields.filter(f => null !== f);
     }
 
-    protected async getFormFieldsForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig[]> {
+    // protected async getFormFieldsForSchemaDef(schema: IOpenApiSchema, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig[]> {
+    //     if (!schema)
+    //         return [];
+    //     const keys = Object.keys(schema.properties || {});
+    //     const others: FormFieldConfig[] = [];
+    //     const groups: { [fs: string]: FormFieldConfig[] } = {};
+    //     // Collect all properties of this schema def
+    //     for (const p of keys) {
+    //         const property = schema.properties[p];
+    //         const fsName = property.hidden ? null : String(property.fieldSet || "");
+    //         const fields = (await this.getFormFieldsForProp(property, options, parent))
+    //             .filter(f => null !== f);
+    //         // If we have a fieldset name defined and have actual fields for it
+    //         // then push the property fields into a group
+    //         if (fsName && fields.length) {
+    //             const group = groups[fsName] || [];
+    //             groups[fsName] = group;
+    //             group.push(...fields);
+    //             continue;
+    //         }
+    //         // Otherwise just push the fields to the others
+    //         others.push(...fields);
+    //     }
+    //     // Create a field-set wrapper for each group and concat the other fields to the end
+    //     return Object.keys(groups).map(group => {
+    //         return {
+    //             fieldGroup: groups[group],
+    //             wrappers: ["form-fieldset"],
+    //             id: !path ? group : `${path}.${group}`,
+    //             props: {
+    //                 label: this.getLabel(group, options, path),
+    //                 hidden: false
+    //             }
+    //         } as FormFieldConfig;
+    //     }).concat(others);
+    // }
+
+    protected async getFormFieldsForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig[]> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             if (property.format == "radio") {
-                return options.customizer(property, options, this.getFormRadioConfig(property, options, path), path);
+                return options.customizer(property, options, this.getFormRadioConfig(property, options, parent), parent);
             }
-            return options.customizer(property, options, this.getFormSelectConfig(property, options, path), path);
+            return options.customizer(property, options, this.getFormSelectConfig(property, options, parent), parent);
         }
         switch (property.type) {
             case "string":
@@ -233,57 +241,62 @@ export class DynamicFormService {
             case "integer":
             case "textarea":
                 // if (this.checkIsEditorProperty(property)) {
-                //     return options.customizer(property, options, this.getFormEditorConfig(property, options), path);
+                //     return options.customizer(property, options, this.getFormEditorConfig(property, options, parent), parent);
                 // }
                 if (property.format == "textarea") {
-                    return options.customizer(property, options, this.getFormTextareaConfig(property, options, path), path);
+                    return options.customizer(property, options, this.getFormTextareaConfig(property, options, parent), parent);
                 }
                 if (property.format == "date" || property.format == "date-time") {
-                    return options.customizer(property, options, this.getFormDatepickerConfig(property, options, path), path);
+                    return options.customizer(property, options, this.getFormDatepickerConfig(property, options, parent), parent);
                 }
-                return options.customizer(property, options, this.getFormInputConfig(property, options, path), path);
+                return options.customizer(property, options, this.getFormInputConfig(property, options, parent), parent);
             // case "object":
-            //     return options.customizer(property, options, this.getFormEditorConfig(property, options), path);
+            //     return options.customizer(property, options, this.getFormEditorConfig(property, options, parent), parent);
             case "boolean":
-                return options.customizer(property, options, this.getFormCheckboxConfig(property, options, path), path);
+                return options.customizer(property, options, this.getFormCheckboxConfig(property, options, parent), parent);
             case "array":
-                return options.customizer(property, options, await this.getFormArrayConfig(property, options, path), path);
+                return options.customizer(property, options, await this.getFormArrayConfig(property, options, parent), parent);
             case "file":
             case "upload":
-                return options.customizer(property, options, this.getFormUploadConfig(property, options, path), path);
+                return options.customizer(property, options, this.getFormUploadConfig(property, options, parent), parent);
         }
         if (findRefs(property).length > 0) {
             return options.customizer(
                 property, options,
-                await this.getFormGroupConfig(property, options, path),
-                path
+                await this.getFormGroupConfig(property, options, parent),
+                parent
             );
         }
         return [];
     }
 
-    protected getFormFieldData(property: IOpenApiSchemaProperty): FormFieldData {
+    protected getFormFieldData(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormFieldData {
+        const validators: Validators = {};
+        const schema = options.schema;
+        if (ObjectUtils.isArray(schema.required) && schema.required.indexOf(property.id) >= 0) {
+            validators.required = requiredValidation();
+        }
+        this.addPropertyValidators(validators, property);
+        this.addItemsValidators(validators, property.items);
         return {
-            fieldSet: property.fieldSet || ""
+            fieldSet: property.fieldSet || "",
+            validators
         };
     }
 
-    protected async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig> {
-        let array: FormFieldConfig | FormFieldConfig[];
-        const subPath = !path ? property.id : `${path}.${property.id}`;
-        const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
-        if (subSchemas.length > 0) {
-            const subModels = await Promise.all(
-                subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, subPath))
-            );
-            array = mergeFormFields(ObjectUtils.copy(subModels));
-        } else {
-            const propFields = await this.getFormFieldsForProp(property.items, options, subPath);
-            array = propFields.pop();
-        }
-
-        return this.builder.createFormArray(property.id, array, {
-            ...this.getFormFieldData(property),
+    protected async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormlyFieldConfig> {
+        return this.builder.createFormArray(property.id, async sp => {
+            const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
+            if (subSchemas.length > 0) {
+                const subModels = await Promise.all(
+                    subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, sp))
+                );
+                return mergeFormFields(ObjectUtils.copy(subModels));
+            }
+            const propFields = await this.getFormFieldsForProp(property.items, options, sp);
+            return propFields.pop();
+        }, {
+            ...this.getFormFieldData(property, options),
             // initialCount: property.initialCount || 0,
             // sortable: property.sortable || false,
             // useTabs: property.useTabs || false,
@@ -293,21 +306,22 @@ export class DynamicFormService {
             moveItem: property.moveItem !== false,
             removeItem: property.removeItem !== false,
             clearItems: property.clearItems !== false
-        }, path, options);
+        }, parent, options);
     }
 
-    protected async getFormGroupConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): Promise<FormlyFieldConfig> {
+    protected async getFormGroupConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormlyFieldConfig> {
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
-        const subPath = !path ? property.id : `${path}.${property.id}`;
-        const subModels = await Promise.all(
-            subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, subPath))
-        );
-        return this.builder.createFormGroup(property.id, mergeFormFields(subModels), {
-            ...this.getFormFieldData(property),
-        }, path, options);
+        return this.builder.createFormGroup(property.id, async sp => {
+            const subModels = await Promise.all(
+                subSchemas.map(s => this.getFormFieldsForSchemaDef(s, options, sp))
+            );
+            return mergeFormFields(subModels);
+        }, {
+            ...this.getFormFieldData(property, options),
+        }, parent, options);
     }
 
-    protected getFormInputConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormInputConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         let type = StringUtils.has(property.id || "", "password", "Password") ? "password" : (property.format || property.type);
         switch (type) {
             case "string":
@@ -325,7 +339,7 @@ export class DynamicFormService {
         }
         const sub = property.type == "array" ? property.items || property : property;
         return this.builder.createFormInput(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             type,
             autocomplete: property.autocomplete,
             pattern: property.pattern,
@@ -335,12 +349,12 @@ export class DynamicFormService {
             minLength: sub.minLength,
             maxLength: sub.maxLength,
             placeholder: property.placeholder
-        }, path, options);
+        }, parent, options);
     }
 
-    protected getFormTextareaConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormTextareaConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormInput(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             type: "textarea",
             autocomplete: property.autoComplete,
             cols: property.cols || null,
@@ -348,7 +362,7 @@ export class DynamicFormService {
             minLength: property.minLength,
             maxLength: property.maxLength,
             placeholder: property.placeholder || ""
-        }, path, options);
+        }, parent, options);
     }
 
     // getFormEditorConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): DynamicEditorModelConfig {
@@ -371,59 +385,59 @@ export class DynamicFormService {
     //     );
     // }
 
-    protected getFormDatepickerConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormDatepickerConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormInput(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             type: property.format == "date-time" ? "datetime-local" : "date",
             // format: property.dateFormat || "dd.MM.yyyy",
             min: this.convertToDate(property.min),
             max: this.convertToDate(property.max),
-        }, path, options);
+        }, parent, options);
     }
 
-    protected getFormRadioConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormRadioConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormSelect(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             options: field => this.getFormSelectOptions(property, options, field),
             type: "radio",
             multiple: property.type == "array",
             groupBy: property.groupBy,
             inline: property.inline,
             allowEmpty: property.allowEmpty
-        }, path, options);
+        }, parent, options);
     }
 
-    protected getFormSelectConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormSelectConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormSelect(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             options: field => this.getFormSelectOptions(property, options, field),
             type: "select",
             multiple: property.type == "array",
             groupBy: property.groupBy,
             inline: property.inline,
             allowEmpty: property.allowEmpty
-        }, path, options);
+        }, parent, options);
     }
 
-    protected getFormUploadConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormUploadConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormUpload(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             multiple: property.type === "array",
             inline: property.inline,
             accept: property.accept,
             url: property.url,
             maxSize: property.maxSize,
             uploadOptions: property.uploadOptions
-        }, path, options);
+        }, parent, options);
     }
 
-    protected getFormCheckboxConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, path: string): FormlyFieldConfig {
+    protected getFormCheckboxConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormInput(property.id, {
-            ...this.getFormFieldData(property),
+            ...this.getFormFieldData(property, options),
             type: "checkbox",
             formCheck: "nolabel",
             indeterminate: property.indeterminate || false
-        }, path, options);
+        }, parent, options);
     }
 
     protected getFormSelectOptions(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
@@ -503,17 +517,6 @@ export class DynamicFormService {
             }, endpoint)
         }
         return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
-    }
-
-    protected getValidators(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): Validators {
-        const validators: Validators = {};
-        const schema = options.schema;
-        if (ObjectUtils.isArray(schema.required) && schema.required.indexOf(property.id) >= 0) {
-            validators.required = requiredValidation();
-        }
-        this.addPropertyValidators(validators, property);
-        this.addItemsValidators(validators, property.items);
-        return validators;
     }
 
     protected addPropertyValidators(validators: Validators, property: IOpenApiSchemaProperty): void {
