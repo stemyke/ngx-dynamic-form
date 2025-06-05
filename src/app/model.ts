@@ -36,14 +36,14 @@ function serializeDate(format: string = "yyyy-MM-dd", defaultValue: string = "")
 export class AddressModel {
 
     @FormInput({
-        fieldSet: "address",
+        fieldSet: "fds",
+        hidden: true,
         placeholder: "label.buyerStreet"
     })
     @FormSerializable()
     street: string = "";
 
     @FormInput({
-        fieldSet: "address",
         classes: "form-group-sm",
         placeholder: "label.buyerZipCode"
     })
@@ -51,7 +51,6 @@ export class AddressModel {
     zip: string = "";
 
     @FormInput({
-        fieldSet: "address",
         classes: "form-group-sm",
         placeholder: "label.buyerCity"
     })

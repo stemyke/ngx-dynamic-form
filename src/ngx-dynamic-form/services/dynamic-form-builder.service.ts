@@ -56,8 +56,10 @@ export class DynamicFormBuilderService {
             key,
             type,
             validators,
+            parent,
             className: Array.isArray(data.classes) ? data.classes.join(" ") : data.classes || "",
-            fieldSet: data.fieldSet,
+            hide: data.hidden === true,
+            fieldSet: String(data.fieldSet || ""),
             validation: {
                 messages: Object.keys(validators).reduce((res, key) => {
                     res[key] = validationMessage(this.injector, key, options.labelPrefix);
@@ -79,9 +81,11 @@ export class DynamicFormBuilderService {
         for (const key of fields) {
             const builder: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", prototype, key);
             const field = builder(this, parent, options);
-            result.push(field);
+            if (field) {
+                result.push(field);
+            }
         }
-        return result;
+        return this.createFieldSets(result, parent, options);
     }
 
     resolveFormGroup(key: string, target: Type<any>, data: FormGroupData, parent: FormFieldConfig = null, options: FormBuilderOptions = {}): FormFieldConfig {
@@ -94,8 +98,40 @@ export class DynamicFormBuilderService {
         return this.createFormArray(key, sp => {
             return typeof itemType === "function" ? this.resolveFormFields(
                 itemType, sp, options
-            ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, sp, options);
+            ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, null, options);
         }, data, parent, options);
+    }
+
+    createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
+        const others: FormFieldConfig[] = [];
+        const groups: { [fs: string]: FormFieldConfig[] } = {};
+
+        for (const field of fields) {
+            const fsName = field.hide ? null : String(field.fieldSet || "");
+            // If we have a fieldset name defined and have actual fields for it
+            // then push the property fields into a group
+            if (fsName) {
+                const group = groups[fsName] || [];
+                groups[fsName] = group;
+                group.push(field);
+                continue;
+            }
+            // Otherwise just push the fields to the others
+            others.push(field);
+        }
+
+        // Create a field-set wrapper for each group and concat the other fields to the end
+        return Object.keys(groups).map(group => {
+            return {
+                fieldGroup: groups[group],
+                wrappers: ["form-fieldset"],
+                id: !parent ? group : `${parent.props?.label}.${group}`,
+                props: {
+                    label: this.getLabel(group, group, parent, options),
+                    hidden: false
+                }
+            } as FormFieldConfig;
+        }).concat(others);
     }
 
     createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
@@ -193,7 +229,7 @@ export class DynamicFormBuilderService {
         const array = this.createFormField(key, "array", data, {
             // initialCount: data.initialCount || 0,
             // sortable: data.sortable || false,
-            useTabs: data.useTabs || false,
+            useTabs: data.useTabs === true,
             tabsLabel: `${data.tabsLabel || "label"}`,
             addItem: data.addItem !== false,
             insertItem: data.insertItem !== false,
@@ -208,14 +244,27 @@ export class DynamicFormBuilderService {
                 array.fieldArray = Array.isArray(items) ? {
                     wrappers: ["form-group"],
                     fieldGroup: items,
-                } : items;
+                } : {
+                    ...items,
+                    props: {
+                        ...items.props,
+                        label: ""
+                    }
+                };
                 return array;
             });
         }
+        const items = result as FormFieldConfig;
         array.fieldArray = Array.isArray(result) ? {
             wrappers: ["form-group"],
             fieldGroup: result,
-        } : result;
+        } : {
+            ...items,
+            props: {
+                ...items.props,
+                label: ""
+            }
+        };
         return array;
     }
 
