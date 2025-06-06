@@ -1,9 +1,7 @@
-<div class="ngx-dynamic-form-group">
-    <label class="form-group-label" *ngIf="props.label">
-        {{ props.label }}
-        <p class="form-group-description" *ngIf="props.description">{{ props.description }}</p>
-    </label>
-    <div class="ngx-dynamic-form-container">
-        <ng-container #fieldComponent></ng-container>
-    </div>
+<label class="field-label" *ngIf="props.label">
+    {{ props.label | translate }}
+    <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+</label>
+<div class="field-container">
+    <ng-container #fieldComponent></ng-container>
 </div>

@@ -1,9 +1,7 @@
-<div class="ngx-dynamic-form-fieldset">
-    <legend class="form-label" *ngIf="props.label">
-        {{ props.label }}
-        <p class="form-group-description" *ngIf="props.description">{{ props.description }}</p>
-    </legend>
-    <div class="ngx-dynamic-form-container">
-        <ng-container #fieldComponent></ng-container>
-    </div>
+<legend class="form-label" *ngIf="props.label">
+    {{ props.label }}
+    <p class="form-group-description" *ngIf="props.description">{{ props.description }}</p>
+</legend>
+<div class="ngx-dynamic-form-container">
+    <ng-container #fieldComponent></ng-container>
 </div>

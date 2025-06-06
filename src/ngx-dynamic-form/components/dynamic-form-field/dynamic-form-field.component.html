@@ -1,19 +1,15 @@
-<div [ngClass]="['ngx-dynamic-form-field', 'ngx-dynamic-form-' + field.type]">
-    <label class="control-label ng-star-inserted" *ngIf="props.label">
-        {{ props.label | translate }}
-        <span class="form-field-required" *ngIf="props.required && props.hideRequiredMarker !== true" aria-hidden="true">*</span>
-        <p class="form-field-description" *ngIf="props.description">
-            {{ props.description | translate }}
-        </p>
-    </label>
-    <div class="ngx-dynamic-form-control">
-        <ng-container #fieldComponent></ng-container>
-        <div *ngIf="showError" class="invalid-feedback">
-            <formly-validation-message
-                id="{{ id }}-formly-validation-error"
-                [field]="field"
-                role="alert"
-            ></formly-validation-message>
-        </div>
+<label class="field-label" *ngIf="props.label">
+    {{ props.label | translate }}
+    <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+    <span class="field-required" *ngIf="props.required && props.hideRequiredMarker !== true" aria-hidden="true">*</span>
+</label>
+<div class="field-container">
+    <ng-container #fieldComponent></ng-container>
+    <div *ngIf="showError" class="field-errors invalid-feedback">
+        <formly-validation-message
+            id="{{ id }}-formly-validation-error"
+            [field]="field"
+            role="alert"
+        ></formly-validation-message>
     </div>
 </div>

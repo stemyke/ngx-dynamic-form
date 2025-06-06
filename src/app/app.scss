@@ -35,27 +35,27 @@ a.dropdown-box-toggle-link {
     text-decoration: none;
 }
 
-.ngx-dynamic-form-group, .ngx-dynamic-form-array, .ngx-dynamic-form-field {
+.dynamic-form-field {
     display: flex;
     margin-bottom: 10px;
     overflow: hidden;
 
-    > label {
+    > .field-label {
         width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
 
-        .form-field-required {
+        .field-required {
             color: red;
         }
     }
 
-    > div {
+    > .field-container {
         flex: 1;
     }
 }
 
-.ngx-dynamic-form-group, .ngx-dynamic-form-array {
+.dynamic-form-group, .dynamic-form-array {
     border-bottom: 1px solid #a6a6a6;
 }
 

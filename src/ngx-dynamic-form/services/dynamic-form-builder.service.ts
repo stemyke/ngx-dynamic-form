@@ -52,12 +52,15 @@ export class DynamicFormBuilderService {
                 return res;
             }, {} as Validators)
             : data.validators || {};
+        const classes = [`dynamic-form-field`, `dynamic-form-field-${key}`, `dynamic-form-${type || "group"}`].concat(
+            Array.isArray(data.classes) ? data.classes : [data.classes || ""]
+        );
         return {
             key,
             type,
             validators,
             parent,
-            className: Array.isArray(data.classes) ? data.classes.join(" ") : data.classes || "",
+            className: classes.filter(c => c?.length > 0).join(" "),
             hide: data.hidden === true,
             fieldSet: String(data.fieldSet || ""),
             validation: {
@@ -126,6 +129,7 @@ export class DynamicFormBuilderService {
             return {
                 fieldGroup: groups[group],
                 wrappers: ["form-fieldset"],
+                className: `dynamic-form-fieldset dynamic-form-fieldset-${group}`,
                 id: !parent ? group : `${parent.props?.label}.${group}`,
                 props: {
                     label: this.getLabel(group, group, parent, options),

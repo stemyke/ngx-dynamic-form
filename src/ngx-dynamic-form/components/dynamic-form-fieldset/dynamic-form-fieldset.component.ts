@@ -4,7 +4,7 @@ import {DynamicFormGroupComponent} from "../dynamic-form-group/dynamic-form-grou
 
 @Component({
     standalone: false,
-    selector: "dynamic-form-field",
+    selector: "dynamic-form-fieldset",
     templateUrl: "./dynamic-form-fieldset.component.html",
     encapsulation: ViewEncapsulation.None
 })

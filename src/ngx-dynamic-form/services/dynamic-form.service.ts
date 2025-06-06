@@ -93,7 +93,6 @@ export class DynamicFormService {
         for (const field of fields) {
             const serializer = field.serializer;
             const key = `${field.key}`;
-            const props = field.props || {};
             if (ObjectUtils.isFunction(serializer)) {
                 result[key] = await serializer(field, this.injector);
                 continue;
@@ -261,6 +260,7 @@ export class DynamicFormService {
         return {
             hidden: property.hidden === true,
             fieldSet: property.fieldSet,
+            classes: property.classes,
             validators
         };
     }

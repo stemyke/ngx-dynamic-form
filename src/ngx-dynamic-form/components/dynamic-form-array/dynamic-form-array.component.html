@@ -1,53 +1,51 @@
-<div class="ngx-dynamic-form-array">
-    <label class="form-label" *ngIf="props.label">
-        {{ props.label }}
-        <p class="form-array-description" *ngIf="props.description">{{ props.description }}</p>
-    </label>
-    <div class="ngx-dynamic-form-container">
-        @if (props.useTabs) {
-            <ul class="form-array-tabs">
-                @for (field of field.fieldGroup; track field.key; let ix = $index) {
-                    <li>
-                        <a class="btn" [ngClass]="[currentTab() === ix ? 'btn-primary' : 'btn-secondary']"
-                           (click)="currentTab.set(ix)">
-                            {{ (field.formControl.value | getValue : props.tabsLabel) || ix + 1 }}
-                        </a>
-                    </li>
-                }
-            </ul>
-        }
-        @for (field of field.fieldGroup; track field.key; let ix = $index) {
-            @if (!props.useTabs || ix === currentTab()) {
-                <div class="form-array-item">
-                    <div class="form-array-buttons">
-                        @if (props.removeItem) {
-                            <button type="button" class="btn btn-sm btn-primary" (click)="remove(ix)">
-                                <i icon="trash-outline"></i>
-                            </button>
-                        }
-                        @if (props.insertItem) {
-                            <button type="button" class="btn btn-sm btn-primary" (click)="add(ix)">
-                                <i icon="plus-outline"></i>
-                            </button>
-                        }
-                    </div>
-                    <formly-field [field]="field"></formly-field>
+<label class="field-label" *ngIf="props.label">
+    {{ props.label | translate }}
+    <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+</label>
+<div class="field-container">
+    @if (props.useTabs) {
+        <ul class="form-array-tabs">
+            @for (field of field.fieldGroup; track field.key; let ix = $index) {
+                <li>
+                    <a class="btn" [ngClass]="[currentTab() === ix ? 'btn-primary' : 'btn-secondary']"
+                       (click)="currentTab.set(ix)">
+                        {{ (field.formControl.value | getValue : props.tabsLabel) || ix + 1 }}
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+    @for (field of field.fieldGroup; track field.key; let ix = $index) {
+        @if (!props.useTabs || ix === currentTab()) {
+            <div class="form-array-item">
+                <div class="form-array-buttons">
+                    @if (props.removeItem) {
+                        <button type="button" class="btn btn-sm btn-primary" (click)="remove(ix)">
+                            <i icon="trash-outline"></i>
+                        </button>
+                    }
+                    @if (props.insertItem) {
+                        <button type="button" class="btn btn-sm btn-primary" (click)="add(ix)">
+                            <i icon="plus-outline"></i>
+                        </button>
+                    }
                 </div>
-            }
+                <formly-field [field]="field"></formly-field>
+            </div>
         }
-        <div class="form-array-buttons">
-            @if (props.clearItems) {
-                <button type="button" class="btn btn-sm btn-primary" (click)="clear()">
-                    <i icon="trash-outline"></i>
-                    {{ 'button.clear-items' | translate }}
-                </button>
-            }
-            @if (props.addItem) {
-                <button type="button" class="btn btn-sm btn-primary" (click)="add()">
-                    <i icon="plus-outline"></i>
-                    {{ 'button.insert-item' | translate }}
-                </button>
-            }
-        </div>
+    }
+    <div class="form-array-buttons">
+        @if (props.clearItems) {
+            <button type="button" class="btn btn-sm btn-primary" (click)="clear()">
+                <i icon="trash-outline"></i>
+                {{ 'button.clear-items' | translate }}
+            </button>
+        }
+        @if (props.addItem) {
+            <button type="button" class="btn btn-sm btn-primary" (click)="add()">
+                <i icon="plus-outline"></i>
+                {{ 'button.insert-item' | translate }}
+            </button>
+        }
     </div>
 </div>
