@@ -6,7 +6,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "ngx-dynamic-form": {
+        "application": {
             "root": "",
             "sourceRoot": "src",
             "projectType": "application",
@@ -58,15 +58,15 @@
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "options": {
-                        "buildTarget": "ngx-dynamic-form:build",
+                        "buildTarget": "application:build",
                         "port": 4100
                     },
                     "configurations": {
                         "production": {
-                            "buildTarget": "ngx-dynamic-form:build:production"
+                            "buildTarget": "application:build:production"
                         },
                         "development": {
-                            "buildTarget": "ngx-dynamic-form:build:development"
+                            "buildTarget": "application:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -74,7 +74,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "buildTarget": "ngx-dynamic-form:build"
+                        "buildTarget": "application:build"
                     }
                 },
                 "test": {
@@ -103,7 +103,7 @@
                 }
             }
         },
-        "ngx-dynamic-form-e2e": {
+        "application-e2e": {
             "root": "",
             "sourceRoot": "",
             "projectType": "application",
@@ -112,7 +112,7 @@
                     "builder": "@angular-devkit/build-angular:protractor",
                     "options": {
                         "protractorConfig": "./protractor.conf.js",
-                        "devServerTarget": "ngx-dynamic-form:serve"
+                        "devServerTarget": "application:serve"
                     }
                 },
                 "lint": {
