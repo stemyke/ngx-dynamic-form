@@ -77,11 +77,16 @@ export {
 } from "./ngx-dynamic-form/utils/misc";
 
 export {DynamicFormBuilderService} from "./ngx-dynamic-form/services/dynamic-form-builder.service";
-
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
 
+export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";
 export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
+export {DynamicFormChipsComponent} from "./ngx-dynamic-form/components/dynamic-form-chips/dynamic-form-chips.component";
+export {DynamicFormFieldComponent} from "./ngx-dynamic-form/components/dynamic-form-field/dynamic-form-field.component";
+export {DynamicFormFieldsetComponent} from "./ngx-dynamic-form/components/dynamic-form-fieldset/dynamic-form-fieldset.component";
+export {DynamicFormGroupComponent} from "./ngx-dynamic-form/components/dynamic-form-group/dynamic-form-group.component";
+export {DynamicFormUploadComponent} from "./ngx-dynamic-form/components/dynamic-form-upload/dynamic-form-upload.component";
 
 export {NgxDynamicFormModule} from "./ngx-dynamic-form/ngx-dynamic-form.module";
