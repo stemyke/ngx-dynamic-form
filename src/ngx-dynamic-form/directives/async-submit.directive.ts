@@ -40,6 +40,11 @@ export class AsyncSubmitDirective {
         return form?.status() || null;
     });
 
+    protected group = computed(() => {
+        const form = this.form();
+        return form?.group() || null;
+    });
+
     protected loading = signal(false);
     protected callback = signal<() => void>(null);
 
@@ -58,13 +63,6 @@ export class AsyncSubmitDirective {
             if (this.elem.nativeElement.tagName === "BUTTON") {
                 this.renderer.setAttribute(this.elem.nativeElement, "type", "button");
             }
-        });
-        effect(() => {
-            if (this.status() !== "VALID") {
-                this.renderer.setAttribute(this.elem.nativeElement, "disabled", "disabled");
-                return;
-            }
-            this.renderer.removeAttribute(this.elem.nativeElement, "disabled");
         });
         effect(() => {
             const status = this.status();

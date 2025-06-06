@@ -75,9 +75,14 @@ export class AppComponent implements OnInit {
     }
 
     submit = async (form: IDynamicForm): Promise<IAsyncMessage> =>  {
-        this.forms.serializeForm(form).then(res => {
-            console.log("res", res);
-        });
+        let data: any = null;
+        try {
+            data = await this.forms.serializeForm(form);
+        } catch (e) {
+            console.warn("validation errors", e);
+            return null;
+        }
+        console.log("results", data);
         return null;
     }
 }

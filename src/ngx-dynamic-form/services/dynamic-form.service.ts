@@ -1,6 +1,6 @@
 import {Injectable, Injector} from "@angular/core";
-import {FormGroup} from "@angular/forms";
-import {distinctUntilChanged, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
+import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
+import {distinctUntilChanged, first, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
 import {FormlyFieldConfig} from "@ngx-formly/core";
 import {
     IApiService,
@@ -38,6 +38,7 @@ import {
 } from "../utils/validation";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
+import {getFormValidationErrors} from "../utils/validation-errors";
 
 @Injectable()
 export class DynamicFormService {
@@ -62,13 +63,33 @@ export class DynamicFormService {
         return group.fieldGroup;
     }
 
-    async serializeForm(form: IDynamicForm, validate?: boolean): Promise<FormSerializeResult> {
+    async serializeForm(form: IDynamicForm, validate: boolean = true): Promise<FormSerializeResult> {
         const fields = form.config();
         if (!fields) return null;
         if (validate) {
-            // await this.validateForm(form);
+            await this.validateForm(form);
         }
         return this.serialize(fields);
+    }
+
+    async validateForm(form: IDynamicForm, showErrors: boolean = true): Promise<any> {
+        const group = form.group();
+        if (!group) return Promise.resolve();
+        return new Promise<any>((resolve, reject) => {
+            group.statusChanges
+                .pipe(first(status => status == "VALID" || status == "INVALID"))
+                .subscribe(status => {
+                    if (showErrors) {
+                        this.showErrorsForGroup(group);
+                    }
+                    if (status == "VALID") {
+                        resolve(null);
+                        return;
+                    }
+                    reject(getFormValidationErrors(group.controls));
+                });
+            group.updateValueAndValidity();
+        });
     }
 
     async serialize(fields: FormFieldConfig[]): Promise<FormSerializeResult> {
@@ -98,6 +119,26 @@ export class DynamicFormService {
             result[key] = control.value;
         }
         return result;
+    }
+
+    protected showErrorsForGroup(formGroup: FormGroup): void {
+        if (!formGroup) return;
+        formGroup.markAsTouched({onlySelf: true});
+        const controls = Object.keys(formGroup.controls).map(id => formGroup.controls[id]);
+        this.showErrorsForControls(controls);
+    }
+
+    protected showErrorsForControls(controls: AbstractControl[]): void {
+        controls.forEach(control => {
+            if (control instanceof FormGroup) {
+                this.showErrorsForGroup(control);
+                return;
+            }
+            control.markAsTouched({onlySelf: true});
+            if (control instanceof FormArray) {
+                this.showErrorsForControls(control.controls);
+            }
+        });
     }
 
     protected convertToDate(value: any): any {
