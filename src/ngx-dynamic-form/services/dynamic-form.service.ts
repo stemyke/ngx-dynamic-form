@@ -58,20 +58,6 @@ export class DynamicFormService {
                 readonly builder: DynamicFormBuilderService) {
     }
 
-    async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
-        const group = await this.getFormFieldGroupForSchema(name, customizeOrOptions);
-        return group.fieldGroup;
-    }
-
-    async serializeForm(form: IDynamicForm, validate: boolean = true): Promise<FormSerializeResult> {
-        const fields = form.config();
-        if (!fields) return null;
-        if (validate) {
-            await this.validateForm(form);
-        }
-        return this.serialize(fields);
-    }
-
     async validateForm(form: IDynamicForm, showErrors: boolean = true): Promise<any> {
         const group = form.group();
         if (!group) return Promise.resolve();
@@ -90,6 +76,15 @@ export class DynamicFormService {
                 });
             group.updateValueAndValidity();
         });
+    }
+
+    async serializeForm(form: IDynamicForm, validate: boolean = true): Promise<FormSerializeResult> {
+        const fields = form.config();
+        if (!fields) return null;
+        if (validate) {
+            await this.validateForm(form);
+        }
+        return this.serialize(fields);
     }
 
     async serialize(fields: FormFieldConfig[]): Promise<FormSerializeResult> {
@@ -121,32 +116,9 @@ export class DynamicFormService {
         return result;
     }
 
-    protected showErrorsForGroup(formGroup: FormGroup): void {
-        if (!formGroup) return;
-        formGroup.markAsTouched({onlySelf: true});
-        const controls = Object.keys(formGroup.controls).map(id => formGroup.controls[id]);
-        this.showErrorsForControls(controls);
-    }
-
-    protected showErrorsForControls(controls: AbstractControl[]): void {
-        controls.forEach(control => {
-            if (control instanceof FormGroup) {
-                this.showErrorsForGroup(control);
-                return;
-            }
-            control.markAsTouched({onlySelf: true});
-            if (control instanceof FormArray) {
-                this.showErrorsForControls(control.controls);
-            }
-        });
-    }
-
-    protected convertToDate(value: any): any {
-        if (ObjectUtils.isNullOrUndefined(value)) return null;
-        const date = ObjectUtils.isDate(value)
-            ? value
-            : new Date(value);
-        return isNaN(date as any) ? new Date() : date;
+    async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
+        const group = await this.getFormFieldGroupForSchema(name, customizeOrOptions);
+        return group.fieldGroup;
     }
 
     async getFormFieldGroupForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig> {
@@ -525,6 +497,34 @@ export class DynamicFormService {
             }, endpoint)
         }
         return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
+    }
+
+    protected showErrorsForGroup(formGroup: FormGroup): void {
+        if (!formGroup) return;
+        formGroup.markAsTouched({onlySelf: true});
+        const controls = Object.keys(formGroup.controls).map(id => formGroup.controls[id]);
+        this.showErrorsForControls(controls);
+    }
+
+    protected showErrorsForControls(controls: AbstractControl[]): void {
+        controls.forEach(control => {
+            if (control instanceof FormGroup) {
+                this.showErrorsForGroup(control);
+                return;
+            }
+            control.markAsTouched({onlySelf: true});
+            if (control instanceof FormArray) {
+                this.showErrorsForControls(control.controls);
+            }
+        });
+    }
+
+    protected convertToDate(value: any): any {
+        if (ObjectUtils.isNullOrUndefined(value)) return null;
+        const date = ObjectUtils.isDate(value)
+            ? value
+            : new Date(value);
+        return isNaN(date as any) ? new Date() : date;
     }
 
     protected addPropertyValidators(validators: Validators, property: IOpenApiSchemaProperty): void {
