@@ -1,7 +1,7 @@
 @if (config() && group()) {
     <form [formGroup]="group()" (ngSubmit)="submit()">
         <input type="submit" [hidden]="true" />
-        <formly-form [model]="model()"
+        <formly-form [model]="data()"
                      [fields]="config()"
                      [form]="group()"
                      [options]="options"></formly-form>

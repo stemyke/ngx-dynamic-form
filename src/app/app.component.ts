@@ -46,7 +46,7 @@ export class AppComponent implements OnInit {
         }
     });
 
-    model = signal<any>({
+    plainData = signal<any>({
         externalId: "X",
         attachments: [],
         openingHours: [
@@ -55,13 +55,13 @@ export class AppComponent implements OnInit {
         ]
     });
 
-    decoratorModel = signal<any>(new OrderModel());
+    decoratorData = signal<any>(new OrderModel());
 
     constructor(private openApi: OpenApiService,
                 private fb: DynamicFormBuilderService,
                 private forms: DynamicFormService) {
         setTimeout(() => {
-            this.model.update(value => {
+            this.plainData.update(value => {
                 return {
                     ...value,
                     email: "test@mail.com"
