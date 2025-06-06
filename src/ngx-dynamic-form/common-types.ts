@@ -146,7 +146,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden"
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "formCheck" | "indeterminate" | "cols" | "rows">;
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "indeterminate" | "cols" | "rows">;
 
 export type FormSelectData = FormFieldData
     & Pick<FormFieldProps, "multiple" | "type" | "inline" | "allowEmpty" | "groupBy"> & {

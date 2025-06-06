@@ -403,7 +403,6 @@ export class DynamicFormService {
         return this.builder.createFormInput(property.id, {
             ...this.getFormFieldData(property, options),
             type: "checkbox",
-            formCheck: "nolabel",
             indeterminate: property.indeterminate || false
         }, parent, options);
     }

@@ -12,6 +12,7 @@ import {DynamicFormService} from "./services/dynamic-form.service";
 import {DynamicFormBuilderService} from "./services/dynamic-form-builder.service";
 
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
+import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
 import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic-form-group.component";
 import {DynamicFormFieldComponent} from "./components/dynamic-form-field/dynamic-form-field.component";
 import {DynamicFormFieldsetComponent} from "./components/dynamic-form-fieldset/dynamic-form-fieldset.component";
@@ -49,6 +50,7 @@ export class NgxDynamicFormModule {
         const {providers} = FormlyModule.forRoot({
             types: [
                 {name: "array", component: DynamicFormArrayComponent},
+                {name: "chips", component: DynamicFormChipsComponent},
                 {name: "upload", component: DynamicFormUploadComponent, wrappers: ["form-field"]},
                 {name: "file", extends: "upload"},
                 {name: "translation", extends: "array"},

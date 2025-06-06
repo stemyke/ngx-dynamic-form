@@ -68,6 +68,7 @@ export class DynamicFormBuilderService {
             },
             props: {
                 ...props,
+                formCheck: "nolabel",
                 required: !!validators.required,
                 label: this.getLabel(key, data.label, parent, options),
             }
@@ -212,14 +213,13 @@ export class DynamicFormBuilderService {
         }, parent, options);
         group.wrappers = ["form-group"];
         const result = fields(group);
-        if (result instanceof Promise) {
-            return result.then(fieldGroup => {
-                group.fieldGroup = fieldGroup;
-                return group;
-            });
-        }
-        group.fieldGroup = result;
-        return group;
+        const handleGroup = (fieldGroup: FormFieldConfig[]) => {
+            group.fieldGroup = fieldGroup;
+            return group;
+        };
+        return result instanceof Promise
+            ? result.then(handleGroup)
+            : handleGroup(result);
     }
 
     createFormArray(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig | FormFieldConfig[], data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
@@ -239,33 +239,37 @@ export class DynamicFormBuilderService {
             clearItems: data.clearItems !== false
         }, parent, options);
         const result = fields(array);
-        if (result instanceof Promise) {
-            return result.then(items => {
-                array.fieldArray = Array.isArray(items) ? {
+        const handleItems = (items: FormFieldConfig | FormFieldConfig[]) => {
+            if (Array.isArray(items)) {
+                array.fieldArray = {
                     wrappers: ["form-group"],
                     fieldGroup: items,
-                } : {
-                    ...items,
-                    props: {
-                        ...items.props,
-                        label: ""
-                    }
                 };
                 return array;
-            });
-        }
-        const items = result as FormFieldConfig;
-        array.fieldArray = Array.isArray(result) ? {
-            wrappers: ["form-group"],
-            fieldGroup: result,
-        } : {
-            ...items,
-            props: {
-                ...items.props,
-                label: ""
             }
+            const props = items.props || {};
+            if (props.type === "text" || props.type === "number") {
+                array.type = "chips";
+                array.wrappers = ["form-field"];
+                array.props = {
+                    ...props,
+                    ...array.props,
+                    multiple: true
+                };
+                return array;
+            }
+            array.fieldArray = {
+                ...items,
+                props: {
+                    ...items.props,
+                    label: ""
+                }
+            };
+            return array;
         };
-        return array;
+        return result instanceof Promise
+            ? result.then(handleItems)
+            : handleItems(result);
     }
 
     async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {
