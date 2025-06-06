@@ -70,4 +70,8 @@ export class DynamicFormComponent implements IDynamicForm {
     submit() {
         this.onSubmit.emit(this);
     }
+
+    reset() {
+        this.options?.resetModel?.();
+    }
 }

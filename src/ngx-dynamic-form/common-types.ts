@@ -100,6 +100,7 @@ export interface IDynamicForm {
     readonly status: Signal<DynamicFormState>;
     readonly onSubmit: OutputRef<IDynamicForm>;
 
+    reset(): void;
 }
 
 // --- Validation types ---
