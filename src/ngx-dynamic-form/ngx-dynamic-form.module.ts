@@ -54,16 +54,20 @@ export class NgxDynamicFormModule {
                 {name: "upload", component: DynamicFormUploadComponent, wrappers: ["form-field"]},
                 {name: "file", extends: "upload"},
                 {name: "translation", extends: "array"},
+                ...(config?.types || [])
             ],
             wrappers: [
                 { name: "form-field", component: DynamicFormFieldComponent },
                 { name: "form-fieldset", component: DynamicFormFieldsetComponent },
                 { name: "form-group", component: DynamicFormGroupComponent },
+                ...(config?.wrappers || [])
             ],
             extras: {
-                renderFormlyFieldElement: false
+                renderFormlyFieldElement: false,
+                ...(config?.extras || {})
             }
         });
+
         return [
             ...(providers as Provider[]),
             DynamicFormService,

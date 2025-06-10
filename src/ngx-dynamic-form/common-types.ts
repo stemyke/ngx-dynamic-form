@@ -1,7 +1,7 @@
 import {Injector, OutputRef, Signal} from "@angular/core";
 import {AbstractControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {FieldTypeConfig, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
+import {FieldTypeConfig, FormlyFieldConfig, FormlyFieldProps, ConfigOption} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty, IRequestOptions} from "@stemy/ngx-utils";
 
@@ -185,6 +185,6 @@ export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions,
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
-export interface IDynamicFormModuleConfig {
+export interface IDynamicFormModuleConfig extends Pick<ConfigOption, "types" | "wrappers" | "extras">{
     // controlProvider?: (injector: Injector) => DynamicFormControlMapFn;
 }
