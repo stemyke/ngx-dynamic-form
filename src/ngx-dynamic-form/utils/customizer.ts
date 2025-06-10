@@ -1,16 +1,23 @@
-import {cachedFactory, CachedProvider, IOpenApiSchema, IOpenApiSchemaProperty} from "@stemy/ngx-utils";
+import {
+    cachedFactory,
+    CachedProvider,
+    IOpenApiSchema,
+    IOpenApiSchemaProperty,
+    MaybeArray,
+    MaybePromise
+} from "@stemy/ngx-utils";
 
-import {FormBuilderOptions, FormFieldConfig, FormFieldCustomizer, PromiseOrNot} from "../common-types";
+import {FormBuilderOptions, FormFieldConfig, FormFieldCustomizer} from "../common-types";
 
 export interface IFormFieldCustomizer {
-    acceptField(config: FormFieldConfig, parent: FormFieldConfig): boolean;
+    acceptField(field: FormFieldConfig, parent: FormFieldConfig): boolean;
     customizeField(
-        config: FormFieldConfig,
+        field: FormFieldConfig,
         property: IOpenApiSchemaProperty,
         schema: IOpenApiSchema,
         parent: FormFieldConfig,
         options: FormBuilderOptions
-    ): PromiseOrNot<FormFieldConfig | FormFieldConfig[]>;
+    ): MaybePromise<MaybeArray<FormFieldConfig>>;
 }
 
 export function customizeFormField(...providers: CachedProvider<IFormFieldCustomizer>[]): FormFieldCustomizer {

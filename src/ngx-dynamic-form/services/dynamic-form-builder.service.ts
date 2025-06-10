@@ -5,6 +5,7 @@ import {
     IApiService,
     ILanguageService,
     LANGUAGE_SERVICE,
+    MaybePromise,
     ObjectUtils,
     ReflectUtils
 } from "@stemy/ngx-utils";
@@ -20,7 +21,6 @@ import {
     FormSelectData,
     FormSelectOption,
     FormUploadData,
-    PromiseOrNot,
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
@@ -210,11 +210,9 @@ export class DynamicFormBuilderService {
 
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig[], data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): PromiseOrNot<FormFieldConfig> {
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
-        const group = this.createFormField(key, undefined, data, {
-
-        }, parent, options);
+        const group = this.createFormField(key, undefined, data, {}, parent, options);
         group.wrappers = ["form-group"];
         const result = fields(group);
         const handleGroup = (fieldGroup: FormFieldConfig[]) => {
@@ -228,7 +226,7 @@ export class DynamicFormBuilderService {
 
     createFormArray(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig | FormFieldConfig[], data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
     createFormArray(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig | FormFieldConfig[]>, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
-    createFormArray(key: string, fields: (parent: FormFieldConfig) => any, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): PromiseOrNot<FormFieldConfig> {
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => any, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
         const array = this.createFormField(key, "array", data, {
             // initialCount: data.initialCount || 0,

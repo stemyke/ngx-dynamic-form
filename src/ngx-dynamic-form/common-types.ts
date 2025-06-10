@@ -3,9 +3,14 @@ import {AbstractControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
 import {FieldTypeConfig, FormlyFieldConfig, FormlyFieldProps, ConfigOption} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
-import {IAsyncMessage, IOpenApiSchema, IOpenApiSchemaProperty, IRequestOptions} from "@stemy/ngx-utils";
-
-export type PromiseOrNot<T> = Promise<T> | T;
+import {
+    IAsyncMessage,
+    IOpenApiSchema,
+    IOpenApiSchemaProperty,
+    IRequestOptions,
+    MaybeArray,
+    MaybePromise
+} from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
 export const FORM_ROOT_KEY = "__root";
@@ -58,7 +63,7 @@ export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConf
 
 }
 
-export type FormFieldSerializer = (field: FormBaseFieldConfig, injector: Injector) => PromiseOrNot<any>;
+export type FormFieldSerializer = (field: FormBaseFieldConfig, injector: Injector) => MaybePromise<any>;
 
 export declare type FormHookFn = (field: FormBaseFieldConfig) => void;
 
@@ -105,7 +110,9 @@ export interface IDynamicForm {
 
 // --- Validation types ---
 
-type FormFieldValidatorFn<T> = ((control: AbstractControl, field?: FormlyFieldConfig) => T) & {validatorName?: string};
+type FormFieldValidatorFn<T> = ((control: AbstractControl, field?: FormlyFieldConfig) => T) & {
+    validatorName?: string
+};
 
 export type ValidationMessageFn = (error: any, field: FormFieldConfig) => string | Observable<string>;
 
@@ -167,7 +174,7 @@ export type FormArrayData = FormFieldData
 export type FormFieldCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormlyFieldConfig,
     parent: FormFieldConfig, options: FormBuilderOptions, injector: Injector
-) => PromiseOrNot<FormlyFieldConfig | FormlyFieldConfig[]>;
+) => MaybePromise<MaybeArray<FormFieldConfig>>;
 
 export interface ConfigForSchemaOptions extends FormBuilderOptions {
     customizer?: FormFieldCustomizer;
@@ -182,9 +189,8 @@ export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions,
     ) => Promise<FormFieldConfig[]>;
 }
 
-
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
-export interface IDynamicFormModuleConfig extends Pick<ConfigOption, "types" | "wrappers" | "extras">{
+export interface IDynamicFormModuleConfig extends Pick<ConfigOption, "types" | "wrappers" | "extras"> {
     // controlProvider?: (injector: Injector) => DynamicFormControlMapFn;
 }
