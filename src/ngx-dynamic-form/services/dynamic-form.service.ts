@@ -1,7 +1,6 @@
 import {Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {distinctUntilChanged, first, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
-import {FormlyFieldConfig} from "@ngx-formly/core";
 import {
     IApiService,
     ILanguageService,
@@ -115,12 +114,12 @@ export class DynamicFormService {
         return result;
     }
 
-    async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig[]> {
+    async getFormFieldsForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormFieldConfig[]> {
         const group = await this.getFormFieldGroupForSchema(name, customizeOrOptions);
         return group.fieldGroup;
     }
 
-    async getFormFieldGroupForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormlyFieldConfig> {
+    async getFormFieldGroupForSchema(name: string, customizeOrOptions?: FormFieldCustomizer | ConfigForSchemaOptions): Promise<FormFieldConfig> {
         this.schemas = await this.openApi.getSchemas();
         const schemaOptions = ObjectUtils.isObject(customizeOrOptions) ? customizeOrOptions as ConfigForSchemaOptions : {};
         const customizeConfig = ObjectUtils.isFunction(customizeOrOptions) ? customizeOrOptions : schemaOptions.customizer;
@@ -265,7 +264,7 @@ export class DynamicFormService {
         };
     }
 
-    protected async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormlyFieldConfig> {
+    protected async getFormArrayConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         return this.builder.createFormArray(property.id, async sp => {
             const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
             if (subSchemas.length > 0) {
@@ -290,7 +289,7 @@ export class DynamicFormService {
         }, parent, options);
     }
 
-    protected async getFormGroupConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormlyFieldConfig> {
+    protected async getFormGroupConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         const subSchemas = findRefs(property).map(ref => this.schemas[ref]);
         return this.builder.createFormGroup(property.id, async sp => {
             const subModels = await Promise.all(
