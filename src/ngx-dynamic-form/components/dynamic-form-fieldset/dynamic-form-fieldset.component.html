@@ -1,7 +1,6 @@
-<legend class="form-label" *ngIf="props.label">
-    {{ props.label }}
-    <p class="form-group-description" *ngIf="props.description">{{ props.description }}</p>
+<legend class="field-legend" *ngIf="props.label">
+    {{ props.label | translate }}
 </legend>
-<div class="ngx-dynamic-form-container">
+<div class="field-container">
     <ng-container #fieldComponent></ng-container>
 </div>

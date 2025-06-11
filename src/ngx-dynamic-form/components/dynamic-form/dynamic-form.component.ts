@@ -11,8 +11,9 @@ import {
 } from "@angular/core";
 import {rxResource} from "@angular/core/rxjs-interop";
 import {FormGroup} from "@angular/forms";
+import {Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
-import {FormFieldConfig, IDynamicForm} from "../../common-types";
+import {FormFieldChangeEvent, FormFieldConfig, IDynamicForm} from "../../common-types";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 
 @Component({
@@ -31,6 +32,8 @@ export class DynamicFormComponent implements IDynamicForm {
     readonly data = input<any>({});
 
     readonly fields = input<FormFieldConfig[]>(null);
+
+    readonly fieldChanges = new Subject<FormFieldChangeEvent>();
 
     protected readonly config$ = resource({
         request: () => ({
@@ -62,13 +65,15 @@ export class DynamicFormComponent implements IDynamicForm {
     readonly onSubmit = output<IDynamicForm>();
 
     readonly options: FormlyFormOptions = {
+        fieldChanges: this.fieldChanges,
         formState: {
             injector: inject(Injector)
         }
     };
 
     submit() {
-        this.onSubmit.emit(this);
+        // TODO: Templ disable submit
+        // this.onSubmit.emit(this);
     }
 
     reset() {

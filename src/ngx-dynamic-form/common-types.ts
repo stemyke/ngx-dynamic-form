@@ -11,6 +11,7 @@ import {
     MaybeArray,
     MaybePromise
 } from "@stemy/ngx-utils";
+import {FormlyValueChangeEvent} from "@ngx-formly/core/lib/models";
 
 // --- Basic frm constants ---
 export const FORM_ROOT_KEY = "__root";
@@ -85,6 +86,10 @@ export interface FormFieldType<T = FormFieldProps> extends FieldTypeConfig<T> {
 
 }
 
+export interface FormFieldChangeEvent extends FormlyValueChangeEvent {
+    field: FormFieldConfig;
+}
+
 export interface FormSerializeResult {
     [key: string]: any;
 }
@@ -99,6 +104,7 @@ export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption
 
 export interface IDynamicForm {
 
+    readonly fieldChanges: Observable<FormFieldChangeEvent>;
     readonly config: Signal<FormFieldConfig[]>;
     readonly group: Signal<FormGroup>;
     readonly status: Signal<DynamicFormState>;

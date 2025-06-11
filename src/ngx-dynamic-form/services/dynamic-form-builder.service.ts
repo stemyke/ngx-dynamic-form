@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {BehaviorSubject, distinctUntilChanged, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, distinctUntilChanged, map, startWith, switchMap} from "rxjs";
 import {
     API_SERVICE,
     IApiService,
@@ -56,7 +56,7 @@ export class DynamicFormBuilderService {
             Array.isArray(data.classes) ? data.classes : [data.classes || ""]
         );
         const hide = new BehaviorSubject(data.hidden === true);
-        const className = hide.pipe(switchMap(hidden => {
+        const className = hide.pipe(map(hidden => {
             return hidden ? `` : classes.filter(c => c?.length > 0).join(" ");
         }));
         const field = {
@@ -78,6 +78,9 @@ export class DynamicFormBuilderService {
                 formCheck: "nolabel",
                 required: !!validators.required,
                 label: this.getLabel(key, data.label, parent, options),
+            },
+            modelOptions: {
+                updateOn: "change"
             },
             expressions: {
                 hide,
@@ -140,7 +143,7 @@ export class DynamicFormBuilderService {
                 fieldGroup: groups[group],
                 wrappers: ["form-fieldset"],
                 className: `dynamic-form-fieldset dynamic-form-fieldset-${group}`,
-                id: !parent ? group : `${parent.props?.label}.${group}`,
+                id: !parent?.path ? group : `${parent.path}.${group}`,
                 props: {
                     label: this.getLabel(group, group, parent, options),
                     hidden: false
@@ -151,8 +154,11 @@ export class DynamicFormBuilderService {
 
     createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {};
+        const type = `${data.type || "text"}`;
+        const autocomplete = data.autocomplete || (type === "password" ? "new-password" : "none");
         return this.createFormField(key, data.type === "checkbox" ? "checkbox" : "input", data, {
-            type: `${data.type || "text"}`,
+            type,
+            autocomplete,
             pattern: ObjectUtils.isString(data.pattern) ? data.pattern : "",
             step: data.step,
             cols: data.cols || null,
@@ -163,7 +169,7 @@ export class DynamicFormBuilderService {
             maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
             placeholder: data.placeholder || "",
             attributes: {
-                autocomplete: data.autocomplete || "off"
+                autocomplete
             },
         }, parent, options);
     }
