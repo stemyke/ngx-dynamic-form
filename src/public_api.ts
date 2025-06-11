@@ -3,7 +3,6 @@ export {
 
     FormBuilderOptions,
     FormFieldProps,
-    FormBaseFieldConfig,
     FormFieldSerializer,
     FormHookFn,
     FormHookConfig,
@@ -71,6 +70,9 @@ export {
 export {
     replaceSpecialChars,
     mergeFormFields,
+    getFieldByPath,
+    setFieldHidden,
+    setFieldDisabled,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS

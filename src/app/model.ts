@@ -157,7 +157,8 @@ export class OrderModel {
 
     @FormInput({
         fieldSet: "buyermessage",
-        type: "textarea"
+        type: "textarea",
+        hidden: true
     })
     @FormSerializable()
     message: string = "";

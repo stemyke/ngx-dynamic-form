@@ -59,26 +59,25 @@ export interface FormFieldProps extends FormlyFieldProps {
     uploadUrl?: string;
 }
 
-export interface FormBaseFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
+export type FormFieldSerializer = (field: FormFieldConfig, injector: Injector) => MaybePromise<any>;
 
-}
-
-export type FormFieldSerializer = (field: FormBaseFieldConfig, injector: Injector) => MaybePromise<any>;
-
-export declare type FormHookFn = (field: FormBaseFieldConfig) => void;
+export declare type FormHookFn = (field: FormFieldConfig) => void;
 
 export interface FormHookConfig {
-    onInit?: FormHookFn | ((field: FormBaseFieldConfig) => Observable<any>);
+    onInit?: FormHookFn | ((field: FormFieldConfig) => Observable<any>);
     onChanges?: FormHookFn;
     afterContentInit?: FormHookFn;
     afterViewInit?: FormHookFn;
     onDestroy?: FormHookFn;
 }
 
-export interface FormFieldConfig<T = FormFieldProps> extends FormBaseFieldConfig<T> {
+export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
     serializer?: FormFieldSerializer;
     serialize?: boolean;
     fieldSet?: string;
+    path?: string;
+    fieldGroup?: FormFieldConfig[];
+    fieldArray?: FormFieldConfig | ((field: FormFieldConfig) => FormFieldConfig);
     hooks?: FormHookConfig;
 }
 
@@ -158,7 +157,7 @@ export type FormInputData = FormFieldData
 
 export type FormSelectData = FormFieldData
     & Pick<FormFieldProps, "multiple" | "type" | "inline" | "allowEmpty" | "groupBy"> & {
-    options: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
+    options?: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
 };
 
 export type FormUploadData = FormFieldData

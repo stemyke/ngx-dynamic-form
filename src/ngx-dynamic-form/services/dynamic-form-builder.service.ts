@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {distinctUntilChanged, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, distinctUntilChanged, startWith, switchMap} from "rxjs";
 import {
     API_SERVICE,
     IApiService,
@@ -55,14 +55,18 @@ export class DynamicFormBuilderService {
         const classes = [`dynamic-form-field`, `dynamic-form-field-${key}`, `dynamic-form-${type || "group"}`].concat(
             Array.isArray(data.classes) ? data.classes : [data.classes || ""]
         );
-        return {
+        const hide = new BehaviorSubject(data.hidden === true);
+        const className = hide.pipe(switchMap(hidden => {
+            return hidden ? `` : classes.filter(c => c?.length > 0).join(" ");
+        }));
+        const field = {
             key,
             type,
             validators,
             parent,
-            className: classes.filter(c => c?.length > 0).join(" "),
-            hide: data.hidden === true,
+            path: !parent?.path ? key : `${parent.path}.${key}`,
             fieldSet: String(data.fieldSet || ""),
+            resetOnHide: false,
             validation: {
                 messages: Object.keys(validators).reduce((res, key) => {
                     res[key] = validationMessage(this.injector, key, options.labelPrefix);
@@ -74,8 +78,14 @@ export class DynamicFormBuilderService {
                 formCheck: "nolabel",
                 required: !!validators.required,
                 label: this.getLabel(key, data.label, parent, options),
+            },
+            expressions: {
+                hide,
+                className
             }
-        }
+        } as FormFieldConfig;
+        field.expressions.path = () => field.path;
+        return field;
     }
 
     resolveFormFields(target: Type<any>, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
@@ -159,7 +169,7 @@ export class DynamicFormBuilderService {
     }
 
     createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
-        data = data || {options: () => []};
+        data = data || {};
         const select = this.createFormField(key, data.type === "radio" ? "radio" : "select", data, {
             multiple: data.multiple,
             type: data.type,
@@ -169,7 +179,7 @@ export class DynamicFormBuilderService {
         }, parent, options);
         select.hooks = {
             onInit: field => {
-                const options = data.options(field);
+                const options = data.options?.(field) || [];
                 const control = field.formControl.root;
                 field.props.options = options instanceof Promise ? control.valueChanges.pipe(
                     startWith(control.value),

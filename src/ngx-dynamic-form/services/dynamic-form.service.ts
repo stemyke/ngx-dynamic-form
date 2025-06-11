@@ -147,6 +147,7 @@ export class DynamicFormService {
         } as ConfigForSchemaWrapOptions;
         const config = {
             key: FORM_ROOT_KEY,
+            path: "",
             wrappers: ["form-group"]
         } as FormFieldConfig;
 

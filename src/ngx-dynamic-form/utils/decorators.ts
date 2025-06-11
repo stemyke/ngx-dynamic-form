@@ -29,6 +29,7 @@ export function FormSerializable(serializer?: FormFieldSerializer): PropertyDeco
 }
 
 export function FormInput(data?: FormInputData): PropertyDecorator {
+    data = data || {};
     return (target: any, key: string): void => {
         const meta = ReflectUtils.getOwnMetadata("design:type", target, key);
         const type = meta ? meta.name : "";
@@ -51,6 +52,7 @@ export function FormInput(data?: FormInputData): PropertyDecorator {
 }
 
 export function FormSelect(data?: FormSelectData): PropertyDecorator {
+    data = data || {};
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
@@ -61,6 +63,7 @@ export function FormSelect(data?: FormSelectData): PropertyDecorator {
 }
 
 export function FormUpload(data?: FormUploadData): PropertyDecorator {
+    data = data || {};
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
@@ -76,6 +79,7 @@ export function FormFile(data?: FormUploadData): PropertyDecorator {
 }
 
 export function FormGroup(data?: FormGroupData): PropertyDecorator {
+    data = data || {};
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
@@ -88,6 +92,7 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
 }
 
 export function FormArray(itemType: string | FormInputData | Type<any>, data?: FormArrayData): PropertyDecorator {
+    data = data || {};
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
