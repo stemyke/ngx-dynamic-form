@@ -179,7 +179,7 @@ export type FormArrayData = FormFieldData
 
 export type FormFieldCustomizer = (
     property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormFieldConfig,
-    parent: FormFieldConfig, options: FormBuilderOptions, injector: Injector
+    options: FormBuilderOptions, injector: Injector
 ) => MaybePromise<MaybeArray<FormFieldConfig>>;
 
 export interface ConfigForSchemaOptions extends FormBuilderOptions {
@@ -189,10 +189,7 @@ export interface ConfigForSchemaOptions extends FormBuilderOptions {
 export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions, "customizer"> {
     schema: IOpenApiSchema;
     injector?: Injector;
-    customizer?: (
-        property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions,
-        field: FormFieldConfig, parent: FormFieldConfig
-    ) => Promise<FormFieldConfig[]>;
+    customizer?: (property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig) => Promise<FormFieldConfig[]>;
 }
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;

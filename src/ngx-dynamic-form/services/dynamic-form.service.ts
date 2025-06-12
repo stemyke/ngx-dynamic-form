@@ -128,15 +128,13 @@ export class DynamicFormService {
             ...schemaOptions,
             schema,
             injector: this.injector,
-            customizer: async (property, options, config, parent: FormFieldConfig) => {
+            customizer: async (property, options, config) => {
                 config.defaultValue = `${config.type}`.startsWith("date")
                     ? this.convertToDate(property.default) : property.default;
                 if (!ObjectUtils.isFunction(customizeConfig)) return [config];
                 let res = customizeConfig(
                     property, schema, config,
-                    parent,
-                    options,
-                    this.injector
+                    options, this.injector
                 );
                 if (!res) return [config];
                 if (res instanceof Promise) {
@@ -170,7 +168,7 @@ export class DynamicFormService {
             id: FORM_ROOT_KEY,
             type: "object",
             properties: schema?.properties || {}
-        }, wrapOptions, config, null);
+        }, wrapOptions, config);
         // Check if the customized root wrapper returned an array
         fields.length = 0;
 
@@ -207,7 +205,7 @@ export class DynamicFormService {
 
     protected async getFormFieldsForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig[]> {
         const field = await this.getFormFieldForProp(property, options, parent);
-        return !field ? [] : options.customizer(property, options, field, parent);
+        return !field ? [] : options.customizer(property, options, field);
     }
 
     protected async getFormFieldForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
