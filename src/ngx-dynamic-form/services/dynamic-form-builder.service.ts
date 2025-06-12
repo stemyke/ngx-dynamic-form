@@ -52,14 +52,8 @@ export class DynamicFormBuilderService {
                 return res;
             }, {} as Validators)
             : data.validators || {};
-        const classes = [`dynamic-form-field`, `dynamic-form-field-${key}`, `dynamic-form-${type || "group"}`].concat(
-            Array.isArray(data.classes) ? data.classes : [data.classes || ""]
-        );
         const hide = new BehaviorSubject(data.hidden === true);
         const additional = new BehaviorSubject({});
-        const className = hide.pipe(map(hidden => {
-            return hidden ? `` : classes.filter(c => c?.length > 0).join(" ");
-        }));
         const field = {
             key,
             type,
@@ -76,6 +70,7 @@ export class DynamicFormBuilderService {
             },
             props: {
                 ...props,
+                disabled: data.disabled === true,
                 formCheck: "nolabel",
                 required: !!validators.required,
                 label: this.getLabel(key, data.label, parent, options),
@@ -86,10 +81,15 @@ export class DynamicFormBuilderService {
             fieldGroupClassName: "field-container",
             expressions: {
                 hide,
-                className,
                 additional
             }
         } as FormFieldConfig;
+        field.expressions.className = hide.pipe(map(hidden => {
+            const classes = [`dynamic-form-field`, `dynamic-form-field-${field.key}`, `dynamic-form-${field.type || "group"}`].concat(
+                Array.isArray(data.classes) ? data.classes : [data.classes || ""]
+            );
+            return hidden ? `` : classes.filter(c => c?.length > 0).join(" ");
+        }));
         field.expressions.path = () => field.path;
         return field;
     }
@@ -179,11 +179,11 @@ export class DynamicFormBuilderService {
 
     createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {};
-        const select = this.createFormField(key, data.type === "radio" ? "radio" : "select", data, {
+        const type = `${data.type || "select"}`;
+        const select = this.createFormField(key, type === "radio" ? type : "select", data, {
+            type,
             multiple: data.multiple,
-            type: data.type,
             groupBy: data.groupBy,
-            inline: data.inline,
             allowEmpty: data.allowEmpty
         }, parent, options);
         select.hooks = {

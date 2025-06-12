@@ -211,9 +211,6 @@ export class DynamicFormService {
     protected async getFormFieldForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
-            if (property.format == "radio") {
-                return this.getFormRadioConfig(property, options, parent);
-            }
             return this.getFormSelectConfig(property, options, parent);
         }
         switch (property.type) {
@@ -374,26 +371,13 @@ export class DynamicFormService {
         }, parent, options);
     }
 
-    protected getFormRadioConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
-        return this.builder.createFormSelect(property.id, {
-            ...this.getFormFieldData(property, options),
-            options: field => this.getFormSelectOptions(property, options, field),
-            type: "radio",
-            multiple: property.type == "array",
-            groupBy: property.groupBy,
-            inline: property.inline,
-            allowEmpty: property.allowEmpty
-        }, parent, options);
-    }
-
     protected getFormSelectConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormSelect(property.id, {
             ...this.getFormFieldData(property, options),
             options: field => this.getFormSelectOptions(property, options, field),
-            type: "select",
+            type: property.format || "select",
             multiple: property.type == "array",
             groupBy: property.groupBy,
-            inline: property.inline,
             allowEmpty: property.allowEmpty
         }, parent, options);
     }

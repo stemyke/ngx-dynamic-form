@@ -36,7 +36,6 @@ export interface FormFieldProps extends FormlyFieldProps {
     indeterminate?: boolean;
     // --- Select props ---
     multiple?: boolean;
-    inline?: boolean;
     allowEmpty?: boolean;
     groupBy?: string;
     // --- Array props ---
@@ -49,6 +48,7 @@ export interface FormFieldProps extends FormlyFieldProps {
     removeItem?: boolean;
     clearItems?: boolean;
     // --- Upload props ---
+    inline?: boolean;
     accept?: string | string[];
     url?: string;
     maxSize?: number;
@@ -151,7 +151,7 @@ export type AsyncValidators = FormFieldValidation<AsyncValidatorFn, AsyncBoolean
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden">
+export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden" | "disabled">
     & {
     validators?: Validators | ValidatorFn[];
     serializer?: FormFieldSerializer;
@@ -163,7 +163,7 @@ export type FormInputData = FormFieldData
     & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "indeterminate" | "cols" | "rows">;
 
 export type FormSelectData = FormFieldData
-    & Pick<FormFieldProps, "multiple" | "type" | "inline" | "allowEmpty" | "groupBy"> & {
+    & Pick<FormFieldProps, "multiple" | "type" | "allowEmpty" | "groupBy"> & {
     options?: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
 };
 
