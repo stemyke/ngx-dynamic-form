@@ -157,7 +157,7 @@ export class DynamicFormBuilderService {
         data = data || {};
         const type = `${data.type || "text"}`;
         const autocomplete = data.autocomplete || (type === "password" ? "new-password" : "none");
-        return this.createFormField(key, data.type === "checkbox" ? "checkbox" : "input", data, {
+        return this.createFormField(key, type === "checkbox" || type === "textarea" ? type : "input", data, {
             type,
             autocomplete,
             pattern: ObjectUtils.isString(data.pattern) ? data.pattern : "",
