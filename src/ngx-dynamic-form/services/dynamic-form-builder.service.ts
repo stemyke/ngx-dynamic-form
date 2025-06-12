@@ -82,6 +82,7 @@ export class DynamicFormBuilderService {
             modelOptions: {
                 updateOn: "change"
             },
+            fieldGroupClassName: "field-container",
             expressions: {
                 hide,
                 className

@@ -2,6 +2,4 @@
     {{ props.label | translate }}
     <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
 </label>
-<div class="field-container">
-    <ng-container #fieldComponent></ng-container>
-</div>
+<ng-container #fieldComponent></ng-container>
