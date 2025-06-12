@@ -1,4 +1,4 @@
-import {IOpenApiSchemaProperty} from "@stemy/ngx-utils";
+import {IOpenApiSchemaProperty, ObjectUtils} from "@stemy/ngx-utils";
 import {BehaviorSubject, Subject} from "rxjs";
 import {FormFieldConfig} from "../common-types";
 
@@ -62,6 +62,15 @@ export function setFieldDisabled(field: FormFieldConfig, disabled: boolean = tru
         ...(field.props || {}),
         disabled
     };
+}
+
+export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {
+    const additional = field.expressions?.additional;
+    if (additional instanceof BehaviorSubject) {
+        additional.next(ObjectUtils.assign(additional.value, values || {}));
+        return;
+    }
+    field.expressions.additional = new BehaviorSubject(values || {});
 }
 
 export const MIN_INPUT_NUM = -999999999;

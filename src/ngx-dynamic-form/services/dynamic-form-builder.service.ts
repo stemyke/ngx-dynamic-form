@@ -56,6 +56,7 @@ export class DynamicFormBuilderService {
             Array.isArray(data.classes) ? data.classes : [data.classes || ""]
         );
         const hide = new BehaviorSubject(data.hidden === true);
+        const additional = new BehaviorSubject({});
         const className = hide.pipe(map(hidden => {
             return hidden ? `` : classes.filter(c => c?.length > 0).join(" ");
         }));
@@ -85,7 +86,8 @@ export class DynamicFormBuilderService {
             fieldGroupClassName: "field-container",
             expressions: {
                 hide,
-                className
+                className,
+                additional
             }
         } as FormFieldConfig;
         field.expressions.path = () => field.path;

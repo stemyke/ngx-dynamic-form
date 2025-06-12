@@ -74,6 +74,7 @@ export {
     getFieldByPath,
     setFieldHidden,
     setFieldDisabled,
+    additionalFieldValues,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS

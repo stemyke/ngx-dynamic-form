@@ -80,6 +80,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     fieldGroup?: FormFieldConfig[];
     fieldArray?: FormFieldConfig | ((field: FormFieldConfig) => FormFieldConfig);
     hooks?: FormHookConfig;
+    readonly additional?: Readonly<{[key: string]: any}>;
 }
 
 export interface FormFieldType<T = FormFieldProps> extends FieldTypeConfig<T> {
@@ -177,7 +178,7 @@ export type FormArrayData = FormFieldData
 // --- JSON schema interfaces ---
 
 export type FormFieldCustomizer = (
-    property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormlyFieldConfig,
+    property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormFieldConfig,
     parent: FormFieldConfig, options: FormBuilderOptions, injector: Injector
 ) => MaybePromise<MaybeArray<FormFieldConfig>>;
 
