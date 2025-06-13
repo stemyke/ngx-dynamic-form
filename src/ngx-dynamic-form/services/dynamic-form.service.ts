@@ -324,7 +324,9 @@ export class DynamicFormService {
             max: sub.maximum,
             minLength: sub.minLength,
             maxLength: sub.maxLength,
-            placeholder: property.placeholder
+            placeholder: property.placeholder,
+            indeterminate: property.indeterminate,
+            suffix: property.suffix
         }, parent, options);
     }
 

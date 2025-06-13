@@ -1,7 +1,7 @@
 import {Injector, OutputRef, Signal} from "@angular/core";
-import {AbstractControl, FormGroup} from "@angular/forms";
+import {AbstractControl, FormControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {FieldTypeConfig, FormlyFieldConfig, FormlyFieldProps, ConfigOption} from "@ngx-formly/core";
+import {ConfigOption, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {
     IAsyncMessage,
@@ -11,7 +11,6 @@ import {
     MaybeArray,
     MaybePromise
 } from "@stemy/ngx-utils";
-import {FormlyValueChangeEvent} from "@ngx-formly/core/lib/models";
 
 // --- Basic frm constants ---
 export const FORM_ROOT_KEY = "__root";
@@ -26,11 +25,13 @@ export type UploadData = Record<string, any> | ArrayBuffer | FormData;
 
 export interface FormBuilderOptions {
     labelPrefix?: string;
+    testId?: string;
 }
 
 export interface FormFieldProps extends FormlyFieldProps {
     // --- Input props ---
     autocomplete?: string;
+    suffix?: string;
     // --- Checkbox props ---
     formCheck?: string;
     indeterminate?: boolean;
@@ -72,23 +73,40 @@ export interface FormHookConfig {
     onDestroy?: FormHookFn;
 }
 
+export type FormFieldExpression<T = any> = string | ((field: FormFieldConfig) => T) | Observable<T>;
+export type FormFieldExpressions = {
+    [property: string]: FormFieldExpression;
+} & {
+    className?: FormFieldExpression<string>;
+    hide?: FormFieldExpression<boolean>;
+    "props.disabled"?: FormFieldExpression<boolean>;
+    "props.required"?: FormFieldExpression<boolean>;
+};
+
 export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
     serializer?: FormFieldSerializer;
     serialize?: boolean;
     fieldSet?: string;
-    path?: string;
+    parent?: FormFieldConfig;
     fieldGroup?: FormFieldConfig[];
     fieldArray?: FormFieldConfig | ((field: FormFieldConfig) => FormFieldConfig);
     hooks?: FormHookConfig;
+    expressions?: FormFieldExpressions;
     readonly additional?: Readonly<{[key: string]: any}>;
+    readonly path?: string;
+    readonly testId?: string;
 }
 
-export interface FormFieldType<T = FormFieldProps> extends FieldTypeConfig<T> {
-
+export interface FormFieldType<T = FormFieldProps> extends FormFieldConfig<T> {
+    formControl: FormControl;
+    props: NonNullable<T>;
 }
 
-export interface FormFieldChangeEvent extends FormlyValueChangeEvent {
+export interface FormFieldChangeEvent {
     field: FormFieldConfig;
+    type: string;
+    value: any;
+    [meta: string]: any;
 }
 
 export interface FormSerializeResult {
@@ -160,7 +178,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden"
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "indeterminate" | "cols" | "rows">;
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows">;
 
 export type FormSelectData = FormFieldData
     & Pick<FormFieldProps, "multiple" | "type" | "allowEmpty" | "groupBy"> & {

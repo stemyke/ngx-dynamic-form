@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {BehaviorSubject, distinctUntilChanged, map, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, distinctUntilChanged, startWith, switchMap} from "rxjs";
 import {
     API_SERVICE,
     IApiService,
@@ -15,6 +15,7 @@ import {
     FormBuilderOptions,
     FormFieldConfig,
     FormFieldData,
+    FormFieldExpressions,
     FormFieldProps,
     FormGroupData,
     FormInputData,
@@ -54,12 +55,11 @@ export class DynamicFormBuilderService {
             : data.validators || {};
         const hide = new BehaviorSubject(data.hidden === true);
         const additional = new BehaviorSubject({});
-        const field = {
+        return {
             key,
             type,
             validators,
             parent,
-            path: !parent?.path ? key : `${parent.path}.${key}`,
             fieldSet: String(data.fieldSet || ""),
             resetOnHide: false,
             validation: {
@@ -81,17 +81,15 @@ export class DynamicFormBuilderService {
             fieldGroupClassName: "field-container",
             expressions: {
                 hide,
-                additional
+                additional,
+                className: (target: FormFieldConfig) => {
+                    return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${target.type || "group"}`].concat(
+                        Array.isArray(data.classes) ? data.classes : [data.classes || ""]
+                    ).filter(c => c?.length > 0).join(" ");
+                },
+                ...this.getExpressions(options)
             }
-        } as FormFieldConfig;
-        field.expressions.className = hide.pipe(map(hidden => {
-            const classes = [`dynamic-form-field`, `dynamic-form-field-${field.key}`, `dynamic-form-${field.type || "group"}`].concat(
-                Array.isArray(data.classes) ? data.classes : [data.classes || ""]
-            );
-            return hidden ? `` : classes.filter(c => c?.length > 0).join(" ");
-        }));
-        field.expressions.path = () => field.path;
-        return field;
+        }
     }
 
     resolveFormFields(target: Type<any>, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
@@ -150,6 +148,9 @@ export class DynamicFormBuilderService {
                 props: {
                     label: this.getLabel(group, group, parent, options),
                     hidden: false
+                },
+                expressions: {
+                    ...this.getExpressions(options)
                 }
             } as FormFieldConfig;
         }).concat(others);
@@ -171,6 +172,8 @@ export class DynamicFormBuilderService {
             minLength: isNaN(data.minLength) ? 0 : data.minLength,
             maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
             placeholder: data.placeholder || "",
+            indeterminate: data.indeterminate || false,
+            suffix: data.suffix || "",
             attributes: {
                 autocomplete
             },
@@ -306,5 +309,21 @@ export class DynamicFormBuilderService {
         if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
         control.setValue(options[0].value);
         return options;
+    }
+
+    protected getExpressions(options: FormBuilderOptions): FormFieldExpressions {
+        return {
+            path: target => {
+                const tp = target.parent;
+                const key = !target.key ? `` : `.${target.key}`;
+                return !tp?.path ? `${target.key || ""}` : `${tp.path}.${key}`;
+            },
+            testId: target => {
+                const tp = target.parent;
+                const prefix = !options.testId ? `` : `${options.testId}-`;
+                const key = !target.key ? `` : `-${target.key}`;
+                return !tp?.testId ? `${prefix}${target.key || key}` : `${tp.testId}${key}`;
+            }
+        };
     }
 }

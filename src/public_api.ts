@@ -6,6 +6,8 @@ export {
     FormFieldSerializer,
     FormHookFn,
     FormHookConfig,
+    FormFieldExpression,
+    FormFieldExpressions,
     FormFieldConfig,
     FormFieldType,
     FormFieldChangeEvent,

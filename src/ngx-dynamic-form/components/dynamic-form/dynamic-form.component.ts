@@ -35,6 +35,8 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly labelPrefix = input<string>("label");
 
+    readonly testId = input<string>("");
+
     readonly data = input<any>({});
 
     readonly fields = input<FormFieldConfig[]>(null);
@@ -47,7 +49,8 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly config = computed(() => {
         return this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, {
-            labelPrefix: this.labelPrefix()
+            labelPrefix: this.labelPrefix(),
+            testId: this.testId(),
         });
     });
 

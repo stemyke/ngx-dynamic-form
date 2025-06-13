@@ -1,4 +1,4 @@
-<label class="field-label" *ngIf="props.label">
+<label class="field-label" [for]="id" *ngIf="props.label">
     {{ props.label | translate }}
     <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
     <span class="field-required" *ngIf="props.required && props.hideRequiredMarker !== true" aria-hidden="true">*</span>
