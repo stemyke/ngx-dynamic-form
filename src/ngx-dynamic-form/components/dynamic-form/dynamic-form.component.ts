@@ -15,7 +15,7 @@ import {Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
 import {EventsService, LANGUAGE_SERVICE} from "@stemy/ngx-utils";
 
-import {FormFieldChangeEvent, FormFieldConfig, IDynamicForm} from "../../common-types";
+import {FormFieldChangeEvent, FormFieldConfig, FormFieldLabelCustomizer, IDynamicForm} from "../../common-types";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 
 @Component({
@@ -35,6 +35,8 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly labelPrefix = input<string>("label");
 
+    readonly labelCustomizer = input<FormFieldLabelCustomizer>(null);
+
     readonly testId = input<string>("");
 
     readonly data = input<any>({});
@@ -50,6 +52,7 @@ export class DynamicFormComponent implements IDynamicForm {
     readonly config = computed(() => {
         return this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, {
             labelPrefix: this.labelPrefix(),
+            labelCustomizer: this.labelCustomizer(),
             testId: this.testId(),
         });
     });

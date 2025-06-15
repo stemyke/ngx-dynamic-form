@@ -11,12 +11,6 @@ import "core-js";
 /** ALL Firefox browsers require the following to support `@angular/animation`. **/
 // import "web-animations-js";
 
-
-/** Zone JS is required by Angular itself. **/
-
-import "zone.js";  // Included with Angular CLI.
-
-
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */

@@ -8,7 +8,13 @@ import {
     ViewEncapsulation
 } from "@angular/core";
 import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
-import {DynamicFormBuilderService, DynamicFormService, IDynamicForm} from "../public_api";
+import {
+    DynamicFormBuilderService,
+    DynamicFormSchemaService,
+    DynamicFormService,
+    FORM_ROOT_KEY,
+    IDynamicForm
+} from "../public_api";
 import {AddressModel, OrderModel} from "./model";
 
 @Component({
@@ -35,9 +41,10 @@ export class AppComponent implements OnInit {
             localStorage.setItem("selectedSchema", p.request);
             return this.forms.getFormFieldsForSchema(p.request, {
                 labelPrefix: "form",
-                customizer: (_p, _s, field, parent, options) => {
-                    if (!parent) {
-                        field.fieldGroup.unshift(this.fb.resolveFormGroup("address", AddressModel, {}, parent, options));
+                fieldCustomizer: async (field, options) => {
+                    if (field.key === FORM_ROOT_KEY) {
+                        // const test = await this.forms.getFormFieldGroupForSchema("JewelerPriceContext");
+                        field.fieldGroup.unshift(this.fb.resolveFormGroup("address", AddressModel, {}, field, options));
                         return field;
                     }
                     return field;
@@ -59,6 +66,7 @@ export class AppComponent implements OnInit {
 
     constructor(private openApi: OpenApiService,
                 private fb: DynamicFormBuilderService,
+                private fs: DynamicFormSchemaService,
                 private forms: DynamicFormService) {
         setTimeout(() => {
             this.plainData.update(value => {

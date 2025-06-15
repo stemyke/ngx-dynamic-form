@@ -25,7 +25,8 @@ import {
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
-import {isStringWithVal, MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {isStringWithVal} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => FormFieldConfig;
 
@@ -35,61 +36,6 @@ export class DynamicFormBuilderService {
     constructor(readonly injector: Injector,
                 @Inject(API_SERVICE) readonly api: IApiService,
                 @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
-    }
-
-    protected getLabel(key: string, label: string, parent: FormFieldConfig, options: FormBuilderOptions): string {
-        const labelPrefix = !ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix;
-        const pathPrefix = `${parent?.props?.label || labelPrefix}`;
-        const labelItems = ObjectUtils.isString(label)
-            ? (!label ? [] : [labelPrefix, label])
-            : [pathPrefix, `${key || ""}`]
-        return labelItems.filter(l => l.length > 0).join(".");
-    }
-
-    protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
-        const validators = Array.isArray(data.validators)
-            ? data.validators.reduce((res, validator, ix) => {
-                res[validator.validatorName || `validator_${ix}`] = validator;
-                return res;
-            }, {} as Validators)
-            : data.validators || {};
-        const hide = new BehaviorSubject(data.hidden === true);
-        const additional = new BehaviorSubject({});
-        return {
-            key,
-            type,
-            validators,
-            parent,
-            fieldSet: String(data.fieldSet || ""),
-            resetOnHide: false,
-            validation: {
-                messages: Object.keys(validators).reduce((res, key) => {
-                    res[key] = validationMessage(this.injector, key, options.labelPrefix);
-                    return res;
-                }, {})
-            },
-            props: {
-                ...props,
-                disabled: data.disabled === true,
-                formCheck: "nolabel",
-                required: !!validators.required,
-                label: this.getLabel(key, data.label, parent, options),
-            },
-            modelOptions: {
-                updateOn: "change"
-            },
-            fieldGroupClassName: "field-container",
-            expressions: {
-                hide,
-                additional,
-                className: (target: FormFieldConfig) => {
-                    return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${target.type || "group"}`].concat(
-                        Array.isArray(data.classes) ? data.classes : [data.classes || ""]
-                    ).filter(c => c?.length > 0).join(" ");
-                },
-                ...this.getExpressions(options)
-            }
-        }
     }
 
     resolveFormFields(target: Type<any>, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
@@ -140,7 +86,7 @@ export class DynamicFormBuilderService {
 
         // Create a field-set wrapper for each group and concat the other fields to the end
         return Object.keys(groups).map(group => {
-            return {
+            const fieldSet: FormFieldConfig = {
                 fieldGroup: groups[group],
                 wrappers: ["form-fieldset"],
                 className: `dynamic-form-fieldset dynamic-form-fieldset-${group}`,
@@ -148,11 +94,10 @@ export class DynamicFormBuilderService {
                 props: {
                     label: this.getLabel(group, group, parent, options),
                     hidden: false
-                },
-                expressions: {
-                    ...this.getExpressions(options)
                 }
-            } as FormFieldConfig;
+            };
+            this.setExpressions(fieldSet, options);
+            return fieldSet;
         }).concat(others);
     }
 
@@ -311,8 +256,65 @@ export class DynamicFormBuilderService {
         return options;
     }
 
-    protected getExpressions(options: FormBuilderOptions): FormFieldExpressions {
-        return {
+    protected getLabel(key: string, label: string, parent: FormFieldConfig, options: FormBuilderOptions): string {
+        const labelPrefix = !ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix;
+        const pathPrefix = `${parent?.props?.label || labelPrefix}`;
+        const labelItems = ObjectUtils.isString(label)
+            ? (!label ? [] : [labelPrefix, label])
+            : [pathPrefix, `${key || ""}`]
+        return options.labelCustomizer?.(key, label, parent, options.labelPrefix)
+            ?? labelItems.filter(l => l.length > 0).join(".");
+    }
+
+    protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+        const validators = Array.isArray(data.validators)
+            ? data.validators.reduce((res, validator, ix) => {
+                res[validator.validatorName || `validator_${ix}`] = validator;
+                return res;
+            }, {} as Validators)
+            : data.validators || {};
+        const hide = new BehaviorSubject(data.hidden === true);
+        const additional = new BehaviorSubject({});
+        const field: FormFieldConfig = {
+            key,
+            type,
+            validators,
+            parent,
+            fieldSet: String(data.fieldSet || ""),
+            resetOnHide: false,
+            validation: {
+                messages: Object.keys(validators).reduce((res, key) => {
+                    res[key] = validationMessage(this.injector, key, options.labelPrefix);
+                    return res;
+                }, {})
+            },
+            props: {
+                ...props,
+                disabled: data.disabled === true,
+                formCheck: "nolabel",
+                required: !!validators.required,
+                label: this.getLabel(key, data.label, parent, options),
+            },
+            modelOptions: {
+                updateOn: "change"
+            },
+            fieldGroupClassName: "field-container",
+            expressions: {
+                hide,
+                additional,
+                className: (target: FormFieldConfig) => {
+                    return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${target.type || "group"}`].concat(
+                        Array.isArray(data.classes) ? data.classes : [data.classes || ""]
+                    ).filter(c => c?.length > 0).join(" ");
+                }
+            }
+        };
+        this.setExpressions(field, options);
+        return field;
+    }
+
+    protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): void {
+        const expressions: FormFieldExpressions = {
             path: target => {
                 const tp = target.parent;
                 const key = !target.key ? `` : `.${target.key}`;
@@ -325,5 +327,12 @@ export class DynamicFormBuilderService {
                 return !tp?.testId ? `${prefix}${target.key || key}` : `${tp.testId}${key}`;
             }
         };
+        Object.entries(expressions).forEach(([key, expression]) => {
+            field.expressions = field.expressions ?? {};
+            field.expressions[key] = expression;
+            if (ObjectUtils.isFunction(expression)) {
+                field[key] = expression(field);
+            }
+        });
     }
 }

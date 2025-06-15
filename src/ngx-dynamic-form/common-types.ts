@@ -23,8 +23,11 @@ export type UploadData = Record<string, any> | ArrayBuffer | FormData;
 
 // --- Basic form field interfaces ---
 
+export type FormFieldLabelCustomizer = (key: string, label: string, parent: FormFieldConfig, labelPrefix: string) => string;
+
 export interface FormBuilderOptions {
     labelPrefix?: string;
+    labelCustomizer?: FormFieldLabelCustomizer;
     testId?: string;
 }
 
@@ -165,6 +168,13 @@ export type AsyncValidatorExpression = FormFieldValidatorExpression<AsyncBoolean
 
 export type AsyncValidators = FormFieldValidation<AsyncValidatorFn, AsyncBoolean>;
 
+export interface AllValidationErrors {
+    control: AbstractControl;
+    path: string;
+    errorKey: string;
+    errorValue: any;
+}
+
 // --- Form field data types ---
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
@@ -196,22 +206,18 @@ export type FormArrayData = FormFieldData
 // --- JSON schema interfaces ---
 
 export type FormFieldCustomizer = (
-    property: IOpenApiSchemaProperty, schema: IOpenApiSchema, field: FormFieldConfig,
-    options: FormBuilderOptions, injector: Injector
+    field: FormFieldConfig, options: FormBuilderOptions, injector: Injector,
+    property: IOpenApiSchemaProperty, schema: IOpenApiSchema
 ) => MaybePromise<MaybeArray<FormFieldConfig>>;
 
 export interface ConfigForSchemaOptions extends FormBuilderOptions {
-    customizer?: FormFieldCustomizer;
+    fieldCustomizer?: FormFieldCustomizer;
 }
 
-export interface ConfigForSchemaWrapOptions extends Omit<ConfigForSchemaOptions, "customizer"> {
-    schema: IOpenApiSchema;
-    injector?: Injector;
-    customizer?: (property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig) => Promise<FormFieldConfig[]>;
-}
+export type CustomizerOrSchemaOptions = FormFieldCustomizer | ConfigForSchemaOptions;
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
 export interface IDynamicFormModuleConfig extends Pick<ConfigOption, "types" | "wrappers" | "extras"> {
-    // controlProvider?: (injector: Injector) => DynamicFormControlMapFn;
+
 }

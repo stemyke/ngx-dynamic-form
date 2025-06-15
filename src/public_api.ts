@@ -1,6 +1,7 @@
 export {
     FORM_ROOT_KEY,
 
+    FormFieldLabelCustomizer,
     FormBuilderOptions,
     FormFieldProps,
     FormFieldSerializer,
@@ -24,6 +25,7 @@ export {
     AsyncValidatorFn,
     AsyncValidatorExpression,
     AsyncValidators,
+    AllValidationErrors,
 
     FormFieldCustom,
     FormFieldData,
@@ -72,8 +74,8 @@ export {
 
 export {
     replaceSpecialChars,
-    mergeFormFields,
     getFieldByPath,
+    getFieldsByKey,
     setFieldHidden,
     setFieldDisabled,
     additionalFieldValues,
@@ -83,6 +85,7 @@ export {
 } from "./ngx-dynamic-form/utils/misc";
 
 export {DynamicFormBuilderService} from "./ngx-dynamic-form/services/dynamic-form-builder.service";
+export {DynamicFormSchemaService} from "./ngx-dynamic-form/services/dynamic-form-schema.service";
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";

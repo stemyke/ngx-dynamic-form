@@ -10,6 +10,7 @@ import {IDynamicFormModuleConfig} from "./common-types";
 
 import {DynamicFormService} from "./services/dynamic-form.service";
 import {DynamicFormBuilderService} from "./services/dynamic-form-builder.service";
+import {DynamicFormSchemaService} from "./services/dynamic-form-schema.service";
 
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
@@ -71,7 +72,8 @@ export class NgxDynamicFormModule {
         return [
             ...(providers as Provider[]),
             DynamicFormService,
-            DynamicFormBuilderService
+            DynamicFormBuilderService,
+            DynamicFormSchemaService
         ];
     }
 
