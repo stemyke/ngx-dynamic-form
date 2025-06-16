@@ -75,6 +75,7 @@ export {
 export {
     replaceSpecialChars,
     getFieldByPath,
+    getFieldsByPredicate,
     getFieldsByKey,
     setFieldHidden,
     setFieldDisabled,

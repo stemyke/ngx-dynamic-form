@@ -25,7 +25,7 @@ import {
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
-import {MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {getFieldsByPredicate, MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
 import {isStringWithVal} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => FormFieldConfig;
@@ -69,14 +69,23 @@ export class DynamicFormBuilderService {
     createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
         const others: FormFieldConfig[] = [];
         const groups: { [fs: string]: FormFieldConfig[] } = {};
+        fields = fields.filter(f => {
+            if (Array.isArray(f.fieldGroup) && Array.isArray(f.wrappers) && f.wrappers[0] === "form-fieldset") {
+                // This field is an already existing set
+                groups[f.id] = f.fieldGroup;
+                return false;
+            }
+            return true;
+        });
 
         for (const field of fields) {
             const fsName = field.hide ? null : String(field.fieldSet || "");
             // If we have a fieldset name defined and have actual fields for it
             // then push the property fields into a group
             if (fsName) {
-                const group = groups[fsName] || [];
-                groups[fsName] = group;
+                const fsId = !parent?.path ? fsName : `${parent.path}.${fsName}`;
+                const group = groups[fsId] || [];
+                groups[fsId] = group;
                 group.push(field);
                 continue;
             }
@@ -85,14 +94,16 @@ export class DynamicFormBuilderService {
         }
 
         // Create a field-set wrapper for each group and concat the other fields to the end
-        return Object.keys(groups).map(group => {
+        return Object.keys(groups).map(id => {
+            const key = id.split(".").pop();
             const fieldSet: FormFieldConfig = {
-                fieldGroup: groups[group],
+                id,
+                parent,
+                fieldGroup: groups[id],
                 wrappers: ["form-fieldset"],
-                className: `dynamic-form-fieldset dynamic-form-fieldset-${group}`,
-                id: !parent?.path ? group : `${parent.path}.${group}`,
+                className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`,
                 props: {
-                    label: this.getLabel(group, group, parent, options),
+                    label: this.getLabel(key, key, parent, options),
                     hidden: false
                 }
             };
@@ -262,8 +273,7 @@ export class DynamicFormBuilderService {
         const labelItems = ObjectUtils.isString(label)
             ? (!label ? [] : [labelPrefix, label])
             : [pathPrefix, `${key || ""}`]
-        return options.labelCustomizer?.(key, label, parent, options.labelPrefix)
-            ?? labelItems.filter(l => l.length > 0).join(".");
+        return labelItems.filter(l => l.length > 0).join(".");
     }
 
     protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
@@ -293,7 +303,8 @@ export class DynamicFormBuilderService {
                 disabled: data.disabled === true,
                 formCheck: "nolabel",
                 required: !!validators.required,
-                label: this.getLabel(key, data.label, parent, options),
+                label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
+                    ?? this.getLabel(key, data.label, parent, options),
             },
             modelOptions: {
                 updateOn: "change"

@@ -18,16 +18,20 @@ export function getFieldByPath(field: FormFieldConfig, path: string): FormFieldC
     return null;
 }
 
-export function getFieldsByKey(field: FormFieldConfig, key: string): FormFieldConfig[] {
-    if (field.key === key) {
+export function getFieldsByPredicate(field: FormFieldConfig, cb: (field: FormFieldConfig) => boolean): FormFieldConfig[] {
+    if (cb(field)) {
         return [field];
     }
     if (!field.fieldGroup) return [];
     const results: FormFieldConfig[] = [];
     for (const sf of field.fieldGroup) {
-        results.push(...getFieldsByKey(sf, key));
+        results.push(...getFieldsByPredicate(sf, cb));
     }
     return results;
+}
+
+export function getFieldsByKey(field: FormFieldConfig, key: string | number | (string | number)[]): FormFieldConfig[] {
+    return getFieldsByPredicate(field, f => f.key === key);
 }
 
 export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {

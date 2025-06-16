@@ -49,6 +49,10 @@ export class DynamicFormComponent implements IDynamicForm {
         initialValue: this.languages.currentLanguage
     });
 
+    protected readonly enableTranslations = toSignal(this.events.translationsEnabled, {
+        initialValue: this.languages.enableTranslations
+    });
+
     readonly config = computed(() => {
         return this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, {
             labelPrefix: this.labelPrefix(),
@@ -82,6 +86,7 @@ export class DynamicFormComponent implements IDynamicForm {
     constructor() {
         effect(() => {
             this.language();
+            this.enableTranslations();
             this.config().forEach(field => {
                 if (!field.options) return;
                 this.options.detectChanges(field);
