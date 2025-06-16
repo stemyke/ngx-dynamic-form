@@ -24,7 +24,11 @@ function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilde
 
 export function FormSerializable(serializer?: FormFieldSerializer): PropertyDecorator {
     return (target: any, key: string): void => {
-        defineFormControl(target, key, () => ({key, serializer, serialize: true}));
+        defineFormControl(target, key, () => ({
+            key,
+            serializer,
+            serialize: true
+        }));
     };
 }
 

@@ -1,6 +1,7 @@
 export {
     FORM_ROOT_KEY,
 
+    FormFieldKey,
     FormFieldLabelCustomizer,
     FormBuilderOptions,
     FormFieldProps,

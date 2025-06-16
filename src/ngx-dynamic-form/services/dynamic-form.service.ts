@@ -13,11 +13,13 @@ import {
 import {getFormValidationErrors, toWrapOptions} from "../utils/internal";
 
 import {DynamicFormSchemaService} from "./dynamic-form-schema.service";
+import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
 
 @Injectable()
 export class DynamicFormService {
 
     constructor(protected readonly fs: DynamicFormSchemaService,
+                protected readonly fb: DynamicFormBuilderService,
                 protected readonly injector: Injector,
                 @Inject(API_SERVICE) protected readonly api: IApiService) {
 
@@ -53,9 +55,10 @@ export class DynamicFormService {
 
         // Add id fields if necessary
         const idFields: FormFieldConfig[] = [
-            {key: "id", props: {hidden: true}},
-            {key: "_id", props: {hidden: true}},
+            this.fb.createFormInput("id", {hidden: true}, null, wrapOptions),
+            this.fb.createFormInput("_id", {hidden: true}, null, wrapOptions)
         ];
+
         fieldGroup.unshift(...idFields
             .filter(t => !fields.some(c => c.key == t.key))
         );

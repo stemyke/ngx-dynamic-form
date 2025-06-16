@@ -23,6 +23,8 @@ export type UploadData = Record<string, any> | ArrayBuffer | FormData;
 
 // --- Basic form field interfaces ---
 
+export type FormFieldKey = string | number | (string | number)[];
+
 export type FormFieldLabelCustomizer = (key: string, label: string, parent: FormFieldConfig, labelPrefix: string) => string;
 
 export interface FormBuilderOptions {
@@ -93,8 +95,8 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     parent?: FormFieldConfig;
     fieldGroup?: FormFieldConfig[];
     fieldArray?: FormFieldConfig | ((field: FormFieldConfig) => FormFieldConfig);
-    hooks?: FormHookConfig;
-    expressions?: FormFieldExpressions;
+    hooks: FormHookConfig;
+    expressions: FormFieldExpressions;
     readonly additional?: Readonly<{[key: string]: any}>;
     readonly path?: string;
     readonly testId?: string;

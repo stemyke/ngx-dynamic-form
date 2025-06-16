@@ -1,6 +1,6 @@
-import {ObjectUtils} from "@stemy/ngx-utils";
 import {BehaviorSubject, Subject} from "rxjs";
-import {FormFieldConfig} from "../common-types";
+import {ObjectUtils} from "@stemy/ngx-utils";
+import {FormFieldKey, FormFieldConfig} from "../common-types";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
@@ -30,7 +30,7 @@ export function getFieldsByPredicate(field: FormFieldConfig, cb: (field: FormFie
     return results;
 }
 
-export function getFieldsByKey(field: FormFieldConfig, key: string | number | (string | number)[]): FormFieldConfig[] {
+export function getFieldsByKey(field: FormFieldConfig, key: FormFieldKey): FormFieldConfig[] {
     return getFieldsByPredicate(field, f => f.key === key);
 }
 

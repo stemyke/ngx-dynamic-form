@@ -18,6 +18,7 @@ import {
     FormFieldExpressions,
     FormFieldProps,
     FormGroupData,
+    FormHookConfig,
     FormInputData,
     FormSelectData,
     FormSelectOption,
@@ -25,10 +26,10 @@ import {
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
-import {getFieldsByPredicate, MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
 import {isStringWithVal} from "../utils/internal";
 
-export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => FormFieldConfig;
+export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
 
 @Injectable()
 export class DynamicFormBuilderService {
@@ -44,7 +45,7 @@ export class DynamicFormBuilderService {
         const result: FormFieldConfig[] = [];
         for (const key of fields) {
             const builder: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", prototype, key);
-            const field = builder(this, parent, options);
+            const field = builder(this, parent, options) as FormFieldConfig;
             if (field) {
                 result.push(field);
             }
@@ -105,7 +106,9 @@ export class DynamicFormBuilderService {
                 props: {
                     label: this.getLabel(key, key, parent, options),
                     hidden: false
-                }
+                },
+                hooks: {},
+                expressions: {}
             };
             this.setExpressions(fieldSet, options);
             return fieldSet;
@@ -145,7 +148,7 @@ export class DynamicFormBuilderService {
             groupBy: data.groupBy,
             allowEmpty: data.allowEmpty
         }, parent, options);
-        select.hooks = {
+        select.hooks = Object.assign(select.hooks, {
             onInit: field => {
                 const options = data.options?.(field) || [];
                 const control = field.formControl.root;
@@ -158,7 +161,7 @@ export class DynamicFormBuilderService {
                     })
                 ) : options;
             }
-        };
+        } as FormHookConfig);
         return select;
     }
 
@@ -224,6 +227,8 @@ export class DynamicFormBuilderService {
                 array.fieldArray = {
                     wrappers: ["form-group"],
                     fieldGroup: items,
+                    hooks: {},
+                    expressions: {}
                 };
                 return array;
             }
@@ -310,6 +315,7 @@ export class DynamicFormBuilderService {
                 updateOn: "change"
             },
             fieldGroupClassName: "field-container",
+            hooks: {},
             expressions: {
                 hide,
                 additional,

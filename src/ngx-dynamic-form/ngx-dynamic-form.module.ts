@@ -30,7 +30,7 @@ import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynam
         FormsModule,
         ReactiveFormsModule,
         NgxUtilsModule,
-        FormlyModule
+        FormlyModule.forChild()
     ],
     exports: [
         ...components,
