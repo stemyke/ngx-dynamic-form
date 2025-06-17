@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.3.3",
+    "version": "19.4.0",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -29,7 +29,7 @@
         "@floating-ui/dom": "^1.7.1",
         "json5": "^2.2.3",
         "@stemy/ngx-utils": ">=19.5.3",
-        "@ngx-formly/core": "^6.3.12",
+        "@ngx-formly/core": "^7.0.0",
         "ngx-mask": "^17.1.8"
     },
     "devDependencies": {
