@@ -92,6 +92,7 @@ export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.servi
 
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
 
+export {DynamicFieldType} from "./ngx-dynamic-form/components/base/dynamic-field-type";
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";
 export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
 export {DynamicFormChipsComponent} from "./ngx-dynamic-form/components/dynamic-form-chips/dynamic-form-chips.component";

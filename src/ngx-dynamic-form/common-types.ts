@@ -220,6 +220,6 @@ export type CustomizerOrSchemaOptions = FormFieldCustomizer | ConfigForSchemaOpt
 
 export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
-export interface IDynamicFormModuleConfig extends Pick<ConfigOption, "types" | "wrappers" | "extras"> {
-
+export interface IDynamicFormModuleConfig {
+    options?: ConfigOption[];
 }

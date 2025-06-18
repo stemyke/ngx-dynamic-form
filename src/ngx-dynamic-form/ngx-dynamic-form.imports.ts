@@ -1,5 +1,6 @@
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
 
+import {DynamicFieldType} from "./components/base/dynamic-field-type";
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
@@ -10,6 +11,7 @@ import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynam
 
 // --- Components ---
 export const components = [
+    DynamicFieldType,
     DynamicFormComponent,
     DynamicFormArrayComponent,
     DynamicFormChipsComponent,

@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, ViewEncapsulation} from "@angular/core";
-import {FieldType} from "@ngx-formly/core";
-import {FormFieldType} from "../../common-types";
+import {DynamicFieldType} from "../base/dynamic-field-type";
 
 @Component({
     standalone: false,
@@ -9,6 +8,6 @@ import {FormFieldType} from "../../common-types";
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicFormChipsComponent extends FieldType<FormFieldType> {
+export class DynamicFormChipsComponent extends DynamicFieldType {
 
 }

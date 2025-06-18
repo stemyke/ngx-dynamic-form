@@ -1,7 +1,7 @@
 import {EnvironmentProviders, makeEnvironmentProviders, ModuleWithProviders, NgModule, Provider} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {FormlyModule} from "@ngx-formly/core";
+import {FormlyModule, FormlyConfig, FormlyFormBuilder, provideFormlyCore, provideFormlyConfig} from "@ngx-formly/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {components, directives, pipes} from "./ngx-dynamic-form.imports";
@@ -30,7 +30,7 @@ import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynam
         FormsModule,
         ReactiveFormsModule,
         NgxUtilsModule,
-        FormlyModule.forChild()
+        FormlyModule
     ],
     exports: [
         ...components,
@@ -48,29 +48,24 @@ import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynam
 export class NgxDynamicFormModule {
 
     private static getProviders(config?: IDynamicFormModuleConfig): Provider[] {
-        const {providers} = FormlyModule.forRoot({
-            types: [
-                {name: "array", component: DynamicFormArrayComponent},
-                {name: "chips", component: DynamicFormChipsComponent},
-                {name: "upload", component: DynamicFormUploadComponent, wrappers: ["form-field"]},
-                {name: "file", extends: "upload"},
-                {name: "translation", extends: "array"},
-                ...(config?.types || [])
-            ],
-            wrappers: [
-                { name: "form-field", component: DynamicFormFieldComponent },
-                { name: "form-fieldset", component: DynamicFormFieldsetComponent },
-                { name: "form-group", component: DynamicFormGroupComponent },
-                ...(config?.wrappers || [])
-            ],
-            extras: {
-                renderFormlyFieldElement: false,
-                ...(config?.extras || {})
-            }
-        });
-
+        const formlyConfigs = (config?.options || []).map(provideFormlyConfig);
         return [
-            ...(providers as Provider[]),
+            provideFormlyCore({
+                types: [
+                    {name: "array", component: DynamicFormArrayComponent},
+                    {name: "chips", component: DynamicFormChipsComponent, wrappers: ["form-field"]},
+                    {name: "upload", component: DynamicFormUploadComponent, wrappers: ["form-field"]}
+                ],
+                wrappers: [
+                    { name: "form-field", component: DynamicFormFieldComponent },
+                    { name: "form-fieldset", component: DynamicFormFieldsetComponent },
+                    { name: "form-group", component: DynamicFormGroupComponent }
+                ],
+                extras: {
+                    renderFormlyFieldElement: false
+                }
+            }),
+            ...formlyConfigs,
             DynamicFormService,
             DynamicFormBuilderService,
             DynamicFormSchemaService

@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.4.0",
+    "version": "19.4.1",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -30,7 +30,11 @@
         "json5": "^2.2.3",
         "@stemy/ngx-utils": ">=19.5.3",
         "@ngx-formly/core": "^7.0.0",
-        "ngx-mask": "^17.1.8"
+        "ngx-mask": "^19.0.7",
+        "@angular/material": "^19.2.18"
+    },
+    "optionalDependencies": {
+        "@angular/material": "^19.2.18"
     },
     "devDependencies": {
         "@angular/animations": "^19.2.14",
@@ -50,8 +54,8 @@
         "@floating-ui/dom": "^1.7.1",
         "json5": "^2.2.3",
         "@stemy/ngx-utils": "^19.5.3",
-        "@ngx-formly/core": "^6.3.12",
-        "@ngx-formly/bootstrap": "^6.3.12",
+        "@ngx-formly/core": "^7.0.0",
+        "@ngx-formly/bootstrap": "^7.0.0",
         "ngx-mask": "^17.1.8",
         "core-js": "^3.42.0",
         "zone.js": "^0.15.1",
@@ -92,8 +96,8 @@
         "protractor": "7.0.0",
         "rimraf": "3.0.2",
         "ncp": "2.0.0",
-        "@angular/material": "19.0.2",
-        "@angular/cdk": "19.0.2",
+        "@angular/cdk": "^19.2.18",
+        "@angular/material": "^19.2.18",
         "bootstrap": "^5.3.6"
     },
     "main": "dist/bundles/stemy-ngx-dynamic-form.umd.js",
