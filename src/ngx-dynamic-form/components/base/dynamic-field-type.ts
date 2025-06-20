@@ -86,7 +86,7 @@ export class DynamicFieldType<F extends FormFieldType = FormFieldType> extends C
     }
 
     get empty() {
-        return this.value == null || this.value === "";
+        return this.value == null || this.value?.length === 0;
     }
 
     get shouldLabelFloat() {

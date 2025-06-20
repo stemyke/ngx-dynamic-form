@@ -267,8 +267,9 @@ export class DynamicFormBuilderService {
             option.id = option.id ?? option.value;
         }
         const control = field.formControl;
+        field.defaultValue = options[0]?.value ?? null;
         if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
-        control.setValue(options[0].value);
+        control.setValue(field.defaultValue);
         return options;
     }
 
@@ -332,6 +333,19 @@ export class DynamicFormBuilderService {
 
     protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): void {
         const expressions: FormFieldExpressions = {
+            tabs: target => {
+                if (target.fieldArray) {
+                    const group = target.fieldGroup || [];
+                    return group.map((g, ix) => {
+                        const label = ObjectUtils.getValue(g.formControl?.value, target.props?.tabsLabel || "label", ix);
+                        return {
+                            value: ix,
+                            label: `${label}`
+                        }
+                    });
+                }
+                return [];
+            },
             path: target => {
                 const tp = target.parent;
                 const key = !target.key ? `` : `.${target.key}`;

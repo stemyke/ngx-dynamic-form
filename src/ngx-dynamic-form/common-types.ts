@@ -9,7 +9,7 @@ import {
     IOpenApiSchemaProperty,
     IRequestOptions,
     MaybeArray,
-    MaybePromise
+    MaybePromise, TabOption
 } from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
@@ -98,6 +98,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
     readonly additional?: Readonly<{[key: string]: any}>;
+    readonly tabs?: TabOption[];
     readonly path?: string;
     readonly testId?: string;
 }
