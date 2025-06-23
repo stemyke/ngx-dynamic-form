@@ -87,9 +87,9 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
-            (fb, path, options) => {
+            (fb, parent, options) => {
                 const targetType = ReflectUtils.getOwnMetadata("design:type", target, key);
-                return fb.resolveFormGroup(key, targetType, data, path, options);
+                return fb.resolveFormGroup(key, targetType, data, parent, options);
             }
         );
     };
@@ -100,8 +100,8 @@ export function FormArray(itemType: string | FormInputData | Type<any>, data?: F
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
-            (fb, path, options) => {
-                return fb.resolveFormArray(key, itemType, data, path, options);
+            (fb, parent, options) => {
+                return fb.resolveFormArray(key, itemType, data, parent, options);
             }
         );
     };

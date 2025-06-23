@@ -130,6 +130,7 @@ export class DynamicFormSchemaService {
         return {
             hidden: property.hidden === true,
             serialize: property.serialize === true,
+            componentType: property.componentType,
             fieldSet: property.fieldSet,
             classes: property.classes,
             validators
@@ -145,7 +146,7 @@ export class DynamicFormSchemaService {
                 );
                 return mergeFormFields(ObjectUtils.copy(subModels));
             }
-            return this.getFormFieldForProp(property.items, options, null);
+            return this.getFormFieldForProp(property.items, options, sp);
         }, {
             ...this.getFormFieldData(property, options),
             // initialCount: property.initialCount || 0,

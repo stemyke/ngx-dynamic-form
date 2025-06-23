@@ -63,7 +63,7 @@ export class DynamicFormBuilderService {
         return this.createFormArray(key, sp => {
             return typeof itemType === "function" ? this.resolveFormFields(
                 itemType, sp, options
-            ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, null, options);
+            ) : this.createFormInput("", typeof itemType === "string" ? {type: `${itemType}`} : itemType, sp, options);
         }, data, parent, options);
     }
 
@@ -293,9 +293,8 @@ export class DynamicFormBuilderService {
         const additional = new BehaviorSubject({});
         const field: FormFieldConfig = {
             key,
-            type,
             validators,
-            parent,
+            type: data.componentType || type,
             fieldSet: String(data.fieldSet || ""),
             resetOnHide: false,
             validation: {
@@ -329,6 +328,12 @@ export class DynamicFormBuilderService {
                 }
             }
         };
+        // Parent object will be available for customizers as a property, until it gets redefined by formly
+        Object.defineProperty(field, "parent", {
+            get: () => parent,
+            configurable: true
+        });
+        // Set expressions
         this.setExpressions(field, options);
         return field;
     }

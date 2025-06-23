@@ -1,4 +1,4 @@
-import {Injector, OutputRef, Signal} from "@angular/core";
+import {Injector, OutputRef, Signal, Type} from "@angular/core";
 import {AbstractControl, FormControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
 import {ConfigOption, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
@@ -188,6 +188,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden"
     serializer?: FormFieldSerializer;
     serialize?: boolean;
     fieldSet?: string;
+    componentType?: string | Type<any>;
     classes?: string[] | string;
 };
 

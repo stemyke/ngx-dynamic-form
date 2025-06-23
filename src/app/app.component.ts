@@ -44,7 +44,9 @@ export class AppComponent implements OnInit {
                 fieldCustomizer: async (field, options) => {
                     if (field.key === FORM_ROOT_KEY) {
                         // const test = await this.forms.getFormFieldGroupForSchema("JewelerPriceContext");
-                        field.fieldGroup.unshift(this.fb.resolveFormGroup("address", AddressModel, {}, field, options));
+                        field.fieldGroup = [
+                            this.fb.resolveFormArray("addresses", AddressModel, {}, field, options)
+                        ];
                         return field;
                     }
                     return field;

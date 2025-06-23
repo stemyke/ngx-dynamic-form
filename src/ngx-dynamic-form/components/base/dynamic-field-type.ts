@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Directive, OnDestroy, TemplateRef, Type} from "@angular/core";
+import {AfterViewInit, Component, OnDestroy, TemplateRef, Type} from "@angular/core";
 import {FieldType as CoreFieldType, ɵobserve as observe} from "@ngx-formly/core";
 import {Subject} from "rxjs";
 import type {MatFormField, MatFormFieldControl} from "@angular/material/form-field";
