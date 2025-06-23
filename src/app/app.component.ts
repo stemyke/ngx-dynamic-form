@@ -13,7 +13,7 @@ import {
     DynamicFormSchemaService,
     DynamicFormService,
     FORM_ROOT_KEY,
-    IDynamicForm
+    IDynamicForm, setFieldHidden, setFieldHooks
 } from "../public_api";
 import {AddressModel, OrderModel} from "./model";
 
@@ -42,11 +42,14 @@ export class AppComponent implements OnInit {
             return this.forms.getFormFieldsForSchema(p.request, {
                 labelPrefix: "form",
                 fieldCustomizer: async (field, options) => {
-                    if (field.key === FORM_ROOT_KEY) {
-                        // const test = await this.forms.getFormFieldGroupForSchema("JewelerPriceContext");
-                        field.fieldGroup = [
-                            this.fb.resolveFormArray("addresses", AddressModel, {}, field, options)
-                        ];
+                    if (field.key === "phone") {
+                        setFieldHooks(field, {
+                            onInit: target => {
+                                target.formControl.root.get("language")?.valueChanges.subscribe(lang => {
+                                    setFieldHidden(target, lang !== "en");
+                                });
+                            }
+                        });
                         return field;
                     }
                     return field;

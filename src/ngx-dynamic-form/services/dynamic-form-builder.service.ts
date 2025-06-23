@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {BehaviorSubject, distinctUntilChanged, startWith, switchMap} from "rxjs";
+import {distinctUntilChanged, startWith, switchMap} from "rxjs";
 import {
     API_SERVICE,
     IApiService,
@@ -26,7 +26,7 @@ import {
     Validators
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
-import {MAX_INPUT_NUM, MIN_INPUT_NUM} from "../utils/misc";
+import {MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks} from "../utils/misc";
 import {isStringWithVal} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
@@ -148,7 +148,7 @@ export class DynamicFormBuilderService {
             groupBy: data.groupBy,
             allowEmpty: data.allowEmpty
         }, parent, options);
-        select.hooks = Object.assign(select.hooks, {
+        setFieldHooks(select, {
             onInit: field => {
                 const options = data.options?.(field) || [];
                 const control = field.formControl.root;
@@ -161,7 +161,7 @@ export class DynamicFormBuilderService {
                     })
                 ) : options;
             }
-        } as FormHookConfig);
+        });
         return select;
     }
 
@@ -289,11 +289,10 @@ export class DynamicFormBuilderService {
                 return res;
             }, {} as Validators)
             : data.validators || {};
-        const hide = new BehaviorSubject(data.hidden === true);
-        const additional = new BehaviorSubject({});
         const field: FormFieldConfig = {
             key,
             validators,
+            hide: data.hidden === true,
             type: data.componentType || type,
             fieldSet: String(data.fieldSet || ""),
             resetOnHide: false,
@@ -310,6 +309,7 @@ export class DynamicFormBuilderService {
                 required: !!validators.required,
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
+                additional: {}
             },
             modelOptions: {
                 updateOn: "change"
@@ -317,10 +317,9 @@ export class DynamicFormBuilderService {
             fieldGroupClassName: "field-container",
             hooks: {},
             expressions: {
-                hide,
-                additional,
                 serializer: () => data.serializer,
                 serialize: () => data.serialize,
+                additional: (target: FormFieldConfig) => target.props.additional,
                 className: (target: FormFieldConfig) => {
                     return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${target.type || "group"}`].concat(
                         Array.isArray(data.classes) ? data.classes : [data.classes || ""]
@@ -355,14 +354,15 @@ export class DynamicFormBuilderService {
             },
             path: target => {
                 const tp = target.parent;
+                const prefix = tp?.path || "";
                 const key = !target.key ? `` : `.${target.key}`;
-                return !tp?.path ? `${target.key || ""}` : `${tp.path}.${key}`;
+                return !prefix ? String(target.key ?? "") : `${prefix}${key}`;
             },
             testId: target => {
                 const tp = target.parent;
-                const prefix = !options.testId ? `` : `${options.testId}-`;
+                const prefix = !tp?.testId ? options.testId || "" : tp.testId;
                 const key = !target.key ? `` : `-${target.key}`;
-                return !tp?.testId ? `${prefix}${target.key || key}` : `${tp.testId}${key}`;
+                return !prefix ? String(target.key ?? "") : `${prefix}${key}`;
             }
         };
         Object.entries(expressions).forEach(([key, expression]) => {

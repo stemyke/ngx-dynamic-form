@@ -1,6 +1,5 @@
-import {BehaviorSubject, Subject} from "rxjs";
 import {ObjectUtils} from "@stemy/ngx-utils";
-import {FormFieldKey, FormFieldConfig} from "../common-types";
+import {FormFieldConfig, FormFieldKey, FormHookConfig, FormHookFn} from "../common-types";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
@@ -35,15 +34,6 @@ export function getFieldsByKey(field: FormFieldConfig, key: FormFieldKey): FormF
 }
 
 export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {
-    const hide = field.expressions?.hide;
-    if (hide) {
-        if (hide instanceof Subject) {
-            hide.next(hidden);
-            return;
-        }
-        field.expressions.hide = new BehaviorSubject(hidden);
-        return;
-    }
     field.hide = hidden;
 }
 
@@ -54,13 +44,24 @@ export function setFieldDisabled(field: FormFieldConfig, disabled: boolean = tru
     };
 }
 
+export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): void {
+    field.hooks = field.hooks || {};
+    Object.keys(hooks).forEach(name => {
+        const original = field.hooks[name] as FormHookFn;
+        const hook = hooks[name] as FormHookFn;
+        if (!ObjectUtils.isFunction(hook)) return;
+        field.hooks[name] = ObjectUtils.isFunction(original)
+            ? ((field: FormFieldConfig) => {
+                original(field);
+                hook(field);
+            })
+            : hooks[name];
+    });
+}
+
 export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {
-    const additional = field.expressions?.additional;
-    if (additional instanceof BehaviorSubject) {
-        additional.next(ObjectUtils.assign(additional.value, values || {}));
-        return;
-    }
-    field.expressions.additional = new BehaviorSubject(values || {});
+    field.props = field.props || {};
+    field.props.additional = ObjectUtils.assign(field.props.additional || {}, values || {});
 }
 
 export const MIN_INPUT_NUM = -999999999;

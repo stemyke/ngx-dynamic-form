@@ -33,7 +33,11 @@ export interface FormBuilderOptions {
     testId?: string;
 }
 
+export type FormFieldAdditional = Readonly<{[key: string]: any}>;
+
 export interface FormFieldProps extends FormlyFieldProps {
+    // --- Common props ---
+    additional?: FormFieldAdditional;
     // --- Input props ---
     autocomplete?: string;
     suffix?: string;
@@ -71,7 +75,7 @@ export type FormFieldSerializer = (field: FormFieldConfig, injector: Injector) =
 export declare type FormHookFn = (field: FormFieldConfig) => void;
 
 export interface FormHookConfig {
-    onInit?: FormHookFn | ((field: FormFieldConfig) => Observable<any>);
+    onInit?: FormHookFn;
     onChanges?: FormHookFn;
     afterContentInit?: FormHookFn;
     afterViewInit?: FormHookFn;
@@ -97,7 +101,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     fieldArray?: FormFieldConfig | ((field: FormFieldConfig) => FormFieldConfig);
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
-    readonly additional?: Readonly<{[key: string]: any}>;
+    readonly additional?: FormFieldAdditional;
     readonly tabs?: TabOption[];
     readonly path?: string;
     readonly testId?: string;
