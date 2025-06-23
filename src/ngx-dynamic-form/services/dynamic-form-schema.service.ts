@@ -129,6 +129,7 @@ export class DynamicFormSchemaService {
         this.addItemsValidators(validators, property.items);
         return {
             hidden: property.hidden === true,
+            serialize: property.serialize === true,
             fieldSet: property.fieldSet,
             classes: property.classes,
             validators

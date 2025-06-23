@@ -320,6 +320,8 @@ export class DynamicFormBuilderService {
             expressions: {
                 hide,
                 additional,
+                serializer: () => data.serializer,
+                serialize: () => data.serialize,
                 className: (target: FormFieldConfig) => {
                     return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${target.type || "group"}`].concat(
                         Array.isArray(data.classes) ? data.classes : [data.classes || ""]

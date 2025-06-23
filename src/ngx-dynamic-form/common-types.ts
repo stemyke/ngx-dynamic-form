@@ -186,6 +186,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden"
     & {
     validators?: Validators | ValidatorFn[];
     serializer?: FormFieldSerializer;
+    serialize?: boolean;
     fieldSet?: string;
     classes?: string[] | string;
 };
