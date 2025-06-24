@@ -59,6 +59,12 @@ export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): vo
     });
 }
 
+export function additionalFieldValue(field: FormFieldConfig, path: string): any {
+    field.props = field.props || {};
+    field.props.additional = field.props.additional || {};
+    return ObjectUtils.getValue(field.props.additional, path, null, false);
+}
+
 export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {
     field.props = field.props || {};
     field.props.additional = ObjectUtils.assign(field.props.additional || {}, values || {});

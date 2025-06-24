@@ -82,6 +82,7 @@ export {
     setFieldHidden,
     setFieldDisabled,
     setFieldHooks,
+    additionalFieldValue,
     additionalFieldValues,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,

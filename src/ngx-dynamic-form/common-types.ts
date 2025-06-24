@@ -72,7 +72,7 @@ export interface FormFieldProps extends FormlyFieldProps {
 
 export type FormFieldSerializer = (field: FormFieldConfig, injector: Injector) => MaybePromise<any>;
 
-export declare type FormHookFn = (field: FormFieldConfig) => void;
+export declare type FormHookFn = (field: FormFieldConfig) => any;
 
 export interface FormHookConfig {
     onInit?: FormHookFn;

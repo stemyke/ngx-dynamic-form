@@ -321,7 +321,10 @@ export class DynamicFormBuilderService {
                 serialize: () => data.serialize,
                 additional: (target: FormFieldConfig) => target.props.additional,
                 className: (target: FormFieldConfig) => {
-                    return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${target.type || "group"}`].concat(
+                    const type = ObjectUtils.isConstructor(target.type)
+                        ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
+                        : `${target.type || "group"}`;
+                    return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${type}`].concat(
                         Array.isArray(data.classes) ? data.classes : [data.classes || ""]
                     ).filter(c => c?.length > 0).join(" ");
                 }
