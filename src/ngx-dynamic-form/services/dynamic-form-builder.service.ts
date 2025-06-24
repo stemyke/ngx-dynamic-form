@@ -1,7 +1,8 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {distinctUntilChanged, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, combineLatestWith, distinctUntilChanged, Observable, switchMap} from "rxjs";
 import {
     API_SERVICE,
+    EventsService,
     IApiService,
     ILanguageService,
     LANGUAGE_SERVICE,
@@ -18,7 +19,6 @@ import {
     FormFieldExpressions,
     FormFieldProps,
     FormGroupData,
-    FormHookConfig,
     FormInputData,
     FormSelectData,
     FormSelectOption,
@@ -34,9 +34,15 @@ export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormField
 @Injectable()
 export class DynamicFormBuilderService {
 
+    readonly language: Observable<string>;
+
     constructor(readonly injector: Injector,
+                readonly events: EventsService,
                 @Inject(API_SERVICE) readonly api: IApiService,
-                @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
+                @Inject(LANGUAGE_SERVICE) protected readonly languages: ILanguageService) {
+        const lang = new BehaviorSubject(this.languages.currentLanguage);
+        this.events.languageChanged.subscribe(value => lang.next(value));
+        this.language = lang;
     }
 
     resolveFormFields(target: Type<any>, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
@@ -150,16 +156,18 @@ export class DynamicFormBuilderService {
         }, parent, options);
         setFieldHooks(select, {
             onInit: field => {
-                const options = data.options?.(field) || [];
-                const control = field.formControl.root;
-                field.props.options = options instanceof Promise ? control.valueChanges.pipe(
-                    startWith(control.value),
-                    distinctUntilChanged(),
-                    switchMap(async () => {
-                        const results: FormSelectOption[] = await data.options(field) as any;
-                        return this.fixSelectOptions(field, results);
-                    })
-                ) : options;
+                const options = data.options(field);
+                const root = field.formControl.root;
+                field.props.options = options instanceof Observable
+                    ? options
+                    : root.valueChanges.pipe(
+                        distinctUntilChanged(),
+                        combineLatestWith(this.language),
+                        switchMap(async () => {
+                            const results: FormSelectOption[] = await (data.options(field) as any) || [];
+                            return this.fixSelectOptions(field, results);
+                        })
+                    );
             }
         });
         return select;
@@ -226,6 +234,7 @@ export class DynamicFormBuilderService {
             if (Array.isArray(items)) {
                 array.fieldArray = {
                     wrappers: ["form-group"],
+                    className: "dynamic-form-field dynamic-form-group",
                     fieldGroup: items,
                     hooks: {},
                     expressions: {}
@@ -258,14 +267,16 @@ export class DynamicFormBuilderService {
     }
 
     async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {
-        if (!options) return [];
-        for (const option of options) {
+        if (!Array.isArray(options)) return [];
+        options = await Promise.all(options.map(async option => {
             const classes = Array.isArray(option.classes) ? option.classes : [`${option.classes}`];
+            option = Object.assign({}, option);
             option.className = classes.filter(isStringWithVal).join(" ");
-            option.label = await this.language.getTranslation(option.label);
+            option.label = await this.languages.getTranslation(option.label);
             option.value = option.value ?? option.id;
             option.id = option.id ?? option.value;
-        }
+            return option;
+        }));
         const control = field.formControl;
         field.defaultValue = options[0]?.value ?? null;
         if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;

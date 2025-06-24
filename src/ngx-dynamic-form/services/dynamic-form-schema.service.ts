@@ -1,10 +1,12 @@
 import {Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
-import {distinctUntilChanged, firstValueFrom, from, isObservable, startWith, switchMap} from "rxjs";
+import {combineLatestWith, distinctUntilChanged, firstValueFrom, isObservable, startWith, switchMap} from "rxjs";
 import {
     IApiService,
-    ILanguageService, IOpenApiSchema,
+    ILanguageService,
+    IOpenApiSchema,
     IOpenApiSchemaProperty,
+    IPaginationData,
     ObjectUtils,
     OpenApiService,
     StringUtils
@@ -14,7 +16,6 @@ import {
     CustomizerOrSchemaOptions,
     FormFieldConfig,
     FormFieldData,
-    FormSelectOption,
     FormSelectOptions,
     Validators
 } from "../common-types";
@@ -37,6 +38,7 @@ import {
 } from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
+import {debounceTime} from "rxjs/operators";
 
 @Injectable()
 export class DynamicFormSchemaService {
@@ -86,7 +88,7 @@ export class DynamicFormSchemaService {
     protected async getFormFieldForProp(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
-            return this.getFormSelectConfig(property, options, parent);
+            return this.getFormSelectConfig($enum, property, options, parent);
         }
         switch (property.type) {
             case "string":
@@ -129,6 +131,7 @@ export class DynamicFormSchemaService {
         this.addItemsValidators(validators, property.items);
         return {
             hidden: property.hidden === true,
+            disabled: property.disabled === true,
             serialize: property.serialize === true,
             componentType: property.componentType,
             fieldSet: property.fieldSet,
@@ -250,10 +253,10 @@ export class DynamicFormSchemaService {
         }, parent, options);
     }
 
-    protected getFormSelectConfig(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
+    protected getFormSelectConfig($enum: string[], property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         return this.builder.createFormSelect(property.id, {
             ...this.getFormFieldData(property, options),
-            options: field => this.getFormSelectOptions(property, options, field),
+            options: field => this.getFormSelectOptions($enum, property, options, field),
             type: property.format || "select",
             multiple: property.type == "array",
             groupBy: property.groupBy,
@@ -281,40 +284,59 @@ export class DynamicFormSchemaService {
         }, parent, options);
     }
 
-    protected getFormSelectOptions(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
-        const $enum = property.items?.enum || property.enum;
+    protected getFormSelectOptions($enum: string[], property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
         if (Array.isArray($enum)) {
-            return from(this.builder.fixSelectOptions(field, $enum.map(value => {
-                const label = options.labelPrefix
-                    ? this.language.getTranslationSync(`${options.labelPrefix}.${property.id}.${value}`)
-                    : `${property.id}.${value}`;
-                return {value, label};
-            })));
+            return this.getFormEnumOptions($enum, property.id, options, field);
         }
         if (isStringWithVal(property.endpoint)) {
-            const entries = Object.entries((field.formControl.root as FormGroup)?.controls || {});
-            const endpoint = entries.reduce((res, [key, control]) => {
-                return this.replaceOptionsEndpoint(res, key, control?.value);
-            }, `${property.endpoint}`);
-            this.api.cache[endpoint] = this.api.cache[endpoint] || this.api.list(endpoint, this.api.makeListParams(1, -1)).then(result => {
-                const items = ObjectUtils.isArray(result)
-                    ? result
-                    : (ObjectUtils.isArray(result.items) ? result.items : []);
-                return items.map(i => {
-                    const item = ObjectUtils.isObject(i) ? i : {id: i};
+            return this.getFormEndpointOptions(property, field);
+        }
+        return this.getFormPathOptions(property.optionsPath, field);
+    }
+
+    protected getFormEnumOptions($enum: string[], id: string, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
+        return this.builder.language.pipe(
+            distinctUntilChanged(),
+            switchMap(async () => {
+                return this.builder.fixSelectOptions(field, $enum.map(value => {
+                    const label = options.labelPrefix
+                        ? `${options.labelPrefix}.${id}.${value}`
+                        : `${id}.${value}`;
+                    return {value, label};
+                }));
+            })
+        );
+    }
+
+    protected getFormEndpointOptions(property: IOpenApiSchemaProperty, field: FormFieldConfig): FormSelectOptions {
+        const root = field.formControl.root as FormGroup;
+        return root.valueChanges.pipe(
+            distinctUntilChanged(),
+            debounceTime(500),
+            combineLatestWith(this.builder.language),
+            switchMap(async () => {
+                const entries = Object.entries(root.controls || {});
+                const endpoint = entries.reduce((res, [key, control]) => {
+                    return this.replaceOptionsEndpoint(res, key, control.value);
+                }, `${property.endpoint}`);
+                this.api.cache[endpoint] = this.api.cache[endpoint] || this.api.list(endpoint, this.api.makeListParams(1, -1));
+                const data = await this.api.cache[endpoint] as IPaginationData;
+                const items = ObjectUtils.isArray(data)
+                    ? data
+                    : (ObjectUtils.isArray(data.items) ? data.items : []);
+                return this.builder.fixSelectOptions(field, items.map(item => {
+                    item = ObjectUtils.isObject(item) ? item : {id: item};
                     return {
                         ...item,
                         value: item.id || item._id,
                         label: item[property.labelField] || item.label || item.id || item._id
                     };
-                });
-            });
-            const options = this.api.cache[endpoint] as Promise<FormSelectOption[]>;
-            return from(options.then(opts => {
-                return this.builder.fixSelectOptions(field, opts.map(o => Object.assign({}, o)))
-            }));
-        }
-        let path = property.optionsPath as string;
+                }));
+            })
+        );
+    }
+
+    protected getFormPathOptions(path: string, field: FormFieldConfig): FormSelectOptions {
         let control = field.formControl;
         let current = field;
         if (path.startsWith("$root")) {
@@ -333,12 +355,13 @@ export class DynamicFormSchemaService {
         return control.valueChanges.pipe(
             startWith(control.value),
             distinctUntilChanged(),
-            switchMap(async (controlVal) => {
+            combineLatestWith(this.builder.language),
+            switchMap(async ([ctrlValue]) => {
                 const currentOpts = current.props.options;
                 const finalOpts = isObservable(currentOpts)
                     ? await firstValueFrom(currentOpts)
                     : (Array.isArray(currentOpts) ? currentOpts : []);
-                return this.builder.fixSelectOptions(field, (!Array.isArray(controlVal) ? [] : controlVal).map(value => {
+                return this.builder.fixSelectOptions(field, (!Array.isArray(ctrlValue) ? [] : ctrlValue).map(value => {
                     const modelOption = finalOpts.find(t => t.value == value);
                     return {value, label: modelOption?.label || value};
                 }));

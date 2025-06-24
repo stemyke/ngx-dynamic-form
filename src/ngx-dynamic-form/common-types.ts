@@ -186,7 +186,7 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "label" | "readonly" | "hidden" | "disabled">
+export type FormFieldData = Pick<FormFieldProps, "label" | "hidden" | "disabled">
     & {
     validators?: Validators | ValidatorFn[];
     serializer?: FormFieldSerializer;
