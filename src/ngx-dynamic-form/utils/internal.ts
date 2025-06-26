@@ -32,6 +32,10 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
         return this.opts.testId;
     }
 
+    get context() {
+        return this.opts.context;
+    }
+
     protected fieldCustomizer: FormFieldCustomizer;
 
     constructor(

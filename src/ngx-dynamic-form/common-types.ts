@@ -31,6 +31,7 @@ export interface FormBuilderOptions {
     labelPrefix?: string;
     labelCustomizer?: FormFieldLabelCustomizer;
     testId?: string;
+    context?: any;
 }
 
 export type FormFieldAdditional = Readonly<{[key: string]: any}>;
