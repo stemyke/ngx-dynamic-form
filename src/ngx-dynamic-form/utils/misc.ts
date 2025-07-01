@@ -34,7 +34,10 @@ export function getFieldsByKey(field: FormFieldConfig, key: FormFieldKey): FormF
 }
 
 export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {
-    field.hide = hidden;
+    field.props = {
+        ...(field.props || {}),
+        hidden
+    };
 }
 
 export function setFieldDisabled(field: FormFieldConfig, disabled: boolean = true): void {
@@ -60,9 +63,7 @@ export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): vo
 }
 
 export function additionalFieldValue(field: FormFieldConfig, path: string): any {
-    field.props = field.props || {};
-    field.props.additional = field.props.additional || {};
-    return ObjectUtils.getValue(field.props.additional, path, null, false);
+    return ObjectUtils.getValue(field.additional, path, null, false);
 }
 
 export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {

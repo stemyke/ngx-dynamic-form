@@ -1,6 +1,8 @@
-<legend class="field-legend" *ngIf="props.label">
-    {{ props.label | translate }}
-</legend>
-<div class="field-container">
-    <ng-container #fieldComponent></ng-container>
-</div>
+@if (field.display) {
+    <legend class="field-legend" *ngIf="props.label && !field.parent.props.useTabs">
+        {{ props.label | translate }}
+    </legend>
+    <div class="field-container">
+        <ng-container #fieldComponent></ng-container>
+    </div>
+}

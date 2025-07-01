@@ -162,7 +162,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
     readonly additional?: FormFieldAdditional;
-    readonly tabs?: TabOption[];
+    readonly display?: boolean;
     readonly path?: string;
     readonly testId?: string;
 }
@@ -267,7 +267,7 @@ export type FormSelectData = FormFieldData
 export type FormUploadData = FormFieldData
     & Pick<FormFieldProps, "inline" | "multiple" | "accept" | "url" | "maxSize" | "uploadOptions" | "createUploadData" | "multi" | "asFile" | "uploadUrl">;
 
-export type FormGroupData = FormFieldData;
+export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs">;
 
 export type FormArrayData = FormFieldData
     & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "addItem" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "clearItems">;

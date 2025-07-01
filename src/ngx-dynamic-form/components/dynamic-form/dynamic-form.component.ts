@@ -15,13 +15,20 @@ import {Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
 import {EventsService, LANGUAGE_SERVICE} from "@stemy/ngx-utils";
 
-import {FormFieldChangeEvent, FormFieldConfig, FormFieldLabelCustomizer, IDynamicForm} from "../../common-types";
+import {
+    FormBuilderOptions,
+    FormFieldChangeEvent,
+    FormFieldConfig,
+    FormFieldLabelCustomizer,
+    IDynamicForm
+} from "../../common-types";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 
 @Component({
     standalone: false,
     selector: "dynamic-form",
     templateUrl: "./dynamic-form.component.html",
+    styleUrls: ["./dynamic-form.component.scss"],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -33,11 +40,13 @@ export class DynamicFormComponent implements IDynamicForm {
 
     protected readonly languages = inject(LANGUAGE_SERVICE);
 
-    readonly labelPrefix = input<string>("label");
+    readonly labelPrefix = input("label");
 
     readonly labelCustomizer = input<FormFieldLabelCustomizer>(null);
 
-    readonly testId = input<string>("");
+    readonly testId = input("");
+
+    readonly useTabs = input(false);
 
     readonly data = input<any>({});
 
@@ -54,11 +63,23 @@ export class DynamicFormComponent implements IDynamicForm {
     });
 
     readonly config = computed(() => {
-        return this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, {
+        const options = {
             labelPrefix: this.labelPrefix(),
             labelCustomizer: this.labelCustomizer(),
             testId: this.testId(),
-        });
+        } as FormBuilderOptions;
+        const fields = this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, options);
+        return [
+            this.builder.createFormGroup(
+                null, () => fields,
+                {
+                    label: "",
+                    useTabs: this.useTabs(),
+                    hidden: false
+                },
+                null, options
+            )
+        ];
     });
 
     readonly group = computed(() => {

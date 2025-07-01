@@ -42,11 +42,16 @@ export class AppComponent implements OnInit {
             return this.forms.getFormFieldsForSchema(p.request, {
                 labelPrefix: "form",
                 fieldCustomizer: async (field, options) => {
-                    if (field.key === "phone") {
+                    if (field.key === "premium") {
+                        setFieldHidden(field);
+                    }
+                    if (field.key === "integrationOptions") {
                         setFieldHooks(field, {
                             onInit: target => {
-                                target.formControl.root.get("language")?.valueChanges.subscribe(lang => {
-                                    setFieldHidden(target, lang !== "en");
+                                const premium = target.formControl.root.get("premium");
+                                setFieldHidden(target, !premium.value);
+                                premium.valueChanges.subscribe(value => {
+                                    setFieldHidden(target, !value);
                                 });
                             }
                         });
@@ -61,6 +66,7 @@ export class AppComponent implements OnInit {
     plainData = signal<any>({
         externalId: "X",
         attachments: [],
+        // premium: true,
         openingHours: [
             {lang: "hu", translation: "Hétfő"},
             {lang: "en", translation: "Monday"},

@@ -86,9 +86,8 @@ export class DynamicFormBuilderService {
         });
 
         for (const field of fields) {
-            const fsName = field.hide ? null : String(field.fieldSet || "");
-            // If we have a fieldset name defined and have actual fields for it
-            // then push the property fields into a group
+            const fsName = String(field.fieldSet || "");
+            // If we have a fieldset name defined, then push the property fields into a group
             if (fsName) {
                 const fsId = !parent?.path ? fsName : `${parent.path}.${fsName}`;
                 const group = groups[fsId] || [];
@@ -108,10 +107,12 @@ export class DynamicFormBuilderService {
                 parent,
                 fieldGroup: groups[id],
                 wrappers: ["form-fieldset"],
-                className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`,
                 props: {
                     label: this.getLabel(key, key, parent, options),
-                    hidden: false
+                    hidden: false,
+                    additional: {
+                        className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
+                    }
                 },
                 hooks: {},
                 expressions: {}
@@ -201,7 +202,9 @@ export class DynamicFormBuilderService {
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
-        const group = this.createFormField(key, undefined, data, {}, parent, options);
+        const group = this.createFormField(key, undefined, data, {
+            useTabs: data.useTabs === true
+        }, parent, options);
         group.wrappers = ["form-group"];
         const result = fields(group);
         const handleGroup = (fieldGroup: FormFieldConfig[]) => {
@@ -239,6 +242,7 @@ export class DynamicFormBuilderService {
                     hooks: {},
                     expressions: {}
                 };
+                this.setExpressions(array.fieldArray, options);
                 return array;
             }
             const props = items.props || {};
@@ -303,7 +307,6 @@ export class DynamicFormBuilderService {
         const field: FormFieldConfig = {
             key,
             validators,
-            hide: data.hidden === true,
             type: data.componentType || type,
             fieldSet: String(data.fieldSet || ""),
             resetOnHide: false,
@@ -316,11 +319,14 @@ export class DynamicFormBuilderService {
             props: {
                 ...props,
                 disabled: data.disabled === true,
+                hidden: data.hidden === true,
                 formCheck: "nolabel",
                 required: !!validators.required,
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
-                additional: {}
+                additional: {
+                    classes: data.classes || []
+                }
             },
             modelOptions: {
                 updateOn: "change"
@@ -329,16 +335,7 @@ export class DynamicFormBuilderService {
             hooks: {},
             expressions: {
                 serializer: () => data.serializer,
-                serialize: () => data.serialize,
-                additional: (target: FormFieldConfig) => target.props.additional,
-                className: (target: FormFieldConfig) => {
-                    const type = ObjectUtils.isConstructor(target.type)
-                        ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
-                        : `${target.type || "group"}`;
-                    return target.hide ? `` : [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${type}`].concat(
-                        Array.isArray(data.classes) ? data.classes : [data.classes || ""]
-                    ).filter(c => c?.length > 0).join(" ");
-                }
+                serialize: () => data.serialize
             }
         };
         // Parent object will be available for customizers as a property, until it gets redefined by formly
@@ -353,18 +350,33 @@ export class DynamicFormBuilderService {
 
     protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): void {
         const expressions: FormFieldExpressions = {
-            tabs: target => {
-                if (target.fieldArray) {
-                    const group = target.fieldGroup || [];
-                    return group.map((g, ix) => {
-                        const label = ObjectUtils.getValue(g.formControl?.value, target.props?.tabsLabel || "label", ix);
-                        return {
-                            value: ix,
-                            label: `${label}`
-                        }
-                    });
+            display: target => {
+                const display = target.props?.hidden !== true;
+                if (target.fieldGroup) {
+                    return display && target.fieldGroup.some(f => f.display);
                 }
-                return [];
+                return display;
+            },
+            className: (target: FormFieldConfig) => {
+                if (target.display === false) {
+                    return `dynamic-form-field dynamic-form-hidden`;
+                }
+                const {classes, className} = target.additional || {};
+                if (className) {
+                    return className;
+                }
+                const type = target.type || "group";
+                const typeName = ObjectUtils.isConstructor(type)
+                    ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
+                    : type;
+                return [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${typeName}`].concat(
+                    Array.isArray(classes) ? classes : [classes || ""]
+                ).filter(c => c?.length > 0).join(" ");
+            },
+            additional: (target: FormFieldConfig) => {
+                target.props = target.props || {};
+                target.props.additional = target.props.additional || {};
+                return target.props.additional;
             },
             path: target => {
                 const tp = target.parent;

@@ -11,9 +11,9 @@
     </ul>
 </dropdown-box>
 <div class="row">
-    <div class="col-6">
+    <div class="col-7">
         @if (fields.hasValue()) {
-            <dynamic-form [fields]="fields.value()" [data]="plainData()" #form>
+            <dynamic-form [fields]="fields.value()" [data]="plainData()" [useTabs]="true" #form>
                 <button [async-submit]="submit" [form]="form" class="btn btn-primary submit-button">Submit</button>
             </dynamic-form>
         } @else {

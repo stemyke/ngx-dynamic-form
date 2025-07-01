@@ -1,6 +1,6 @@
-import {Component, inject, ViewEncapsulation} from "@angular/core";
+import {Component, ViewEncapsulation} from "@angular/core";
 import {FieldWrapper} from "@ngx-formly/core";
-import {DynamicFormGroupComponent} from "../dynamic-form-group/dynamic-form-group.component";
+import {FormFieldConfig} from "../../common-types";
 
 @Component({
     standalone: false,
@@ -8,7 +8,7 @@ import {DynamicFormGroupComponent} from "../dynamic-form-group/dynamic-form-grou
     templateUrl: "./dynamic-form-fieldset.component.html",
     encapsulation: ViewEncapsulation.None
 })
-export class DynamicFormFieldsetComponent extends FieldWrapper {
+export class DynamicFormFieldsetComponent extends FieldWrapper<FormFieldConfig> {
 
     ngOnInit(): void {
         // console.log(this.field.id, this.field.props?.label, this.options);

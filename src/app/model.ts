@@ -36,7 +36,7 @@ function serializeDate(format: string = "yyyy-MM-dd", defaultValue: string = "")
 export class AddressModel {
 
     @FormInput({
-        placeholder: "label.buyerStreet"
+        placeholder: "label.buyerStreet",
     })
     @FormSerializable()
     street: string = "";
@@ -82,7 +82,7 @@ export class OrderModel {
     @FormSerializable(serializeDate())
     buyerBirthday: Date = null;
 
-    @FormGroup({label: ""})
+    @FormGroup()
     buyerAddress: AddressModel = new AddressModel();
 
     @FormArray(AddressModel, {useTabs: true, tabsLabel: "street"})
@@ -101,6 +101,7 @@ export class OrderModel {
 
     @FormInput({
         fieldSet: "contact-1",
+        hidden: true,
         placeholder: "label.buyerEmail",
         validators: [emailValidation()]
     })
@@ -109,6 +110,7 @@ export class OrderModel {
 
     @FormInput({
         fieldSet: "contact-1",
+        hidden: true,
         placeholder: "label.buyerPhone"
     })
     @FormSerializable()
