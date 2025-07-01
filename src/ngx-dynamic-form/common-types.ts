@@ -34,38 +34,97 @@ export interface FormBuilderOptions {
     context?: any;
 }
 
+/**
+ * This interface describes additional values for form field properties
+ */
 export type FormFieldAdditional = Readonly<{[key: string]: any}>;
 
+/**
+ * This interface describes what properties each form field component can have.
+ */
 export interface FormFieldProps extends FormlyFieldProps {
-    // --- Common props ---
+    /**
+     * Other, not basic component specific values can be stored here, use the helper function "additionalFieldValues"
+     */
     additional?: FormFieldAdditional;
-    // --- Input props ---
+    /**
+     * In the input component, define how the browser should automatically fill in the field value.
+     */
     autocomplete?: string;
+    /**
+     * In the number type input component, you specify what text to add at the end, e.g. some unit of measurement
+     */
     suffix?: string;
-    // --- Checkbox props ---
+    /**
+     * In a checkbox type component, it specifies where the label should be placed. (Bootstrap library specific)
+     */
     formCheck?: string;
+    /**
+     * In a checkbox type component, it specifies where the label should be placed. (Material library specific)
+     */
+    labelPosition?: "before" | "after";
+    /**
+     * Specifies that the value of the checkbox type component can be undecided.
+     */
     indeterminate?: boolean;
-    // --- Select props ---
+    /**
+     * Specifies that multiple values can be selected at once in the select component.
+     */
     multiple?: boolean;
+    /**
+     * Allows empty, null values in the select component
+     */
     allowEmpty?: boolean;
+    /**
+     * Groups selectable values based on the value of the specified key in the select component
+     */
     groupBy?: string;
-    // --- Array props ---
+    /**
+     * For group and array type components, specifies whether the field hides groups or array elements under tabs and always displays only the selected element.
+     */
     useTabs?: boolean;
+    /**
+     * In the case of an array type component, it specifies the key from which each element to extract the text displayed on the tab.
+     * If not specified or the value is undefined, it is replaced with the index of the array element.
+     */
     tabsLabel?: string;
+    /**
+     * Specifies whether a new element can be added to the array type component.
+     */
     addItem?: boolean;
+    /**
+     * Specifies whether new elements can be inserted into existing elements of an array component.
+     */
     insertItem?: boolean;
+    /**
+     * Specifies whether an existing element of an array type component can be cloned.
+     */
     cloneItem?: boolean;
+    /**
+     * Specifies whether an existing element of an array type component can be moved.
+     */
     moveItem?: boolean;
+    /**
+     * Specifies whether an existing element of an array type component can be deleted.
+     */
     removeItem?: boolean;
+
     clearItems?: boolean;
-    // --- Upload props ---
+    /**
+     * Specifies that the file upload component value is stored inline, so instead of an API call, the file Blob is inserted into the field value.
+     */
     inline?: boolean;
+    /**
+     * Specifies what types of files the file upload component can accept. (.jpg, .png)
+     */
     accept?: string | string[];
     url?: string;
     maxSize?: number;
     uploadOptions?: IRequestOptions;
     createUploadData?: (file: File) => UploadData | Promise<UploadData>;
-    // --- Old upload props
+    /**
+     * Old upload props
+     */
     multi?: boolean;
     asFile?: boolean;
     uploadUrl?: string;

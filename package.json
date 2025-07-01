@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.4.9",
+    "version": "19.4.10",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -99,7 +99,8 @@
         "@angular/cdk": "^19.2.18",
         "@angular/material": "^19.2.18",
         "@fortawesome/fontawesome-free": "^6.7.2",
-        "bootstrap": "^5.3.6"
+        "bootstrap": "^5.3.6",
+        "typedoc": "^0.28.7"
     },
     "main": "dist/bundles/stemy-ngx-dynamic-form.umd.js",
     "module": "dist/fesm5/stemy-ngx-dynamic-form.js",

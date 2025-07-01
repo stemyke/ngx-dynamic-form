@@ -90,35 +90,33 @@ export class DynamicFormSchemaService {
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             return this.getFormSelectConfig($enum, property, options, parent);
         }
+        if (findRefs(property).length > 0) {
+            return this.getFormGroupConfig(property, options, parent);
+        }
         switch (property.type) {
-            case "string":
-            case "number":
-            case "integer":
-            case "textarea":
-                // if (this.checkIsEditorProperty(property)) {
-                //     return this.getFormEditorConfig(property, options, parent);
-                // }
-                if (property.format == "textarea") {
-                    return this.getFormTextareaConfig(property, options, parent);
-                }
-                if (property.format == "date" || property.format == "date-time") {
-                    return this.getFormDatepickerConfig(property, options, parent);
-                }
-                return this.getFormInputConfig(property, options, parent);
             // case "object":
             //     return this.getFormEditorConfig(property, options, parent);
+            case "file":
+            case "upload":
+                return this.getFormUploadConfig(property, options, parent);
             case "boolean":
                 return this.getFormCheckboxConfig(property, options, parent);
             case "array":
                 return this.getFormArrayConfig(property, options, parent);
-            case "file":
-            case "upload":
-                return this.getFormUploadConfig(property, options, parent);
         }
-        if (findRefs(property).length > 0) {
-            return this.getFormGroupConfig(property, options, parent);
+        // if (this.checkIsEditorProperty(property)) {
+        //     return this.getFormEditorConfig(property, options, parent);
+        // }
+        if (property.format == "file" || property.format == "upload") {
+            return this.getFormUploadConfig(property, options, parent);
         }
-        return null;
+        if (property.format == "textarea") {
+            return this.getFormTextareaConfig(property, options, parent);
+        }
+        if (property.format == "date" || property.format == "date-time") {
+            return this.getFormDatepickerConfig(property, options, parent);
+        }
+        return this.getFormInputConfig(property, options, parent);
     }
 
     protected getFormFieldData(property: IOpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormFieldData {
