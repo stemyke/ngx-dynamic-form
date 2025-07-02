@@ -4,15 +4,15 @@
         <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
     </label>
     <tabs class="field-container">
-        @for (f of field.fieldGroup; track f; let ix = $index) {
-            @if (props.useTabs && f.display && f.wrappers | includes: 'form-fieldset') {
+        @for (itemField of field.fieldGroup; track itemField; let ix = $index) {
+            @if (props.useTabs && itemField.display && itemField.wrappers | includes: 'form-fieldset') {
                 <div class="form-fieldset-item"
                      [tabsItem]="ix"
-                     [label]="f.props.label">
-                    <formly-field [field]="f"></formly-field>
+                     [label]="itemField.props.label">
+                    <formly-field [field]="itemField"></formly-field>
                 </div>
             } @else {
-                <formly-field [field]="f"></formly-field>
+                <formly-field [field]="itemField"></formly-field>
             }
         }
     </tabs>

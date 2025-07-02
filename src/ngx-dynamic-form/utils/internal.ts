@@ -117,6 +117,9 @@ export function arrayItemActionToExpression(action: FormFieldArrayItemsAction): 
         ? () => false
         : (ObjectUtils.isFunction(action) ? action : () => true)
     return (field: FormFieldConfig) => {
+        // Needed to immediately reflect the changes on the view
+        field.options.detectChanges(field);
+        // Returns the actual calculated value
         return cb(field.formControl?.value, Number(field.key), field);
     };
 }

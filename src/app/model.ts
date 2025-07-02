@@ -85,7 +85,11 @@ export class OrderModel {
     @FormGroup()
     buyerAddress: AddressModel = new AddressModel();
 
-    @FormArray(AddressModel, {useTabs: true, tabsLabel: "street"})
+    @FormArray(AddressModel, {
+        removeItem: (item) => {
+            return !item.street || item.street.length < 5;
+        }
+    })
     addresses: AddressModel[] = [new AddressModel()];
 
     @FormArray("text")

@@ -246,8 +246,7 @@ export class DynamicFormBuilderService {
                         }
                     },
                     hooks: {},
-                    expressions: {}
-                    // expressions
+                    expressions
                 };
                 this.setExpressions(array.fieldArray, options);
                 return array;
@@ -270,11 +269,10 @@ export class DynamicFormBuilderService {
                     label: "",
                 },
                 hooks: {},
-                // expressions
+                expressions
             };
             return array;
         };
-        console.log(array);
         return result instanceof Promise
             ? result.then(handleItems)
             : handleItems(result);
