@@ -86,7 +86,7 @@ export class OrderModel {
     buyerAddress: AddressModel = new AddressModel();
 
     @FormArray(AddressModel, {useTabs: true, tabsLabel: "street"})
-    addresses: AddressModel[] = [];
+    addresses: AddressModel[] = [new AddressModel()];
 
     @FormArray("text")
     lines: string[] = [];
@@ -101,7 +101,6 @@ export class OrderModel {
 
     @FormInput({
         fieldSet: "contact-1",
-        hidden: true,
         placeholder: "label.buyerEmail",
         validators: [emailValidation()]
     })
@@ -110,7 +109,6 @@ export class OrderModel {
 
     @FormInput({
         fieldSet: "contact-1",
-        hidden: true,
         placeholder: "label.buyerPhone"
     })
     @FormSerializable()

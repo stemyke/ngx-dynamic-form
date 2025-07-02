@@ -27,7 +27,7 @@ import {
 } from "../common-types";
 import {validationMessage} from "../utils/validation";
 import {MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks} from "../utils/misc";
-import {isStringWithVal} from "../utils/internal";
+import {arrayItemActionToExpression, isStringWithVal} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
 
@@ -226,14 +226,16 @@ export class DynamicFormBuilderService {
             useTabs: data.useTabs === true,
             tabsLabel: `${data.tabsLabel || "label"}`,
             addItem: data.addItem !== false,
-            insertItem: data.insertItem !== false,
-            cloneItem: data.cloneItem !== false,
-            moveItem: data.moveItem !== false,
-            removeItem: data.removeItem !== false,
             clearItems: data.clearItems !== false
         }, parent, options);
         const result = fields(array);
         const handleItems = (items: FormFieldConfig | FormFieldConfig[]) => {
+            const expressions: FormFieldExpressions = {
+                insertItem: arrayItemActionToExpression(data.insertItem),
+                cloneItem: arrayItemActionToExpression(data.cloneItem),
+                moveItem: arrayItemActionToExpression(data.moveItem),
+                removeItem: arrayItemActionToExpression(data.removeItem)
+            };
             if (Array.isArray(items)) {
                 array.fieldArray = {
                     wrappers: ["form-group"],
@@ -245,6 +247,7 @@ export class DynamicFormBuilderService {
                     },
                     hooks: {},
                     expressions: {}
+                    // expressions
                 };
                 this.setExpressions(array.fieldArray, options);
                 return array;
@@ -264,11 +267,14 @@ export class DynamicFormBuilderService {
                 ...items,
                 props: {
                     ...items.props,
-                    label: ""
-                }
+                    label: "",
+                },
+                hooks: {},
+                // expressions
             };
             return array;
         };
+        console.log(array);
         return result instanceof Promise
             ? result.then(handleItems)
             : handleItems(result);
@@ -370,7 +376,7 @@ export class DynamicFormBuilderService {
                 if (className) {
                     return className;
                 }
-                const type = target.type || "group";
+                const type = String(target.type || "group").replace("formly-", "");
                 const typeName = ObjectUtils.isConstructor(type)
                     ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
                     : type;

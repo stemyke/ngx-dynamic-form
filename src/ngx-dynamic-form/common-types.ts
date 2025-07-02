@@ -35,9 +35,14 @@ export interface FormBuilderOptions {
 }
 
 /**
- * This interface describes additional values for form field properties
+ * This type describes additional values for form field properties
  */
 export type FormFieldAdditional = Readonly<{[key: string]: any}>;
+
+/**
+ * This type describes how one of the array actions should react based on an array item
+ */
+export type FormFieldArrayItemsAction = boolean | ((item: any, ix: number, field: FormFieldConfig) => boolean);
 
 /**
  * This interface describes what properties each form field component can have.
@@ -89,26 +94,28 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     tabsLabel?: string;
     /**
+     * Specifies whether new elements can be inserted into existing elements of an array component.
+     */
+    insertItem?: FormFieldArrayItemsAction;
+    /**
+     * Specifies whether an existing element of an array type component can be cloned.
+     */
+    cloneItem?: FormFieldArrayItemsAction;
+    /**
+     * Specifies whether an existing element of an array type component can be moved.
+     */
+    moveItem?: FormFieldArrayItemsAction;
+    /**
+     * Specifies whether an existing element of an array type component can be deleted.
+     */
+    removeItem?: FormFieldArrayItemsAction;
+    /**
      * Specifies whether a new element can be added to the array type component.
      */
     addItem?: boolean;
     /**
-     * Specifies whether new elements can be inserted into existing elements of an array component.
+     * Specifies whether all the items can be removed from the array type component.
      */
-    insertItem?: boolean;
-    /**
-     * Specifies whether an existing element of an array type component can be cloned.
-     */
-    cloneItem?: boolean;
-    /**
-     * Specifies whether an existing element of an array type component can be moved.
-     */
-    moveItem?: boolean;
-    /**
-     * Specifies whether an existing element of an array type component can be deleted.
-     */
-    removeItem?: boolean;
-
     clearItems?: boolean;
     /**
      * Specifies that the file upload component value is stored inline, so instead of an API call, the file Blob is inserted into the field value.
@@ -158,13 +165,14 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     fieldSet?: string;
     parent?: FormFieldConfig;
     fieldGroup?: FormFieldConfig[];
-    fieldArray?: FormFieldConfig | ((field: FormFieldConfig) => FormFieldConfig);
+    fieldArray?: FormFieldConfig;
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
     readonly additional?: FormFieldAdditional;
     readonly display?: boolean;
     readonly path?: string;
     readonly testId?: string;
+    [additionalProperties: string]: any;
 }
 
 export interface FormFieldType<T = FormFieldProps> extends FormFieldConfig<T> {
@@ -270,7 +278,7 @@ export type FormUploadData = FormFieldData
 export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs">;
 
 export type FormArrayData = FormFieldData
-    & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "addItem" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "clearItems">;
+    & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "addItem" | "clearItems">;
 
 // --- JSON schema interfaces ---
 

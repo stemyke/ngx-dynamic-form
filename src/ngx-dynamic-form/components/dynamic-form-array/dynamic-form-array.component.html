@@ -5,15 +5,15 @@
 <div class="field-container">
     @if (props.useTabs) {
         <tabs class="form-array-items" [(value)]="currentTab">
-            @for (field of field.fieldGroup; track field.key; let ix = $index) {
+            @for (f of field.fieldGroup; track f.key; let ix = $index) {
                 <div class="form-array-item"
                      [tabsItem]="ix"
-                     [label]="(field.formControl.value | getValue : props.tabsLabel) || ix + 1">
+                     [label]="(f.formControl.value | getValue : props.tabsLabel) || ix + 1">
                     <div class="form-array-buttons">
-                        @if (props.removeItem) {
+                        @if (f.removeItem) {
                             <btn icon="trash" (click)="removeItem(ix)"></btn>
                         }
-                        @if (props.insertItem) {
+                        @if (f.insertItem) {
                             <btn icon="plus" (click)="addItem(ix)"></btn>
                         }
                     </div>
@@ -22,13 +22,13 @@
             }
         </tabs>
     } @else {
-        @for (field of field.fieldGroup; track field; let ix = $index) {
+        @for (f of field.fieldGroup; track f.key; let ix = $index) {
             <div class="form-array-item">
                 <div class="form-array-buttons">
-                    @if (props.removeItem) {
+                    @if (f.removeItem) {
                         <btn icon="trash" (click)="removeItem(ix)"></btn>
                     }
-                    @if (props.insertItem) {
+                    @if (f.insertItem) {
                         <btn icon="plus" (click)="addItem(ix)"></btn>
                     }
                 </div>
@@ -38,6 +38,7 @@
     }
 
     <div class="form-array-buttons">
+        {{ props | json }}
         @if (props.clearItems) {
             <btn icon="trash" label="button.clear-items" (click)="clearItems()"></btn>
         }
