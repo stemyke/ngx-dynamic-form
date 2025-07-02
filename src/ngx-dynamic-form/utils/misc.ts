@@ -1,5 +1,6 @@
+import {firstValueFrom, Observable} from "rxjs";
 import {ObjectUtils} from "@stemy/ngx-utils";
-import {FormFieldConfig, FormFieldKey, FormHookConfig, FormHookFn} from "../common-types";
+import {FormFieldConfig, FormFieldKey, FormHookConfig, FormHookFn, FormSelectOption} from "../common-types";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
@@ -31,6 +32,39 @@ export function getFieldsByPredicate(field: FormFieldConfig, cb: (field: FormFie
 
 export function getFieldsByKey(field: FormFieldConfig, key: FormFieldKey): FormFieldConfig[] {
     return getFieldsByPredicate(field, f => f.key === key);
+}
+
+export async function getSelectOptions(field: FormFieldConfig): Promise<FormSelectOption[]> {
+    const options = field.props?.options || [];
+    if (options instanceof Observable) {
+        return firstValueFrom(options);
+    }
+    return options;
+}
+
+export function replaceFieldArray(field: FormFieldConfig, items: any[]): void {
+    const model = field.model || [];
+    model.splice(0, model.length, ...items);
+    field.options.build(field);
+}
+
+export function clearFieldArray(field: FormFieldConfig): void {
+    const model = field.model || [];
+    model.splice(0, model.length);
+    field.options.build(field);
+}
+
+export function insertToFieldArray(field: FormFieldConfig, item: any, ix?: number): void {
+    const model = field.model || [];
+    ix = ix == null ? model.length : ix;
+    model.splice(ix, 0, item);
+    field.options.build(field);
+}
+
+export function removeFromFieldArray(field: FormFieldConfig, ix: number): void {
+    const model = field.model || [];
+    model.splice(ix, 1);
+    field.options.build(field);
 }
 
 export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {

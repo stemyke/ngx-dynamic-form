@@ -4,9 +4,9 @@ import {
     AllValidationErrors,
     ConfigForSchemaOptions,
     CustomizerOrSchemaOptions,
-    FormBuilderOptions,
+    FormBuilderOptions, FormFieldArrayItemsAction,
     FormFieldConfig,
-    FormFieldCustomizer
+    FormFieldCustomizer, FormFieldExpression
 } from "../common-types";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 
@@ -110,6 +110,15 @@ export function findRefs(property: IOpenApiSchemaProperty): string[] {
         ? property.allOf.map(o => o.$ref).filter(isStringWithVal)
         : [property.items?.$ref, property.$ref].filter(isStringWithVal);
     return refs.map(t => t.split("/").pop());
+}
+
+export function arrayItemActionToExpression(action: FormFieldArrayItemsAction): FormFieldExpression {
+    const cb = action === false
+        ? () => false
+        : (ObjectUtils.isFunction(action) ? action : () => true)
+    return (field: FormFieldConfig) => {
+        return cb(field.formControl?.value, Number(field.key), field);
+    };
 }
 
 export function mergeFormFields(formFields: FormFieldConfig[][]): FormFieldConfig[] {
