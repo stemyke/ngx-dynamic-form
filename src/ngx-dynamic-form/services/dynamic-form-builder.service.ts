@@ -237,8 +237,12 @@ export class DynamicFormBuilderService {
             if (Array.isArray(items)) {
                 array.fieldArray = {
                     wrappers: ["form-group"],
-                    className: "dynamic-form-field dynamic-form-group",
                     fieldGroup: items,
+                    props: {
+                        additional: {
+                            className: "dynamic-form-field dynamic-form-group",
+                        }
+                    },
                     hooks: {},
                     expressions: {}
                 };
@@ -298,6 +302,7 @@ export class DynamicFormBuilderService {
     }
 
     protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+
         const validators = Array.isArray(data.validators)
             ? data.validators.reduce((res, validator, ix) => {
                 res[validator.validatorName || `validator_${ix}`] = validator;
@@ -352,7 +357,7 @@ export class DynamicFormBuilderService {
         const expressions: FormFieldExpressions = {
             display: target => {
                 const display = target.props?.hidden !== true;
-                if (target.fieldGroup) {
+                if (target.fieldGroup?.length) {
                     return display && target.fieldGroup.some(f => f.display);
                 }
                 return display;

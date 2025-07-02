@@ -90,9 +90,6 @@ export class DynamicFormSchemaService {
         if (Array.isArray($enum) || isStringWithVal(property.optionsPath) || isStringWithVal(property.endpoint)) {
             return this.getFormSelectConfig($enum, property, options, parent);
         }
-        if (findRefs(property).length > 0) {
-            return this.getFormGroupConfig(property, options, parent);
-        }
         switch (property.type) {
             // case "object":
             //     return this.getFormEditorConfig(property, options, parent);
@@ -107,6 +104,9 @@ export class DynamicFormSchemaService {
         // if (this.checkIsEditorProperty(property)) {
         //     return this.getFormEditorConfig(property, options, parent);
         // }
+        if (findRefs(property).length > 0) {
+            return this.getFormGroupConfig(property, options, parent);
+        }
         if (property.format == "file" || property.format == "upload") {
             return this.getFormUploadConfig(property, options, parent);
         }
