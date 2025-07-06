@@ -1,12 +1,19 @@
 import {Injector} from "@angular/core";
-import {IOpenApiSchema, IOpenApiSchemaProperty, MaybeArray, ObjectUtils, ForbiddenZone} from "@stemy/ngx-utils";
+import {
+    IOpenApiSchema,
+    IOpenApiSchemaProperty,
+    MaybeArray,
+    ObjectUtils,
+    ForbiddenZone,
+    KeysOfType
+} from "@stemy/ngx-utils";
 import {
     AllValidationErrors,
     ConfigForSchemaOptions,
     CustomizerOrSchemaOptions,
     FormBuilderOptions, FormFieldArrayItemsAction,
     FormFieldConfig,
-    FormFieldCustomizer, FormFieldExpression
+    FormFieldCustomizer, FormFieldExpression, FormFieldProps
 } from "../common-types";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 
@@ -112,15 +119,16 @@ export function findRefs(property: IOpenApiSchemaProperty): string[] {
     return refs.map(t => t.split("/").pop());
 }
 
-export function arrayItemActionToExpression(action: FormFieldArrayItemsAction): FormFieldExpression {
-    const cb = action === false
-        ? () => false
-        : (ObjectUtils.isFunction(action) ? action : () => true)
+export function arrayItemActionToExpression(actionName: KeysOfType<FormFieldProps, FormFieldArrayItemsAction>): FormFieldExpression {
     return (field: FormFieldConfig) => {
+        const action = field.parent?.props?.[actionName];
         // Needed to immediately reflect the changes on the view
         field.options.detectChanges(field);
+        if (action === false) return false;
         // Returns the actual calculated value
-        return cb(field.formControl?.value, Number(field.key), field);
+        return ObjectUtils.isFunction(action)
+            ? action(field.formControl?.value, Number(field.key), field)
+            : true;
     };
 }
 

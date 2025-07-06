@@ -225,16 +225,20 @@ export class DynamicFormBuilderService {
             // sortable: data.sortable || false,
             useTabs: data.useTabs === true,
             tabsLabel: `${data.tabsLabel || "label"}`,
+            insertItem: data.insertItem,
+            cloneItem: data.cloneItem,
+            moveItem: data.moveItem,
+            removeItem: data.removeItem,
             addItem: data.addItem !== false,
             clearItems: data.clearItems !== false
         }, parent, options);
         const result = fields(array);
         const handleItems = (items: FormFieldConfig | FormFieldConfig[]) => {
             const expressions: FormFieldExpressions = {
-                insertItem: arrayItemActionToExpression(data.insertItem),
-                cloneItem: arrayItemActionToExpression(data.cloneItem),
-                moveItem: arrayItemActionToExpression(data.moveItem),
-                removeItem: arrayItemActionToExpression(data.removeItem)
+                insertItem: arrayItemActionToExpression("insertItem"),
+                cloneItem: arrayItemActionToExpression("cloneItem"),
+                moveItem: arrayItemActionToExpression("moveItem"),
+                removeItem: arrayItemActionToExpression("removeItem")
             };
             if (Array.isArray(items)) {
                 array.fieldArray = {
