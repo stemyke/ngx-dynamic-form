@@ -53,6 +53,14 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     additional?: FormFieldAdditional;
     /**
+     * Specifies if required marker should be hidden
+     */
+    hideRequiredMarker?: boolean;
+    /**
+     * Specifies if label should be hidden
+     */
+    hideLabel?: boolean;
+    /**
      * In the input component, define how the browser should automatically fill in the field value.
      */
     autocomplete?: string;
@@ -135,6 +143,14 @@ export interface FormFieldProps extends FormlyFieldProps {
     multi?: boolean;
     asFile?: boolean;
     uploadUrl?: string;
+    /**
+     * Angular material specific props
+     */
+    floatLabel?: "always" | "auto";
+    appearance?: "fill" | "outline";
+    subscriptSizing?: "fixed" | "dynamic";
+    color?: "primary" | "accent" | "warn";
+    hideFieldUnderline?: boolean;
 }
 
 export type FormFieldSerializer = (field: FormFieldConfig, injector: Injector) => MaybePromise<any>;

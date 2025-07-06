@@ -1,41 +1,43 @@
-<label class="field-label" *ngIf="props.label">
-    {{ props.label | translate }}
-    <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-</label>
-<div class="field-container">
-    <tabs class="form-array-items" [(value)]="currentTab">
-        @for (itemField of field.fieldGroup; track itemField.key; let ix = $index) {
-            <ng-template #fieldContent>
-                <div class="form-array-buttons">
-                    @if (itemField.removeItem) {
-                        <btn icon="trash" (click)="removeItem(ix)"></btn>
-                    }
-                    @if (itemField.insertItem) {
-                        <btn icon="plus" (click)="addItem(ix)"></btn>
-                    }
-                </div>
-                <formly-field [field]="itemField"></formly-field>
-            </ng-template>
-            @if (props.useTabs) {
-                <div class="form-array-item"
-                     [tabsItem]="ix"
-                     [label]="(itemField.formControl.value | getValue : props.tabsLabel) || ix + 1">
-                    <ng-container [ngTemplateOutlet]="fieldContent"></ng-container>
-                </div>
-            } @else {
-                <div class="form-array-item">
-                    <ng-container [ngTemplateOutlet]="fieldContent"></ng-container>
-                </div>
+@if (field.display) {
+    <label class="field-label" *ngIf="props.label">
+        {{ props.label | translate }}
+        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+    </label>
+    <div class="field-container">
+        <tabs class="form-array-items" [(value)]="currentTab">
+            @for (itemField of field.fieldGroup; track itemField.key; let ix = $index) {
+                <ng-template #fieldContent>
+                    <div class="form-array-buttons">
+                        @if (itemField.removeItem) {
+                            <btn icon="trash" (click)="removeItem(ix)"></btn>
+                        }
+                        @if (itemField.insertItem) {
+                            <btn icon="plus" (click)="addItem(ix)"></btn>
+                        }
+                    </div>
+                    <formly-field [field]="itemField"></formly-field>
+                </ng-template>
+                @if (props.useTabs) {
+                    <div class="form-array-item"
+                         [tabsItem]="ix"
+                         [label]="(itemField.formControl.value | getValue : props.tabsLabel) || ix + 1">
+                        <ng-container [ngTemplateOutlet]="fieldContent"></ng-container>
+                    </div>
+                } @else {
+                    <div class="form-array-item">
+                        <ng-container [ngTemplateOutlet]="fieldContent"></ng-container>
+                    </div>
+                }
             }
-        }
-    </tabs>
+        </tabs>
 
-    <div class="form-array-buttons">
-        @if (props.clearItems) {
-            <btn icon="trash" label="button.clear-items" (click)="clearItems()"></btn>
-        }
-        @if (props.addItem) {
-            <btn icon="plus" label="button.insert-item" (click)="addItem()"></btn>
-        }
+        <div class="form-array-buttons">
+            @if (props.clearItems) {
+                <btn icon="trash" label="button.clear-items" (click)="clearItems()"></btn>
+            }
+            @if (props.addItem) {
+                <btn icon="plus" label="button.insert-item" (click)="addItem()"></btn>
+            }
+        </div>
     </div>
-</div>
+}
