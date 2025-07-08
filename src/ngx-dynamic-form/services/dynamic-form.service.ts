@@ -38,7 +38,8 @@ export class DynamicFormService {
         const config = {
             id: FORM_ROOT_ID,
             path: "",
-            wrappers: ["form-group"]
+            wrappers: ["form-group"],
+            props: {}
         } as FormFieldConfig;
         const schema = await this.fs.getSchema(name);
         const wrapOptions = await toWrapOptions(
