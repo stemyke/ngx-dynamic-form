@@ -62,6 +62,7 @@ export class NgxDynamicFormModule {
                     { name: "form-group", component: DynamicFormGroupComponent }
                 ],
                 extras: {
+                    resetFieldOnHide: false,
                     renderFormlyFieldElement: false
                 }
             }),

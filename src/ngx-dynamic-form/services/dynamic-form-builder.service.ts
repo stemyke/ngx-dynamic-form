@@ -149,29 +149,29 @@ export class DynamicFormBuilderService {
     createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {};
         const type = `${data.type || "select"}`;
-        const select = this.createFormField(key, type === "radio" ? type : "select", data, {
+        const field = this.createFormField(key, type === "radio" ? type : "select", data, {
             type,
             multiple: data.multiple,
             groupBy: data.groupBy,
             allowEmpty: data.allowEmpty
         }, parent, options);
-        setFieldHooks(select, {
-            onInit: field => {
-                const options = data.options(field);
-                const root = field.formControl.root;
-                field.props.options = options instanceof Observable
+        setFieldHooks(field, {
+            onInit: target => {
+                const options = data.options(target);
+                const root = target.formControl.root;
+                target.props.options = options instanceof Observable
                     ? options
                     : root.valueChanges.pipe(
                         distinctUntilChanged(),
                         combineLatestWith(this.language),
                         switchMap(async () => {
-                            const results: FormSelectOption[] = await (data.options(field) as any) || [];
-                            return this.fixSelectOptions(field, results);
+                            const results: FormSelectOption[] = await (data.options(target) as any) || [];
+                            return this.fixSelectOptions(target, results);
                         })
                     );
             }
         });
-        return select;
+        return field;
     }
 
     createFormUpload(key: string, data: FormUploadData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
@@ -203,8 +203,9 @@ export class DynamicFormBuilderService {
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
         const group = this.createFormField(key, undefined, data, {
-            useTabs: data.useTabs === true
+            useTabs: data.useTabs === true,
         }, parent, options);
+        group.defaultValue = {};
         group.wrappers = ["form-group"];
         const result = fields(group);
         const handleGroup = (fieldGroup: FormFieldConfig[]) => {
@@ -249,6 +250,7 @@ export class DynamicFormBuilderService {
                             className: "dynamic-form-field dynamic-form-group",
                         }
                     },
+                    defaultValue: [],
                     hooks: {},
                     expressions
                 };
@@ -272,6 +274,7 @@ export class DynamicFormBuilderService {
                     ...items.props,
                     label: "",
                 },
+                defaultValue: [],
                 hooks: {},
                 expressions
             };
@@ -333,10 +336,12 @@ export class DynamicFormBuilderService {
                 ...props,
                 disabled: data.disabled === true,
                 hidden: data.hidden === true,
-                formCheck: "nolabel",
-                required: !!validators.required,
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
+                hideLabel: data.hideLabel === true,
+                formCheck: "nolabel",
+                labelPosition: "before",
+                required: !!validators.required,
                 additional: {
                     classes: data.classes || []
                 }

@@ -1,8 +1,10 @@
 @if (field.display) {
-    <label class="field-label" *ngIf="props.label">
-        {{ props.label | translate }}
-        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-    </label>
+    @if (props.label && props.hideLabel !== true) {
+        <label class="field-label">
+            {{ props.label | translate }}
+            <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+        </label>
+    }
     <div class="field-container">
         <tabs class="form-array-items" [(value)]="currentTab">
             @for (itemField of field.fieldGroup; track itemField.key; let ix = $index) {

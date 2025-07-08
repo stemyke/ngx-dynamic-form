@@ -12,10 +12,11 @@ import {
     DynamicFormBuilderService,
     DynamicFormSchemaService,
     DynamicFormService,
-    FORM_ROOT_KEY,
-    IDynamicForm, setFieldHidden, setFieldHooks
+    IDynamicForm,
+    setFieldHidden,
+    setFieldHooks
 } from "../public_api";
-import {AddressModel, OrderModel} from "./model";
+import {OrderModel} from "./model";
 
 @Component({
     standalone: false,
@@ -66,7 +67,7 @@ export class AppComponent implements OnInit {
     plainData = signal<any>({
         externalId: "X",
         attachments: [],
-        // premium: true,
+        premium: true,
         openingHours: [
             {lang: "hu", translation: "Hétfő"},
             {lang: "en", translation: "Monday"},

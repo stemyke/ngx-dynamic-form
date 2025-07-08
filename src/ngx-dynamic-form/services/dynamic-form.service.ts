@@ -5,7 +5,7 @@ import {API_SERVICE, IApiService, ObjectUtils} from "@stemy/ngx-utils";
 
 import {
     CustomizerOrSchemaOptions,
-    FORM_ROOT_KEY,
+    FORM_ROOT_ID,
     FormFieldConfig,
     FormSerializeResult,
     IDynamicForm
@@ -36,7 +36,7 @@ export class DynamicFormService {
 
     protected async getFormFieldGroupBySchemaName(name: string, customizeOrOptions: CustomizerOrSchemaOptions, restrictedMethod: string): Promise<FormFieldConfig> {
         const config = {
-            key: FORM_ROOT_KEY,
+            id: FORM_ROOT_ID,
             path: "",
             wrappers: ["form-group"]
         } as FormFieldConfig;
@@ -64,7 +64,7 @@ export class DynamicFormService {
         );
 
         const root = await wrapOptions.customize(config, {
-            id: FORM_ROOT_KEY,
+            id: FORM_ROOT_ID,
             type: "object",
             properties: schema?.properties || {}
         }, schema);
@@ -72,7 +72,7 @@ export class DynamicFormService {
         fields.length = 0;
 
         for (const model of root) {
-            if (model.key === FORM_ROOT_KEY) {
+            if (model.id === FORM_ROOT_ID) {
                 return model;
             } else {
                 fields.push(model);

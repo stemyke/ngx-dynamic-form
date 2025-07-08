@@ -13,7 +13,7 @@ import {
 } from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
-export const FORM_ROOT_KEY = "__root";
+export const FORM_ROOT_ID = "__root";
 
 // --- Basic form types ---
 
@@ -270,7 +270,7 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "label" | "hidden" | "disabled">
+export type FormFieldData = Pick<FormFieldProps, "hidden" | "disabled" | "label" | "hideLabel">
     & {
     validators?: Validators | ValidatorFn[];
     serializer?: FormFieldSerializer;

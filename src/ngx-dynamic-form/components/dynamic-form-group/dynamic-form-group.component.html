@@ -1,18 +1,22 @@
 @if (field.display) {
-    <label class="field-label" *ngIf="props.label">
-        {{ props.label | translate }}
-        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-    </label>
+    @if (props.label && props.hideLabel !== true) {
+        <label class="field-label">
+            {{ props.label | translate }}
+            <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+        </label>
+    }
     <tabs class="field-container">
         @for (itemField of field.fieldGroup; track itemField; let ix = $index) {
-            @if (props.useTabs && itemField.display && itemField.wrappers | includes: 'form-fieldset') {
-                <div class="form-fieldset-item"
-                     [tabsItem]="ix"
-                     [label]="itemField.props.label">
+            @if (itemField.display) {
+                @if (props.useTabs && itemField.wrappers | includes: 'form-fieldset') {
+                    <div class="form-fieldset-item"
+                         [tabsItem]="ix"
+                         [label]="itemField.props.label">
+                        <formly-field [field]="itemField"></formly-field>
+                    </div>
+                } @else {
                     <formly-field [field]="itemField"></formly-field>
-                </div>
-            } @else {
-                <formly-field [field]="itemField"></formly-field>
+                }
             }
         }
     </tabs>

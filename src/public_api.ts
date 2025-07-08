@@ -1,5 +1,5 @@
 export {
-    FORM_ROOT_KEY,
+    FORM_ROOT_ID,
 
     FormFieldKey,
     FormFieldLabelCustomizer,
