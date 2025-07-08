@@ -1,15 +1,17 @@
 import {Injector} from "@angular/core";
 import {LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
-import {ValidationMessageFn, ValidatorFn} from "../common-types";
+import {FormFieldConfig, ValidationMessageFn, ValidatorFn, Validators} from "../common-types";
 
-export function validationMessage(injector: Injector, key: string, labelPrefix?: string): ValidationMessageFn {
-    const language = injector.get(LANGUAGE_SERVICE);
+function validationMessage(errorKey: string): ValidationMessageFn {
+    const key = `form.error.${errorKey}`;
     return (_, field) => {
-        return language.getTranslationSync(labelPrefix ? `${labelPrefix}.error.${key}` : `error.${key}`, field);
+        const injector = field.options.formState?.injector as Injector;
+        const language = injector?.get(LANGUAGE_SERVICE);
+        return !language ? key : language.getTranslationSync(key, field);
     }
 }
 
-export function withName(fn: ValidatorFn, name: string): ValidatorFn {
+function withName(fn: ValidatorFn, name: string): ValidatorFn {
     fn.validatorName = name;
     return fn;
 }
@@ -19,6 +21,43 @@ function validateEach(each: boolean, cb: (value: any) => boolean, name: string):
         const value = control.value;
         return each ? Array.isArray(value) && value.every(cb) : cb(value);
     }, name);
+}
+
+export function addFieldValidators(field: FormFieldConfig, validators: Validators | ValidatorFn[]): void {
+    field.validators = field.validators || {};
+    const validation = field.validation || {};
+    const messages = validation.messages || {};
+    if (Array.isArray(validators)) {
+        validators.forEach((validator, ix) => {
+            const name = validator.validatorName || `validator_${ix}`;
+            field.validators[name] = validator;
+            messages[name] = validationMessage(name);
+        });
+    } else if (validators) {
+        Object.keys(validators).forEach(name => {
+            field.validators[name] = validators[name];
+            messages[name] = validationMessage(name);
+        });
+    }
+    field.validation = {
+        ...validation,
+        messages
+    };
+}
+
+export function removeFieldValidators(field: FormFieldConfig, ...names: string[]): void {
+    const validators = Object.assign({}, field.validators || {});
+    const validation = field.validation || {};
+    const messages = Object.assign({}, validation.messages || {});
+    names.forEach(name => {
+        delete validators[name];
+        delete messages[name];
+    });
+    field.validators = validators;
+    field.validation = {
+        ...validation,
+        messages
+    };
 }
 
 export function jsonValidation(): ValidatorFn {

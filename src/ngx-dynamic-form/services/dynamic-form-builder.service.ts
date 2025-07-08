@@ -22,10 +22,9 @@ import {
     FormInputData,
     FormSelectData,
     FormSelectOption,
-    FormUploadData,
-    Validators
+    FormUploadData
 } from "../common-types";
-import {validationMessage} from "../utils/validation";
+import {addFieldValidators} from "../utils/validation";
 import {MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks} from "../utils/misc";
 import {arrayItemActionToExpression, isStringWithVal} from "../utils/internal";
 
@@ -314,24 +313,13 @@ export class DynamicFormBuilderService {
 
     protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
 
-        const validators = Array.isArray(data.validators)
-            ? data.validators.reduce((res, validator, ix) => {
-                res[validator.validatorName || `validator_${ix}`] = validator;
-                return res;
-            }, {} as Validators)
-            : data.validators || {};
         const field: FormFieldConfig = {
             key,
-            validators,
             type: data.componentType || type,
             fieldSet: String(data.fieldSet || ""),
             resetOnHide: false,
-            validation: {
-                messages: Object.keys(validators).reduce((res, key) => {
-                    res[key] = validationMessage(this.injector, key, options.labelPrefix);
-                    return res;
-                }, {})
-            },
+            validators: {},
+            validation: {},
             props: {
                 ...props,
                 disabled: data.disabled === true,
@@ -341,7 +329,6 @@ export class DynamicFormBuilderService {
                 hideLabel: data.hideLabel === true,
                 formCheck: "nolabel",
                 labelPosition: "before",
-                required: !!validators.required,
                 additional: {
                     classes: data.classes || []
                 }
@@ -353,7 +340,8 @@ export class DynamicFormBuilderService {
             hooks: {},
             expressions: {
                 serializer: () => data.serializer,
-                serialize: () => data.serialize
+                serialize: () => data.serialize,
+                "props.required": field => !!field.validators?.required
             }
         };
         // Parent object will be available for customizers as a property, until it gets redefined by formly
@@ -362,6 +350,7 @@ export class DynamicFormBuilderService {
             configurable: true
         });
         // Set expressions
+        addFieldValidators(field, data.validators);
         this.setExpressions(field, options);
         return field;
     }
@@ -370,13 +359,20 @@ export class DynamicFormBuilderService {
         const expressions: FormFieldExpressions = {
             display: target => {
                 const display = target.props?.hidden !== true;
-                if (target.fieldGroup?.length) {
+                if (Array.isArray(target.fieldGroup) && target.fieldGroup.length) {
                     return display && target.fieldGroup.some(f => f.display);
                 }
                 return display;
             },
+            valid: target => {
+                const valid = target.key ? target.formControl?.valid : true;
+                if (Array.isArray(target.fieldGroup) && target.fieldGroup.length) {
+                    return valid && target.fieldGroup.every(f => f.valid);
+                }
+                return valid;
+            },
             className: (target: FormFieldConfig) => {
-                if (target.display === false) {
+                if (!target.display) {
                     return `dynamic-form-field dynamic-form-hidden`;
                 }
                 const {classes, className} = target.additional || {};

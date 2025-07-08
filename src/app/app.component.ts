@@ -9,10 +9,12 @@ import {
 } from "@angular/core";
 import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
 import {
+    addFieldValidators,
     DynamicFormBuilderService,
     DynamicFormSchemaService,
     DynamicFormService,
     IDynamicForm,
+    requiredValidation,
     setFieldHidden,
     setFieldHooks
 } from "../public_api";
@@ -45,6 +47,9 @@ export class AppComponent implements OnInit {
                 fieldCustomizer: async (field, options) => {
                     if (field.key === "premium") {
                         setFieldHidden(field);
+                    }
+                    if (field.key === "name") {
+                        addFieldValidators(field, [requiredValidation()]);
                     }
                     if (field.key === "integrationOptions") {
                         setFieldHooks(field, {
@@ -94,7 +99,7 @@ export class AppComponent implements OnInit {
         this.openApi.getSchemas().then(s => this.schemas.set(Object.keys(s).sort()));
     }
 
-    submit = async (form: IDynamicForm): Promise<IAsyncMessage> =>  {
+    submit = async (form: IDynamicForm): Promise<IAsyncMessage> => {
         let data: any = null;
         try {
             data = await this.forms.serializeForm(form);

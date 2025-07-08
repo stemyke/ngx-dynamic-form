@@ -11,6 +11,7 @@
                 @if (props.useTabs && itemField.wrappers | includes: 'form-fieldset') {
                     <div class="form-fieldset-item"
                          [tabsItem]="ix"
+                         [classes]="['form-fieldset-tab', itemField.valid ? 'valid' : 'invalid']"
                          [label]="itemField.props.label">
                         <formly-field [field]="itemField"></formly-field>
                     </div>

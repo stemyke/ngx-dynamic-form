@@ -186,6 +186,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     expressions: FormFieldExpressions;
     readonly additional?: FormFieldAdditional;
     readonly display?: boolean;
+    readonly valid?: boolean;
     readonly path?: string;
     readonly testId?: string;
     [additionalProperties: string]: any;

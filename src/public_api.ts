@@ -63,7 +63,8 @@ export {
 } from "./ngx-dynamic-form/utils/decorators";
 
 export {
-    validationMessage,
+    addFieldValidators,
+    removeFieldValidators,
     jsonValidation,
     requiredValidation,
     translationValidation,
@@ -85,6 +86,7 @@ export {
     clearFieldArray,
     insertToFieldArray,
     removeFromFieldArray,
+    setFieldProp,
     setFieldHidden,
     setFieldDisabled,
     setFieldHooks,

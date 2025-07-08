@@ -1,6 +1,13 @@
 import {firstValueFrom, Observable} from "rxjs";
 import {ObjectUtils} from "@stemy/ngx-utils";
-import {FormFieldConfig, FormFieldKey, FormHookConfig, FormHookFn, FormSelectOption} from "../common-types";
+import {
+    FormFieldConfig,
+    FormFieldKey,
+    FormFieldProps,
+    FormHookConfig,
+    FormHookFn,
+    FormSelectOption
+} from "../common-types";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
@@ -67,18 +74,20 @@ export function removeFromFieldArray(field: FormFieldConfig, ix: number): void {
     field.options.build(field);
 }
 
-export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {
+export function setFieldProp<P extends keyof FormFieldProps, V extends FormFieldProps[P]>(
+    field: FormFieldConfig, prop: P, value: V): void {
     field.props = {
         ...(field.props || {}),
-        hidden
+        [prop]: value
     };
 }
 
+export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {
+    setFieldProp(field, "hidden", hidden);
+}
+
 export function setFieldDisabled(field: FormFieldConfig, disabled: boolean = true): void {
-    field.props = {
-        ...(field.props || {}),
-        disabled
-    };
+    setFieldProp(field, "disabled", disabled);
 }
 
 export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): void {
@@ -101,8 +110,8 @@ export function additionalFieldValue(field: FormFieldConfig, path: string): any 
 }
 
 export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {
-    field.props = field.props || {};
-    field.props.additional = ObjectUtils.assign(field.props.additional || {}, values || {});
+    const additional = field.props?.additional || {};
+    setFieldProp(field, "additional", additional);
 }
 
 export const MIN_INPUT_NUM = -999999999;
