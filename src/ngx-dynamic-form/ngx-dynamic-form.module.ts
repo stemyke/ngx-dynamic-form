@@ -1,7 +1,7 @@
 import {EnvironmentProviders, makeEnvironmentProviders, ModuleWithProviders, NgModule, Provider} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {FormlyModule, FormlyConfig, FormlyFormBuilder, provideFormlyCore, provideFormlyConfig} from "@ngx-formly/core";
+import {FormlyModule, provideFormlyConfig, provideFormlyCore} from "@ngx-formly/core";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {components, directives, pipes} from "./ngx-dynamic-form.imports";

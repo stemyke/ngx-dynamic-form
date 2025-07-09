@@ -1,4 +1,4 @@
-import {Inject, Injectable, Injector} from "@angular/core";
+import {Inject, Injectable, Injector, untracked} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {first} from "rxjs";
 import {API_SERVICE, IApiService, ObjectUtils} from "@stemy/ngx-utils";
@@ -107,7 +107,7 @@ export class DynamicFormService {
     }
 
     async serializeForm(form: IDynamicForm, validate: boolean = true): Promise<FormSerializeResult> {
-        const fields = form.config();
+        const fields = untracked(() => form.config());
         if (!fields) return null;
         if (validate) {
             await this.validateForm(form);

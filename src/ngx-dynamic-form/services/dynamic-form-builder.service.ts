@@ -339,9 +339,11 @@ export class DynamicFormBuilderService {
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
                 hideLabel: data.hideLabel === true,
+                hideRequiredMarker: data.hideRequiredMarker === true,
                 formCheck: "nolabel",
                 labelPosition: "before",
                 additional: {
+                    ...(data.additional || {}),
                     classes: data.classes || []
                 }
             },
