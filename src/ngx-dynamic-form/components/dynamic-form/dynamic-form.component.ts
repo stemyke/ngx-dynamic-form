@@ -13,7 +13,7 @@ import {rxResource, toSignal} from "@angular/core/rxjs-interop";
 import {FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
-import {EventsService, LANGUAGE_SERVICE} from "@stemy/ngx-utils";
+import {EventsService, LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
 
 import {
     FormBuilderOptions,
@@ -109,8 +109,8 @@ export class DynamicFormComponent implements IDynamicForm {
             this.language();
             this.enableTranslations();
             this.config().forEach(field => {
-                if (!field.options) return;
-                this.options.detectChanges(field);
+                if (!ObjectUtils.isFunction(field.options?.detectChanges)) return;
+                field.options.detectChanges(field);
             });
         });
     }
