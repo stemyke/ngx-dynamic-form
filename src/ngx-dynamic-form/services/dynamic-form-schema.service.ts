@@ -1,6 +1,6 @@
 import {Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
-import {combineLatestWith, distinctUntilChanged, firstValueFrom, isObservable, startWith, switchMap} from "rxjs";
+import {combineLatestWith, distinctUntilChanged, switchMap} from "rxjs";
 import {
     IApiService,
     ILanguageService,
@@ -38,7 +38,7 @@ import {
 } from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
-import {debounceTime} from "rxjs/operators";
+import {controlValues, getSelectOptions} from "../utils/misc";
 
 @Injectable()
 export class DynamicFormSchemaService {
@@ -308,9 +308,7 @@ export class DynamicFormSchemaService {
 
     protected getFormEndpointOptions(property: IOpenApiSchemaProperty, field: FormFieldConfig): FormSelectOptions {
         const root = field.formControl.root as FormGroup;
-        return root.valueChanges.pipe(
-            distinctUntilChanged(),
-            debounceTime(500),
+        return controlValues(root).pipe(
             combineLatestWith(this.builder.language),
             switchMap(async () => {
                 const entries = Object.entries(root.controls || {});
@@ -350,15 +348,10 @@ export class DynamicFormSchemaService {
             current = current.parent || current;
         }
         control = !path ? control : control.get(path);
-        return control.valueChanges.pipe(
-            startWith(control.value),
-            distinctUntilChanged(),
+        return controlValues(control).pipe(
             combineLatestWith(this.builder.language),
             switchMap(async ([ctrlValue]) => {
-                const currentOpts = current.props.options;
-                const finalOpts = isObservable(currentOpts)
-                    ? await firstValueFrom(currentOpts)
-                    : (Array.isArray(currentOpts) ? currentOpts : []);
+                const finalOpts = await getSelectOptions(current);
                 return this.builder.fixSelectOptions(field, (!Array.isArray(ctrlValue) ? [] : ctrlValue).map(value => {
                     const modelOption = finalOpts.find(t => t.value == value);
                     return {value, label: modelOption?.label || value};

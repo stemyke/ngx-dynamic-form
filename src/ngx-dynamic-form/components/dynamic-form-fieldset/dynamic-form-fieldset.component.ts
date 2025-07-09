@@ -10,8 +10,4 @@ import {FormFieldConfig} from "../../common-types";
 })
 export class DynamicFormFieldsetComponent extends FieldWrapper<FormFieldConfig> {
 
-    ngOnInit(): void {
-        // console.log(this.field.id, this.field.props?.label, this.options);
-        // console.log(this.field.parent);
-    }
 }

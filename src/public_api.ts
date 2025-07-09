@@ -80,6 +80,7 @@ export {
 
 export {
     replaceSpecialChars,
+    controlValues,
     getFieldByPath,
     getFieldsByPredicate,
     getFieldsByKey,

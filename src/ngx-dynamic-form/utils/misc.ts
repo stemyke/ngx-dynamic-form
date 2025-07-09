@@ -1,4 +1,6 @@
-import {firstValueFrom, Observable} from "rxjs";
+import {AbstractControl} from "@angular/forms";
+import {firstValueFrom, merge, Observable, of} from "rxjs";
+import {debounceTime} from "rxjs/operators";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     FormFieldConfig,
@@ -11,6 +13,19 @@ import {
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
+}
+
+/**
+ * Creates a new observable that always starts with the controls current value.
+ * @param control AbstractControl to retrieve value changes from
+ * @param timeout Additional timeout
+ */
+export function controlValues(control: AbstractControl, timeout: number = 500): Observable<any> {
+    const initial$ = of(control.value); // Emit immediately
+    const changes$ = control.valueChanges.pipe(
+        debounceTime(timeout)
+    );
+    return merge(initial$, changes$);
 }
 
 export function getFieldByPath(field: FormFieldConfig, path: string): FormFieldConfig | null {
@@ -114,8 +129,8 @@ export function additionalFieldValues(field: FormFieldConfig, values: {[key: str
     setFieldProp(field, "additional", additional);
 }
 
-export const MIN_INPUT_NUM = -999999999;
+export const MIN_INPUT_NUM = -1999999999;
 
-export const MAX_INPUT_NUM = 999999999;
+export const MAX_INPUT_NUM = 1999999999;
 
 export const EDITOR_FORMATS = ["php", "json", "html", "css", "scss"];

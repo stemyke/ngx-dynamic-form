@@ -3,6 +3,10 @@
         {{ props.label | translate }}
     </legend>
     <div class="field-container">
-        <ng-container #fieldComponent></ng-container>
+        @for (itemField of field.fieldGroup; track itemField) {
+            @if (itemField.display) {
+                <formly-field [field]="itemField"></formly-field>
+            }
+        }
     </div>
 }

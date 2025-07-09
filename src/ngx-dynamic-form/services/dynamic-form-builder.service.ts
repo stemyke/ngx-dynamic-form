@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
-import {BehaviorSubject, combineLatestWith, distinctUntilChanged, Observable, switchMap} from "rxjs";
+import {BehaviorSubject, combineLatestWith, Observable, switchMap} from "rxjs";
 import {
     API_SERVICE,
     EventsService,
@@ -25,7 +25,7 @@ import {
     FormUploadData
 } from "../common-types";
 import {addFieldValidators} from "../utils/validation";
-import {MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks} from "../utils/misc";
+import {controlValues, MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks, setFieldProp} from "../utils/misc";
 import {arrayItemActionToExpression, isStringWithVal} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
@@ -125,24 +125,37 @@ export class DynamicFormBuilderService {
         data = data || {};
         const type = `${data.type || "text"}`;
         const autocomplete = data.autocomplete || (type === "password" ? "new-password" : "none");
-        return this.createFormField(key, type === "checkbox" || type === "textarea" ? type : "input", data, {
+        const props: FormFieldProps = {
             type,
             autocomplete,
             pattern: ObjectUtils.isString(data.pattern) ? data.pattern : "",
             step: data.step,
             cols: data.cols || null,
             rows: data.rows || 10,
-            min: isNaN(data.min) ? undefined : data.min,
-            max: isNaN(data.max) ? undefined : data.max,
-            minLength: isNaN(data.minLength) ? 0 : data.minLength,
-            maxLength: isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength,
             placeholder: data.placeholder || "",
             indeterminate: data.indeterminate || false,
             suffix: data.suffix || "",
             attributes: {
                 autocomplete
             },
-        }, parent, options);
+        };
+        switch (type) {
+            case "number":
+            case "integer":
+                props.min = isNaN(data.min) ? MIN_INPUT_NUM : data.min;
+                props.max = isNaN(data.max) ? MAX_INPUT_NUM : data.max;
+                break;
+            case "string":
+            case "text":
+            case "textarea":
+                props.minLength = isNaN(data.minLength) ? 0 : data.minLength;
+                props.maxLength = isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength;
+                break;
+        }
+        return this.createFormField(
+            key, type === "checkbox" || type === "textarea" ? type : "input",
+            data, props, parent, options
+        );
     }
 
     createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
@@ -158,16 +171,15 @@ export class DynamicFormBuilderService {
             onInit: target => {
                 const options = data.options(target);
                 const root = target.formControl.root;
-                target.props.options = options instanceof Observable
+                setFieldProp(target, "options", options instanceof Observable
                     ? options
-                    : root.valueChanges.pipe(
-                        distinctUntilChanged(),
+                    : controlValues(root).pipe(
                         combineLatestWith(this.language),
                         switchMap(async () => {
                             const results: FormSelectOption[] = await (data.options(target) as any) || [];
                             return this.fixSelectOptions(target, results);
                         })
-                    );
+                    ));
             }
         });
         return field;
@@ -389,9 +401,7 @@ export class DynamicFormBuilderService {
                 ).filter(c => c?.length > 0).join(" ");
             },
             additional: (target: FormFieldConfig) => {
-                target.props = target.props || {};
-                target.props.additional = target.props.additional || {};
-                return target.props.additional;
+                return target.props?.additional || {};
             },
             path: target => {
                 const tp = target.parent;
