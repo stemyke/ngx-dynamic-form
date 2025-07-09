@@ -341,7 +341,8 @@ export class DynamicFormBuilderService {
             expressions: {
                 serializer: () => data.serializer,
                 serialize: () => data.serialize,
-                "props.required": field => !!field.validators?.required
+                "props.hideRequiredMarker": target => target.type === "checkbox",
+                "props.required": target => !!target.validators?.required
             }
         };
         // Parent object will be available for customizers as a property, until it gets redefined by formly
