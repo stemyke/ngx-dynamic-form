@@ -9,13 +9,14 @@ import {
     input,
     output,
     Renderer2,
-    signal
+    signal,
+    untracked
 } from "@angular/core";
 import {outputToObservable} from "@angular/core/rxjs-interop";
 import {debounceTime} from "rxjs/operators";
 import {IAsyncMessage, TOASTER_SERVICE} from "@stemy/ngx-utils";
 
-import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
+import {AsyncSubmitMethod, AsyncSubmitMode, IDynamicForm} from "../common-types";
 
 @Directive({
     standalone: false,
@@ -24,7 +25,8 @@ import {AsyncSubmitMethod, IDynamicForm} from "../common-types";
 })
 export class AsyncSubmitDirective {
 
-    method = input<AsyncSubmitMethod>(null, {alias: "async-submit"});
+    readonly method = input<AsyncSubmitMethod>(null, {alias: "async-submit"});
+    readonly mode = input<AsyncSubmitMode>("click");
     form = input<IDynamicForm>();
     context = input<any>();
 
@@ -59,11 +61,9 @@ export class AsyncSubmitDirective {
     }
 
     constructor() {
-        effect(() => {
-            if (this.elem.nativeElement.tagName === "BUTTON") {
-                this.renderer.setAttribute(this.elem.nativeElement, "type", "button");
-            }
-        });
+        if (this.elem.nativeElement.tagName === "BUTTON") {
+            this.renderer.setAttribute(this.elem.nativeElement, "type", "button");
+        }
         effect(() => {
             const status = this.status();
             const cb = this.callback();
@@ -75,7 +75,8 @@ export class AsyncSubmitDirective {
         });
         effect(() => {
             const form = this.form();
-            if (!form) return;
+            const mode = this.mode();
+            if (!form || mode === "click") return;
             const sub = outputToObservable(form.onSubmit)
                 .pipe(debounceTime(200)).subscribe(() => this.callMethod());
             return () => sub.unsubscribe();
@@ -84,7 +85,9 @@ export class AsyncSubmitDirective {
 
     @HostListener("click")
     click(): void {
-        const status = this.status();
+        const mode = untracked(() => this.mode());
+        if (mode === "submit") return;
+        const status = untracked(() => this.status());
         if (status !== "VALID" && status !== "INVALID") {
             this.callback.set(() => this.callMethod());
             return;
@@ -93,9 +96,11 @@ export class AsyncSubmitDirective {
     }
 
     callMethod(): void {
-        if (this.loading()) return;
+        const loading = untracked(() => this.loading());
+        if (loading) return;
         this.loading.set(true);
-        this.method()(this.form(), this.context).then(result => {
+        const [method, form, context] = untracked(() => [this.method(), this.form(), this.context()]);
+        method(form, context).then(result => {
             this.loading.set(false);
             if (result) {
                 this.onSuccess.emit(result);

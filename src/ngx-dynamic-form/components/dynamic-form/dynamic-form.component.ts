@@ -116,8 +116,7 @@ export class DynamicFormComponent implements IDynamicForm {
     }
 
     submit() {
-        // TODO: Templ disable submit
-        // this.onSubmit.emit(this);
+        this.onSubmit.emit(this);
     }
 
     reset() {

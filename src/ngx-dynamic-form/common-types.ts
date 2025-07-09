@@ -297,6 +297,11 @@ export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs">;
 export type FormArrayData = FormFieldData
     & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "addItem" | "clearItems">;
 
+// --- Async submit ---
+
+export type AsyncSubmitMode = "click" | "submit" | "all";
+export type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
+
 // --- JSON schema interfaces ---
 
 export type FormFieldCustomizer = (
@@ -309,8 +314,6 @@ export interface ConfigForSchemaOptions extends FormBuilderOptions {
 }
 
 export type CustomizerOrSchemaOptions = FormFieldCustomizer | ConfigForSchemaOptions;
-
-export declare type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
 
 export interface IDynamicFormModuleConfig {
     options?: ConfigOption[];

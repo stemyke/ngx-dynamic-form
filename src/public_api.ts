@@ -38,12 +38,14 @@ export {
     FormGroupData,
     FormArrayData,
 
+    AsyncSubmitMode,
+    AsyncSubmitMethod,
+
     FormFieldCustomizer,
     ConfigForSchemaOptions,
 
     DynamicFormState,
     DynamicFormUpdateOn,
-    AsyncSubmitMethod,
     IDynamicFormModuleConfig,
 } from "./ngx-dynamic-form/common-types";
 
