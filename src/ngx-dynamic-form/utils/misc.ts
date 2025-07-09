@@ -126,7 +126,7 @@ export function additionalFieldValue(field: FormFieldConfig, path: string): any 
 
 export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {
     const additional = field.props?.additional || {};
-    setFieldProp(field, "additional", additional);
+    setFieldProp(field, "additional", ObjectUtils.assign(additional, values || {}));
 }
 
 export const MIN_INPUT_NUM = -1999999999;

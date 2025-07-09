@@ -350,7 +350,6 @@ export class DynamicFormBuilderService {
             modelOptions: {
                 updateOn: "change"
             },
-            fieldGroupClassName: "field-container",
             hooks: {},
             expressions: {
                 serializer: () => data.serializer,
