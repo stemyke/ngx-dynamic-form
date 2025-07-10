@@ -17,7 +17,7 @@ export const FORM_ROOT_ID = "__root";
 
 // --- Basic form types ---
 
-export type DynamicFormState = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
+export type DynamicFormStatus = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
 export type UploadData = Record<string, any> | ArrayBuffer | FormData;
 
@@ -221,7 +221,7 @@ export interface IDynamicForm {
     readonly fieldChanges: Observable<FormFieldChangeEvent>;
     readonly config: Signal<FormFieldConfig[]>;
     readonly group: Signal<FormGroup>;
-    readonly status: Signal<DynamicFormState>;
+    readonly status: Signal<DynamicFormStatus>;
     readonly onSubmit: OutputRef<IDynamicForm>;
 
     reset(): void;

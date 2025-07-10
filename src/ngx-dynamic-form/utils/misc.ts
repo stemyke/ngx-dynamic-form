@@ -3,6 +3,7 @@ import {firstValueFrom, merge, Observable, of} from "rxjs";
 import {debounceTime} from "rxjs/operators";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
+    DynamicFormStatus,
     FormFieldConfig,
     FormFieldKey,
     FormFieldProps,
@@ -23,6 +24,19 @@ export function replaceSpecialChars(str: string, to: string = "-"): string {
 export function controlValues(control: AbstractControl, timeout: number = 500): Observable<any> {
     const initial$ = of(control.value); // Emit immediately
     const changes$ = control.valueChanges.pipe(
+        debounceTime(timeout)
+    );
+    return merge(initial$, changes$);
+}
+
+/**
+ * Creates a new observable that always starts with the controls current status.
+ * @param control AbstractControl to retrieve status changes from
+ * @param timeout Additional timeout
+ */
+export function controlStatus(control: AbstractControl, timeout: number = 10): Observable<DynamicFormStatus> {
+    const initial$ = of(control.status); // Emit immediately
+    const changes$ = control.statusChanges.pipe(
         debounceTime(timeout)
     );
     return merge(initial$, changes$);

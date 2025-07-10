@@ -44,7 +44,7 @@ export {
     FormFieldCustomizer,
     ConfigForSchemaOptions,
 
-    DynamicFormState,
+    DynamicFormStatus,
     DynamicFormUpdateOn,
     IDynamicFormModuleConfig,
 } from "./ngx-dynamic-form/common-types";
@@ -81,6 +81,7 @@ export {
 export {
     replaceSpecialChars,
     controlValues,
+    controlStatus,
     getFieldByPath,
     getFieldsByPredicate,
     getFieldsByKey,

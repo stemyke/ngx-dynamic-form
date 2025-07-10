@@ -22,6 +22,7 @@ import {
     FormFieldLabelCustomizer,
     IDynamicForm
 } from "../../common-types";
+import {controlStatus} from "../../utils/misc";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 
 @Component({
@@ -92,7 +93,7 @@ export class DynamicFormComponent implements IDynamicForm {
 
     protected readonly status$ = rxResource({
         request: () => this.group(),
-        loader: p => p.request.statusChanges,
+        loader: p => controlStatus(p.request),
         defaultValue: "PENDING"
     });
 
