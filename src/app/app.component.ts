@@ -15,6 +15,7 @@ import {
     DynamicFormService,
     IDynamicForm,
     requiredValidation,
+    setFieldDisabled,
     setFieldHidden,
     setFieldHooks
 } from "../public_api";
@@ -50,6 +51,9 @@ export class AppComponent implements OnInit {
                     }
                     if (field.key === "name") {
                         addFieldValidators(field, [requiredValidation()]);
+                    }
+                    if (field.key === "externalId") {
+                        setFieldDisabled(field);
                     }
                     if (field.key === "integrationOptions") {
                         setFieldHooks(field, {

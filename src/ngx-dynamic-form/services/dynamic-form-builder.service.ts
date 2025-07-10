@@ -379,7 +379,8 @@ export class DynamicFormBuilderService {
                 return display;
             },
             valid: target => {
-                const valid = target.key ? target.formControl?.valid : true;
+                const control = target.formControl;
+                const valid = target.key && control ? control.disabled || control.valid : true;
                 if (Array.isArray(target.fieldGroup) && target.fieldGroup.length) {
                     return valid && target.fieldGroup.every(f => f.valid);
                 }
