@@ -26,7 +26,7 @@ import {
 } from "../common-types";
 import {addFieldValidators} from "../utils/validation";
 import {controlValues, MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks, setFieldProp} from "../utils/misc";
-import {arrayItemActionToExpression, isStringWithVal} from "../utils/internal";
+import {arrayItemActionToExpression} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
 
@@ -94,7 +94,7 @@ export class DynamicFormBuilderService {
                 group.push(field);
                 continue;
             }
-            // Otherwise just push the fields to the others
+            // Otherwise, push the fields to the others
             others.push(field);
         }
 
@@ -109,9 +109,7 @@ export class DynamicFormBuilderService {
                 props: {
                     label: this.getLabel(key, key, parent, options),
                     hidden: false,
-                    additional: {
-                        className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
-                    }
+                    className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
                 },
                 hooks: {},
                 expressions: {}
@@ -163,9 +161,10 @@ export class DynamicFormBuilderService {
         const type = `${data.type || "select"}`;
         const field = this.createFormField(key, type === "radio" ? type : "select", data, {
             type,
-            multiple: data.multiple,
+            multiple: data.multiple === true,
+            allowEmpty: data.allowEmpty === true,
             groupBy: data.groupBy,
-            allowEmpty: data.allowEmpty
+            invert: data.invert === true
         }, parent, options);
         setFieldHooks(field, {
             onInit: target => {
@@ -217,7 +216,6 @@ export class DynamicFormBuilderService {
             useTabs: data.useTabs === true,
         }, parent, options);
         group.defaultValue = {};
-        group.wrappers = ["form-group"];
         const result = fields(group);
         const handleGroup = (fieldGroup: FormFieldConfig[]) => {
             group.fieldGroup = fieldGroup;
@@ -256,11 +254,7 @@ export class DynamicFormBuilderService {
                 array.fieldArray = {
                     wrappers: ["form-group"],
                     fieldGroup: items,
-                    props: {
-                        additional: {
-                            className: "dynamic-form-field dynamic-form-group",
-                        }
-                    },
+                    className: "dynamic-form-field dynamic-form-group",
                     defaultValue: [],
                     hooks: {},
                     expressions
@@ -301,7 +295,7 @@ export class DynamicFormBuilderService {
         options = await Promise.all(options.map(async option => {
             const classes = Array.isArray(option.classes) ? option.classes : [`${option.classes}`];
             option = Object.assign({}, option);
-            option.className = classes.filter(isStringWithVal).join(" ");
+            option.className = classes.filter(ObjectUtils.isStringWithValue).join(" ");
             option.label = await this.languages.getTranslation(option.label);
             option.value = option.value ?? option.id;
             option.id = option.id ?? option.value;
@@ -324,9 +318,13 @@ export class DynamicFormBuilderService {
     }
 
     protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
-
+        const wrappers = Array.isArray(data.wrappers) ? Array.from(data.wrappers) : [];
+        if (type !== "array") {
+            wrappers.unshift(!type ? "form-group" : "form-field");
+        }
         const field: FormFieldConfig = {
             key,
+            wrappers,
             type: data.componentType || type,
             fieldSet: String(data.fieldSet || ""),
             resetOnHide: false,
@@ -339,13 +337,12 @@ export class DynamicFormBuilderService {
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
                 hideLabel: data.hideLabel === true,
+                classes: data.classes || [],
+                layout: data.layout || [],
+                className: data.className || "",
                 hideRequiredMarker: data.hideRequiredMarker === true,
                 formCheck: "nolabel",
-                labelPosition: "before",
-                additional: {
-                    ...(data.additional || {}),
-                    classes: data.classes || []
-                }
+                labelPosition: "before"
             },
             modelOptions: {
                 updateOn: "change"
@@ -390,7 +387,7 @@ export class DynamicFormBuilderService {
                 if (!target.display) {
                     return `dynamic-form-field dynamic-form-hidden`;
                 }
-                const {classes, className} = target.additional || {};
+                const {classes, layout, className} = target.props || {};
                 if (className) {
                     return className;
                 }
@@ -399,11 +396,9 @@ export class DynamicFormBuilderService {
                     ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
                     : type;
                 return [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${typeName}`].concat(
-                    Array.isArray(classes) ? classes : [classes || ""]
+                    Array.isArray(classes) ? classes : [classes || ""],
+                    (Array.isArray(layout) ? layout : [layout || ""]).map(layout => `dynamic-form-layout-${layout}`)
                 ).filter(c => c?.length > 0).join(" ");
-            },
-            additional: (target: FormFieldConfig) => {
-                return target.props?.additional || {};
             },
             path: target => {
                 const tp = target.parent;

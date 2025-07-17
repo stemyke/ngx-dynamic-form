@@ -1,8 +1,0 @@
-{
-    "/gateway": {
-        "target": "https://wamagold.metrix-demo.com",
-        "secure": true,
-        "changeOrigin": true,
-        "logLevel": "debug"
-    }
-}

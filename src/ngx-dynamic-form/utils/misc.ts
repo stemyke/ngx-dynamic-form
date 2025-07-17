@@ -134,15 +134,6 @@ export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): vo
     });
 }
 
-export function additionalFieldValue(field: FormFieldConfig, path: string): any {
-    return ObjectUtils.getValue(field.additional, path, null, false);
-}
-
-export function additionalFieldValues(field: FormFieldConfig, values: {[key: string]: any}): void {
-    const additional = field.props?.additional || {};
-    setFieldProp(field, "additional", ObjectUtils.assign(additional, values || {}));
-}
-
 export const MIN_INPUT_NUM = -1999999999;
 
 export const MAX_INPUT_NUM = 1999999999;

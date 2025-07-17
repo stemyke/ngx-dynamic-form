@@ -5,11 +5,12 @@ import {ConfigOption, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/cor
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {
     IAsyncMessage,
-    IOpenApiSchema,
-    IOpenApiSchemaProperty,
-    IRequestOptions,
+    OpenApiSchema,
+    OpenApiSchemaProperty,
+    HttpRequestOptions,
     MaybeArray,
-    MaybePromise, TabOption
+    MaybePromise,
+    UploadData
 } from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
@@ -19,7 +20,6 @@ export const FORM_ROOT_ID = "__root";
 
 export type DynamicFormStatus = "VALID" | "INVALID" | "PENDING" | "DISABLED" | "LOADING";
 export type DynamicFormUpdateOn = "change" | "blur" | "submit";
-export type UploadData = Record<string, any> | ArrayBuffer | FormData;
 
 // --- Basic form field interfaces ---
 
@@ -35,11 +35,6 @@ export interface FormBuilderOptions {
 }
 
 /**
- * This type describes additional values for form field properties
- */
-export type FormFieldAdditional = Readonly<{[key: string]: any}>;
-
-/**
  * This type describes how one of the array actions should react based on an array item
  */
 export type FormFieldArrayItemsAction = boolean | ((item: any, ix: number, field: FormFieldConfig) => boolean);
@@ -49,10 +44,6 @@ export type FormFieldArrayItemsAction = boolean | ((item: any, ix: number, field
  */
 export interface FormFieldProps extends FormlyFieldProps {
     /**
-     * Other, not basic component specific values can be stored here, use the helper function "additionalFieldValues"
-     */
-    additional?: FormFieldAdditional;
-    /**
      * Specifies if required marker should be hidden
      */
     hideRequiredMarker?: boolean;
@@ -61,11 +52,23 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     hideLabel?: boolean;
     /**
+     * Custom class name(s) can be defined for a form field
+     */
+    classes?: string[] | string;
+    /**
+     * Custom class name(s) can be defined for a form field, but they get prefixed by `dynamic-form-layout-`
+     */
+    layout?: string[] | string;
+    /**
+     * This custom class name overrides the whole class list of the form field
+     */
+    className?: string;
+    /**
      * In the input component, define how the browser should automatically fill in the field value.
      */
     autocomplete?: string;
     /**
-     * In the number type input component, you specify what text to add at the end, e.g. some unit of measurement
+     * In the number type input component, you specify what text to add at the end, e.g., some unit of measurement
      */
     suffix?: string;
     /**
@@ -89,9 +92,13 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     allowEmpty?: boolean;
     /**
-     * Groups selectable values based on the value of the specified key in the select component
+     * Groups the selectable values based on the value of the specified key in the select component
      */
     groupBy?: string;
+    /**
+     * Inverts the display of selected values in the select component
+     */
+    invert?: boolean;
     /**
      * For group and array type components, specifies whether the field hides groups or array elements under tabs and always displays only the selected element.
      */
@@ -135,7 +142,7 @@ export interface FormFieldProps extends FormlyFieldProps {
     accept?: string | string[];
     url?: string;
     maxSize?: number;
-    uploadOptions?: IRequestOptions;
+    uploadOptions?: HttpRequestOptions;
     createUploadData?: (file: File) => UploadData | Promise<UploadData>;
     /**
      * Old upload props
@@ -151,6 +158,10 @@ export interface FormFieldProps extends FormlyFieldProps {
     subscriptSizing?: "fixed" | "dynamic";
     color?: "primary" | "accent" | "warn";
     hideFieldUnderline?: boolean;
+    /**
+     * Additional custom field props
+     */
+    [additionalProperties: string]: any;
 }
 
 export type FormFieldSerializer = (field: FormFieldConfig, injector: Injector) => MaybePromise<any>;
@@ -184,7 +195,6 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     fieldArray?: FormFieldConfig;
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
-    readonly additional?: FormFieldAdditional;
     readonly display?: boolean;
     readonly valid?: boolean;
     readonly path?: string;
@@ -271,21 +281,39 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "hidden" | "disabled" | "label" | "additional" | "hideRequiredMarker" | "hideLabel">
+export type FormFieldData = Pick<FormFieldProps, "hidden" | "disabled" | "label" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
     & {
-    validators?: Validators | ValidatorFn[];
+    /**
+     * This is a custom serializer callback function. (Can't be defined from JSON schema because it is a JS callback)
+     */
     serializer?: FormFieldSerializer;
+    /**
+     * Enables normal serialization even if the field is hidden
+     */
     serialize?: boolean;
+    /**
+     * Puts the field in a custom field set
+     */
     fieldSet?: string;
+    /**
+     * The used component type of the field can be overridden, (Only string can be defined from JSON schema)
+     */
     componentType?: string | Type<any>;
-    classes?: string[] | string;
+    /**
+     * Custom wrappers for a form field. (Only pre-defined string wrappers can be defined from JSON schema)
+     */
+    wrappers?: Array<Type<any> | string>;
+    /**
+     * Custom validators for a form field.
+     */
+    validators?: Validators | ValidatorFn[];
 };
 
 export type FormInputData = FormFieldData
     & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows">;
 
 export type FormSelectData = FormFieldData
-    & Pick<FormFieldProps, "multiple" | "type" | "allowEmpty" | "groupBy"> & {
+    & Pick<FormFieldProps, "multiple" | "type" | "allowEmpty" | "groupBy" | "invert"> & {
     options?: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
 };
 
@@ -306,7 +334,7 @@ export type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<I
 
 export type FormFieldCustomizer = (
     field: FormFieldConfig, options: FormBuilderOptions, injector: Injector,
-    property: IOpenApiSchemaProperty, schema: IOpenApiSchema
+    property: OpenApiSchemaProperty, schema: OpenApiSchema
 ) => MaybePromise<MaybeArray<FormFieldConfig>>;
 
 export interface ConfigForSchemaOptions extends FormBuilderOptions {

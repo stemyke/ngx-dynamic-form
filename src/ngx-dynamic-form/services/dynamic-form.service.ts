@@ -46,7 +46,7 @@ export class DynamicFormService {
             customizeOrOptions, this.injector, schema,
             `"DynamicFormService.${restrictedMethod}" is called from a customizer, which is not allowed. Please use DynamicFormSchemaService instead!`
         );
-        const fields = await this.fs.getFormFieldsForSchema(name, config, wrapOptions);
+        const fields = await this.fs.getFormFieldsForSchema(schema, config, wrapOptions);
         const fieldGroup = [...fields];
 
         config.fieldGroup = fieldGroup;

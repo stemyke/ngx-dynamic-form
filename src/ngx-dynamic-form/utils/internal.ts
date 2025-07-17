@@ -1,7 +1,7 @@
 import {Injector} from "@angular/core";
 import {
-    IOpenApiSchema,
-    IOpenApiSchemaProperty,
+    OpenApiSchema,
+    OpenApiSchemaProperty,
     MaybeArray,
     ObjectUtils,
     ForbiddenZone,
@@ -21,8 +21,8 @@ export type ConfigForSchemaWrapMode = "wrap" | "customizer";
 
 export interface ConfigForSchemaWrapOptions extends Required<FormBuilderOptions> {
     readonly injector: Injector;
-    readonly schema: IOpenApiSchema;
-    customize(field: FormFieldConfig, property: IOpenApiSchemaProperty, schema: IOpenApiSchema): Promise<FormFieldConfig[]>;
+    readonly schema: OpenApiSchema;
+    customize(field: FormFieldConfig, property: OpenApiSchemaProperty, schema: OpenApiSchema): Promise<FormFieldConfig[]>;
 }
 
 class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
@@ -49,14 +49,14 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
         protected readonly opts: ConfigForSchemaOptions,
         protected readonly mode: ConfigForSchemaWrapMode,
         readonly injector: Injector,
-        readonly schema: IOpenApiSchema
+        readonly schema: OpenApiSchema
     ) {
         this.fieldCustomizer = this.mode !== "wrap" || !ObjectUtils.isFunction(this.opts.fieldCustomizer)
             ? field => field
             : this.opts.fieldCustomizer;
     }
 
-    async customize(field: FormFieldConfig, property: IOpenApiSchemaProperty, schema: IOpenApiSchema) {
+    async customize(field: FormFieldConfig, property: OpenApiSchemaProperty, schema: OpenApiSchema) {
         field.defaultValue = `${field.props?.type}`.startsWith("date")
             ? convertToDate(property.default) : property.default;
         const res = await ForbiddenZone.run("customizer", () =>
@@ -72,14 +72,14 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
         return new ConfigForSchemaWrap(this.opts, "customizer", this.injector, this.schema);
     }
 
-    forSchema(schema: IOpenApiSchema): ConfigForSchemaWrapOptions {
+    forSchema(schema: OpenApiSchema): ConfigForSchemaWrapOptions {
         return new ConfigForSchemaWrap(this.opts,  this.mode, this.injector, schema);
     }
 }
 
 export async function toWrapOptions(customizeOrOptions: CustomizerOrSchemaOptions | ConfigForSchemaWrapOptions,
                                     injector: Injector,
-                                    schema: IOpenApiSchema,
+                                    schema: OpenApiSchema,
                                     errorMsg?: string): Promise<ConfigForSchemaWrapOptions> {
     if (errorMsg && ForbiddenZone.isForbidden("customizer")) {
         throw new Error(errorMsg);
@@ -106,17 +106,6 @@ export function convertToDate(value: any): any {
 
 export function handleConfigs(configs: MaybeArray<FormFieldConfig>) {
     return Array.isArray(configs) ? configs : [configs];
-}
-
-export function isStringWithVal(val: any): boolean {
-    return typeof val == "string" && val.length > 0;
-}
-
-export function findRefs(property: IOpenApiSchemaProperty): string[] {
-    const refs = Array.isArray(property.allOf)
-        ? property.allOf.map(o => o.$ref).filter(isStringWithVal)
-        : [property.items?.$ref, property.$ref].filter(isStringWithVal);
-    return refs.map(t => t.split("/").pop());
 }
 
 export function arrayItemActionToExpression(actionName: KeysOfType<FormFieldProps, FormFieldArrayItemsAction>): FormFieldExpression {

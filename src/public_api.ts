@@ -4,7 +4,6 @@ export {
     FormFieldKey,
     FormFieldLabelCustomizer,
     FormBuilderOptions,
-    FormFieldAdditional,
     FormFieldArrayItemsAction,
     FormFieldProps,
     FormFieldSerializer,
@@ -94,8 +93,6 @@ export {
     setFieldHidden,
     setFieldDisabled,
     setFieldHooks,
-    additionalFieldValue,
-    additionalFieldValues,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS
@@ -109,11 +106,14 @@ export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.d
 
 export {DynamicFieldType} from "./ngx-dynamic-form/components/base/dynamic-field-type";
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";
+
 export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
 export {DynamicFormChipsComponent} from "./ngx-dynamic-form/components/dynamic-form-chips/dynamic-form-chips.component";
+export {DynamicFormUploadComponent} from "./ngx-dynamic-form/components/dynamic-form-upload/dynamic-form-upload.component";
+
+export {DynamicFormAlertComponent} from "./ngx-dynamic-form/components/dynamic-form-alert/dynamic-form-alert.component";
 export {DynamicFormFieldComponent} from "./ngx-dynamic-form/components/dynamic-form-field/dynamic-form-field.component";
 export {DynamicFormFieldsetComponent} from "./ngx-dynamic-form/components/dynamic-form-fieldset/dynamic-form-fieldset.component";
 export {DynamicFormGroupComponent} from "./ngx-dynamic-form/components/dynamic-form-group/dynamic-form-group.component";
-export {DynamicFormUploadComponent} from "./ngx-dynamic-form/components/dynamic-form-upload/dynamic-form-upload.component";
 
 export {NgxDynamicFormModule} from "./ngx-dynamic-form/ngx-dynamic-form.module";

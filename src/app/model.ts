@@ -88,7 +88,8 @@ export class OrderModel {
     @FormArray(AddressModel, {
         removeItem: (item) => {
             return !item.street || item.street.length < 5;
-        }
+        },
+        wrappers: ["form-alert"]
     })
     addresses: AddressModel[] = [new AddressModel()];
 

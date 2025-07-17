@@ -77,9 +77,7 @@ export class DynamicFormComponent implements IDynamicForm {
                     label: "",
                     useTabs: this.useTabs(),
                     hidden: false,
-                    additional: {
-                        className: "dynamic-form-root-group"
-                    }
+                    className: "dynamic-form-root-group"
                 },
                 null, options
             )

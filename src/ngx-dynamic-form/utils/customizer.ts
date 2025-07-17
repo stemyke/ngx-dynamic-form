@@ -1,8 +1,8 @@
 import {
     cachedFactory,
     CachedProvider,
-    IOpenApiSchema,
-    IOpenApiSchemaProperty,
+    OpenApiSchema,
+    OpenApiSchemaProperty,
     MaybeArray,
     MaybePromise
 } from "@stemy/ngx-utils";
@@ -12,14 +12,14 @@ import {FormBuilderOptions, FormFieldConfig, FormFieldCustomizer} from "../commo
 export interface IFormFieldCustomizer {
     acceptField(
         field: FormFieldConfig,
-        property: IOpenApiSchemaProperty,
-        schema: IOpenApiSchema
+        property: OpenApiSchemaProperty,
+        schema: OpenApiSchema
     ): boolean;
     customizeField(
         field: FormFieldConfig,
         options: FormBuilderOptions,
-        property: IOpenApiSchemaProperty,
-        schema: IOpenApiSchema
+        property: OpenApiSchemaProperty,
+        schema: OpenApiSchema
     ): MaybePromise<MaybeArray<FormFieldConfig>>;
 }
 
