@@ -302,8 +302,9 @@ export class DynamicFormBuilderService {
             return option;
         }));
         const control = field.formControl;
-        field.defaultValue = options[0]?.value ?? null;
-        if (field.props.multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
+        const multiple = field.props.multiple;
+        field.defaultValue = multiple ? [] : options[0]?.value ?? null;
+        if (multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
         control.setValue(field.defaultValue);
         return options;
     }
