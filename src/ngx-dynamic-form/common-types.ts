@@ -304,6 +304,10 @@ export type FormFieldData = Pick<FormFieldProps, "hidden" | "disabled" | "label"
      */
     wrappers?: Array<Type<any> | string>;
     /**
+     * Any additional property for a form field (These gets applied before the type-specific props)
+     */
+    props?: Record<string, any>;
+    /**
      * Custom validators for a form field.
      */
     validators?: Validators | ValidatorFn[];

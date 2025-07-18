@@ -135,6 +135,7 @@ export class DynamicFormSchemaService {
             fieldSet: property.fieldSet,
             componentType: property.componentType,
             wrappers: property.wrappers,
+            props: property,
             validators
         };
     }

@@ -332,6 +332,7 @@ export class DynamicFormBuilderService {
             validators: {},
             validation: {},
             props: {
+                ...(data.props || {}),
                 ...props,
                 disabled: data.disabled === true,
                 hidden: data.hidden === true,
