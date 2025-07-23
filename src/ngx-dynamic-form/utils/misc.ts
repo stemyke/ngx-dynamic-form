@@ -11,6 +11,7 @@ import {
     FormHookFn,
     FormSelectOption
 } from "../common-types";
+import {convertToDateFormat} from "./internal";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
@@ -103,12 +104,29 @@ export function removeFromFieldArray(field: FormFieldConfig, ix: number): void {
     field.options.build(field);
 }
 
-export function setFieldProp<P extends keyof FormFieldProps, V extends FormFieldProps[P]>(
-    field: FormFieldConfig, prop: P, value: V): void {
-    field.props = {
-        ...(field.props || {}),
-        [prop]: value
-    };
+export function setFieldDefault(field: FormFieldConfig, value: any): void {
+    field.defaultValue = value instanceof Date ? convertToDateFormat(value, field.props?.type || "date") : value;
+}
+
+interface SetFormFieldProps extends Omit<FormFieldProps, "min" | "max"> {
+    min?: number | Date;
+    max?: number | Date;
+}
+
+export function setFieldProps(field: FormFieldConfig, values: SetFormFieldProps): FormFieldConfig {
+    if (!ObjectUtils.isObject(values)) return;
+    const props = Object.assign({} as SetFormFieldProps, field.props || {});
+    props.type = values.type || props.type;
+    Object.keys(values).forEach(key => {
+        const value = values[key];
+        props[key] = value instanceof Date ? convertToDateFormat(value, props.type || "date") : value;
+    });
+    field.props = props;
+    return field;
+}
+
+export function setFieldProp<P extends keyof SetFormFieldProps, V extends SetFormFieldProps[P]>(field: FormFieldConfig, prop: P, value: V): FormFieldConfig {
+    return setFieldProps(field, {[prop]: value});
 }
 
 export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {

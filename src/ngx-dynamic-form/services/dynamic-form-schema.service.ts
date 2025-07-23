@@ -29,7 +29,7 @@ import {
 } from "../utils/validation";
 import {
     ConfigForSchemaWrapOptions,
-    convertToDate,
+    convertToDateFormat,
     mergeFormFields,
     toWrapOptions
 } from "../utils/internal";
@@ -244,12 +244,12 @@ export class DynamicFormSchemaService {
     // }
 
     protected getFormDatepickerConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
+        const type = property.format == "date-time" ? "datetime-local" : "date";
         return this.builder.createFormInput(property.id, {
             ...this.getFormFieldData(property, options),
-            type: property.format == "date-time" ? "datetime-local" : "date",
-            // format: property.dateFormat || "dd.MM.yyyy",
-            min: convertToDate(property.min),
-            max: convertToDate(property.max),
+            type,
+            min: convertToDateFormat(property.min, property.format),
+            max: convertToDateFormat(property.max, property.format),
         }, parent, options);
     }
 

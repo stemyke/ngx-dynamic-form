@@ -114,10 +114,22 @@ export function maxLengthValidation(maxLength: number, each?: boolean): Validato
     return validateEach(each, v => typeof v == "string" && v.length <= maxLength, "maxLength");
 }
 
-export function minValueValidation(min: number, each?: boolean): ValidatorFn {
-    return validateEach(each, v => typeof v == "number" && v >= min, "minValue");
+export function minValueValidation(min: number | Date, each?: boolean): ValidatorFn {
+    return validateEach(each, v => {
+        if (min instanceof Date) {
+            v = new Date(v);
+            return isNaN(v) || v >= min;
+        }
+        return v == null || v >= min;
+    }, "minValue");
 }
 
-export function maxValueValidation(max: number, each?: boolean): ValidatorFn {
-    return validateEach(each, v => typeof v == "number" && v <= max, "maxValue");
+export function maxValueValidation(max: number | Date, each?: boolean): ValidatorFn {
+    return validateEach(each, v => {
+        if (max instanceof Date) {
+            v = new Date(v);
+            return isNaN(v) || v <= max;
+        }
+        return v == null || v <= max;
+    }, "maxValue");
 }

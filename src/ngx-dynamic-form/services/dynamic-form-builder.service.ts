@@ -143,6 +143,11 @@ export class DynamicFormBuilderService {
                 props.min = isNaN(data.min) ? MIN_INPUT_NUM : data.min;
                 props.max = isNaN(data.max) ? MAX_INPUT_NUM : data.max;
                 break;
+            case "date":
+            case "datetime-local":
+                props.min = data.min;
+                props.max = data.max;
+                break;
             case "string":
             case "text":
             case "textarea":

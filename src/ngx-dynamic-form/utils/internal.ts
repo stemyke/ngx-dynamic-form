@@ -57,8 +57,8 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
     }
 
     async customize(field: FormFieldConfig, property: OpenApiSchemaProperty, schema: OpenApiSchema) {
-        field.defaultValue = `${field.props?.type}`.startsWith("date")
-            ? convertToDate(property.default) : property.default;
+        field.defaultValue = property.format?.startsWith("date")
+            ? convertToDateFormat(property.default, property.format) : property.default;
         const res = await ForbiddenZone.run("customizer", () =>
             this.fieldCustomizer(
                 field, this.forCustomizer(), this.injector,
@@ -96,12 +96,15 @@ export async function toWrapOptions(customizeOrOptions: CustomizerOrSchemaOption
     return new ConfigForSchemaWrap(schemaOptions, "wrap", injector, schema);
 }
 
-export function convertToDate(value: any): any {
-    if (ObjectUtils.isNullOrUndefined(value)) return null;
-    const date = ObjectUtils.isDate(value)
-        ? value
-        : new Date(value);
-    return isNaN(date as any) ? new Date() : date;
+export function convertToDateFormat(value: any, format: string): any {
+    if (!ObjectUtils.isDefined(value)) return undefined;
+    value = ObjectUtils.isDate(value) ? value : new Date(value);
+    const date = isNaN(value) ? new Date() : value as Date;
+    return format === "datetime-local" || format === "date-time"
+        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 16)
+        : date.toISOString().slice(0, 10);
 }
 
 export function handleConfigs(configs: MaybeArray<FormFieldConfig>) {

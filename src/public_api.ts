@@ -89,6 +89,8 @@ export {
     clearFieldArray,
     insertToFieldArray,
     removeFromFieldArray,
+    setFieldDefault,
+    setFieldProps,
     setFieldProp,
     setFieldHidden,
     setFieldDisabled,
