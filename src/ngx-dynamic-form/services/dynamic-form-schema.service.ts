@@ -99,10 +99,6 @@ export class DynamicFormSchemaService {
         // if (this.checkIsEditorProperty(property)) {
         //     return this.getFormEditorConfig(property, options, parent);
         // }
-        const refs = await this.openApi.getReferences(property, options.schema);
-        if (refs.length > 0) {
-            return this.getFormGroupConfig(property, options, parent);
-        }
         if (property.format == "file" || property.format == "upload") {
             return this.getFormUploadConfig(property, options, parent);
         }
@@ -111,6 +107,10 @@ export class DynamicFormSchemaService {
         }
         if (property.format == "date" || property.format == "date-time") {
             return this.getFormDatepickerConfig(property, options, parent);
+        }
+        const refs = await this.openApi.getReferences(property, options.schema);
+        if (refs.length > 0) {
+            return this.getFormGroupConfig(property, options, parent);
         }
         return this.getFormInputConfig(property, options, parent);
     }
