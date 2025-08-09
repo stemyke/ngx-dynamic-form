@@ -233,6 +233,7 @@ export interface IDynamicForm {
     readonly group: Signal<FormGroup>;
     readonly status: Signal<DynamicFormStatus>;
     readonly onSubmit: OutputRef<IDynamicForm>;
+    readonly onChanges: OutputRef<FormFieldChangeEvent>;
 
     reset(): void;
 }

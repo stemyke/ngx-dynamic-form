@@ -9,7 +9,7 @@ import {
     output,
     ViewEncapsulation
 } from "@angular/core";
-import {rxResource, toSignal} from "@angular/core/rxjs-interop";
+import {outputFromObservable, rxResource, toSignal} from "@angular/core/rxjs-interop";
 import {FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
@@ -98,6 +98,8 @@ export class DynamicFormComponent implements IDynamicForm {
     readonly status = computed(() => this.status$.value());
 
     readonly onSubmit = output<IDynamicForm>();
+
+    readonly onChanges = outputFromObservable(this.fieldChanges);
 
     readonly options: FormlyFormOptions = {
         fieldChanges: this.fieldChanges,
