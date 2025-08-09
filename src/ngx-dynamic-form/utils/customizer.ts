@@ -1,6 +1,6 @@
 import {
     cachedFactory,
-    CachedProvider,
+    TypedProvider,
     OpenApiSchema,
     OpenApiSchemaProperty,
     MaybeArray,
@@ -23,7 +23,7 @@ export interface IFormFieldCustomizer {
     ): MaybePromise<MaybeArray<FormFieldConfig>>;
 }
 
-export function customizeFormField(...providers: CachedProvider<IFormFieldCustomizer>[]): FormFieldCustomizer {
+export function customizeFormField(...providers: TypedProvider<IFormFieldCustomizer>[]): FormFieldCustomizer {
     const factory = cachedFactory(providers);
     return async (field, options, injector, property, schema) => {
         const customizers = factory(injector);
