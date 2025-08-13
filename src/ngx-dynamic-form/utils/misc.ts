@@ -48,7 +48,7 @@ export function controlStatus(control: AbstractControl, timeout: number = 10): O
  * @param format Expected date format (date, date-time)
  */
 export function convertToDateFormat(value: any, format: string): any {
-    if (!ObjectUtils.isDefined(value) || format?.includes("date")) return value;
+    if (!ObjectUtils.isDefined(value) || !format?.includes("date")) return value;
     value = ObjectUtils.isDate(value) ? value : new Date(value);
     const date = isNaN(value) ? new Date() : value as Date;
     return format === "datetime-local" || format === "date-time"
@@ -64,7 +64,7 @@ export function convertToDateFormat(value: any, format: string): any {
  * @param format Expected date format (date, date-time)
  */
 export function convertToDate(value: any, format: string): any {
-    return (!ObjectUtils.isDefined(value) || format?.includes("date"))
+    return (!ObjectUtils.isDefined(value) || !format?.includes("date"))
         ? value
         : new Date(convertToDateFormat(value, format));
 }
