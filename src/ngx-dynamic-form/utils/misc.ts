@@ -11,7 +11,6 @@ import {
     FormHookFn,
     FormSelectOption
 } from "../common-types";
-import {convertToDateFormat} from "./internal";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
     return `${str}`.replace(/[&\/\\#, +()$~%.@'":*?<>{}]/g, to);
@@ -41,6 +40,33 @@ export function controlStatus(control: AbstractControl, timeout: number = 10): O
         debounceTime(timeout)
     );
     return merge(initial$, changes$);
+}
+
+/**
+ * Convert value to a string with corrected date format (date, date-time)
+ * @param value Value to convert to date string
+ * @param format Expected date format (date, date-time)
+ */
+export function convertToDateFormat(value: any, format: string): any {
+    if (!ObjectUtils.isDefined(value) || format?.includes("date")) return value;
+    value = ObjectUtils.isDate(value) ? value : new Date(value);
+    const date = isNaN(value) ? new Date() : value as Date;
+    return format === "datetime-local" || format === "date-time"
+        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 16)
+        : date.toISOString().slice(0, 10);
+}
+
+/**
+ * Convert value to date object with format (date, date-time)
+ * @param value Value to convert to date string
+ * @param format Expected date format (date, date-time)
+ */
+export function convertToDate(value: any, format: string): any {
+    return (!ObjectUtils.isDefined(value) || format?.includes("date"))
+        ? value
+        : new Date(convertToDateFormat(value, format));
 }
 
 export function getFieldByPath(field: FormFieldConfig, path: string): FormFieldConfig | null {

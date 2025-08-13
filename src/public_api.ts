@@ -81,6 +81,8 @@ export {
     replaceSpecialChars,
     controlValues,
     controlStatus,
+    convertToDateFormat,
+    convertToDate,
     getFieldByPath,
     getFieldsByPredicate,
     getFieldsByKey,

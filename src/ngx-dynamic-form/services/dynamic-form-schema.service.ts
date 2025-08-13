@@ -29,13 +29,12 @@ import {
 } from "../utils/validation";
 import {
     ConfigForSchemaWrapOptions,
-    convertToDateFormat,
     mergeFormFields,
     toWrapOptions
 } from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
-import {controlValues, getSelectOptions} from "../utils/misc";
+import {controlValues, convertToDate, convertToDateFormat, getSelectOptions} from "../utils/misc";
 
 @Injectable()
 export class DynamicFormSchemaService {
@@ -408,10 +407,10 @@ export class DynamicFormSchemaService {
             validators.maxLength = maxLengthValidation(property.maxLength);
         }
         if (!isNaN(property.minimum)) {
-            validators.min = minValueValidation(property.minimum);
+            validators.min = minValueValidation(convertToDate(property.minimum, property.format));
         }
         if (!isNaN(property.maximum)) {
-            validators.max = maxValueValidation(property.maximum);
+            validators.max = maxValueValidation(convertToDate(property.maximum, property.format));
         }
         // if (isString(property.pattern) && property.pattern.length) {
         //     validators.pattern = property.pattern;

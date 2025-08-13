@@ -1,21 +1,25 @@
 import {Injector} from "@angular/core";
 import {
-    OpenApiSchema,
-    OpenApiSchemaProperty,
+    ForbiddenZone,
+    KeysOfType,
     MaybeArray,
     ObjectUtils,
-    ForbiddenZone,
-    KeysOfType
+    OpenApiSchema,
+    OpenApiSchemaProperty
 } from "@stemy/ngx-utils";
 import {
     AllValidationErrors,
     ConfigForSchemaOptions,
     CustomizerOrSchemaOptions,
-    FormBuilderOptions, FormFieldArrayItemsAction,
+    FormBuilderOptions,
+    FormFieldArrayItemsAction,
     FormFieldConfig,
-    FormFieldCustomizer, FormFieldExpression, FormFieldProps
+    FormFieldCustomizer,
+    FormFieldExpression,
+    FormFieldProps
 } from "../common-types";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
+import {convertToDateFormat} from "./misc";
 
 export type ConfigForSchemaWrapMode = "wrap" | "customizer";
 
@@ -94,17 +98,6 @@ export async function toWrapOptions(customizeOrOptions: CustomizerOrSchemaOption
         };
     }
     return new ConfigForSchemaWrap(schemaOptions, "wrap", injector, schema);
-}
-
-export function convertToDateFormat(value: any, format: string): any {
-    if (!ObjectUtils.isDefined(value)) return undefined;
-    value = ObjectUtils.isDate(value) ? value : new Date(value);
-    const date = isNaN(value) ? new Date() : value as Date;
-    return format === "datetime-local" || format === "date-time"
-        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16)
-        : date.toISOString().slice(0, 10);
 }
 
 export function handleConfigs(configs: MaybeArray<FormFieldConfig>) {

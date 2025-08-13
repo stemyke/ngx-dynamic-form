@@ -117,8 +117,8 @@ export function maxLengthValidation(maxLength: number, each?: boolean): Validato
 export function minValueValidation(min: number | Date, each?: boolean): ValidatorFn {
     return validateEach(each, v => {
         if (min instanceof Date) {
-            v = new Date(v);
-            return isNaN(v) || v >= min;
+            const date = new Date(v) as any;
+            return isNaN(date) || date >= min;
         }
         return v == null || v >= min;
     }, "minValue");
@@ -127,8 +127,8 @@ export function minValueValidation(min: number | Date, each?: boolean): Validato
 export function maxValueValidation(max: number | Date, each?: boolean): ValidatorFn {
     return validateEach(each, v => {
         if (max instanceof Date) {
-            v = new Date(v);
-            return isNaN(v) || v <= max;
+            const date = new Date(v) as any;
+            return isNaN(date) || date <= max;
         }
         return v == null || v <= max;
     }, "maxValue");
