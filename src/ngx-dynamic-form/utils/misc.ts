@@ -4,12 +4,14 @@ import {debounceTime} from "rxjs/operators";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     DynamicFormStatus,
+    FormFieldCondition,
     FormFieldConfig,
     FormFieldKey,
     FormFieldProps,
     FormHookConfig,
     FormHookFn,
-    FormSelectOption
+    FormSelectOption,
+    FormSelectOptions
 } from "../common-types";
 
 export function replaceSpecialChars(str: string, to: string = "-"): string {
@@ -97,12 +99,15 @@ export function getFieldsByKey(field: FormFieldConfig, key: FormFieldKey): FormF
     return getFieldsByPredicate(field, f => f.key === key);
 }
 
-export async function getSelectOptions(field: FormFieldConfig): Promise<FormSelectOption[]> {
-    const options = field.props?.options || [];
+export async function getSelectOptions(fieldOrOpts: FormFieldConfig | FormSelectOptions): Promise<FormSelectOption[]> {
+    const options = (fieldOrOpts as FormFieldConfig).props?.options || fieldOrOpts as FormSelectOptions;
     if (options instanceof Observable) {
         return firstValueFrom(options);
     }
-    return options;
+    if (options instanceof Promise) {
+        return await options;
+    }
+    return Array.isArray(options) ? options : [];
 }
 
 export function replaceFieldArray(field: FormFieldConfig, items: any[]): void {
@@ -155,12 +160,12 @@ export function setFieldProp<P extends keyof SetFormFieldProps, V extends SetFor
     return setFieldProps(field, {[prop]: value});
 }
 
-export function setFieldHidden(field: FormFieldConfig, hidden: boolean = true): void {
-    setFieldProp(field, "hidden", hidden);
+export function setFieldHidden(field: FormFieldConfig, hidden: FormFieldCondition = true): void {
+    setFieldProp(field, "__hidden", ObjectUtils.isFunction(hidden) ? hidden : () => hidden);
 }
 
-export function setFieldDisabled(field: FormFieldConfig, disabled: boolean = true): void {
-    setFieldProp(field, "disabled", disabled);
+export function setFieldDisabled(field: FormFieldConfig, disabled: FormFieldCondition = true): void {
+    setFieldProp(field, "__disabled", ObjectUtils.isFunction(disabled) ? disabled : () => disabled);
 }
 
 export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): void {

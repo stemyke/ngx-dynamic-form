@@ -10,7 +10,7 @@ import {
     HttpRequestOptions,
     MaybeArray,
     MaybePromise,
-    UploadData
+    UploadData, ResolveFactory
 } from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
@@ -183,6 +183,7 @@ export type FormFieldExpressions = {
     className?: FormFieldExpression<string>;
     hide?: FormFieldExpression<boolean>;
     "props.disabled"?: FormFieldExpression<boolean>;
+    "props.hidden"?: FormFieldExpression<boolean>;
     "props.required"?: FormFieldExpression<boolean>;
 };
 
@@ -218,13 +219,20 @@ export interface FormSerializeResult {
     [key: string]: any;
 }
 
-export interface FormSelectOption extends FormlySelectOption {
+export interface FormSelectOption extends Omit<FormlySelectOption, "group"> {
     className?: string;
     classes?: string[] | string;
     id?: any;
+    [key: string]: any;
 }
 
-export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption[]>;
+export type FormSelectOptions = FormSelectOption[] | Observable<FormSelectOption[]> | Promise<FormSelectOption[]>;
+
+export type FormSelectOptionsFactory = (field: FormFieldConfig, injector: Injector) => FormSelectOptions;
+
+export type FormFieldConditionFn = (field: FormFieldConfig, injector: Injector) => boolean;
+
+export type FormFieldCondition = FormFieldConditionFn | boolean;
 
 export interface IDynamicForm {
 
@@ -282,8 +290,16 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "hidden" | "disabled" | "label" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
+export type FormFieldData = Pick<FormFieldProps, "label" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
     & {
+    /**
+     * Conditional check if the field should be hidden or not
+     */
+    hidden?: FormFieldCondition | ResolveFactory<FormFieldCondition>;
+    /**
+     * Conditional check if the field should be disabled or not
+     */
+    disabled?: FormFieldCondition | ResolveFactory<FormFieldCondition>;
     /**
      * This is a custom serializer callback function. (Can't be defined from JSON schema because it is a JS callback)
      */
@@ -319,7 +335,7 @@ export type FormInputData = FormFieldData
 
 export type FormSelectData = FormFieldData
     & Pick<FormFieldProps, "multiple" | "type" | "allowEmpty" | "groupBy" | "invert"> & {
-    options?: (field: FormFieldConfig) => FormSelectOptions | Promise<FormSelectOption[]>;
+    options?: ResolveFactory<FormSelectOptionsFactory> | FormSelectOptionsFactory;
 };
 
 export type FormUploadData = FormFieldData

@@ -17,6 +17,9 @@ export {
     FormSerializeResult,
     FormSelectOption,
     FormSelectOptions,
+    FormSelectOptionsFactory,
+    FormFieldConditionFn,
+    FormFieldCondition,
 
     IDynamicForm,
 

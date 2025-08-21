@@ -173,14 +173,15 @@ export class DynamicFormBuilderService {
         }, parent, options);
         setFieldHooks(field, {
             onInit: target => {
-                const options = data.options(target);
+                const factory = ReflectUtils.resolve(data.options, this.injector);
+                const options = factory(target, this.injector);
                 const root = target.formControl.root;
                 setFieldProp(target, "options", options instanceof Observable
                     ? options
                     : controlValues(root).pipe(
                         combineLatestWith(this.language),
                         switchMap(async () => {
-                            const results: FormSelectOption[] = await (data.options(target) as any) || [];
+                            const results: FormSelectOption[] = await (factory(target, this.injector) as any) || [];
                             return this.fixSelectOptions(target, results);
                         })
                     ));
@@ -328,6 +329,8 @@ export class DynamicFormBuilderService {
         if (type !== "array") {
             wrappers.unshift(!type ? "form-group" : "form-field");
         }
+        const disabled = ReflectUtils.resolve(data.disabled, this.injector);
+        const hidden = ReflectUtils.resolve(data.hidden, this.injector);
         const field: FormFieldConfig = {
             key,
             wrappers,
@@ -339,8 +342,6 @@ export class DynamicFormBuilderService {
             props: {
                 ...(data.props || {}),
                 ...props,
-                disabled: data.disabled === true,
-                hidden: data.hidden === true,
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
                 hideLabel: data.hideLabel === true,
@@ -349,7 +350,9 @@ export class DynamicFormBuilderService {
                 className: data.className || "",
                 hideRequiredMarker: data.hideRequiredMarker === true,
                 formCheck: "nolabel",
-                labelPosition: "before"
+                labelPosition: "before",
+                __disabled: ObjectUtils.isFunction(disabled) ? disabled : () => disabled,
+                __hidden: ObjectUtils.isFunction(hidden) ? hidden : () => hidden
             },
             modelOptions: {
                 updateOn: "change"
@@ -359,7 +362,15 @@ export class DynamicFormBuilderService {
                 serializer: () => data.serializer,
                 serialize: () => data.serialize,
                 "props.hideRequiredMarker": target => target.type === "checkbox",
-                "props.required": target => !!target.validators?.required
+                "props.required": target => !!target.validators?.required,
+                "props.disabled": target => {
+                    const disabled = target.props?.__disabled;
+                    return !!disabled(target, this.injector);
+                },
+                "props.hidden": target => {
+                    const hidden = target.props?.__hidden;
+                    return !!hidden(target, this.injector);
+                }
             }
         };
         // Parent object will be available for customizers as a property, until it gets redefined by formly
