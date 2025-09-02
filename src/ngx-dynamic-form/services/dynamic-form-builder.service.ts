@@ -73,50 +73,47 @@ export class DynamicFormBuilderService {
     }
 
     createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
-        const others: FormFieldConfig[] = [];
+        const result: FormFieldConfig[] = [];
         const groups: { [fs: string]: FormFieldConfig[] } = {};
-        fields = fields.filter(f => {
+        fields.forEach(f => {
             if (Array.isArray(f.fieldGroup) && Array.isArray(f.wrappers) && f.wrappers[0] === "form-fieldset") {
                 // This field is an already existing set
                 groups[f.id] = f.fieldGroup;
-                return false;
             }
-            return true;
         });
-
         for (const field of fields) {
             const fsName = String(field.fieldSet || "");
             // If we have a fieldset name defined, then push the property fields into a group
             if (fsName) {
-                const fsId = !parent?.path ? fsName : `${parent.path}.${fsName}`;
-                const group = groups[fsId] || [];
-                groups[fsId] = group;
-                group.push(field);
+                const id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
+                let fieldGroup = groups[id];
+                if (!fieldGroup) {
+                    fieldGroup = [];
+                    const fieldSet: FormFieldConfig = {
+                        id,
+                        parent,
+                        fieldGroup,
+                        wrappers: ["form-fieldset"],
+                        props: {
+                            label: this.getLabel(fsName, fsName, parent, options),
+                            hidden: false,
+                            className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
+                        },
+                        hooks: {},
+                        expressions: {}
+                    };
+                    this.setExpressions(fieldSet, options);
+                    groups[id] = fieldGroup;
+                    result.push(fieldSet);
+                }
+                fieldGroup.push(field);
                 continue;
             }
-            // Otherwise, push the fields to the others
-            others.push(field);
+            // Otherwise just push to result
+            result.push(field);
         }
 
-        // Create a field-set wrapper for each group and concat the other fields to the end
-        return Object.keys(groups).map(id => {
-            const key = id.split(".").pop();
-            const fieldSet: FormFieldConfig = {
-                id,
-                parent,
-                fieldGroup: groups[id],
-                wrappers: ["form-fieldset"],
-                props: {
-                    label: this.getLabel(key, key, parent, options),
-                    hidden: false,
-                    className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
-                },
-                hooks: {},
-                expressions: {}
-            };
-            this.setExpressions(fieldSet, options);
-            return fieldSet;
-        }).concat(others);
+        return result;
     }
 
     createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
