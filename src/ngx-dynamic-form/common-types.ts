@@ -88,6 +88,10 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     multiple?: boolean;
     /**
+     * Specifies that the input balue does not have to be in the options of chips component if false (default: true)
+     */
+    strict?: boolean;
+    /**
      * Allows empty, null values in the select component
      */
     allowEmpty?: boolean;
@@ -191,11 +195,12 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     serializer?: FormFieldSerializer;
     serialize?: boolean;
     fieldSet?: string;
-    parent?: FormFieldConfig;
+    priority?: number;
     fieldGroup?: FormFieldConfig[];
     fieldArray?: FormFieldConfig;
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
+    readonly parent?: FormFieldConfig;
     readonly display?: boolean;
     readonly valid?: boolean;
     readonly path?: string;
@@ -313,6 +318,10 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "hideRequiredMarker" 
      */
     fieldSet?: string;
     /**
+     * Puts the field in a custom order
+     */
+    priority?: number;
+    /**
      * The used component type of the field can be overridden, (Only string can be defined from JSON schema)
      */
     componentType?: string | Type<any>;
@@ -334,7 +343,7 @@ export type FormInputData = FormFieldData
     & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows">;
 
 export type FormSelectData = FormFieldData
-    & Pick<FormFieldProps, "multiple" | "type" | "allowEmpty" | "groupBy" | "invert"> & {
+    & Pick<FormFieldProps, "multiple" | "strict" | "type" | "allowEmpty" | "groupBy" | "invert"> & {
     options?: ResolveFactory<FormSelectOptionsFactory> | FormSelectOptionsFactory;
 };
 

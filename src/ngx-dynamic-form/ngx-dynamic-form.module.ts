@@ -2,6 +2,7 @@ import {EnvironmentProviders, makeEnvironmentProviders, ModuleWithProviders, NgM
 import {CommonModule} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {FormlyModule, provideFormlyConfig, provideFormlyCore} from "@ngx-formly/core";
+import {FormlySelectModule} from "@ngx-formly/core/select";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {components, directives, pipes} from "./ngx-dynamic-form.imports";
@@ -32,7 +33,8 @@ import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic
         FormsModule,
         ReactiveFormsModule,
         NgxUtilsModule,
-        FormlyModule
+        FormlyModule,
+        FormlySelectModule
     ],
     exports: [
         ...components,
@@ -41,7 +43,8 @@ import {DynamicFormGroupComponent} from "./components/dynamic-form-group/dynamic
         FormsModule,
         ReactiveFormsModule,
         NgxUtilsModule,
-        FormlyModule
+        FormlyModule,
+        FormlySelectModule
     ],
     providers: [
         ...pipes

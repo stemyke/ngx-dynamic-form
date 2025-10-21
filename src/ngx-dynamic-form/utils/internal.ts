@@ -89,7 +89,7 @@ export async function toWrapOptions(customizeOrOptions: CustomizerOrSchemaOption
         throw new Error(errorMsg);
     }
     if (customizeOrOptions instanceof ConfigForSchemaWrap) {
-        return customizeOrOptions;
+        return customizeOrOptions.forSchema(schema);
     }
     let schemaOptions = customizeOrOptions as ConfigForSchemaOptions;
     if (!ObjectUtils.isObject(schemaOptions)) {

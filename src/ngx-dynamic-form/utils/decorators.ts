@@ -13,10 +13,12 @@ import {Type} from "@angular/core";
 function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilder): void {
     const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target) || new Set();
     const existing: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", target, propertyKey);
-    const builder: FormFieldBuilder = !ObjectUtils.isFunction(existing) ? cb : ((fb, opts, path) => {
-        const data = existing(fb, opts, path);
-        return ObjectUtils.assign(data || {}, cb(fb, opts, path) || {});
-    });
+    const builder: FormFieldBuilder = (fb, opts, path) => {
+        const data = ObjectUtils.isFunction(existing) ? existing(fb, opts, path) : {
+            priority: Number.MAX_SAFE_INTEGER
+        };
+        return ObjectUtils.assign(data, cb(fb, opts, path) || {});
+    };
     fields.add(propertyKey);
     ReflectUtils.defineMetadata("dynamicFormField", builder, target, propertyKey);
     ReflectUtils.defineMetadata("dynamicFormFields", fields, target);

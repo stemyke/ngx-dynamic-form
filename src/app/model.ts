@@ -37,6 +37,7 @@ export class AddressModel {
 
     @FormInput({
         placeholder: "label.buyerStreet",
+        validators: [requiredValidation()]
     })
     @FormSerializable()
     street: string = "";
@@ -78,7 +79,9 @@ export class OrderModel {
     @FormSerializable()
     buyerLastName: string = "";
 
-    // @FormDate()
+    // @FormInput({
+    //     type: "date"
+    // })
     @FormSerializable(serializeDate())
     buyerBirthday: Date = null;
 
@@ -89,6 +92,7 @@ export class OrderModel {
         removeItem: (item) => {
             return !item.street || item.street.length < 5;
         },
+        priority: -1,
         wrappers: ["form-alert"]
     })
     addresses: AddressModel[] = [new AddressModel()];
@@ -142,14 +146,17 @@ export class OrderModel {
     weddingDate: Date = null;
 
     @FormSelect({
-        options: getPreferredContacts
+        options: getPreferredContacts,
+        strict: false,
+        multiple: true
     })
     @FormSerializable()
-    preferredContact: string = "";
+    preferredContacts: string[] = [];
 
     @FormSelect({
         options: getPreferredContacts,
-        type: "radio"
+        type: "radio",
+        priority: 0
     })
     @FormSerializable()
     radioContact: string = "";

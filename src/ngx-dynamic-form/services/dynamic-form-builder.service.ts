@@ -75,12 +75,15 @@ export class DynamicFormBuilderService {
     createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
         const result: FormFieldConfig[] = [];
         const groups: { [fs: string]: FormFieldConfig[] } = {};
+        fields = Array.from(fields || [])
+            .sort((a, b) => a.priority - b.priority);
         fields.forEach(f => {
             if (Array.isArray(f.fieldGroup) && Array.isArray(f.wrappers) && f.wrappers[0] === "form-fieldset") {
                 // This field is an already existing set
                 groups[f.id] = f.fieldGroup;
             }
         });
+
         for (const field of fields) {
             const fsName = String(field.fieldSet || "");
             // If we have a fieldset name defined, then push the property fields into a group
@@ -161,9 +164,11 @@ export class DynamicFormBuilderService {
     createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         data = data || {};
         const type = `${data.type || "select"}`;
-        const field = this.createFormField(key, type === "radio" ? type : "select", data, {
+        const fieldType = type === "radio" ? type : (data.strict === false ? "chips" : "select");
+        const field = this.createFormField(key, fieldType, data, {
             type,
             multiple: data.multiple === true,
+            strict: data.strict !== false,
             allowEmpty: data.allowEmpty === true,
             groupBy: data.groupBy,
             invert: data.invert === true
@@ -329,10 +334,12 @@ export class DynamicFormBuilderService {
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
         const hidden = ReflectUtils.resolve(data.hidden, this.injector);
         const field: FormFieldConfig = {
-            key,
-            wrappers,
-            type: data.componentType || type,
+            serializer: data.serializer,
+            serialize: data.serialize || false,
             fieldSet: String(data.fieldSet || ""),
+            priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
+
+            type: data.componentType || type,
             resetOnHide: false,
             validators: {},
             validation: {},
@@ -356,8 +363,6 @@ export class DynamicFormBuilderService {
             },
             hooks: {},
             expressions: {
-                serializer: () => data.serializer,
-                serialize: () => data.serialize,
                 "props.hideRequiredMarker": target => target.type === "checkbox",
                 "props.required": target => !!target.validators?.required,
                 "props.disabled": target => {
@@ -368,7 +373,9 @@ export class DynamicFormBuilderService {
                     const hidden = target.props?.__hidden;
                     return !!hidden(target, this.injector);
                 }
-            }
+            },
+            key,
+            wrappers,
         };
         // Parent object will be available for customizers as a property, until it gets redefined by formly
         Object.defineProperty(field, "parent", {

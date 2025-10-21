@@ -6,5 +6,8 @@
        [min]="props.min"
        [max]="props.max"
        [multiple]="props.multiple"
+       [strict]="props.strict"
+       [options]="props.options | formlySelectOptions | async"
+       [testId]="field.testId"
        [formlyAttributes]="field">
 </chips>

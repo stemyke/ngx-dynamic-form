@@ -132,6 +132,7 @@ export class DynamicFormSchemaService {
             layout: property.layout,
             serialize: property.serialize === true,
             fieldSet: property.fieldSet,
+            priority: property.priority,
             componentType: property.componentType,
             wrappers: property.wrappers,
             props: property,
@@ -258,6 +259,7 @@ export class DynamicFormSchemaService {
             options: field => this.getFormSelectOptions($enum, property, options, field),
             type: property.format || "select",
             multiple: property.type == "array",
+            strict: property.strict,
             groupBy: property.groupBy,
             invert: property.invert,
             allowEmpty: property.allowEmpty
