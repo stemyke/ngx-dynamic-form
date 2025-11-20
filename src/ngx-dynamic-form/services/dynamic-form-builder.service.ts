@@ -388,23 +388,27 @@ export class DynamicFormBuilderService {
         return field;
     }
 
+    protected shouldDisplay(field: FormFieldConfig): boolean {
+        const display = field.props?.hidden !== true;
+        if (Array.isArray(field.fieldGroup) && field.fieldGroup.length) {
+            return display && field.fieldGroup.some(f => this.shouldDisplay(f));
+        }
+        return display;
+    }
+
+    protected isValid(field: FormFieldConfig): boolean {
+        const control = field.formControl;
+        const valid = field.key && control ? (control.disabled || control.valid) !== false : true;
+        if (Array.isArray(field.fieldGroup) && field.fieldGroup.length) {
+            return valid && field.fieldGroup.every(f => this.isValid(f));
+        }
+        return valid;
+    }
+
     protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): void {
         const expressions: FormFieldExpressions = {
-            display: target => {
-                const display = target.props?.hidden !== true;
-                if (Array.isArray(target.fieldGroup) && target.fieldGroup.length) {
-                    return display && target.fieldGroup.some(f => f.display);
-                }
-                return display;
-            },
-            valid: target => {
-                const control = target.formControl;
-                const valid = target.key && control ? control.disabled || control.valid : true;
-                if (Array.isArray(target.fieldGroup) && target.fieldGroup.length) {
-                    return valid && target.fieldGroup.every(f => f.valid);
-                }
-                return valid;
-            },
+            display: target => this.shouldDisplay(target),
+            valid: target => this.isValid(target),
             className: (target: FormFieldConfig) => {
                 if (!target.display) {
                     return `dynamic-form-field dynamic-form-hidden`;
