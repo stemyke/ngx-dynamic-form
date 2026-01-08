@@ -85,7 +85,6 @@ export class AsyncSubmitDirective {
 
     @HostListener("click")
     click(): void {
-        console.log("CLICK");
         const mode = untracked(() => this.mode());
         if (mode === "submit") return;
         const status = untracked(() => this.status());
