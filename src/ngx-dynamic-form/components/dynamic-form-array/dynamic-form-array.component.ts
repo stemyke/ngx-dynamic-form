@@ -12,7 +12,7 @@ import {FormFieldConfig} from "../../common-types";
 })
 export class DynamicFormArrayComponent extends FieldArrayType<FormFieldConfig> {
 
-    readonly currentTab = signal(0);
+    currentTab = signal(0);
 
     clearItems(): void {
         const control = this.formControl as FormArray;

@@ -14,7 +14,7 @@
     <div class="col-7">
         @if (fields.hasValue()) {
             <dynamic-form [fields]="fields.value()" [data]="plainData()" [useTabs]="true" #form>
-                <button [async-submit]="submit" [form]="form" class="btn btn-primary submit-button">Submit</button>
+                <button type="button" [async-submit]="submit" [form]="form" class="btn btn-primary submit-button">Submit</button>
             </dynamic-form>
         } @else {
             <div class="form-generation-error">
@@ -24,7 +24,7 @@
     </div>
     <div class="col-5">
         <dynamic-form [data]="decoratorData()" #decoratorForm>
-            <button [async-submit]="submit" [form]="decoratorForm" class="btn btn-primary submit-button">Submit</button>
+            <button type="button" [async-submit]="submit" [form]="decoratorForm" class="btn btn-primary submit-button">Submit</button>
         </dynamic-form>
     </div>
 </div>

@@ -3,7 +3,7 @@
         <label class="field-label">
             {{ props.label | translate }}
             <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-            @if (props.required && props.hideRequiredMarker !== true) {
+            @if (props.markRequired) {
                 <span class="field-required" aria-hidden="true">*</span>
             }
         </label>
@@ -43,6 +43,14 @@
             @if (props.addItem) {
                 <btn icon="plus" label="button.insert-item" (click)="addItem()"></btn>
             }
+        </div>
+
+        <div *ngIf="showError" class="field-errors invalid-feedback">
+            <formly-validation-message
+                [field]="field"
+                id="{{ id }}-formly-validation-error"
+                role="alert"
+            ></formly-validation-message>
         </div>
     </div>
 }

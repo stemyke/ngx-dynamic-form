@@ -241,6 +241,7 @@ export class DynamicFormBuilderService {
         const array = this.createFormField(key, "array", data, {
             // initialCount: data.initialCount || 0,
             // sortable: data.sortable || false,
+            defaultValue: [],
             useTabs: data.useTabs === true,
             tabsLabel: `${data.tabsLabel || "label"}`,
             insertItem: data.insertItem,
@@ -352,7 +353,6 @@ export class DynamicFormBuilderService {
                 classes: data.classes || [],
                 layout: data.layout || [],
                 className: data.className || "",
-                hideRequiredMarker: data.hideRequiredMarker === true,
                 formCheck: "nolabel",
                 labelPosition: "before",
                 __disabled: ObjectUtils.isFunction(disabled) ? disabled : () => disabled,
@@ -363,8 +363,7 @@ export class DynamicFormBuilderService {
             },
             hooks: {},
             expressions: {
-                "props.hideRequiredMarker": target => target.type === "checkbox",
-                "props.required": target => !!target.validators?.required,
+                "props.markRequired": target => data.hideRequiredMarker !== true && !!target.validators?.required,
                 "props.disabled": target => {
                     const disabled = target.props?.__disabled;
                     return !!disabled(target, this.injector);

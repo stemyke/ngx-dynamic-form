@@ -1,6 +1,7 @@
 import {DatePipe} from "@angular/common";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
+    arrayLengthValidation,
     emailValidation,
     FormFieldSerializer,
     FormGroup,
@@ -92,10 +93,11 @@ export class OrderModel {
         removeItem: (item) => {
             return !item.street || item.street.length < 5;
         },
+        validators: [requiredValidation(), arrayLengthValidation()],
         priority: -1,
         wrappers: ["form-alert"]
     })
-    addresses: AddressModel[] = [new AddressModel()];
+    addresses: AddressModel[] = null;
 
     @FormArray("text")
     lines: string[] = [];

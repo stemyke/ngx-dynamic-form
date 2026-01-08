@@ -106,6 +106,13 @@ export function emailValidation(): ValidatorFn {
     }, "email");
 }
 
+export function arrayLengthValidation(min: number = 1, max: number = Number.MAX_SAFE_INTEGER) {
+    return withName((control) => {
+        const value = control.value;
+        return !Array.isArray(value) || (min <= value.length && value.length <= max);
+    }, "arrayLength");
+}
+
 export function minLengthValidation(minLength: number, each?: boolean): ValidatorFn {
     return validateEach(each, v => typeof v == "string" && v.length >= minLength, "minLength");
 }

@@ -163,6 +163,10 @@ export interface FormFieldProps extends FormlyFieldProps {
     color?: "primary" | "accent" | "warn";
     hideFieldUnderline?: boolean;
     /**
+     * Specifies if required marker should be shown
+     */
+    markRequired?: boolean;
+    /**
      * Additional custom field props
      */
     [additionalProperties: string]: any;

@@ -74,6 +74,7 @@ export {
     translationValidation,
     phoneValidation,
     emailValidation,
+    arrayLengthValidation,
     minLengthValidation,
     maxLengthValidation,
     minValueValidation,

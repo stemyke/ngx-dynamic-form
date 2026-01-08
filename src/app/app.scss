@@ -40,18 +40,23 @@ a.dropdown-box-toggle-link {
     margin-bottom: 10px;
     overflow: hidden;
 
-    > .field-label {
-        width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        .field-required {
-            color: red;
-        }
-    }
-
     > .field-container {
         flex: 1;
+    }
+}
+
+.field-label {
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    margin-right: 10px;
+
+    .field-required {
+        color: red;
+        position: absolute;
+        right: 0;
+        top: 0;
     }
 }
 
@@ -81,4 +86,8 @@ a.dropdown-box-toggle-link {
     margin: 10px 0;
     padding: 20px;
     border-radius: 10px;
+}
+
+.disabled, .btn.disabled {
+    pointer-events: all;
 }
