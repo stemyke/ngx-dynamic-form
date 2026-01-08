@@ -380,23 +380,15 @@ export class DynamicFormSchemaService {
         return endpoint.replace(new RegExp(`\\$${key}`, "gi"), `${value ?? ""}`);
     }
 
-    protected showErrorsForGroup(formGroup: FormGroup): void {
-        if (!formGroup) return;
-        formGroup.markAsTouched({onlySelf: true});
-        const controls = Object.keys(formGroup.controls).map(id => formGroup.controls[id]);
-        this.showErrorsForControls(controls);
-    }
-
     protected showErrorsForControls(controls: AbstractControl[]): void {
         controls.forEach(control => {
             if (control instanceof FormGroup) {
-                this.showErrorsForGroup(control);
-                return;
-            }
-            control.markAsTouched({onlySelf: true});
-            if (control instanceof FormArray) {
+                const controls = Object.keys(control.controls).map(id => control.controls[id]);
+                this.showErrorsForControls(controls);
+            } else if (control instanceof FormArray) {
                 this.showErrorsForControls(control.controls);
             }
+            control.markAsTouched({onlySelf: true});
         });
     }
 

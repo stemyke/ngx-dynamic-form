@@ -142,13 +142,10 @@ export function getFormValidationErrors(controls: FormGroupControls, parentPath:
         const path = !parentPath ? name : `${parentPath}.${name}`;
         if (control instanceof FormGroup) {
             getFormValidationErrors(control.controls, path).forEach(error => errors.push(error));
-            return;
-        }
-        if (control instanceof FormArray) {
+        } else if (control instanceof FormArray) {
             control.controls.forEach((control: FormGroup, ix) => {
                 getFormValidationErrors(control.controls, `${path}.${ix}`).forEach(error => errors.push(error));
             });
-            return;
         }
         Object.entries(control.errors || {}).forEach(([errorKey, errorValue]) => {
             errors.push({control, path, errorKey, errorValue});
