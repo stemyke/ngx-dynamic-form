@@ -349,6 +349,8 @@ export class DynamicFormBuilderService {
                 ...props,
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
+                description: options.labelCustomizer?.(key, data.description, parent, options.labelPrefix)
+                    ?? this.getLabel(key, data.description, parent, options),
                 hideLabel: data.hideLabel === true,
                 classes: data.classes || [],
                 layout: data.layout || [],

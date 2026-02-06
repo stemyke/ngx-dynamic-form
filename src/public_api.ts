@@ -63,6 +63,7 @@ export {
     FormUpload,
     FormFile,
     FormGroup,
+    FormArray,
     FormModel
 } from "./ngx-dynamic-form/utils/decorators";
 

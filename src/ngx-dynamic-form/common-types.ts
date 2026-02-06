@@ -299,7 +299,7 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "label" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
+export type FormFieldData = Pick<FormFieldProps, "label" | "description" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
     & {
     /**
      * Conditional check if the field should be hidden or not
