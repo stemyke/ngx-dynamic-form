@@ -36,6 +36,7 @@ export {
     FormFieldData,
     FormInputData,
     FormSelectData,
+    FormStaticData,
     FormUploadData,
     FormGroupData,
     FormArrayData,
@@ -60,6 +61,7 @@ export {
     FormSerializable,
     FormInput,
     FormSelect,
+    FormStatic,
     FormUpload,
     FormFile,
     FormGroup,
@@ -88,6 +90,7 @@ export {
     controlStatus,
     convertToDateFormat,
     convertToDate,
+    convertToNumber,
     getFieldByPath,
     getFieldsByPredicate,
     getFieldsByKey,
@@ -118,7 +121,9 @@ export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/d
 
 export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
 export {DynamicFormChipsComponent} from "./ngx-dynamic-form/components/dynamic-form-chips/dynamic-form-chips.component";
+export {DynamicFormStaticComponent} from "./ngx-dynamic-form/components/dynamic-form-static/dynamic-form-static.component";
 export {DynamicFormUploadComponent} from "./ngx-dynamic-form/components/dynamic-form-upload/dynamic-form-upload.component";
+export {DynamicFormWysiwygComponent} from "./ngx-dynamic-form/components/dynamic-form-wysiwyg/dynamic-form-wysiwyg.component";
 
 export {DynamicFormAlertComponent} from "./ngx-dynamic-form/components/dynamic-form-alert/dynamic-form-alert.component";
 export {DynamicFormFieldComponent} from "./ngx-dynamic-form/components/dynamic-form-field/dynamic-form-field.component";

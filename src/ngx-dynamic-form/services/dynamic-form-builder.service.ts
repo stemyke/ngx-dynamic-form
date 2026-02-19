@@ -22,10 +22,19 @@ import {
     FormInputData,
     FormSelectData,
     FormSelectOption,
+    FormStaticData,
     FormUploadData
 } from "../common-types";
 import {addFieldValidators} from "../utils/validation";
-import {controlValues, MAX_INPUT_NUM, MIN_INPUT_NUM, setFieldHooks, setFieldProp} from "../utils/misc";
+import {
+    controlValues,
+    convertToDate, convertToDateFormat,
+    convertToNumber,
+    MAX_INPUT_NUM,
+    MIN_INPUT_NUM,
+    setFieldHooks,
+    setFieldProp
+} from "../utils/misc";
 import {arrayItemActionToExpression} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
@@ -140,13 +149,13 @@ export class DynamicFormBuilderService {
         switch (type) {
             case "number":
             case "integer":
-                props.min = isNaN(data.min) ? MIN_INPUT_NUM : data.min;
-                props.max = isNaN(data.max) ? MAX_INPUT_NUM : data.max;
+                props.min = convertToNumber(data.min, MIN_INPUT_NUM);
+                props.max = convertToNumber(data.max, MAX_INPUT_NUM);
                 break;
             case "date":
             case "datetime-local":
-                props.min = data.min;
-                props.max = data.max;
+                props.min = convertToDateFormat(data.min, type);
+                props.max = convertToDateFormat(data.max, type);
                 break;
             case "string":
             case "text":
@@ -156,7 +165,7 @@ export class DynamicFormBuilderService {
                 break;
         }
         return this.createFormField(
-            key, type === "checkbox" || type === "textarea" ? type : "input",
+            key, type === "checkbox" || type === "textarea" || type === "wysiwyg" ? type : "input",
             data, props, parent, options
         );
     }
@@ -190,6 +199,15 @@ export class DynamicFormBuilderService {
             }
         });
         return field;
+    }
+
+    createFormStatic(key: string, data: FormStaticData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+        data = data || {};
+
+        return this.createFormField(key, "static", data, {
+            properties: Array.isArray(data.properties) ? data.properties : null,
+            style: data.style === "list" ? "list" : "table"
+        }, parent, options);
     }
 
     createFormUpload(key: string, data: FormUploadData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {

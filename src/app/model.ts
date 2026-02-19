@@ -8,7 +8,7 @@ import {
     FormInput,
     FormSelect,
     FormSelectOption,
-    FormSerializable,
+    FormSerializable, FormStatic,
     FormUpload,
     minValueValidation,
     requiredValidation
@@ -41,7 +41,7 @@ export class AddressModel {
         validators: [requiredValidation()]
     })
     @FormSerializable()
-    street: string = "";
+    street: string = "fds";
 
     @FormInput({
         classes: "form-group-sm",
@@ -65,6 +65,14 @@ export class OrderModel {
     })
     @FormSerializable()
     commission: string = "";
+
+    @FormInput({
+        type: "date",
+        max: new Date("2026-03-05"),
+        validators: [requiredValidation()]
+    })
+    @FormSerializable()
+    desiredDate: Date = new Date();
 
     @FormInput({
         label: "buyerName",
@@ -98,6 +106,12 @@ export class OrderModel {
         wrappers: ["form-alert"]
     })
     addresses: AddressModel[] = null;
+
+    @FormStatic()
+    displayAddress: AddressModel = new AddressModel();
+
+    @FormStatic()
+    displayName: string = "Teszt Elek";
 
     @FormArray("text")
     lines: string[] = [];
@@ -162,6 +176,13 @@ export class OrderModel {
     })
     @FormSerializable()
     radioContact: string = "";
+
+    @FormInput({
+        placeholder: "label.html",
+        type: "wysiwyg"
+    })
+    @FormSerializable()
+    html: string = "";
 
     @FormSerializable()
     individualEngravingOptionLeft: string = "none";

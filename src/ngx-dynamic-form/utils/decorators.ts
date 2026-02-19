@@ -4,7 +4,7 @@ import {
     FormFieldSerializer,
     FormGroupData,
     FormInputData,
-    FormSelectData,
+    FormSelectData, FormStaticData,
     FormUploadData
 } from "../common-types";
 import {FormFieldBuilder} from "../services/dynamic-form-builder.service";
@@ -82,6 +82,17 @@ export function FormUpload(data?: FormUploadData): PropertyDecorator {
 export function FormFile(data?: FormUploadData): PropertyDecorator {
     console.warn(`@FormFile decorator is deprecated, use @FormUpload instead`);
     return FormUpload(data);
+}
+
+export function FormStatic(data?: FormStaticData): PropertyDecorator {
+    data = data || {};
+    return (target: any, key: string): void => {
+        defineFormControl(
+            target, key,
+            (fb, path, options) =>
+                fb.createFormStatic(key, data, path, options)
+        );
+    };
 }
 
 export function FormGroup(data?: FormGroupData): PropertyDecorator {

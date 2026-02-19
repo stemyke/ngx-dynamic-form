@@ -6,11 +6,11 @@ import {
     inject,
     Injector,
     input,
-    output,
+    output, untracked,
     ViewEncapsulation
 } from "@angular/core";
 import {outputFromObservable, rxResource, toSignal} from "@angular/core/rxjs-interop";
-import {FormGroup} from "@angular/forms";
+import {AbstractControl, FormGroup} from "@angular/forms";
 import {Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
 import {EventsService, LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
@@ -19,11 +19,12 @@ import {
     FormBuilderOptions,
     FormFieldChangeEvent,
     FormFieldConfig,
-    FormFieldLabelCustomizer,
+    FormFieldLabelCustomizer, FormSerializeResult,
     IDynamicForm
 } from "../../common-types";
-import {controlStatus} from "../../utils/misc";
+import {controlStatus, getFieldByPath} from "../../utils/misc";
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
+import {DynamicFormService} from "../../services/dynamic-form.service";
 
 @Component({
     standalone: false,
@@ -108,7 +109,7 @@ export class DynamicFormComponent implements IDynamicForm {
         }
     };
 
-    constructor() {
+    constructor(readonly forms: DynamicFormService) {
         effect(() => {
             this.language();
             this.enableTranslations();
@@ -125,5 +126,19 @@ export class DynamicFormComponent implements IDynamicForm {
 
     reset() {
         this.options?.resetModel?.();
+    }
+
+    serialize(validate: boolean = true): Promise<FormSerializeResult> {
+        return this.forms.serializeForm(this, validate);
+    }
+
+    getField(path: string): FormFieldConfig {
+        const config = untracked(() => this.config());
+        return getFieldByPath(config[0], path);
+    }
+
+    getControl(path: string): AbstractControl {
+        const field = this.getField(path);
+        return field?.formControl ?? null;
     }
 }

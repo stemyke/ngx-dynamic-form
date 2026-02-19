@@ -10,7 +10,7 @@ import {
     HttpRequestOptions,
     MaybeArray,
     MaybePromise,
-    UploadData, ResolveFactory
+    UploadData, ResolveFactory, UnorderedListStyle
 } from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
@@ -137,6 +137,14 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     clearItems?: boolean;
     /**
+     * Defines what properties should we display in static type component
+     */
+    properties?: string[];
+    /**
+     * Defines what style should we use in static type component
+     */
+    style?: UnorderedListStyle;
+    /**
      * Specifies that the file upload component value is stored inline, so instead of an API call, the file Blob is inserted into the field value.
      */
     inline?: boolean;
@@ -253,6 +261,9 @@ export interface IDynamicForm {
     readonly onChanges: OutputRef<FormFieldChangeEvent>;
 
     reset(): void;
+    serialize(validate?: boolean): Promise<any>;
+    getField(path: string): FormFieldConfig;
+    getControl(path: string): AbstractControl;
 }
 
 // --- Validation types ---
@@ -344,12 +355,18 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "description" | "hide
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "min" | "max" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows">;
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows"> & {
+    min?: number | Date;
+    max?: number | Date;
+};
 
 export type FormSelectData = FormFieldData
     & Pick<FormFieldProps, "multiple" | "strict" | "type" | "allowEmpty" | "groupBy" | "invert"> & {
     options?: ResolveFactory<FormSelectOptionsFactory> | FormSelectOptionsFactory;
 };
+
+export type FormStaticData = FormFieldData
+    & Pick<FormFieldProps, "properties" | "style">;
 
 export type FormUploadData = FormFieldData
     & Pick<FormFieldProps, "inline" | "multiple" | "accept" | "url" | "maxSize" | "uploadOptions" | "createUploadData" | "multi" | "asFile" | "uploadUrl">;
