@@ -1,11 +1,16 @@
-@if (props.label && props.hideLabel !== true) {
-    <label class="field-label" [for]="id">
-        {{ props.label | translate }}
-        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-        @if (props.markRequired) {
-            <span class="field-required" aria-hidden="true">*</span>
-        }
-    </label>
+<ng-template #labelTemplate>
+    @if (props.label && props.hideLabel !== true) {
+        <label class="field-label" [for]="id">
+            <span [innerHTML]="props.label | translate | safe: 'html'"></span>
+            <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+            @if (props.markRequired) {
+                <span class="field-required" aria-hidden="true">*</span>
+            }
+        </label>
+    }
+</ng-template>
+@if (props.labelAlign === "before") {
+    <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
 }
 <div class="field-container">
     <ng-container #fieldComponent></ng-container>
@@ -17,3 +22,6 @@
         ></formly-validation-message>
     </div>
 </div>
+@if (props.labelAlign === "after") {
+    <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
+}

@@ -367,13 +367,13 @@ export class DynamicFormBuilderService {
                 ...props,
                 label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
                     ?? this.getLabel(key, data.label, parent, options),
+                labelAlign: data.labelAlign === "after" ? "after" : "before",
                 description: data.description,
                 hideLabel: data.hideLabel === true,
                 classes: data.classes || [],
                 layout: data.layout || [],
                 className: data.className || "",
                 formCheck: "nolabel",
-                labelPosition: "before",
                 __disabled: ObjectUtils.isFunction(disabled) ? disabled : () => disabled,
                 __hidden: ObjectUtils.isFunction(hidden) ? hidden : () => hidden
             },

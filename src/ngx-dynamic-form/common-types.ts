@@ -44,6 +44,10 @@ export type FormFieldArrayItemsAction = boolean | ((item: any, ix: number, field
  */
 export interface FormFieldProps extends FormlyFieldProps {
     /**
+     * It specifies where the label should be placed. (default: before)
+     */
+    labelAlign?: "before" | "after";
+    /**
      * Specifies if required marker should be hidden
      */
     hideRequiredMarker?: boolean;
@@ -75,10 +79,6 @@ export interface FormFieldProps extends FormlyFieldProps {
      * In a checkbox type component, it specifies where the label should be placed. (Bootstrap library specific)
      */
     formCheck?: string;
-    /**
-     * In a checkbox type component, it specifies where the label should be placed. (Material library specific)
-     */
-    labelPosition?: "before" | "after";
     /**
      * Specifies that the value of the checkbox type component can be undecided.
      */
@@ -144,6 +144,10 @@ export interface FormFieldProps extends FormlyFieldProps {
      * Defines what style should we use in static type component
      */
     style?: UnorderedListStyle;
+    /**
+     * An array of weekdays to be disabled in calendar
+     */
+    daysDisabled?: number[];
     /**
      * Specifies that the file upload component value is stored inline, so instead of an API call, the file Blob is inserted into the field value.
      */
@@ -310,7 +314,7 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "label" | "description" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
+export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "description" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
     & {
     /**
      * Conditional check if the field should be hidden or not
@@ -355,7 +359,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "description" | "hide
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows"> & {
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows" | "daysDisabled"> & {
     min?: number | Date;
     max?: number | Date;
 };

@@ -100,6 +100,7 @@ export {
     insertToFieldArray,
     removeFromFieldArray,
     setFieldDefault,
+    setFieldValue,
     setFieldProps,
     setFieldProp,
     setFieldHidden,
