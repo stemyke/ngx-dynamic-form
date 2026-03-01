@@ -383,7 +383,7 @@ export type FormArrayData = FormFieldData
 // --- Async submit ---
 
 export type AsyncSubmitMode = "click" | "submit" | "all";
-export type AsyncSubmitMethod = (form: IDynamicForm, context?: any) => Promise<IAsyncMessage>;
+export type AsyncSubmitMethod = (form: IDynamicForm, context?: any, ev?: MouseEvent) => Promise<IAsyncMessage>;
 
 // --- JSON schema interfaces ---
 

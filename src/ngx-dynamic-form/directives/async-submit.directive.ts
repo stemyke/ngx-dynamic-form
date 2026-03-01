@@ -4,36 +4,32 @@ import {
     effect,
     ElementRef,
     HostBinding,
-    HostListener,
     inject,
     input,
-    output,
     Renderer2,
     signal,
     untracked
 } from "@angular/core";
 import {outputToObservable} from "@angular/core/rxjs-interop";
 import {debounceTime} from "rxjs/operators";
-import {IAsyncMessage, TOASTER_SERVICE} from "@stemy/ngx-utils";
+import {AsyncMethodBase} from "@stemy/ngx-utils";
 
 import {AsyncSubmitMethod, AsyncSubmitMode, IDynamicForm} from "../common-types";
 
 @Directive({
     standalone: false,
     selector: "[async-submit]",
-    exportAs: "async-submit"
+    exportAs: "async-submit",
+    providers: [
+        {provide: AsyncMethodBase, useExisting: AsyncSubmitDirective}
+    ]
 })
-export class AsyncSubmitDirective {
+export class AsyncSubmitDirective extends AsyncMethodBase {
 
     readonly method = input<AsyncSubmitMethod>(null, {alias: "async-submit"});
     readonly mode = input<AsyncSubmitMode>("click");
-    form = input<IDynamicForm>();
-    context = input<any>();
+    readonly form = input<IDynamicForm>();
 
-    onSuccess = output<IAsyncMessage>();
-    onError = output<IAsyncMessage>();
-
-    toaster = inject(TOASTER_SERVICE);
     renderer = inject(Renderer2);
     elem = inject<ElementRef<HTMLElement>>(ElementRef);
 
@@ -47,7 +43,6 @@ export class AsyncSubmitDirective {
         return form?.group() || null;
     });
 
-    protected loading = signal(false);
     protected callback = signal<() => void>(null);
 
     @HostBinding("class.disabled")
@@ -61,6 +56,7 @@ export class AsyncSubmitDirective {
     }
 
     constructor() {
+        super();
         if (this.elem.nativeElement.tagName === "BUTTON") {
             this.renderer.setAttribute(this.elem.nativeElement, "type", "button");
         }
@@ -83,35 +79,24 @@ export class AsyncSubmitDirective {
         });
     }
 
-    @HostListener("click")
-    click(): void {
+    protected handleClick(ev: MouseEvent): boolean {
+        ev?.preventDefault();
         const mode = untracked(() => this.mode());
-        if (mode === "submit") return;
+        if (mode === "submit") return false;
         const status = untracked(() => this.status());
         if (status !== "VALID" && status !== "INVALID") {
             this.callback.set(() => this.callMethod());
-            return;
+            return false;
         }
-        this.callMethod();
+        this.callMethod(ev);
+        return true;
     }
 
-    callMethod(): void {
-        const loading = untracked(() => this.loading());
-        if (loading) return;
-        this.loading.set(true);
-        const [method, form, context] = untracked(() => [this.method(), this.form(), this.context()]);
-        method(form, context).then(result => {
-            this.loading.set(false);
-            if (result) {
-                this.onSuccess.emit(result);
-                this.toaster.success(result.message, result.context);
-            }
-        }, reason => {
-            if (!reason || !reason.message)
-                throw new Error("Reason must implement IAsyncMessage interface");
-            this.loading.set(false);
-            this.onError.emit(reason);
-            this.toaster.error(reason.message, reason.context);
-        });
+    protected getMethod() {
+        return untracked(() => this.method());
+    }
+
+    protected getArgs(ev: MouseEvent): unknown[] {
+        return untracked(() => [this.form(), this.context(), ev]);
     }
 }
