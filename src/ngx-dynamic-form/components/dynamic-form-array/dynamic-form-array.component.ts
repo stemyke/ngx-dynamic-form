@@ -22,9 +22,9 @@ export class DynamicFormArrayComponent extends FieldArrayType<FormFieldConfig> {
         this.currentTab.set(0);
     }
 
-    addItem(i?: number): void {
+    addItem(i?: number, initialModel?: any): void {
         i = i == null ? this.field.fieldGroup.length : i;
-        this.add(i);
+        this.add(i, initialModel);
         this.currentTab.set(i);
     }
 

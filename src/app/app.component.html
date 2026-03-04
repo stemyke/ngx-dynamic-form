@@ -1,15 +1,24 @@
-<dropdown-box>
-    <ng-container toggle-content>
-        {{ schema() }}
-    </ng-container>
-    <ul>
-        @for (s of schemas(); track s) {
-            <li [ngClass]="{active: s === schema()}" (click)="schema.set(s)">
-                {{ s }}
-            </li>
-        }
-    </ul>
-</dropdown-box>
+<div class="header">
+    <dropdown-box>
+        <ng-container toggle-content>
+            {{ schema() }}
+        </ng-container>
+        <ul>
+            @for (s of schemas(); track s) {
+                <li [ngClass]="{active: s === schema()}" (click)="schema.set(s)">
+                    {{ s }}
+                </li>
+            }
+        </ul>
+    </dropdown-box>
+    <div class="field-language">
+        <a *ngFor="let lang of language.languages"
+           class="btn"
+           [ngClass]="lang == language.editLanguage ? 'btn-primary' : 'btn-secondary'" (click)="language.editLanguage = lang">
+            {{ lang }}
+        </a>
+    </div>
+</div>
 <div class="row">
     <div class="col-7">
         @if (fields.hasValue()) {

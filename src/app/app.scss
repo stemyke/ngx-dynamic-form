@@ -6,6 +6,16 @@ body {
     padding: 10px 50px;
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+
+    .field-language {
+        display: flex;
+        gap: 5px;
+    }
+}
+
 form {
     background: lightgray;
     max-width: 800px;

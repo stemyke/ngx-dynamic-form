@@ -1,0 +1,26 @@
+@if (field.display) {
+    @if (props.label && props.hideLabel !== true) {
+        <label class="field-label">
+            {{ props.label | translate }}
+            <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+            @if (props.markRequired) {
+                <span class="field-required" aria-hidden="true">*</span>
+            }
+        </label>
+    }
+    <div class="field-container">
+        @for (itemField of field.fieldGroup; track itemField.key; let ix = $index) {
+            @if (ix === currentTab()) {
+                <formly-field [field]="itemField"></formly-field>
+            }
+        }
+
+        <div *ngIf="showError" class="field-errors invalid-feedback">
+            <formly-validation-message
+                [field]="field"
+                id="{{ id }}-formly-validation-error"
+                role="alert"
+            ></formly-validation-message>
+        </div>
+    </div>
+}

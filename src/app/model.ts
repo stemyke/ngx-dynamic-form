@@ -1,5 +1,5 @@
 import {DatePipe} from "@angular/common";
-import {ObjectUtils} from "@stemy/ngx-utils";
+import {ITranslation, ObjectUtils} from "@stemy/ngx-utils";
 import {
     arrayLengthValidation,
     emailValidation,
@@ -11,7 +11,7 @@ import {
     FormSerializable, FormStatic,
     FormUpload,
     minValueValidation,
-    requiredValidation
+    requiredValidation, RichTranslationModel, TranslationModel
 } from "../public_api";
 import {FormArray} from "../ngx-dynamic-form/utils/decorators";
 
@@ -58,6 +58,12 @@ export class AddressModel {
     city: string = "";
 }
 export class OrderModel {
+
+    @FormArray(TranslationModel)
+    title: ITranslation[] = [];
+
+    @FormArray(RichTranslationModel)
+    body: ITranslation[] = [];
 
     @FormInput({
         fieldSet: "commission",

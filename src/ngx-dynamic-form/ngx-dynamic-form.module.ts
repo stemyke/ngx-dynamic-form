@@ -16,6 +16,7 @@ import {DynamicFormSchemaService} from "./services/dynamic-form-schema.service";
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
 import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
+import {DynamicFormTranslationComponent} from "./components/dynamic-form-translation/dynamic-form-translation.component";
 import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynamic-form-upload.component";
 import {DynamicFormWysiwygComponent} from "./components/dynamic-form-wysiwyg/dynamic-form-wysiwyg.component";
 
@@ -62,6 +63,7 @@ export class NgxDynamicFormModule {
                     {name: "array", component: DynamicFormArrayComponent},
                     {name: "chips", component: DynamicFormChipsComponent},
                     {name: "static", component: DynamicFormStaticComponent},
+                    {name: "translation", component: DynamicFormTranslationComponent},
                     {name: "upload", component: DynamicFormUploadComponent},
                     {name: "wysiwyg", component: DynamicFormWysiwygComponent},
                 ],

@@ -111,6 +111,9 @@ export {
     EDITOR_FORMATS
 } from "./ngx-dynamic-form/utils/misc";
 
+export {RichTranslationModel} from "./ngx-dynamic-form/models/rich-translation.model";
+export {TranslationModel} from "./ngx-dynamic-form/models/translation.model";
+
 export {DynamicFormBuilderService} from "./ngx-dynamic-form/services/dynamic-form-builder.service";
 export {DynamicFormSchemaService} from "./ngx-dynamic-form/services/dynamic-form-schema.service";
 export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";

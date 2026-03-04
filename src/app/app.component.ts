@@ -1,13 +1,13 @@
 import {
     ChangeDetectionStrategy,
-    Component,
+    Component, Inject,
     linkedSignal,
     OnInit,
     resource,
     signal,
     ViewEncapsulation
 } from "@angular/core";
-import {IAsyncMessage, OpenApiService} from "@stemy/ngx-utils";
+import {IAsyncMessage, ILanguageService, LANGUAGE_SERVICE, OpenApiService} from "@stemy/ngx-utils";
 import {
     addFieldValidators,
     DynamicFormBuilderService,
@@ -85,10 +85,11 @@ export class AppComponent implements OnInit {
 
     decoratorData = signal<any>(new OrderModel());
 
-    constructor(private openApi: OpenApiService,
-                private fb: DynamicFormBuilderService,
-                private fs: DynamicFormSchemaService,
-                private forms: DynamicFormService) {
+    constructor(readonly openApi: OpenApiService,
+                readonly fb: DynamicFormBuilderService,
+                readonly fs: DynamicFormSchemaService,
+                readonly forms: DynamicFormService,
+                @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
         setTimeout(() => {
             this.plainData.update(value => {
                 return {
@@ -97,6 +98,7 @@ export class AppComponent implements OnInit {
                 };
             });
         }, 1000);
+        this.language.addLanguages(["en", "de", "hu"]);
     }
 
     ngOnInit(): void {

@@ -286,6 +286,14 @@ export class DynamicFormBuilderService {
                     hooks: {},
                     expressions
                 };
+                const lang = items.find(i => i.key === "lang");
+                const translation = items.find(i => i.key === "translation");
+                if (lang && translation) {
+                    // Use translation component if the sub items are correct
+                    array.type = "translation";
+                    lang.props.__hidden = () => true;
+                    translation.props.label = "";
+                }
                 this.setExpressions(array.fieldArray, options);
                 return array;
             }

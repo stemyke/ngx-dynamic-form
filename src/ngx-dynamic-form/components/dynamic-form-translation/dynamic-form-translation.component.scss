@@ -1,0 +1,13 @@
+.form-array-item.hidden-tab {
+    display: none;
+}
+
+.form-array-buttons {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.field-errors.invalid-feedback {
+    display: block;
+}
