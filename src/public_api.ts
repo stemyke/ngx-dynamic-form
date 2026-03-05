@@ -126,6 +126,7 @@ export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/d
 export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
 export {DynamicFormChipsComponent} from "./ngx-dynamic-form/components/dynamic-form-chips/dynamic-form-chips.component";
 export {DynamicFormStaticComponent} from "./ngx-dynamic-form/components/dynamic-form-static/dynamic-form-static.component";
+export {DynamicFormTranslationComponent} from "./ngx-dynamic-form/components/dynamic-form-translation/dynamic-form-translation.component";
 export {DynamicFormUploadComponent} from "./ngx-dynamic-form/components/dynamic-form-upload/dynamic-form-upload.component";
 export {DynamicFormWysiwygComponent} from "./ngx-dynamic-form/components/dynamic-form-wysiwyg/dynamic-form-wysiwyg.component";
 
