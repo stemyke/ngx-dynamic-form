@@ -70,7 +70,7 @@ export class OrderModel {
         validators: [requiredValidation()]
     })
     @FormSerializable()
-    commission: string = "";
+    commission: string = "123 456";
 
     @FormInput({
         type: "date",
@@ -111,7 +111,7 @@ export class OrderModel {
         priority: -1,
         wrappers: ["form-alert"]
     })
-    addresses: AddressModel[] = null;
+    addresses: AddressModel[] = [new AddressModel()];
 
     @FormStatic()
     displayAddress: AddressModel = new AddressModel();

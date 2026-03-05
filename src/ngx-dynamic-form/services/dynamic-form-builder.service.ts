@@ -28,10 +28,11 @@ import {
 import {addFieldValidators} from "../utils/validation";
 import {
     controlValues,
-    convertToDate, convertToDateFormat,
+    convertToDateFormat,
     convertToNumber,
     MAX_INPUT_NUM,
     MIN_INPUT_NUM,
+    setFieldHidden,
     setFieldHooks,
     setFieldProp
 } from "../utils/misc";
@@ -291,8 +292,8 @@ export class DynamicFormBuilderService {
                 if (lang && translation) {
                     // Use translation component if the sub items are correct
                     array.type = "translation";
-                    lang.props.__hidden = () => true;
-                    translation.props.label = "";
+                    setFieldHidden(lang);
+                    setFieldProp(translation, "label", "");
                 }
                 this.setExpressions(array.fieldArray, options);
                 return array;
