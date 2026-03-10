@@ -42,6 +42,10 @@ export class DynamicFormService {
             props: {}
         } as FormFieldConfig;
         const schema = await this.fs.getSchema(name);
+        if (!schema) {
+            console.warn(`Schema with name "${name}" not found.`);
+            return config;
+        }
         const wrapOptions = await toWrapOptions(
             customizeOrOptions, this.injector, schema,
             `"DynamicFormService.${restrictedMethod}" is called from a customizer, which is not allowed. Please use DynamicFormSchemaService instead!`
@@ -121,11 +125,12 @@ export class DynamicFormService {
         for (const field of fields) {
             const serializer = field.serializer;
             const key = `${field.key}`;
-            if (ObjectUtils.isFunction(serializer)) {
-                result[key] = await serializer(field, this.injector);
+            const shouldSerialize = field.serialize(field, this.injector) ?? !!field.hide;
+            if (!shouldSerialize) {
                 continue;
             }
-            if (field.hide && !field.serialize) {
+            if (ObjectUtils.isFunction(serializer)) {
+                result[key] = await serializer(field, this.injector);
                 continue;
             }
             const control = field.formControl;

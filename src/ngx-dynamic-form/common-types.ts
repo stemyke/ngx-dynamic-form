@@ -4,13 +4,16 @@ import {Observable} from "rxjs";
 import {ConfigOption, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {
-    IAsyncMessage,
-    OpenApiSchema,
-    OpenApiSchemaProperty,
     HttpRequestOptions,
+    IAsyncMessage,
     MaybeArray,
     MaybePromise,
-    UploadData, ResolveFactory, UnorderedListStyle
+    OpenApiSchema,
+    OpenApiSchemaProperty,
+    RequireAtLeastOne,
+    ResolveFactory,
+    UnorderedListStyle,
+    UploadData
 } from "@stemy/ngx-utils";
 
 // --- Basic frm constants ---
@@ -208,8 +211,8 @@ export type FormFieldExpressions = {
 };
 
 export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
+    serialize?: FormFieldConditionFn;
     serializer?: FormFieldSerializer;
-    serialize?: boolean;
     fieldSet?: string;
     priority?: number;
     fieldGroup?: FormFieldConfig[];
@@ -325,13 +328,13 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
      */
     disabled?: FormFieldCondition | ResolveFactory<FormFieldCondition>;
     /**
+     * Conditional check if the field should be serialized or not, normal serialization can happen even if the field is hidden
+     */
+    serialize?: FormFieldCondition | ResolveFactory<FormFieldCondition>;
+    /**
      * This is a custom serializer callback function. (Can't be defined from JSON schema because it is a JS callback)
      */
     serializer?: FormFieldSerializer;
-    /**
-     * Enables normal serialization even if the field is hidden
-     */
-    serialize?: boolean;
     /**
      * Puts the field in a custom field set
      */
@@ -379,6 +382,8 @@ export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs">;
 
 export type FormArrayData = FormFieldData
     & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "addItem" | "clearItems">;
+
+export type FormSerializerData = RequireAtLeastOne<Pick<FormFieldData, "serialize" | "serializer">>;
 
 // --- Async submit ---
 

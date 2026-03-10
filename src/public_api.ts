@@ -40,6 +40,7 @@ export {
     FormUploadData,
     FormGroupData,
     FormArrayData,
+    FormSerializerData,
 
     AsyncSubmitMode,
     AsyncSubmitMethod,

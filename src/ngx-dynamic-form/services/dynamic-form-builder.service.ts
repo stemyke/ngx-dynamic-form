@@ -17,11 +17,11 @@ import {
     FormFieldConfig,
     FormFieldData,
     FormFieldExpressions,
-    FormFieldProps,
+    FormFieldProps, FormFieldSerializer,
     FormGroupData,
     FormInputData,
     FormSelectData,
-    FormSelectOption,
+    FormSelectOption, FormSerializerData,
     FormStaticData,
     FormUploadData
 } from "../common-types";
@@ -326,6 +326,17 @@ export class DynamicFormBuilderService {
             : handleItems(result);
     }
 
+    createFormSerializer(data: FormFieldSerializer | FormSerializerData): Partial<FormFieldConfig> {
+        const options = ObjectUtils.isFunction(data) ? {
+            serializer: data,
+        } : data || {serialize: true};
+        const serialize = ReflectUtils.resolve(options.serialize, this.injector);
+        return {
+            serialize: ObjectUtils.isFunction(serialize) ? serialize : () => serialize,
+            serializer: options.serializer
+        };
+    }
+
     async fixSelectOptions(field: FormFieldConfig, options: FormSelectOption[]): Promise<FormSelectOption[]> {
         if (!Array.isArray(options)) return [];
         options = await Promise.all(options.map(async option => {
@@ -362,8 +373,7 @@ export class DynamicFormBuilderService {
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
         const hidden = ReflectUtils.resolve(data.hidden, this.injector);
         const field: FormFieldConfig = {
-            serializer: data.serializer,
-            serialize: data.serialize || false,
+            ...this.createFormSerializer(data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
             priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
 

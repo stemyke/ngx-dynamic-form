@@ -59,6 +59,7 @@ export class DynamicFormSchemaService {
     async getFormFieldsForSchema(schema: OpenApiSchema,
                                  parent: FormFieldConfig,
                                  customizeOrOptions: CustomizerOrSchemaOptions): Promise<FormFieldConfig[]> {
+        if (!schema) return [];
         const options = await toWrapOptions(customizeOrOptions, this.injector, schema);
         const keys = Object.keys(schema.properties || {});
         const fields: FormFieldConfig[] = [];

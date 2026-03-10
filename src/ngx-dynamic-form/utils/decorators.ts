@@ -1,10 +1,10 @@
-import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
+import {ObjectUtils, ReflectUtils, RequireAtLeastOne} from "@stemy/ngx-utils";
 import {
-    FormArrayData,
+    FormArrayData, FormFieldData,
     FormFieldSerializer,
     FormGroupData,
     FormInputData,
-    FormSelectData, FormStaticData,
+    FormSelectData, FormSerializerData, FormStaticData,
     FormUploadData
 } from "../common-types";
 import {FormFieldBuilder} from "../services/dynamic-form-builder.service";
@@ -24,13 +24,13 @@ function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilde
     ReflectUtils.defineMetadata("dynamicFormFields", fields, target);
 }
 
-export function FormSerializable(serializer?: FormFieldSerializer): PropertyDecorator {
+export function FormSerializable(data?: FormFieldSerializer | FormSerializerData): PropertyDecorator {
     return (target: any, key: string): void => {
-        defineFormControl(target, key, () => ({
-            key,
-            serializer,
-            serialize: true
-        }));
+        defineFormControl(
+            target, key,
+            (fb) =>
+                fb.createFormSerializer(data)
+        );
     };
 }
 
