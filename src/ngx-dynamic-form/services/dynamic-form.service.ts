@@ -27,7 +27,7 @@ export class DynamicFormService {
 
     async getFormFieldsForSchema(name: string, customizeOrOptions?: CustomizerOrSchemaOptions): Promise<FormFieldConfig[]> {
         const group = await this.getFormFieldGroupBySchemaName(name, customizeOrOptions, "getFormFieldsForSchema");
-        return group.fieldGroup;
+        return group.fieldGroup || [];
     }
 
     async getFormFieldGroupForSchema(name: string, customizeOrOptions?: CustomizerOrSchemaOptions): Promise<FormFieldConfig> {
