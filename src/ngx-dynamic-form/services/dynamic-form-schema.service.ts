@@ -132,7 +132,7 @@ export class DynamicFormSchemaService {
             hideLabel: property.hideLabel === true,
             classes: property.classes,
             layout: property.layout,
-            serialize: property.serialize === true,
+            serialize: property.serialize,
             fieldSet: property.fieldSet,
             priority: property.priority,
             componentType: property.componentType,

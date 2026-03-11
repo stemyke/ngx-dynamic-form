@@ -125,7 +125,7 @@ export class DynamicFormService {
         for (const field of fields) {
             const serializer = field.serializer;
             const key = `${field.key}`;
-            const shouldSerialize = field.serialize(field, this.injector) ?? !!field.hide;
+            const shouldSerialize = field.serialize(field, this.injector) ?? field.props?.hidden !== true;
             if (!shouldSerialize) {
                 continue;
             }

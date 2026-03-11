@@ -332,7 +332,9 @@ export class DynamicFormBuilderService {
         } : data || {serialize: true};
         const serialize = ReflectUtils.resolve(options.serialize, this.injector);
         return {
-            serialize: ObjectUtils.isFunction(serialize) ? serialize : () => serialize,
+            serialize: ObjectUtils.isFunction(serialize) ? serialize : () => {
+                return serialize;
+            },
             serializer: options.serializer
         };
     }
