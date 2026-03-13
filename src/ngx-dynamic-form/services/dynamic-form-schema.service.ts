@@ -136,7 +136,7 @@ export class DynamicFormSchemaService {
             fieldSet: property.fieldSet,
             priority: property.priority,
             componentType: property.componentType,
-            wrappers: property.wrappers,
+            wrappers: Array.isArray(property.wrappers) ? property.wrappers : String(property.wrappers || "").split(","),
             props: property,
             validators
         };

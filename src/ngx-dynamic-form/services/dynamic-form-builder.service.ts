@@ -385,7 +385,7 @@ export class DynamicFormBuilderService {
 
     protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         const wrappers = Array.isArray(data.wrappers) ? Array.from(data.wrappers) : [];
-        if (type !== "array") {
+        if (type !== "array" && wrappers.length === 0) {
             wrappers.unshift(!type ? "form-group" : "form-field");
         }
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
