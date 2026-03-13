@@ -57,13 +57,46 @@ export class AddressModel {
     @FormSerializable()
     city: string = "";
 }
-export class OrderModel {
+
+export class PageModel {
 
     @FormArray(TranslationModel)
     title: ITranslation[] = [];
 
     @FormArray(RichTranslationModel)
     body: ITranslation[] = [];
+}
+
+export class AddressesModel {
+
+    @FormGroup()
+    buyerAddress: AddressModel = new AddressModel();
+
+    @FormArray(AddressModel, {
+        removeItem: (item) => {
+            return !item.street || item.street.length < 5;
+        },
+        validators: [requiredValidation(), arrayLengthValidation()],
+        priority: -1,
+        wrappers: ["form-alert"]
+    })
+    addresses: AddressModel[] = [new AddressModel()];
+
+    @FormStatic()
+    displayAddress: AddressModel = new AddressModel();
+}
+
+export class OrderModel {
+
+    @FormGroup({
+        asFieldSet: true
+    })
+    page: PageModel = new PageModel();
+
+    @FormGroup({
+        asFieldSet: true
+    })
+    addressing: AddressesModel = new AddressesModel();
 
     @FormInput({
         fieldSet: "commission",
@@ -73,6 +106,7 @@ export class OrderModel {
     commission: string = "123 456";
 
     @FormInput({
+        fieldSet: "commission",
         type: "date",
         max: new Date("2026-03-05"),
         validators: [requiredValidation()]
@@ -100,38 +134,8 @@ export class OrderModel {
     @FormSerializable(serializeDate())
     buyerBirthday: Date = null;
 
-    @FormGroup()
-    buyerAddress: AddressModel = new AddressModel();
-
-    @FormArray(AddressModel, {
-        removeItem: (item) => {
-            return !item.street || item.street.length < 5;
-        },
-        validators: [requiredValidation(), arrayLengthValidation()],
-        priority: -1,
-        wrappers: ["form-alert"]
-    })
-    addresses: AddressModel[] = [new AddressModel()];
-
-    @FormStatic()
-    displayAddress: AddressModel = new AddressModel();
-
-    @FormStatic()
-    displayName: string = "Teszt Elek";
-
-    @FormArray("text")
-    lines: string[] = [];
-
-    @FormArray({
-        type: "number",
-        step: 0.05,
-        min: 3,
-        validators: [minValueValidation(5)]
-    })
-    nums: number[] = [];
-
     @FormInput({
-        fieldSet: "contact-1",
+        fieldSet: "contact",
         placeholder: "label.buyerEmail",
         validators: [emailValidation()]
     })
@@ -139,35 +143,28 @@ export class OrderModel {
     buyerEmail: string = "";
 
     @FormInput({
-        fieldSet: "contact-1",
+        fieldSet: "contact",
         placeholder: "label.buyerPhone"
     })
     @FormSerializable()
     buyerPhone: string = "";
 
     @FormInput({
-        fieldSet: "contact-2",
+        fieldSet: "contact",
         placeholder: "label.buyerFax"
     })
     @FormSerializable()
     buyerFax: string = "";
 
     @FormInput({
-        fieldSet: "contact-2",
+        fieldSet: "contact",
         placeholder: "label.buyerMobile"
     })
     @FormSerializable()
     buyerMobile: string = "";
 
-    // @FormDate()
-    @FormSerializable(serializeDate())
-    desiredDeliveryDate: Date = null;
-
-    // @FormDate()
-    @FormSerializable(serializeDate())
-    weddingDate: Date = null;
-
     @FormSelect({
+        fieldSet: "contact",
         options: getPreferredContacts,
         strict: false,
         multiple: true
@@ -176,6 +173,7 @@ export class OrderModel {
     preferredContacts: string[] = [];
 
     @FormSelect({
+        fieldSet: "contact",
         options: getPreferredContacts,
         type: "radio",
         priority: 0
@@ -184,29 +182,46 @@ export class OrderModel {
     radioContact: string = "";
 
     @FormInput({
+        fieldSet: "testing",
         placeholder: "label.html",
         type: "wysiwyg"
     })
     @FormSerializable()
     html: string = "";
 
-    @FormSerializable()
-    individualEngravingOptionLeft: string = "none";
-
-    @FormSerializable()
-    individualEngravingOptionRight: string = "none";
-
     @FormInput({
-        fieldSet: "buyermessage",
+        fieldSet: "testing",
         type: "textarea",
         hidden: true
     })
     @FormSerializable()
     message: string = "";
 
-    @FormUpload()
+    @FormUpload({
+        fieldSet: "testing"
+    })
     @FormSerializable()
     file: string = "";
+
+    @FormStatic({
+        fieldSet: "testing",
+    })
+    displayName: string = "Teszt Elek";
+
+    @FormArray("text", {
+        fieldSet: "testing"
+    })
+    lines: string[] = [];
+
+    @FormArray({
+        type: "number",
+        step: 0.05,
+        min: 3,
+        validators: [minValueValidation(5)]
+    }, {
+        fieldSet: "testing",
+    })
+    nums: number[] = [];
 
     constructor(data?: any) {
         if (data) Object.assign(this, data);

@@ -136,7 +136,7 @@ export class DynamicFormService {
             const control = field.formControl;
             if (field.fieldGroup) {
                 const group = await this.serialize(field.fieldGroup);
-                if (field.key) {
+                if (field.key && !field.asFieldSet) {
                     result[key] = !field.fieldArray ? group : Object.values(group);
                     continue;
                 }

@@ -17,11 +17,13 @@ import {
     FormFieldConfig,
     FormFieldData,
     FormFieldExpressions,
-    FormFieldProps, FormFieldSerializer,
+    FormFieldProps,
+    FormFieldSerializer,
     FormGroupData,
     FormInputData,
     FormSelectData,
-    FormSelectOption, FormSerializerData,
+    FormSelectOption,
+    FormSerializerData,
     FormStaticData,
     FormUploadData
 } from "../common-types";
@@ -121,7 +123,20 @@ export class DynamicFormBuilderService {
                 }
                 fieldGroup.push(field);
                 continue;
+            } else if (field.asFieldSet && !groups[field.id]) {
+                const fsName = String(field.key);
+                const id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
+                field.id = id;
+                field.wrappers = ["form-fieldset"];
+                field.props = {
+                    label: this.getLabel(fsName, fsName, parent, options),
+                    hidden: false,
+                    className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
+                };
+                field.expressions = {};
+                this.setExpressions(field, options);
             }
+
             // Otherwise just push to result
             result.push(field);
         }
@@ -242,8 +257,9 @@ export class DynamicFormBuilderService {
         const group = this.createFormField(key, undefined, data, {
             useTabs: data.useTabs === true,
         }, parent, options);
+        group.asFieldSet = data.asFieldSet === true;
         group.defaultValue = {};
-        const result = fields(group);
+        const result = fields(group.asFieldSet ? parent : group);
         const handleGroup = (fieldGroup: FormFieldConfig[]) => {
             group.fieldGroup = fieldGroup;
             return group;

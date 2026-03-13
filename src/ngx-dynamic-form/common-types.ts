@@ -214,6 +214,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     serialize?: FormFieldConditionFn;
     serializer?: FormFieldSerializer;
     fieldSet?: string;
+    asFieldSet?: boolean;
     priority?: number;
     fieldGroup?: FormFieldConfig[];
     fieldArray?: FormFieldConfig;
@@ -378,7 +379,12 @@ export type FormStaticData = FormFieldData
 export type FormUploadData = FormFieldData
     & Pick<FormFieldProps, "inline" | "multiple" | "accept" | "url" | "maxSize" | "uploadOptions" | "createUploadData" | "multi" | "asFile" | "uploadUrl">;
 
-export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs">;
+export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs"> & {
+    /**
+     * Use this field as a field set instead of a keyed form group
+     */
+    asFieldSet?: boolean;
+};
 
 export type FormArrayData = FormFieldData
     & Pick<FormFieldProps, "useTabs" | "tabsLabel" | "insertItem" | "cloneItem" | "moveItem" | "removeItem" | "addItem" | "clearItems">;
