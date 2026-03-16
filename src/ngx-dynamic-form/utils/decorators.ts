@@ -29,7 +29,7 @@ export function FormSerializable(data?: FormFieldSerializer | FormSerializerData
         defineFormControl(
             target, key,
             (fb) =>
-                fb.createFormSerializer(data)
+                fb.createFormSerializer(key, data)
         );
     };
 }

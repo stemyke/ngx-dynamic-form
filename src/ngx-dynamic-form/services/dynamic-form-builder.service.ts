@@ -1,7 +1,7 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
 import {BehaviorSubject, combineLatestWith, Observable, switchMap} from "rxjs";
 import {
-    API_SERVICE,
+    API_SERVICE, ArrayUtils,
     EventsService,
     IApiService,
     ILanguageService,
@@ -308,6 +308,7 @@ export class DynamicFormBuilderService {
                 if (lang && translation) {
                     // Use translation component if the sub items are correct
                     array.type = "translation";
+                    lang.serialize = () => true;
                     setFieldHidden(lang);
                     setFieldProp(translation, "label", "");
                 }
@@ -342,12 +343,13 @@ export class DynamicFormBuilderService {
             : handleItems(result);
     }
 
-    createFormSerializer(data: FormFieldSerializer | FormSerializerData): Partial<FormFieldConfig> {
+    createFormSerializer(key: string, data: FormFieldSerializer | FormSerializerData): Partial<FormFieldConfig> {
         const options = ObjectUtils.isFunction(data) ? {
             serializer: data,
         } : data || {serialize: true};
         const serialize = ReflectUtils.resolve(options.serialize, this.injector);
         return {
+            key,
             serialize: ObjectUtils.isFunction(serialize) ? serialize : () => {
                 return serialize;
             },
@@ -384,17 +386,19 @@ export class DynamicFormBuilderService {
     }
 
     protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
-        const wrappers = Array.isArray(data.wrappers) ? Array.from(data.wrappers) : [];
-        if (type !== "array" && wrappers.length === 0) {
-            wrappers.unshift(!type ? "form-group" : "form-field");
+        let wrappers = Array.isArray(data.wrappers) ? Array.from(data.wrappers) : [];
+        if (type !== "array") {
+            wrappers = !type
+                ? ArrayUtils.unique([wrappers.length === 0 ? "form-group" : undefined, ...wrappers])
+                : ArrayUtils.unique(["form-field", ...wrappers]);
         }
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
         const hidden = ReflectUtils.resolve(data.hidden, this.injector);
         const field: FormFieldConfig = {
-            ...this.createFormSerializer(data as unknown as FormSerializerData),
+            ...this.createFormSerializer(key, data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
             priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
-
+            wrappers: wrappers.filter(ObjectUtils.isDefined),
             type: data.componentType || type,
             resetOnHide: false,
             validators: {},
@@ -428,9 +432,7 @@ export class DynamicFormBuilderService {
                     const hidden = target.props?.__hidden;
                     return !!hidden(target, this.injector);
                 }
-            },
-            key,
-            wrappers,
+            }
         };
         // Parent object will be available for customizers as a property, until it gets redefined by formly
         Object.defineProperty(field, "parent", {
