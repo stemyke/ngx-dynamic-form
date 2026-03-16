@@ -123,6 +123,7 @@ export class DynamicFormSchemaService {
         }
         this.addPropertyValidators(validators, property);
         this.addItemsValidators(validators, property.items);
+        const wrappers = Array.isArray(property.wrappers) ? property.wrappers : String(property.wrappers || "").split(",");
         return {
             hidden: property.hidden === true,
             disabled: property.disabled === true,
@@ -136,7 +137,7 @@ export class DynamicFormSchemaService {
             fieldSet: property.fieldSet,
             priority: property.priority,
             componentType: property.componentType,
-            wrappers: Array.isArray(property.wrappers) ? property.wrappers : String(property.wrappers || "").split(","),
+            wrappers: wrappers.filter(ObjectUtils.isStringWithValue),
             props: property,
             validators
         };
