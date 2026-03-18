@@ -73,10 +73,12 @@ export class DynamicFormComponent implements IDynamicForm {
             legacyLabels: this.legacyLabels(),
             testId: this.testId(),
         };
-        const fields = this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, options);
         return [
             this.builder.createFormGroup(
-                null, () => fields,
+                null, parent => {
+                    const fields = this.fields() || this.builder.resolveFormFields(this.data()?.constructor, parent, options);
+                    return this.builder.createFieldSets(fields, parent, options);
+                },
                 {
                     label: "",
                     useTabs: this.useTabs(),

@@ -1,6 +1,9 @@
 import {Injector} from "@angular/core";
 import {LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
 import {FormFieldConfig, ValidationMessageFn, ValidatorFn, Validators} from "../common-types";
+import {AbstractControl} from "@angular/forms";
+import {FormlyFieldConfig} from "@ngx-formly/core";
+import {isFieldHidden, isFieldVisible} from "./misc";
 
 function validationMessage(errorKey: string): ValidationMessageFn {
     const key = `form.error.${errorKey}`;
@@ -12,8 +15,11 @@ function validationMessage(errorKey: string): ValidationMessageFn {
 }
 
 function withName(fn: ValidatorFn, name: string): ValidatorFn {
-    fn.validatorName = name;
-    return fn;
+    const mainFn: ValidatorFn = (control: AbstractControl, field: FormFieldConfig) => {
+        return isFieldHidden(field) || fn(control, field);
+    };
+    mainFn.validatorName = name;
+    return mainFn;
 }
 
 function validateEach(each: boolean, cb: (value: any) => boolean, name: string): ValidatorFn {

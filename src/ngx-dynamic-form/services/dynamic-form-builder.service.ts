@@ -34,6 +34,8 @@ import {
     controlValues,
     convertToDateFormat,
     convertToNumber,
+    isFieldHidden,
+    isFieldVisible,
     MAX_INPUT_NUM,
     MIN_INPUT_NUM,
     setFieldHidden,
@@ -394,7 +396,7 @@ export class DynamicFormBuilderService {
             return options.labelCustomizer(key, label, parent, labelPrefix) || "";
         }
         // Exceptional case, to be able to have an "empty" label element in the HTML just to fill the space.
-        if (label === " ") return "\\s";
+        if (label === " ") return "\u200B";
         const pathPrefix = options.legacyLabels
             ? String(legacyPrefix || labelPrefix)
             : String(parent?.props?.label || labelPrefix);
@@ -447,8 +449,7 @@ export class DynamicFormBuilderService {
                     return !!disabled(target, this.injector);
                 },
                 "props.hidden": target => {
-                    const hidden = target.props?.__hidden;
-                    return !!hidden(target, this.injector);
+                    return isFieldHidden(target);
                 }
             }
         };
@@ -463,14 +464,6 @@ export class DynamicFormBuilderService {
         return field;
     }
 
-    protected shouldDisplay(field: FormFieldConfig): boolean {
-        const display = field.props?.hidden !== true;
-        if (Array.isArray(field.fieldGroup) && field.fieldGroup.length) {
-            return display && field.fieldGroup.some(f => this.shouldDisplay(f));
-        }
-        return display;
-    }
-
     protected isValid(field: FormFieldConfig): boolean {
         const control = field.formControl;
         const valid = field.key && control ? (control.disabled || control.valid) !== false : true;
@@ -482,7 +475,7 @@ export class DynamicFormBuilderService {
 
     protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): void {
         const expressions: FormFieldExpressions = {
-            display: target => this.shouldDisplay(target),
+            display: target => isFieldVisible(target),
             valid: target => this.isValid(target),
             className: (target: FormFieldConfig) => {
                 if (!target.display) {

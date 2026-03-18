@@ -107,6 +107,8 @@ export {
     setFieldHidden,
     setFieldDisabled,
     setFieldHooks,
+    isFieldVisible,
+    isFieldHidden,
     MIN_INPUT_NUM,
     MAX_INPUT_NUM,
     EDITOR_FORMATS

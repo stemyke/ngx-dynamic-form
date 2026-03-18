@@ -1,10 +1,11 @@
+import {Injector} from "@angular/core";
 import {AbstractControl} from "@angular/forms";
 import {firstValueFrom, merge, Observable, of} from "rxjs";
 import {debounceTime} from "rxjs/operators";
 import {ObjectUtils} from "@stemy/ngx-utils";
 import {
     DynamicFormStatus,
-    FormFieldCondition,
+    FormFieldCondition, FormFieldConditionFn,
     FormFieldConfig,
     FormFieldKey,
     FormFieldProps,
@@ -195,6 +196,25 @@ export function setFieldHooks(field: FormFieldConfig, hooks: FormHookConfig): vo
             })
             : hooks[name];
     });
+}
+
+export function isFieldVisible(field: FormFieldConfig): boolean {
+    let visible = true;
+    let current = field;
+    while (current && visible) {
+        const hiddenFn: FormFieldConditionFn = current.props?.__hidden;
+        const injector: Injector = field.options?.formState?.injector;
+        visible = visible && (!injector || !hiddenFn?.(current, injector));
+        current = current.parent;
+    }
+    if (Array.isArray(field.fieldGroup) && field.fieldGroup.length) {
+        return visible && field.fieldGroup.some(f => isFieldVisible(f));
+    }
+    return visible;
+}
+
+export function isFieldHidden(field: FormFieldConfig): boolean {
+    return !isFieldVisible(field);
 }
 
 export const MIN_INPUT_NUM = -1999999999;

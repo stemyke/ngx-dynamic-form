@@ -279,7 +279,7 @@ export interface IDynamicForm {
 
 // --- Validation types ---
 
-type FormFieldValidatorFn<T> = ((control: AbstractControl, field?: FormlyFieldConfig) => T) & {
+type FormFieldValidatorFn<T> = ((control: AbstractControl, field: FormlyFieldConfig) => T) & {
     validatorName?: string
 };
 
