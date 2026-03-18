@@ -41,6 +41,7 @@ export {
     FormGroupData,
     FormArrayData,
     FormSerializerData,
+    FormFieldSetData,
 
     AsyncSubmitMode,
     AsyncSubmitMethod,
@@ -59,15 +60,14 @@ export {
 } from "./ngx-dynamic-form/utils/customizer";
 
 export {
-    FormSerializable,
     FormInput,
     FormSelect,
     FormStatic,
     FormUpload,
-    FormFile,
     FormGroup,
     FormArray,
-    FormModel
+    FormSerializable,
+    FormFieldSet
 } from "./ngx-dynamic-form/utils/decorators";
 
 export {

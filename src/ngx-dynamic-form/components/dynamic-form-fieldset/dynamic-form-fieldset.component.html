@@ -1,6 +1,7 @@
+@let label = !props.label || props.hideLabel || field.parent.props.useTabs ? null : props.label | translate;
 @if (field.display) {
-    <legend class="field-legend" *ngIf="props.label && !field.parent.props.useTabs">
-        {{ props.label | translate }}
+    <legend class="field-legend" *ngIf="label">
+        <span [innerHTML]="label | safe: 'html'"></span>
     </legend>
     <div class="field-container">
         @for (itemField of field.fieldGroup; track itemField) {

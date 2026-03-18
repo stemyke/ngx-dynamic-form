@@ -12,6 +12,7 @@ import {
     ConfigForSchemaOptions,
     CustomizerOrSchemaOptions,
     FormBuilderOptions,
+    FormBuilderOptionsBase,
     FormFieldArrayItemsAction,
     FormFieldConfig,
     FormFieldCustomizer,
@@ -23,7 +24,7 @@ import {convertToDateFormat} from "./misc";
 
 export type ConfigForSchemaWrapMode = "wrap" | "customizer";
 
-export interface ConfigForSchemaWrapOptions extends Required<FormBuilderOptions> {
+export interface ConfigForSchemaWrapOptions extends Required<FormBuilderOptionsBase> {
     readonly injector: Injector;
     readonly schema: OpenApiSchema;
     customize(field: FormFieldConfig, property: OpenApiSchemaProperty, schema: OpenApiSchema): Promise<FormFieldConfig[]>;
@@ -37,6 +38,10 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
 
     get labelCustomizer() {
         return this.opts.labelCustomizer;
+    }
+
+    get legacyLabels() {
+        return this.opts.legacyLabels;
     }
 
     get testId() {

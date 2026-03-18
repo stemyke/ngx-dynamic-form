@@ -1,7 +1,8 @@
 import {Inject, Injectable, Injector, Type} from "@angular/core";
 import {BehaviorSubject, combineLatestWith, Observable, switchMap} from "rxjs";
 import {
-    API_SERVICE, ArrayUtils,
+    API_SERVICE,
+    ArrayUtils,
     EventsService,
     IApiService,
     ILanguageService,
@@ -19,6 +20,7 @@ import {
     FormFieldExpressions,
     FormFieldProps,
     FormFieldSerializer,
+    FormFieldSetData,
     FormGroupData,
     FormInputData,
     FormSelectData,
@@ -56,9 +58,11 @@ export class DynamicFormBuilderService {
         this.language = lang;
     }
 
-    resolveFormFields(target: Type<any>, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
-        const prototype = target?.prototype || {};
-        const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target?.prototype || {}) || new Set();
+    resolveFormFields(type: Type<any>, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig[] {
+        const target = type || {prototype: null};
+        const prototype = target.prototype || target;
+        const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", prototype) || new Set();
+        const sets: Map<string, FormFieldSetData> = ReflectUtils.getMetadata("dynamicFormFieldSets", target) || new Map();
         const result: FormFieldConfig[] = [];
         for (const key of fields) {
             const builder: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", prototype, key);
@@ -67,16 +71,16 @@ export class DynamicFormBuilderService {
                 result.push(field);
             }
         }
-        return this.createFieldSets(result, parent, options);
+        return this.createFieldSets(result, parent, options, Array.from(sets.values()));
     }
 
-    resolveFormGroup(key: string, target: Type<any>, data: FormGroupData, parent: FormFieldConfig = null, options: FormBuilderOptions = {}): FormFieldConfig {
+    resolveFormGroup(key: string, target: Type<any>, data: FormGroupData, parent: FormFieldConfig = null, options?: FormBuilderOptions): FormFieldConfig {
         return this.createFormGroup(key, sp => this.resolveFormFields(
             target, sp, options
         ), data, parent, options);
     }
 
-    resolveFormArray(key: string, itemType: string | FormInputData | Type<any>, data: FormArrayData, parent: FormFieldConfig = null, options: FormBuilderOptions = {}): FormFieldConfig {
+    resolveFormArray(key: string, itemType: string | FormInputData | Type<any>, data: FormArrayData, parent: FormFieldConfig = null, options?: FormBuilderOptions): FormFieldConfig {
         return this.createFormArray(key, sp => {
             return typeof itemType === "function" ? this.resolveFormFields(
                 itemType, sp, options
@@ -84,15 +88,15 @@ export class DynamicFormBuilderService {
         }, data, parent, options);
     }
 
-    createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig[] {
+    createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options?: FormBuilderOptions, sets: FormFieldSetData[] = []): FormFieldConfig[] {
         const result: FormFieldConfig[] = [];
         const groups: { [fs: string]: FormFieldConfig[] } = {};
         fields = Array.from(fields || [])
             .sort((a, b) => a.priority - b.priority);
-        fields.forEach(f => {
-            if (Array.isArray(f.fieldGroup) && Array.isArray(f.wrappers) && f.wrappers[0] === "form-fieldset") {
+        fields.forEach(field => {
+            if (this.isFieldset(field)) {
                 // This field is an already existing set
-                groups[f.id] = f.fieldGroup;
+                groups[field.id] = field.fieldGroup;
             }
         });
 
@@ -101,6 +105,7 @@ export class DynamicFormBuilderService {
             // If we have a fieldset name defined, then push the property fields into a group
             if (fsName) {
                 const id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
+                const set = sets.find(s => s.id === fsName);
                 let fieldGroup = groups[id];
                 if (!fieldGroup) {
                     fieldGroup = [];
@@ -110,9 +115,10 @@ export class DynamicFormBuilderService {
                         fieldGroup,
                         wrappers: ["form-fieldset"],
                         props: {
-                            label: this.getLabel(fsName, fsName, parent, options),
+                            label: this.getLabel(fsName, null, parent, options, "title"),
                             hidden: false,
-                            className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
+                            classes: set?.classes,
+                            layout: set?.layout,
                         },
                         hooks: {},
                         expressions: {}
@@ -125,13 +131,14 @@ export class DynamicFormBuilderService {
                 continue;
             } else if (field.asFieldSet && !groups[field.id]) {
                 const fsName = String(field.key);
-                const id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
-                field.id = id;
+                const set = sets.find(s => s.id === fsName);
+                field.id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
                 field.wrappers = ["form-fieldset"];
                 field.props = {
-                    label: this.getLabel(fsName, fsName, parent, options),
+                    label: this.getLabel(fsName, null, parent, options, "title"),
                     hidden: false,
-                    className: `dynamic-form-fieldset dynamic-form-fieldset-${id}`
+                    classes: set?.classes,
+                    layout: set?.layout,
                 };
                 field.expressions = {};
                 this.setExpressions(field, options);
@@ -144,7 +151,7 @@ export class DynamicFormBuilderService {
         return result;
     }
 
-    createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+    createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
         const type = `${data.type || "text"}`;
         const autocomplete = data.autocomplete || (type === "password" ? "new-password" : "none");
@@ -186,7 +193,7 @@ export class DynamicFormBuilderService {
         );
     }
 
-    createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+    createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
         const type = `${data.type || "select"}`;
         const fieldType = type === "radio" ? type : (data.strict === false ? "chips" : "select");
@@ -217,7 +224,7 @@ export class DynamicFormBuilderService {
         return field;
     }
 
-    createFormStatic(key: string, data: FormStaticData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+    createFormStatic(key: string, data: FormStaticData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
 
         return this.createFormField(key, "static", data, {
@@ -226,7 +233,7 @@ export class DynamicFormBuilderService {
         }, parent, options);
     }
 
-    createFormUpload(key: string, data: FormUploadData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+    createFormUpload(key: string, data: FormUploadData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
 
         if (data.asFile) {
@@ -250,9 +257,9 @@ export class DynamicFormBuilderService {
         }, parent, options);
     }
 
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig[], data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options: FormBuilderOptions): MaybePromise<FormFieldConfig> {
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig[], data: FormGroupData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent: FormFieldConfig, options?: FormBuilderOptions): Promise<FormFieldConfig>
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options?: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
         const group = this.createFormField(key, undefined, data, {
             useTabs: data.useTabs === true,
@@ -269,9 +276,9 @@ export class DynamicFormBuilderService {
             : handleGroup(result);
     }
 
-    createFormArray(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig | FormFieldConfig[], data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig
-    createFormArray(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig | FormFieldConfig[]>, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): Promise<FormFieldConfig>
-    createFormArray(key: string, fields: (parent: FormFieldConfig) => any, data: FormArrayData, parent: FormFieldConfig, options: FormBuilderOptions): MaybePromise<FormFieldConfig> {
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig | FormFieldConfig[], data: FormArrayData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig | FormFieldConfig[]>, data: FormArrayData, parent: FormFieldConfig, options?: FormBuilderOptions): Promise<FormFieldConfig>
+    createFormArray(key: string, fields: (parent: FormFieldConfig) => any, data: FormArrayData, parent: FormFieldConfig, options?: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
         const array = this.createFormField(key, "array", data, {
             // initialCount: data.initialCount || 0,
@@ -376,16 +383,28 @@ export class DynamicFormBuilderService {
         return options;
     }
 
-    protected getLabel(key: string, label: string, parent: FormFieldConfig, options: FormBuilderOptions): string {
+    protected isFieldset(field: FormFieldConfig): boolean {
+        return Array.isArray(field.fieldGroup) && Array.isArray(field.wrappers) && field.wrappers[0] === "form-fieldset";
+    }
+
+    protected getLabel(key: string, label: string, parent: FormFieldConfig, options: FormBuilderOptions, legacyPrefix: string = ""): string {
+        options = options || {labelPrefix: ""};
         const labelPrefix = !ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix;
-        const pathPrefix = `${parent?.props?.label || labelPrefix}`;
+        if (ObjectUtils.isFunction(options.labelCustomizer)) {
+            return options.labelCustomizer(key, label, parent, labelPrefix) || "";
+        }
+        // Exceptional case, to be able to have an "empty" label element in the HTML just to fill the space.
+        if (label === " ") return "\\s";
+        const pathPrefix = options.legacyLabels
+            ? String(legacyPrefix || labelPrefix)
+            : String(parent?.props?.label || labelPrefix);
         const labelItems = ObjectUtils.isString(label)
             ? (!label ? [] : [labelPrefix, label])
             : [pathPrefix, `${key || ""}`]
         return labelItems.filter(l => l.length > 0).join(".");
     }
 
-    protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
+    protected createFormField(key: string, type: string, data: FormFieldData, props: FormFieldProps, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         let wrappers = Array.isArray(data.wrappers) ? Array.from(data.wrappers) : [];
         if (type !== "array") {
             wrappers = !type
@@ -406,8 +425,7 @@ export class DynamicFormBuilderService {
             props: {
                 ...(data.props || {}),
                 ...props,
-                label: options.labelCustomizer?.(key, data.label, parent, options.labelPrefix)
-                    ?? this.getLabel(key, data.label, parent, options),
+                label: this.getLabel(key, data.label, parent, options),
                 labelAlign: data.labelAlign === "after" ? "after" : "before",
                 description: data.description,
                 hideLabel: data.hideLabel === true,
@@ -474,14 +492,23 @@ export class DynamicFormBuilderService {
                 if (className) {
                     return className;
                 }
-                const type = String(target.type || "group").replace("formly-", "");
-                const typeName = ObjectUtils.isConstructor(type)
-                    ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
-                    : type;
-                return [`dynamic-form-field`, `dynamic-form-field-${target.key}`, `dynamic-form-${typeName}`].concat(
-                    Array.isArray(classes) ? classes : [classes || ""],
-                    (Array.isArray(layout) ? layout : [layout || ""]).map(layout => `dynamic-form-layout-${layout}`)
-                ).filter(c => c?.length > 0).join(" ");
+                const idName = String(field.id || field.key || "").replace(/\./, "-");
+                let baseName = `dynamic-form-fieldset dynamic-form-fieldset-${idName}`;
+                if (!this.isFieldset(target)) {
+                    const type = String(target.type || "group").replace("formly-", "");
+                    const typeName = ObjectUtils.isConstructor(type)
+                        ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
+                        : type;
+                    baseName = `dynamic-form-field dynamic-form-field-${target.key} dynamic-form-${typeName}`;
+                }
+                const classesName = Array.isArray(classes) ? classes : [classes];
+                const layoutName = Array.isArray(layout) ? layout : [layout];
+
+                return [
+                    baseName,
+                    ...classesName,
+                    ...layoutName.map(l => !l ? null : `dynamic-form-layout-${l}`)
+                ].filter(ObjectUtils.isStringWithValue).join(" ");
             },
             path: target => {
                 const tp = target.parent;
@@ -491,7 +518,7 @@ export class DynamicFormBuilderService {
             },
             testId: target => {
                 const tp = target.parent;
-                const prefix = !tp?.testId ? options.testId || "" : tp.testId;
+                const prefix = !tp?.testId ? options?.testId || "" : tp.testId;
                 const key = !target.key ? `` : `-${target.key}`;
                 return !prefix ? String(target.key ?? "") : `${prefix}${key}`;
             }

@@ -1,7 +1,8 @@
+@let label = !props.label || props.hideLabel ? null : props.label | translate;
 @if (field.display) {
-    @if (props.label && props.hideLabel !== true) {
+    @if (label) {
         <label class="field-label">
-            {{ props.label | translate }}
+            <span [innerHTML]="label | safe: 'html'"></span>
             <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
             @if (props.markRequired) {
                 <span class="field-required" aria-hidden="true">*</span>

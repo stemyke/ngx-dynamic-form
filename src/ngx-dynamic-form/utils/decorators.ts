@@ -1,14 +1,17 @@
-import {ObjectUtils, ReflectUtils, RequireAtLeastOne} from "@stemy/ngx-utils";
+import {Type} from "@angular/core";
+import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
-    FormArrayData, FormFieldData,
+    FormArrayData,
     FormFieldSerializer,
+    FormFieldSetData,
     FormGroupData,
     FormInputData,
-    FormSelectData, FormSerializerData, FormStaticData,
+    FormSelectData,
+    FormSerializerData,
+    FormStaticData,
     FormUploadData
 } from "../common-types";
 import {FormFieldBuilder} from "../services/dynamic-form-builder.service";
-import {Type} from "@angular/core";
 
 function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilder): void {
     const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target) || new Set();
@@ -24,14 +27,11 @@ function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilde
     ReflectUtils.defineMetadata("dynamicFormFields", fields, target);
 }
 
-export function FormSerializable(data?: FormFieldSerializer | FormSerializerData): PropertyDecorator {
-    return (target: any, key: string): void => {
-        defineFormControl(
-            target, key,
-            (fb) =>
-                fb.createFormSerializer(key, data)
-        );
-    };
+function defineFormFieldSet(target: any, data: FormFieldSetData): void {
+    const fieldSets: Map<string, FormFieldSetData> = ReflectUtils.getMetadata("dynamicFormFieldSets", target) || new Map();
+    const existing: FormFieldSetData = fieldSets.get(data.id) || data;
+    fieldSets.set(data.id, Object.assign({}, existing, data));
+    ReflectUtils.defineMetadata("dynamicFormFieldSets", fieldSets, target);
 }
 
 export function FormInput(data?: FormInputData): PropertyDecorator {
@@ -79,14 +79,9 @@ export function FormUpload(data?: FormUploadData): PropertyDecorator {
     };
 }
 
-export function FormFile(data?: FormUploadData): PropertyDecorator {
-    console.warn(`@FormFile decorator is deprecated, use @FormUpload instead`);
-    return FormUpload(data);
-}
-
 export function FormStatic(data?: FormStaticData): PropertyDecorator {
     data = data || {};
-    return (target: any, key: string): void => {
+    return (target: unknown, key: string): void => {
         defineFormControl(
             target, key,
             (fb, path, options) =>
@@ -97,7 +92,7 @@ export function FormStatic(data?: FormStaticData): PropertyDecorator {
 
 export function FormGroup(data?: FormGroupData): PropertyDecorator {
     data = data || {};
-    return (target: any, key: string): void => {
+    return (target: unknown, key: string): void => {
         defineFormControl(
             target, key,
             (fb, parent, options) => {
@@ -110,7 +105,7 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
 
 export function FormArray(itemType: string | FormInputData | Type<any>, data?: FormArrayData): PropertyDecorator {
     data = data || {};
-    return (target: any, key: string): void => {
+    return (target: unknown, key: string): void => {
         defineFormControl(
             target, key,
             (fb, parent, options) => {
@@ -120,7 +115,18 @@ export function FormArray(itemType: string | FormInputData | Type<any>, data?: F
     };
 }
 
-export function FormModel(data?: FormGroupData): PropertyDecorator {
-    console.warn(`@FormModel decorator is deprecated, use @FormGroup instead`);
-    return FormGroup(data);
+export function FormSerializable(data?: FormFieldSerializer | FormSerializerData): PropertyDecorator {
+    return (target: unknown, key: string): void => {
+        defineFormControl(
+            target, key,
+            (fb) =>
+                fb.createFormSerializer(key, data)
+        );
+    };
+}
+
+export function FormFieldSet(data: FormFieldSetData): ClassDecorator {
+    return (target: unknown): void => {
+        defineFormFieldSet(target, data);
+    };
 }

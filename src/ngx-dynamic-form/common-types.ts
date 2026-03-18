@@ -30,12 +30,15 @@ export type FormFieldKey = string | number | (string | number)[];
 
 export type FormFieldLabelCustomizer = (key: string, label: string, parent: FormFieldConfig, labelPrefix: string) => string;
 
-export interface FormBuilderOptions {
+export interface FormBuilderOptionsBase {
     labelPrefix?: string;
     labelCustomizer?: FormFieldLabelCustomizer;
+    legacyLabels?: boolean;
     testId?: string;
     context?: any;
 }
+
+export type FormBuilderOptions = RequireAtLeastOne<FormBuilderOptionsBase>;
 
 /**
  * This type describes how one of the array actions should react based on an array item
@@ -391,6 +394,10 @@ export type FormArrayData = FormFieldData
 
 export type FormSerializerData = RequireAtLeastOne<Pick<FormFieldData, "serialize" | "serializer">>;
 
+export type FormFieldSetData = RequireAtLeastOne<Pick<FormFieldData, "classes" | "layout">> & {
+    id: string;
+};
+
 // --- Async submit ---
 
 export type AsyncSubmitMode = "click" | "submit" | "all";
@@ -403,9 +410,11 @@ export type FormFieldCustomizer = (
     property: OpenApiSchemaProperty, schema: OpenApiSchema
 ) => MaybePromise<MaybeArray<FormFieldConfig>>;
 
-export interface ConfigForSchemaOptions extends FormBuilderOptions {
+export interface ConfigForSchemaOptionsBase extends FormBuilderOptionsBase {
     fieldCustomizer?: FormFieldCustomizer;
 }
+
+export type ConfigForSchemaOptions = RequireAtLeastOne<ConfigForSchemaOptionsBase>;
 
 export type CustomizerOrSchemaOptions = FormFieldCustomizer | ConfigForSchemaOptions;
 

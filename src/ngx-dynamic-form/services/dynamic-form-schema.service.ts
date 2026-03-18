@@ -71,7 +71,7 @@ export class DynamicFormSchemaService {
         }
         return this.builder.createFieldSets(
             fields.filter(f => null !== f),
-            parent, options
+            parent, options, schema.sets || []
         );
     }
 

@@ -50,6 +50,8 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly useTabs = input(false);
 
+    readonly legacyLabels = input(false);
+
     readonly data = input<any>({});
 
     readonly fields = input<FormFieldConfig[]>(null);
@@ -65,11 +67,12 @@ export class DynamicFormComponent implements IDynamicForm {
     });
 
     readonly config = computed(() => {
-        const options = {
+        const options: FormBuilderOptions = {
             labelPrefix: this.labelPrefix(),
             labelCustomizer: this.labelCustomizer(),
+            legacyLabels: this.legacyLabels(),
             testId: this.testId(),
-        } as FormBuilderOptions;
+        };
         const fields = this.fields() || this.builder.resolveFormFields(this.data()?.constructor, null, options);
         return [
             this.builder.createFormGroup(
