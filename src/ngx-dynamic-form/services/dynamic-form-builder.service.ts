@@ -393,7 +393,8 @@ export class DynamicFormBuilderService {
         options = options || {labelPrefix: ""};
         const labelPrefix = !ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix;
         if (ObjectUtils.isFunction(options.labelCustomizer)) {
-            return options.labelCustomizer(key, label, parent, labelPrefix) || "";
+            const customLabel = options.labelCustomizer(key, label, parent, labelPrefix);
+            if (ObjectUtils.isString(customLabel)) return customLabel;
         }
         // Exceptional case, to be able to have an "empty" label element in the HTML just to fill the space.
         if (label === " ") return "\u200B";
