@@ -269,7 +269,9 @@ export interface IDynamicForm {
     readonly group: Signal<FormGroup>;
     readonly status: Signal<DynamicFormStatus>;
     readonly onSubmit: OutputRef<IDynamicForm>;
-    readonly onChanges: OutputRef<FormFieldChangeEvent>;
+    readonly onFieldChanges: OutputRef<FormFieldChangeEvent>;
+    readonly onValueChanges: OutputRef<FormFieldChangeEvent>;
+    readonly onInit: OutputRef<FormFieldChangeEvent>;
 
     reset(): void;
     serialize(validate?: boolean): Promise<any>;

@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.8.13",
+    "version": "19.8.14",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -28,8 +28,8 @@
         "ngx-device-detector": "^9.0.0",
         "@floating-ui/dom": "^1.7.1",
         "json5": "^2.2.3",
-        "@stemy/ngx-utils": ">=19.8.10",
-        "@ngx-formly/core": "^7.0.0",
+        "@stemy/ngx-utils": ">=19.8.13",
+        "@ngx-formly/core": "^7.1.0",
         "ngx-mask": "^19.0.7",
         "@angular/material": "^19.2.18"
     },
@@ -53,9 +53,9 @@
         "ngx-device-detector": "^9.0.0",
         "@floating-ui/dom": "^1.7.1",
         "json5": "^2.2.3",
-        "@stemy/ngx-utils": "^19.8.10",
-        "@ngx-formly/core": "^7.0.0",
-        "@ngx-formly/bootstrap": "^7.0.0",
+        "@stemy/ngx-utils": "^19.8.13",
+        "@ngx-formly/core": "^7.1.0",
+        "@ngx-formly/bootstrap": "^7.1.0",
         "ngx-mask": "^17.1.8",
         "core-js": "^3.42.0",
         "zone.js": "^0.15.1",

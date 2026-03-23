@@ -104,6 +104,7 @@ export {
     setFieldValue,
     setFieldProps,
     setFieldProp,
+    setFieldSerialize,
     setFieldHidden,
     setFieldDisabled,
     setFieldHooks,

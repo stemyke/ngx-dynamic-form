@@ -175,6 +175,10 @@ export function setFieldProp<P extends keyof SetFormFieldProps, V extends SetFor
     return setFieldProps(field, {[prop]: value});
 }
 
+export function setFieldSerialize(field: FormFieldConfig, serialize: FormFieldCondition = true): void {
+    field.serialize = ObjectUtils.isFunction(serialize) ? serialize : () => serialize;
+}
+
 export function setFieldHidden(field: FormFieldConfig, hidden: FormFieldCondition = true): void {
     setFieldProp(field, "__hidden", ObjectUtils.isFunction(hidden) ? hidden : () => hidden);
 }

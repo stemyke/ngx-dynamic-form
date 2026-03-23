@@ -40,7 +40,8 @@ import {
     MIN_INPUT_NUM,
     setFieldHidden,
     setFieldHooks,
-    setFieldProp
+    setFieldProp,
+    setFieldSerialize
 } from "../utils/misc";
 import {arrayItemActionToExpression} from "../utils/internal";
 
@@ -317,8 +318,8 @@ export class DynamicFormBuilderService {
                 if (lang && translation) {
                     // Use translation component if the sub items are correct
                     array.type = "translation";
-                    lang.serialize = () => true;
                     setFieldHidden(lang);
+                    setFieldSerialize(lang);
                     setFieldProp(translation, "label", "");
                 }
                 this.setExpressions(array.fieldArray, options);

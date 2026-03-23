@@ -99,6 +99,7 @@ export async function toWrapOptions(customizeOrOptions: CustomizerOrSchemaOption
     let schemaOptions = customizeOrOptions as ConfigForSchemaOptions;
     if (!ObjectUtils.isObject(schemaOptions)) {
         schemaOptions = {
+            context: {},
             fieldCustomizer: customizeOrOptions as FormFieldCustomizer
         };
     }

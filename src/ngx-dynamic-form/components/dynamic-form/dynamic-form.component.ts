@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import {outputFromObservable, rxResource, toSignal} from "@angular/core/rxjs-interop";
 import {AbstractControl, FormGroup} from "@angular/forms";
-import {Subject} from "rxjs";
+import {filter, first, Subject} from "rxjs";
 import {FormlyFormOptions} from "@ngx-formly/core";
 import {EventsService, LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
 
@@ -57,6 +57,10 @@ export class DynamicFormComponent implements IDynamicForm {
     readonly fields = input<FormFieldConfig[]>(null);
 
     readonly fieldChanges = new Subject<FormFieldChangeEvent>();
+
+    readonly init = this.fieldChanges.pipe(first());
+
+    readonly valueChanges = this.fieldChanges.pipe(filter(c => c.type === "valueChanges"));
 
     protected readonly language = toSignal(this.events.languageChanged, {
         initialValue: this.languages.currentLanguage
@@ -105,7 +109,11 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly onSubmit = output<IDynamicForm>();
 
-    readonly onChanges = outputFromObservable(this.fieldChanges);
+    readonly onFieldChanges = outputFromObservable(this.fieldChanges);
+
+    readonly onValueChanges = outputFromObservable(this.valueChanges);
+
+    readonly onInit = outputFromObservable(this.init);
 
     readonly options: FormlyFormOptions = {
         fieldChanges: this.fieldChanges,
