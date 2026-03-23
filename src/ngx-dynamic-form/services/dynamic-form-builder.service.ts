@@ -43,7 +43,7 @@ import {
     setFieldProp,
     setFieldSerialize
 } from "../utils/misc";
-import {arrayItemActionToExpression} from "../utils/internal";
+import {arrayItemActionToExpression, toStringArray} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
 
@@ -420,6 +420,7 @@ export class DynamicFormBuilderService {
         const field: FormFieldConfig = {
             ...this.createFormSerializer(key, data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
+            purposes: toStringArray(data.purposes),
             priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
             wrappers: wrappers.filter(ObjectUtils.isDefined),
             type: data.componentType || type,

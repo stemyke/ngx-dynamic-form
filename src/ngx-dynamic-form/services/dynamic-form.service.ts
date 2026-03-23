@@ -110,23 +110,25 @@ export class DynamicFormService {
         });
     }
 
-    async serializeForm(form: IDynamicForm, validate: boolean = true): Promise<FormSerializeResult> {
+    async serializeForm(form: IDynamicForm, validate: boolean = true, ...purposes: string[]): Promise<FormSerializeResult> {
         const fields = untracked(() => form.config());
         if (!fields) return null;
         if (validate) {
             await this.validateForm(form);
         }
-        return this.serialize(fields);
+        return this.serialize(fields, purposes);
     }
 
-    async serialize(fields: FormFieldConfig[]): Promise<FormSerializeResult> {
+    async serialize(fields: FormFieldConfig[], purposes: string[] = []): Promise<FormSerializeResult> {
         const result = {};
+        purposes = purposes ?? [];
         if (!fields) return result;
         for (const field of fields) {
             const serializer = field.serializer;
             const key = `${field.key}`;
             const shouldSerialize = field.serialize?.(field, this.injector) ?? field.props?.hidden !== true;
-            if (!shouldSerialize) {
+            const includes: Function = purposes.length > 0 ? Array.prototype.includes.bind(field.purposes ?? []) : null;
+            if (!shouldSerialize || (includes && !includes(purposes))) {
                 continue;
             }
             if (ObjectUtils.isFunction(serializer)) {
@@ -135,7 +137,7 @@ export class DynamicFormService {
             }
             const control = field.formControl;
             if (field.fieldGroup) {
-                const group = await this.serialize(field.fieldGroup);
+                const group = await this.serialize(field.fieldGroup, purposes);
                 if (field.key && !field.asFieldSet) {
                     result[key] = !field.fieldArray ? group : Object.values(group);
                     continue;

@@ -217,6 +217,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     serialize?: FormFieldConditionFn;
     serializer?: FormFieldSerializer;
     fieldSet?: string;
+    purposes?: string[];
     asFieldSet?: boolean;
     priority?: number;
     fieldGroup?: FormFieldConfig[];
@@ -274,7 +275,7 @@ export interface IDynamicForm {
     readonly onInit: OutputRef<FormFieldChangeEvent>;
 
     reset(): void;
-    serialize(validate?: boolean): Promise<any>;
+    serialize(validate?: boolean, ...purposes: string[]): Promise<FormSerializeResult>;
     getField(path: string): FormFieldConfig;
     getControl(path: string): AbstractControl;
 }
@@ -345,6 +346,10 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
      * Puts the field in a custom field set
      */
     fieldSet?: string;
+    /**
+     * Gives purpose to a field (can be used as a filter in serialization)
+     */
+    purposes?: string | string[];
     /**
      * Puts the field in a custom order
      */

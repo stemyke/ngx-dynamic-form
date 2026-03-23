@@ -135,6 +135,7 @@ export class DynamicFormSchemaService {
             layout: property.layout,
             serialize: property.serialize,
             fieldSet: property.fieldSet,
+            purposes: property.purposes || property.purpose,
             priority: property.priority,
             componentType: property.componentType,
             wrappers: wrappers.filter(ObjectUtils.isStringWithValue),

@@ -106,6 +106,10 @@ export async function toWrapOptions(customizeOrOptions: CustomizerOrSchemaOption
     return new ConfigForSchemaWrap(schemaOptions, "wrap", injector, schema);
 }
 
+export function toStringArray(value: string | string[]): string[] {
+    return (Array.isArray(value) ? value : String(value || "").split(",")).filter(ObjectUtils.isStringWithValue);
+}
+
 export function handleConfigs(configs: MaybeArray<FormFieldConfig>) {
     return Array.isArray(configs) ? configs : [configs];
 }

@@ -141,8 +141,8 @@ export class DynamicFormComponent implements IDynamicForm {
         this.options?.resetModel?.();
     }
 
-    serialize(validate: boolean = true): Promise<FormSerializeResult> {
-        return this.forms.serializeForm(this, validate);
+    serialize(validate: boolean = true, ...purposes: string[]): Promise<FormSerializeResult> {
+        return this.forms.serializeForm(this, validate, ...purposes);
     }
 
     getField(path: string): FormFieldConfig {
