@@ -129,6 +129,7 @@ export class DynamicFormSchemaService {
             disabled: property.disabled === true,
             label: property.label,
             labelAlign: property.labelAlign,
+            description: property.description,
             hideRequiredMarker: property.hideRequiredMarker === true,
             hideLabel: property.hideLabel === true,
             classes: property.classes,

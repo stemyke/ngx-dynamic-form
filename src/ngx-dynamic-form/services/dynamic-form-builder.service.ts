@@ -120,8 +120,8 @@ export class DynamicFormBuilderService {
                         props: {
                             label: this.getLabel(fsName, set?.label, set?.labelPrefix, parent, options, "title"),
                             hidden: false,
-                            classes: set?.classes,
-                            layout: set?.layout,
+                            classes: toStringArray(set?.classes),
+                            layout: toStringArray(set?.layout),
                         },
                         hooks: {},
                         expressions: {}
@@ -140,8 +140,8 @@ export class DynamicFormBuilderService {
                 field.props = {
                     label: this.getLabel(fsName, set?.label, set?.labelPrefix, parent, options, "title"),
                     hidden: false,
-                    classes: set?.classes,
-                    layout: set?.layout,
+                    classes: toStringArray(set?.classes),
+                    layout: toStringArray(set?.layout),
                 };
                 field.expressions = {};
                 this.setExpressions(field, options);
@@ -439,10 +439,10 @@ export class DynamicFormBuilderService {
                 ...props,
                 label: this.getLabel(key, data.label, prefix, parent, options),
                 labelAlign: data.labelAlign === "after" ? "after" : "before",
-                description: data.description,
+                description: String(data.description || ""),
                 hideLabel: data.hideLabel === true,
-                classes: data.classes || [],
-                layout: data.layout || [],
+                classes: toStringArray(data.classes),
+                layout: toStringArray(data.layout),
                 className: data.className || "",
                 formCheck: "nolabel",
                 __disabled: ObjectUtils.isFunction(disabled) ? disabled : () => disabled,
