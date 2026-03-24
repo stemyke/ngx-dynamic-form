@@ -227,6 +227,10 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
      */
     fieldSet?: string;
     /**
+     * Optionally change the default label prefix for this field and its children
+     */
+    labelPrefix?: string;
+    /**
      * Optional key to use when requesting a ng-template for the field control (instead of key || id)
      */
     controlTemplateKey?: string;
@@ -388,6 +392,10 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
      */
     fieldSet?: string;
     /**
+     * Optionally change the default label prefix for this field and its children
+     */
+    labelPrefix?: string;
+    /**
      * Optional key to use when requesting a ng-template for the field control (instead of key || id)
      */
     controlTemplateKey?: string;
@@ -462,7 +470,7 @@ export type FormArrayData = FormFieldData
 
 export type FormSerializerData = RequireAtLeastOne<Pick<FormFieldData, "serialize" | "serializer">>;
 
-export type FormFieldSetData = RequireAtLeastOne<Pick<FormFieldData, "classes" | "layout">> & {
+export type FormFieldSetData = RequireAtLeastOne<Pick<FormFieldData, "label" | "labelPrefix" | "classes" | "layout">> & {
     id: string;
 };
 

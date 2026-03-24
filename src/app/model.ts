@@ -79,6 +79,8 @@ export class AddressesModel {
         removeItem: (item) => {
             return !item.street || item.street.length < 5;
         },
+        labelPrefix: "address-data",
+        label: "",
         validators: [requiredValidation(), arrayLengthValidation()],
         priority: -1,
         wrappers: ["form-alert"]

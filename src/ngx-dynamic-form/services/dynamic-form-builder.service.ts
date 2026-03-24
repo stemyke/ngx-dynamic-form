@@ -118,7 +118,7 @@ export class DynamicFormBuilderService {
                         fieldGroup,
                         wrappers: ["form-fieldset"],
                         props: {
-                            label: this.getLabel(fsName, null, parent, options, "title"),
+                            label: this.getLabel(fsName, set?.label, set?.labelPrefix, parent, options, "title"),
                             hidden: false,
                             classes: set?.classes,
                             layout: set?.layout,
@@ -138,7 +138,7 @@ export class DynamicFormBuilderService {
                 field.id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
                 field.wrappers = ["form-fieldset"];
                 field.props = {
-                    label: this.getLabel(fsName, null, parent, options, "title"),
+                    label: this.getLabel(fsName, set?.label, set?.labelPrefix, parent, options, "title"),
                     hidden: false,
                     classes: set?.classes,
                     layout: set?.layout,
@@ -390,9 +390,9 @@ export class DynamicFormBuilderService {
         return Array.isArray(field.fieldGroup) && Array.isArray(field.wrappers) && field.wrappers[0] === "form-fieldset";
     }
 
-    protected getLabel(key: string, label: string, parent: FormFieldConfig, options: FormBuilderOptions, legacyPrefix: string = ""): string {
+    protected getLabel(key: string, label: string, labelPrefix: string, parent: FormFieldConfig, options: FormBuilderOptions, legacyPrefix: string = ""): string {
         options = options || {labelPrefix: ""};
-        const labelPrefix = !ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix;
+        labelPrefix = labelPrefix || (!ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix);
         if (ObjectUtils.isFunction(options.labelCustomizer)) {
             const customLabel = options.labelCustomizer(key, label, parent, labelPrefix);
             if (ObjectUtils.isString(customLabel)) return customLabel;
@@ -417,9 +417,11 @@ export class DynamicFormBuilderService {
         }
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
         const hidden = ReflectUtils.resolve(data.hidden, this.injector);
+        const prefix = String(data.labelPrefix || parent?.labelPrefix || "");
         const field: FormFieldConfig = {
             ...this.createFormSerializer(key, data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
+            labelPrefix: prefix,
             controlTemplateKey: String(data.controlTemplateKey || ""),
             labelTemplateKey: String(data.labelTemplateKey || ""),
             inputTemplateKey: String(data.inputTemplateKey || ""),
@@ -435,7 +437,7 @@ export class DynamicFormBuilderService {
             props: {
                 ...(data.props || {}),
                 ...props,
-                label: this.getLabel(key, data.label, parent, options),
+                label: this.getLabel(key, data.label, prefix, parent, options),
                 labelAlign: data.labelAlign === "after" ? "after" : "before",
                 description: data.description,
                 hideLabel: data.hideLabel === true,

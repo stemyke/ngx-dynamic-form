@@ -135,6 +135,7 @@ export class DynamicFormSchemaService {
             layout: property.layout,
             serialize: property.serialize,
             fieldSet: property.fieldSet,
+            labelPrefix: property.labelPrefix,
             purposes: property.purposes || property.purpose,
             priority: property.priority,
             componentType: property.componentType,
