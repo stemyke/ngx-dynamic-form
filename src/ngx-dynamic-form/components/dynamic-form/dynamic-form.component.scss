@@ -1,3 +1,15 @@
 .dynamic-form-field.dynamic-form-hidden {
     display: none;
 }
+
+.dynamic-form-field > .field-label {
+
+    position: relative;
+
+    > .field-description {
+        font-size: 0.95em;
+        font-weight: normal;
+        color: #777;
+        margin: 0;
+    }
+}

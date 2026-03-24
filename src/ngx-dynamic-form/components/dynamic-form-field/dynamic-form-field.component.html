@@ -1,9 +1,11 @@
 <ng-template #innerLabelTemplate let-label="label">
     <label class="field-label" [for]="id">
         <span [innerHTML]="label | safe: 'html'"></span>
-        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
         @if (props.markRequired) {
             <span class="field-required" aria-hidden="true">*</span>
+        }
+        @if (props.description) {
+            <p class="field-description" [innerHTML]="props.description | translate | safe: 'html'"></p>
         }
     </label>
 </ng-template>
