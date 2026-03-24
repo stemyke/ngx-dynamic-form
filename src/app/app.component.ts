@@ -7,7 +7,14 @@ import {
     signal,
     ViewEncapsulation
 } from "@angular/core";
-import {IAsyncMessage, ILanguageService, LANGUAGE_SERVICE, OpenApiService} from "@stemy/ngx-utils";
+import {
+    DIALOG_SERVICE,
+    IAsyncMessage,
+    IDialogService,
+    ILanguageService,
+    LANGUAGE_SERVICE,
+    OpenApiService
+} from "@stemy/ngx-utils";
 import {
     addFieldValidators,
     DynamicFormBuilderService,
@@ -89,6 +96,7 @@ export class AppComponent implements OnInit {
                 readonly fb: DynamicFormBuilderService,
                 readonly fs: DynamicFormSchemaService,
                 readonly forms: DynamicFormService,
+                @Inject(DIALOG_SERVICE) readonly dialog: IDialogService,
                 @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
         setTimeout(() => {
             this.plainData.update(value => {
@@ -103,6 +111,13 @@ export class AppComponent implements OnInit {
 
     ngOnInit(): void {
         this.openApi.getSchemas().then(s => this.schemas.set(Object.keys(s).sort()));
+    }
+
+    info(description: string): void {
+        this.dialog.confirm({
+            title: description,
+            message: `${description}.detailed`
+        });
     }
 
     submit = async (form: IDynamicForm): Promise<IAsyncMessage> => {

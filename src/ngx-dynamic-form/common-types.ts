@@ -214,14 +214,55 @@ export type FormFieldExpressions = {
 };
 
 export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T> {
+    /**
+     * Conditional check if the field should be serialized or not, normal serialization can happen even if the field is hidden
+     */
     serialize?: FormFieldConditionFn;
+    /**
+     * This is a custom serializer callback function.
+     */
     serializer?: FormFieldSerializer;
+    /**
+     * Puts the field in a custom field set
+     */
     fieldSet?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field control (instead of key || id)
+     */
+    controlTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field label (instead of key || id)
+     */
+    labelTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field input (instead of key || id)
+     */
+    inputTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field prefix (instead of key || id)
+     */
+    prefixTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field suffix (instead of key || id)
+     */
+    suffixTemplateKey?: string;
+    /**
+     * Gives purpose to a field (can be used as a filter in serialization)
+     */
     purposes?: string[];
+    /**
+     * Use this field as a field set instead of a keyed form group
+     */
     asFieldSet?: boolean;
     priority?: number;
     fieldGroup?: FormFieldConfig[];
+    /**
+     * Definition of how array items look
+     */
     fieldArray?: FormFieldConfig;
+    /**
+     * Custom field hook definitions
+     */
     hooks: FormHookConfig;
     expressions: FormFieldExpressions;
     readonly parent?: FormFieldConfig;
@@ -347,6 +388,26 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
      */
     fieldSet?: string;
     /**
+     * Optional key to use when requesting a ng-template for the field control (instead of key || id)
+     */
+    controlTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field label (instead of key || id)
+     */
+    labelTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field input (instead of key || id)
+     */
+    inputTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field prefix (instead of key || id)
+     */
+    prefixTemplateKey?: string;
+    /**
+     * Optional key to use when requesting a ng-template for the field suffix (instead of key || id)
+     */
+    suffixTemplateKey?: string;
+    /**
      * Gives purpose to a field (can be used as a filter in serialization)
      */
     purposes?: string | string[];
@@ -411,7 +472,7 @@ export type AsyncSubmitMode = "click" | "submit" | "all";
 export type AsyncSubmitMethod = (form: IDynamicForm, context?: any, ev?: MouseEvent) => Promise<IAsyncMessage>;
 
 // --- Templates ---
-export type FormTemplateType = "control" | "label" | "input" | "prefix" | "suffix" | "setPrefix" | "setSuffix";
+export type FormTemplateType = "control" | "label" | "input" | "prefix" | "suffix";
 
 // --- JSON schema interfaces ---
 

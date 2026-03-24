@@ -1,13 +1,23 @@
-@let label = !props.label || props.hideLabel ? null : props.label | translate;
-@if (field.display) {
+<ng-template #innerLabelTemplate let-label="label">
+    <label class="field-label" [for]="id">
+        <span [innerHTML]="label | safe: 'html'"></span>
+        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+        @if (props.markRequired) {
+            <span class="field-required" aria-hidden="true">*</span>
+        }
+    </label>
+</ng-template>
+<ng-template #labelTemplate>
+    @let label = !props.label || props.hideLabel ? null : props.label | translate;
     @if (label) {
-        <label class="field-label">
-            <span [innerHTML]="label | safe: 'html'"></span>
-            <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-            @if (props.markRequired) {
-                <span class="field-required" aria-hidden="true">*</span>
-            }
-        </label>
+        <ng-container [ngxTemplateOutlet]="(field | dynamicFormTemplate : 'label') || innerLabelTemplate"
+                      [context]="field"
+                      [additionalContext]="{label: label}"></ng-container>
+    }
+</ng-template>
+@if (field.display) {
+    @if (props.labelAlign === "before") {
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
     <tabs class="field-container">
         @for (itemField of field.fieldGroup; track itemField; let ix = $index) {
@@ -32,4 +42,7 @@
             ></formly-validation-message>
         </div>
     </tabs>
+    @if (props.labelAlign === "after") {
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
+    }
 }

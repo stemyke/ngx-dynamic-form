@@ -69,7 +69,10 @@ export class PageModel {
 
 export class AddressesModel {
 
-    @FormGroup()
+    @FormGroup({
+        labelTemplateKey: "infoButton",
+        description: "order.buyerAddress",
+    })
     buyerAddress: AddressModel = new AddressModel();
 
     @FormArray(AddressModel, {
@@ -100,6 +103,8 @@ export class OrderModel {
 
     @FormInput({
         fieldSet: "commission",
+        labelTemplateKey: "infoButton",
+        description: "order.commission",
         validators: [requiredValidation()]
     })
     @FormSerializable()

@@ -420,6 +420,11 @@ export class DynamicFormBuilderService {
         const field: FormFieldConfig = {
             ...this.createFormSerializer(key, data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
+            controlTemplateKey: String(data.controlTemplateKey || ""),
+            labelTemplateKey: String(data.labelTemplateKey || ""),
+            inputTemplateKey: String(data.inputTemplateKey || ""),
+            prefixTemplateKey: String(data.prefixTemplateKey || ""),
+            suffixTemplateKey: String(data.suffixTemplateKey || ""),
             purposes: toStringArray(data.purposes),
             priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
             wrappers: wrappers.filter(ObjectUtils.isDefined),

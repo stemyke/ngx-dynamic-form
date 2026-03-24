@@ -45,6 +45,8 @@ export class DynamicFormComponent implements IDynamicForm {
 
     protected readonly languages = inject(LANGUAGE_SERVICE);
 
+    readonly globalTemplatePrefix = input("dynamic-form");
+
     readonly labelPrefix = input("label");
 
     readonly labelCustomizer = input<FormFieldLabelCustomizer>(null);
@@ -125,7 +127,8 @@ export class DynamicFormComponent implements IDynamicForm {
         }
     };
 
-    constructor(readonly forms: DynamicFormService) {
+    constructor(readonly forms: DynamicFormService,
+                protected readonly templates: DynamicFormTemplateService) {
         effect(() => {
             this.language();
             this.enableTranslations();
@@ -133,6 +136,9 @@ export class DynamicFormComponent implements IDynamicForm {
                 if (!ObjectUtils.isFunction(field.options?.detectChanges)) return;
                 field.options.detectChanges(field);
             });
+        });
+        effect(() => {
+            this.templates.globalPrefix = this.globalTemplatePrefix();
         });
     }
 

@@ -11,7 +11,6 @@ import {FormFieldConfig, FormTemplateType} from "../common-types";
 })
 export class DynamicFormTemplatePipe implements PipeTransform, OnInit, OnDestroy {
 
-
     protected templatesUpdated: Subscription;
 
     protected cachedKey: string;
@@ -36,8 +35,9 @@ export class DynamicFormTemplatePipe implements PipeTransform, OnInit, OnDestroy
     }
 
     transform(field: FormFieldConfig, type: FormTemplateType): TemplateRef<any> {
-        const key = String(field.key || field.id);
-        if (!field || !key) return null;
+        if (!field) return null;
+        const key = String(field[`${type}TemplateKey`] || field.key || field.id || "");
+        if (!key) return null;
         if (this.cachedTemplate === null || this.cachedKey !== key || this.cachedType !== type) {
             this.cachedKey = key;
             this.cachedType = type;

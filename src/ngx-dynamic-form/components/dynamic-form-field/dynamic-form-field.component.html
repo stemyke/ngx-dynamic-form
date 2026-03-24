@@ -1,13 +1,18 @@
+<ng-template #innerLabelTemplate let-label="label">
+    <label class="field-label" [for]="id">
+        <span [innerHTML]="label | safe: 'html'"></span>
+        <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
+        @if (props.markRequired) {
+            <span class="field-required" aria-hidden="true">*</span>
+        }
+    </label>
+</ng-template>
 <ng-template #labelTemplate>
     @let label = !props.label || props.hideLabel ? null : props.label | translate;
     @if (label) {
-        <label class="field-label" [for]="id">
-            <span [innerHTML]="label | safe: 'html'"></span>
-            <p class="field-description" *ngIf="props.description">{{ props.description | translate }}</p>
-            @if (props.markRequired) {
-                <span class="field-required" aria-hidden="true">*</span>
-            }
-        </label>
+        <ng-container [ngxTemplateOutlet]="(field | dynamicFormTemplate : 'label') || innerLabelTemplate"
+                      [context]="field"
+                      [additionalContext]="{label: label}"></ng-container>
     }
 </ng-template>
 <ng-template #inputTemplate>
@@ -17,8 +22,7 @@
     <ng-container [ngTemplateOutlet]="field | dynamicFormTemplate : 'prefix'"
                   [ngTemplateOutletContext]="field"></ng-container>
     @if (props.labelAlign === "before") {
-        <ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'label') || labelTemplate"
-                      [ngTemplateOutletContext]="field"></ng-container>
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
     <div class="field-container">
         <ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'input') || inputTemplate"
@@ -32,8 +36,7 @@
         </div>
     </div>
     @if (props.labelAlign === "after") {
-        <ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'label') || labelTemplate"
-                      [ngTemplateOutletContext]="field"></ng-container>
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
     <ng-container [ngTemplateOutlet]="field | dynamicFormTemplate : 'suffix'"
                   [ngTemplateOutletContext]="field"></ng-container>

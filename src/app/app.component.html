@@ -32,14 +32,23 @@
         }
     </div>
     <div class="col-6">
-        <dynamic-form [data]="decoratorData()" [useTabs]="true" #decoratorForm>
+        <dynamic-form globalTemplatePrefix="test-form" [data]="decoratorData()" [useTabs]="true" #decoratorForm>
             <ng-template input="displayName" let-formControl="formControl">
                 <span style="color:red">{{ formControl.value }}</span>
             </ng-template>
-            <ng-template control="displayImage" let-formControl="formControl">
-                <img alt="img" [src]="formControl.value | safe: 'url'" *ngIf="formControl.value"/>
+            <ng-template label="infoButton" let-label="label" let-props="props" let-id="id">
+                <label class="field-label" [for]="id">
+                    <span [innerHTML]="label | safe: 'html'"></span>
+                    <button class="btn btn-primary field-description" *ngIf="props.description" (click)="info(props.description)">i</button>
+                    @if (props.markRequired) {
+                        <span class="field-required" aria-hidden="true">*</span>
+                    }
+                </label>
             </ng-template>
             <button type="button" [async-submit]="submit" [form]="decoratorForm" class="btn btn-primary submit-button">Submit</button>
         </dynamic-form>
     </div>
 </div>
+<ng-template globalTemplate="test-form-control-displayImage" let-formControl="formControl">
+    <img alt="img" [src]="formControl.value | safe: 'url'" *ngIf="formControl.value"/>
+</ng-template>
