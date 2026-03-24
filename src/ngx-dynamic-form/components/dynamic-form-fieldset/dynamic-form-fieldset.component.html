@@ -1,5 +1,7 @@
 @let label = !props.label || props.hideLabel || field.parent.props.useTabs ? null : props.label | translate;
 @if (field.display) {
+    <ng-container [ngTemplateOutlet]="field | dynamicFormTemplate : 'setPrefix'"
+                  [ngTemplateOutletContext]="field"></ng-container>
     <legend class="field-legend" *ngIf="label">
         <span [innerHTML]="label | safe: 'html'"></span>
     </legend>
@@ -10,4 +12,6 @@
             }
         }
     </div>
+    <ng-container [ngTemplateOutlet]="field | dynamicFormTemplate : 'setSuffix'"
+                  [ngTemplateOutletContext]="field"></ng-container>
 }

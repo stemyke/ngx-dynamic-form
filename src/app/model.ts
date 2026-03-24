@@ -208,6 +208,11 @@ export class OrderModel {
     })
     displayName: string = "Teszt Elek";
 
+    @FormStatic({
+        fieldSet: "testing",
+    })
+    displayImage: string = "https://picsum.photos/200/300";
+
     @FormArray("text", {
         fieldSet: "testing"
     })

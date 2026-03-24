@@ -23,8 +23,10 @@ import {
     IDynamicForm
 } from "../../common-types";
 import {controlStatus, getFieldByPath} from "../../utils/misc";
+
 import {DynamicFormBuilderService} from "../../services/dynamic-form-builder.service";
 import {DynamicFormService} from "../../services/dynamic-form.service";
+import {DynamicFormTemplateService} from "../../services/dynamic-form-template.service";
 
 @Component({
     standalone: false,
@@ -32,7 +34,8 @@ import {DynamicFormService} from "../../services/dynamic-form.service";
     templateUrl: "./dynamic-form.component.html",
     styleUrls: ["./dynamic-form.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [DynamicFormTemplateService],
 })
 export class DynamicFormComponent implements IDynamicForm {
 

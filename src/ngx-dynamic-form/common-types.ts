@@ -410,6 +410,9 @@ export type FormFieldSetData = RequireAtLeastOne<Pick<FormFieldData, "classes" |
 export type AsyncSubmitMode = "click" | "submit" | "all";
 export type AsyncSubmitMethod = (form: IDynamicForm, context?: any, ev?: MouseEvent) => Promise<IAsyncMessage>;
 
+// --- Templates ---
+export type FormTemplateType = "control" | "label" | "input" | "prefix" | "suffix" | "setPrefix" | "setSuffix";
+
 // --- JSON schema interfaces ---
 
 export type FormFieldCustomizer = (

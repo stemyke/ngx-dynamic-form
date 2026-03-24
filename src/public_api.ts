@@ -46,6 +46,8 @@ export {
     AsyncSubmitMode,
     AsyncSubmitMethod,
 
+    FormTemplateType,
+
     FormFieldCustomizer,
     ConfigForSchemaOptions,
 
@@ -118,11 +120,15 @@ export {
 export {RichTranslationModel} from "./ngx-dynamic-form/models/rich-translation.model";
 export {TranslationModel} from "./ngx-dynamic-form/models/translation.model";
 
+export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
 export {DynamicFormBuilderService} from "./ngx-dynamic-form/services/dynamic-form-builder.service"
 export {DynamicFormSchemaService} from "./ngx-dynamic-form/services/dynamic-form-schema.service";
-export {DynamicFormService} from "./ngx-dynamic-form/services/dynamic-form.service";
+export {DynamicFormTemplateService} from "./ngx-dynamic-form/services/dynamic-form-template.service";
 
 export {AsyncSubmitDirective} from "./ngx-dynamic-form/directives/async-submit.directive";
+export {DynamicFormTemplateDirective} from "./ngx-dynamic-form/directives/dynamic-form-template.directive";
+
+export {DynamicFormTemplatePipe} from "./ngx-dynamic-form/pipes/dynamic-form-template.pipe";
 
 export {DynamicFieldType} from "./ngx-dynamic-form/components/base/dynamic-field-type";
 export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/dynamic-form.component";

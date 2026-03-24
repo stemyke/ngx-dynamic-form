@@ -10,19 +10,33 @@
         </label>
     }
 </ng-template>
-@if (props.labelAlign === "before") {
-    <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
-}
-<div class="field-container">
+<ng-template #inputTemplate>
     <ng-container #fieldComponent></ng-container>
-    <div *ngIf="showError" class="field-errors invalid-feedback">
-        <formly-validation-message
-            [field]="field"
-            id="{{ id }}-formly-validation-error"
-            role="alert"
-        ></formly-validation-message>
+</ng-template>
+<ng-template #controlTemplate>
+    <ng-container [ngTemplateOutlet]="field | dynamicFormTemplate : 'prefix'"
+                  [ngTemplateOutletContext]="field"></ng-container>
+    @if (props.labelAlign === "before") {
+        <ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'label') || labelTemplate"
+                      [ngTemplateOutletContext]="field"></ng-container>
+    }
+    <div class="field-container">
+        <ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'input') || inputTemplate"
+                      [ngTemplateOutletContext]="field"></ng-container>
+        <div *ngIf="showError" class="field-errors invalid-feedback">
+            <formly-validation-message
+                [field]="field"
+                [id]="id + '-formly-validation-error'"
+                role="alert"
+            ></formly-validation-message>
+        </div>
     </div>
-</div>
-@if (props.labelAlign === "after") {
-    <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
-}
+    @if (props.labelAlign === "after") {
+        <ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'label') || labelTemplate"
+                      [ngTemplateOutletContext]="field"></ng-container>
+    }
+    <ng-container [ngTemplateOutlet]="field | dynamicFormTemplate : 'suffix'"
+                  [ngTemplateOutletContext]="field"></ng-container>
+</ng-template>
+<ng-container [ngTemplateOutlet]="(field | dynamicFormTemplate : 'control') || controlTemplate"
+              [ngTemplateOutletContext]="field"></ng-container>

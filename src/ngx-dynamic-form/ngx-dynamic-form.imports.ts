@@ -1,4 +1,9 @@
+import {Type} from "@angular/core";
+
 import {AsyncSubmitDirective} from "./directives/async-submit.directive";
+import {DynamicFormTemplateDirective} from "./directives/dynamic-form-template.directive";
+
+import {DynamicFormTemplatePipe} from "./pipes/dynamic-form-template.pipe";
 
 import {DynamicFieldType} from "./components/base/dynamic-field-type";
 import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.component";
@@ -34,9 +39,12 @@ export const components = [
 ];
 
 // --- Directives ---
-export const directives = [
+export const directives: Type<any>[] = [
     AsyncSubmitDirective,
+    DynamicFormTemplateDirective
 ];
 
 // --- Pipes ---
-export const pipes = [];
+export const pipes: Type<any>[] = [
+    DynamicFormTemplatePipe
+];
