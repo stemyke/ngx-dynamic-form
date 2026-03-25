@@ -121,18 +121,23 @@ export class DynamicFormService {
 
     async serialize(fields: FormFieldConfig[], purposes: string[] = []): Promise<FormSerializeResult> {
         const result = {};
-        purposes = purposes ?? [];
         if (!fields) return result;
+        purposes = purposes || [];
         for (const field of fields) {
             const serializer = field.serializer;
             const key = `${field.key}`;
             const shouldSerialize = field.serialize?.(field, this.injector) ?? field.props?.hidden !== true;
-            const includes: Function = purposes.length > 0 ? Array.prototype.includes.bind(field.purposes ?? []) : null;
-            if (!shouldSerialize || (includes && !includes(purposes))) {
+            // If field should not be serialized
+            if (!shouldSerialize) {
                 continue;
             }
+            // If a custom serializer is defined
             if (ObjectUtils.isFunction(serializer)) {
                 result[key] = await serializer(field, this.injector);
+                continue;
+            }
+            // If field purposes dont match
+            if (purposes.length > 0 && field.key && purposes.every(p => !field.purposes?.includes(p))) {
                 continue;
             }
             const control = field.formControl;
