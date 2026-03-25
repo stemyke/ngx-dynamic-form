@@ -516,14 +516,12 @@ export class DynamicFormBuilderService {
             path: target => {
                 const tp = target.parent;
                 const prefix = tp?.path || "";
-                const key = !target.key ? `` : `.${target.key}`;
-                return !prefix ? String(target.key ?? "") : `${prefix}${key}`;
+                return [prefix, String(target.key ?? "")].filter(ObjectUtils.isStringWithValue).join("-");
             },
             testId: target => {
                 const tp = target.parent;
-                const prefix = !tp?.testId ? options?.testId || "" : tp.testId;
-                const key = !target.key ? `` : `-${target.key}`;
-                return !prefix ? String(target.key ?? "") : `${prefix}${key}`;
+                const prefix = !tp?.testId ? options?.testId || "form" : tp.testId;
+                return [prefix, String(target.key ?? "")].filter(ObjectUtils.isStringWithValue).join("-");
             }
         };
         Object.entries(expressions).forEach(([key, expression]) => {

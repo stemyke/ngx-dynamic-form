@@ -15,10 +15,10 @@
                 <ng-template #fieldContent>
                     <div class="form-array-buttons">
                         @if (itemField.removeItem) {
-                            <btn icon="trash" (click)="removeItem(ix)"></btn>
+                            <btn icon="trash" [attr.data-testid]="field.testId + '-remove-item-' + ix" (click)="removeItem(ix)"></btn>
                         }
                         @if (itemField.insertItem) {
-                            <btn icon="plus" (click)="addItem(ix)"></btn>
+                            <btn icon="plus" [attr.data-testid]="field.testId + '-insert-item-' + ix" (click)="addItem(ix)"></btn>
                         }
                     </div>
                     <formly-field [field]="itemField"></formly-field>
@@ -39,10 +39,10 @@
 
         <div class="form-array-buttons">
             @if (props.clearItems) {
-                <btn icon="trash" label="button.clear-items" (click)="clearItems()"></btn>
+                <btn [attr.data-testid]="field.testId + '-clear-items'" icon="trash" label="button.clear-items" (click)="clearItems()"></btn>
             }
             @if (props.addItem) {
-                <btn icon="plus" label="button.insert-item" (click)="addItem()"></btn>
+                <btn [attr.data-testid]="field.testId + '-add-item'" icon="plus" label="button.insert-item" (click)="addItem()"></btn>
             }
         </div>
 
