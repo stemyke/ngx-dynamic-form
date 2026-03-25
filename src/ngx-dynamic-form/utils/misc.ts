@@ -151,7 +151,7 @@ export function setFieldDefault(field: FormFieldConfig, value: any): void {
 }
 
 export function setFieldValue(field: FormFieldConfig, value: any): void {
-    field.formControl.setValue(value instanceof Date ? convertToDateFormat(value, field.props?.type || "date") : value);
+    field.formControl?.setValue(value instanceof Date ? convertToDateFormat(value, field.props?.type || "date") : value);
 }
 
 interface SetFormFieldProps extends Omit<FormFieldProps, "min" | "max"> {
