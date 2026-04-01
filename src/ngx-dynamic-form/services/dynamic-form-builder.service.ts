@@ -417,7 +417,7 @@ export class DynamicFormBuilderService {
         }
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
         const hidden = ReflectUtils.resolve(data.hidden, this.injector);
-        const prefix = String(data.labelPrefix || parent?.labelPrefix || "");
+        const prefix = String(data.labelPrefix ?? parent?.labelPrefix ?? "");
         const field: FormFieldConfig = {
             ...this.createFormSerializer(key, data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
