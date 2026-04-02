@@ -392,7 +392,7 @@ export class DynamicFormBuilderService {
 
     protected getLabel(key: string, label: string, labelPrefix: string, parent: FormFieldConfig, options: FormBuilderOptions, legacyPrefix: string = ""): string {
         options = options || {labelPrefix: ""};
-        labelPrefix = labelPrefix || (!ObjectUtils.isString(options.labelPrefix) ? `` : options.labelPrefix);
+        labelPrefix = String(labelPrefix ?? options.labelPrefix ?? "");
         if (ObjectUtils.isFunction(options.labelCustomizer)) {
             const customLabel = options.labelCustomizer(key, label, parent, labelPrefix);
             if (ObjectUtils.isString(customLabel)) return customLabel;
@@ -417,7 +417,7 @@ export class DynamicFormBuilderService {
         }
         const disabled = ReflectUtils.resolve(data.disabled, this.injector);
         const hidden = ReflectUtils.resolve(data.hidden, this.injector);
-        const prefix = String(data.labelPrefix ?? parent?.labelPrefix ?? "");
+        const prefix = data.labelPrefix ?? parent?.labelPrefix;
         const field: FormFieldConfig = {
             ...this.createFormSerializer(key, data as unknown as FormSerializerData),
             fieldSet: String(data.fieldSet || ""),
