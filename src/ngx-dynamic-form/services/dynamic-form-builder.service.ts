@@ -27,7 +27,8 @@ import {
     FormSelectOption,
     FormSerializerData,
     FormStaticData,
-    FormUploadData
+    FormUploadData,
+    Validators
 } from "../common-types";
 import {addFieldValidators} from "../utils/validation";
 import {
@@ -91,6 +92,24 @@ export class DynamicFormBuilderService {
         }, data, parent, options);
     }
 
+    createFieldSet(set: FormFieldSetData, fields: FormFieldConfig[], parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
+        const id = !parent?.path ? set.id : `${parent.path}.${set.id}`;
+        return this.setExpressions({
+            id,
+            parent,
+            fieldGroup: fields,
+            wrappers: ["form-fieldset"],
+            props: {
+                label: this.getLabel(set.id, set.label, set.labelPrefix, parent, options, "title"),
+                hidden: false,
+                classes: toStringArray(set.classes),
+                layout: toStringArray(set.layout),
+            },
+            hooks: {},
+            expressions: {}
+        }, options);
+    }
+
     createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options?: FormBuilderOptions, sets: FormFieldSetData[] = []): FormFieldConfig[] {
         const result: FormFieldConfig[] = [];
         const groups: { [fs: string]: FormFieldConfig[] } = {};
@@ -108,27 +127,12 @@ export class DynamicFormBuilderService {
             // If we have a fieldset name defined, then push the property fields into a group
             if (fsName) {
                 const id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
-                const set = sets.find(s => s.id === fsName);
+                const set: FormFieldSetData = sets.find(s => s.id === fsName) || {id: fsName, layout: ""};
                 let fieldGroup = groups[id];
                 if (!fieldGroup) {
                     fieldGroup = [];
-                    const fieldSet: FormFieldConfig = {
-                        id,
-                        parent,
-                        fieldGroup,
-                        wrappers: ["form-fieldset"],
-                        props: {
-                            label: this.getLabel(fsName, set?.label, set?.labelPrefix, parent, options, "title"),
-                            hidden: false,
-                            classes: toStringArray(set?.classes),
-                            layout: toStringArray(set?.layout),
-                        },
-                        hooks: {},
-                        expressions: {}
-                    };
-                    this.setExpressions(fieldSet, options);
                     groups[id] = fieldGroup;
-                    result.push(fieldSet);
+                    result.push(this.createFieldSet(set, fieldGroup, parent, options));
                 }
                 fieldGroup.push(field);
                 continue;
@@ -469,7 +473,10 @@ export class DynamicFormBuilderService {
             configurable: true
         });
         // Set expressions
-        addFieldValidators(field, data.validators);
+        const validators = ObjectUtils.isArray(data.validators)
+            ? data.validators.map(v => ReflectUtils.resolve(v, this.injector))
+            : data.validators as Validators;
+        addFieldValidators(field, validators);
         this.setExpressions(field, options);
         return field;
     }
@@ -483,7 +490,7 @@ export class DynamicFormBuilderService {
         return valid;
     }
 
-    protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): void {
+    protected setExpressions(field: FormFieldConfig, options: FormBuilderOptions): FormFieldConfig {
         const expressions: FormFieldExpressions = {
             display: target => isFieldVisible(target),
             valid: target => this.isValid(target),
@@ -531,5 +538,6 @@ export class DynamicFormBuilderService {
                 field[key] = expression(field);
             }
         });
+        return field;
     }
 }

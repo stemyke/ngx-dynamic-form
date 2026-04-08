@@ -25,6 +25,7 @@ export {
 
     ValidationMessageFn,
     ValidatorFn,
+    ValidatorFactory,
     ValidatorExpression,
     Validators,
     AsyncValidatorFn,
@@ -84,7 +85,8 @@ export {
     minLengthValidation,
     maxLengthValidation,
     minValueValidation,
-    maxValueValidation
+    maxValueValidation,
+    setFieldMinDate
 } from "./ngx-dynamic-form/utils/validation";
 
 export {

@@ -2,8 +2,7 @@ import {Injector} from "@angular/core";
 import {LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
 import {FormFieldConfig, ValidationMessageFn, ValidatorFn, Validators} from "../common-types";
 import {AbstractControl} from "@angular/forms";
-import {FormlyFieldConfig} from "@ngx-formly/core";
-import {isFieldHidden, isFieldVisible} from "./misc";
+import {isFieldHidden, setFieldDefault, setFieldProp, setFieldValue} from "./misc";
 
 function validationMessage(errorKey: string): ValidationMessageFn {
     const key = `form.error.${errorKey}`;
@@ -29,7 +28,7 @@ function validateEach(each: boolean, cb: (value: any) => boolean, name: string):
     }, name);
 }
 
-export function addFieldValidators(field: FormFieldConfig, validators: Validators | ValidatorFn[]): void {
+export function addFieldValidators(field: FormFieldConfig, validators: Validators | ReadonlyArray<ValidatorFn>): void {
     field.validators = field.validators || {};
     const validation = field.validation || {};
     const messages = validation.messages || {};
@@ -145,4 +144,12 @@ export function maxValueValidation(max: number | Date, each?: boolean): Validato
         }
         return v == null || v <= max;
     }, "maxValue");
+}
+
+export function setFieldMinDate(field: FormFieldConfig, min: Date): void {
+    setFieldDefault(field, min);
+    setFieldProp(field, "min", min);
+    setFieldValue(field, min);
+    removeFieldValidators(field, "minValue");
+    addFieldValidators(field, [minValueValidation(min)]);
 }

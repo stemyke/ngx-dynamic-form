@@ -346,6 +346,8 @@ type FormFieldValidation<T, R> = {
 
 export type ValidatorFn = FormFieldValidatorFn<boolean>;
 
+export type ValidatorFactory = ValidatorFn | ResolveFactory<ValidatorFn>;
+
 export type ValidatorExpression = FormFieldValidatorExpression<boolean>;
 
 export type Validators = FormFieldValidation<ValidatorFn, boolean>;
@@ -438,7 +440,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
     /**
      * Custom validators for a form field.
      */
-    validators?: Validators | ValidatorFn[];
+    validators?: Validators | ReadonlyArray<ValidatorFactory>;
 };
 
 export type FormInputData = FormFieldData
