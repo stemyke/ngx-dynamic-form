@@ -54,11 +54,10 @@ export function convertToDateFormat(value: any, format: string): any {
     if (!ObjectUtils.isDefined(value) || !format?.includes("date")) return value;
     value = ObjectUtils.isDate(value) ? value : new Date(value);
     const date = isNaN(value) ? new Date() : value as Date;
+    const target = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
     return format === "datetime-local" || format === "date-time"
-        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16)
-        : date.toISOString().slice(0, 10);
+        ? target.slice(0, 16)
+        : target.slice(0, 10);
 }
 
 /**

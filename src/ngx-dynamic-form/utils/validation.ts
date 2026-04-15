@@ -2,7 +2,7 @@ import {Injector} from "@angular/core";
 import {LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
 import {FormFieldConfig, ValidationMessageFn, ValidatorFn, Validators} from "../common-types";
 import {AbstractControl} from "@angular/forms";
-import {isFieldHidden, setFieldDefault, setFieldProp, setFieldValue} from "./misc";
+import {convertToDate, convertToDateFormat, isFieldHidden, setFieldDefault, setFieldProp, setFieldValue} from "./misc";
 
 function validationMessage(errorKey: string): ValidationMessageFn {
     const key = `form.error.${errorKey}`;
@@ -21,10 +21,10 @@ function withName(fn: ValidatorFn, name: string): ValidatorFn {
     return mainFn;
 }
 
-function validateEach(each: boolean, cb: (value: any) => boolean, name: string): ValidatorFn {
-    return withName((control) => {
+function validateEach(each: boolean, cb: (value: any, field: FormFieldConfig) => boolean, name: string): ValidatorFn {
+    return withName((control, field) => {
         const value = control.value;
-        return each ? Array.isArray(value) && value.every(cb) : cb(value);
+        return each ? Array.isArray(value) && value.every(v => cb(v, field)) : cb(value, field);
     }, name);
 }
 
@@ -52,7 +52,7 @@ export function addFieldValidators(field: FormFieldConfig, validators: Validator
 
 export function removeFieldValidators(field: FormFieldConfig, ...names: string[]): void {
     const validators = Object.assign({}, field.validators || {});
-    const validation = field.validation || {};
+    const validation = Object.assign({}, field.validation || {});
     const messages = Object.assign({}, validation.messages || {});
     names.forEach(name => {
         delete validators[name];
@@ -126,8 +126,11 @@ export function maxLengthValidation(maxLength: number, each?: boolean): Validato
     return validateEach(each, v => typeof v == "string" && v.length <= maxLength, "maxLength");
 }
 
-export function minValueValidation(min: number | Date, each?: boolean): ValidatorFn {
-    return validateEach(each, v => {
+export function minValueValidation(each?: boolean): ValidatorFn {
+    return validateEach(each, (v, f) => {
+        const type = f.props.type || "number";
+        const min = type.includes("date")
+            ? convertToDate(f.props.min, type) : Number(f.props.min ?? 0);
         if (min instanceof Date) {
             const date = new Date(v) as any;
             return isNaN(date) || date >= min;
@@ -136,8 +139,11 @@ export function minValueValidation(min: number | Date, each?: boolean): Validato
     }, "minValue");
 }
 
-export function maxValueValidation(max: number | Date, each?: boolean): ValidatorFn {
-    return validateEach(each, v => {
+export function maxValueValidation(each?: boolean): ValidatorFn {
+    return validateEach(each, (v, f) => {
+        const type = f.props.type || "number";
+        const max = type.includes("date")
+            ? convertToDate(f.props.max, type) : Number(f.props.max ?? 0);
         if (max instanceof Date) {
             const date = new Date(v) as any;
             return isNaN(date) || date <= max;
@@ -150,6 +156,5 @@ export function setFieldMinDate(field: FormFieldConfig, min: Date): void {
     setFieldDefault(field, min);
     setFieldProp(field, "min", min);
     setFieldValue(field, min);
-    removeFieldValidators(field, "minValue");
-    addFieldValidators(field, [minValueValidation(min)]);
+    addFieldValidators(field, [minValueValidation(field.type === "array")]);
 }

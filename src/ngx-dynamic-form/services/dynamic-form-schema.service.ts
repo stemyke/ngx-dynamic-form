@@ -431,10 +431,10 @@ export class DynamicFormSchemaService {
             validators.itemsMaxLength = maxLengthValidation(items.maxLength, true);
         }
         if (!isNaN(items.minimum)) {
-            validators.itemsMinValue = minValueValidation(items.minimum, true);
+            validators.itemsMinValue = minValueValidation(true);
         }
         if (!isNaN(items.maximum)) {
-            validators.itemsMaxValue = maxValueValidation(items.maximum, true);
+            validators.itemsMaxValue = maxValueValidation(true);
         }
     }
 }
