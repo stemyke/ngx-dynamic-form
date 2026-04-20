@@ -141,7 +141,10 @@ export class DynamicFormSchemaService {
             priority: property.priority,
             componentType: property.componentType,
             wrappers: wrappers.filter(ObjectUtils.isStringWithValue),
-            props: property,
+            props: {
+                ...property,
+                required: false
+            },
             validators
         };
     }
@@ -400,6 +403,9 @@ export class DynamicFormSchemaService {
 
     protected addPropertyValidators(validators: Validators, property: OpenApiSchemaProperty): void {
         if (!property) return;
+        if (Boolean(property.required)) {
+            validators.required = requiredValidation();
+        }
         if (!isNaN(property.minLength)) {
             validators.minLength = minLengthValidation(property.minLength);
         }
