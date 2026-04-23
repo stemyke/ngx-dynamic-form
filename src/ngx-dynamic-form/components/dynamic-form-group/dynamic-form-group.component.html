@@ -36,13 +36,15 @@
                 }
             }
         }
-        <div *ngIf="showError" class="field-errors invalid-feedback">
-            <formly-validation-message
-                [field]="field"
-                id="{{ id }}-formly-validation-error"
-                role="alert"
-            ></formly-validation-message>
-        </div>
+        @if (showError && field.key !== null) {
+            <div *ngIf="showError" class="field-errors invalid-feedback">
+                <formly-validation-message
+                    [field]="field"
+                    id="{{ id }}-formly-validation-error"
+                    role="alert"
+                ></formly-validation-message>
+            </div>
+        }
     </tabs>
     @if (props.labelAlign === "after") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>

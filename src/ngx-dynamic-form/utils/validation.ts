@@ -79,10 +79,11 @@ export function jsonValidation(): ValidatorFn {
 }
 
 export function requiredValidation(): ValidatorFn {
-    return withName((control) =>
-            ObjectUtils.isString(control.value) ? control.value.length > 0 : ObjectUtils.isDefined(control.value),
-        "required"
-    )
+    return withName((control, field) => {
+        if (field.props?.type === "checkbox")
+            return control.value === true;
+        return ObjectUtils.isString(control.value) ? control.value.length > 0 : ObjectUtils.isDefined(control.value)
+    },"required");
 }
 
 export function translationValidation(langs: string[] = ["de", "en"]): ValidatorFn {
