@@ -277,6 +277,8 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     [additionalProperties: string]: any;
 }
 
+export type FormFieldLookup = FormFieldConfig | ReadonlyArray<FormFieldConfig>;
+
 export interface FormFieldType<T = FormFieldProps> extends FormFieldConfig<T> {
     formControl: FormControl;
     props: NonNullable<T>;

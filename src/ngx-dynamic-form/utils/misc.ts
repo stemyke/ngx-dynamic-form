@@ -7,7 +7,7 @@ import {
     DynamicFormStatus,
     FormFieldCondition, FormFieldConditionFn,
     FormFieldConfig,
-    FormFieldKey,
+    FormFieldKey, FormFieldLookup,
     FormFieldProps,
     FormHookConfig,
     FormHookFn,
@@ -81,32 +81,36 @@ export function convertToNumber(value: any, defaultVal?: number): any {
     return isNaN(num) ? defaultVal ?? value : num;
 }
 
-export function getFieldByPath(field: FormFieldConfig, path: string): FormFieldConfig | null {
-    if (field.path === path) {
+export function getFieldByPath(lookup: FormFieldLookup, path: string): FormFieldConfig | null {
+    const field = ObjectUtils.isArray(lookup) ? null : lookup as FormFieldConfig;
+    if (field?.path === path) {
         return field;
     }
-    if (!field.fieldGroup) return null;
-    for (const sf of field.fieldGroup) {
+    const fields = ObjectUtils.isArray(lookup) ? lookup : field.fieldGroup;
+    if (!fields) return null;
+    for (const sf of fields) {
         const found = getFieldByPath(sf, path);
         if (found) return found;
     }
     return null;
 }
 
-export function getFieldsByPredicate(field: FormFieldConfig, cb: (field: FormFieldConfig) => boolean): FormFieldConfig[] {
-    if (cb(field)) {
+export function getFieldsByPredicate(lookup: FormFieldLookup, cb: (field: FormFieldConfig) => boolean): FormFieldConfig[] {
+    const field = ObjectUtils.isArray(lookup) ? null : lookup as FormFieldConfig;
+    if (field && cb(field)) {
         return [field];
     }
-    if (!field.fieldGroup) return [];
     const results: FormFieldConfig[] = [];
-    for (const sf of field.fieldGroup) {
+    const fields = ObjectUtils.isArray(lookup) ? lookup : field.fieldGroup;
+    if (!fields) return results;
+    for (const sf of fields) {
         results.push(...getFieldsByPredicate(sf, cb));
     }
     return results;
 }
 
-export function getFieldsByKey(field: FormFieldConfig, key: FormFieldKey): FormFieldConfig[] {
-    return getFieldsByPredicate(field, f => f.key === key);
+export function getFieldsByKey(lookup: FormFieldLookup, key: FormFieldKey): FormFieldConfig[] {
+    return getFieldsByPredicate(lookup, f => f.key === key);
 }
 
 export async function getSelectOptions(fieldOrOpts: FormFieldConfig | FormSelectOptions): Promise<FormSelectOption[]> {

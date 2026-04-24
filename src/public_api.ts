@@ -12,6 +12,7 @@ export {
     FormFieldExpression,
     FormFieldExpressions,
     FormFieldConfig,
+    FormFieldLookup,
     FormFieldType,
     FormFieldChangeEvent,
     FormSerializeResult,
