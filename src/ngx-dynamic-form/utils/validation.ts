@@ -21,10 +21,10 @@ function withName(fn: ValidatorFn, name: string): ValidatorFn {
     return mainFn;
 }
 
-function validateEach(each: boolean, cb: (value: any, field: FormFieldConfig) => boolean, name: string): ValidatorFn {
+function validateEach(cb: (value: any, field: FormFieldConfig) => boolean, name: string): ValidatorFn {
     return withName((control, field) => {
         const value = control.value;
-        return each ? Array.isArray(value) && value.every(v => cb(v, field)) : cb(value, field);
+        return field.type === "array" ? Array.isArray(value) && value.every(v => cb(v, field)) : cb(value, field);
     }, name);
 }
 
@@ -119,16 +119,16 @@ export function arrayLengthValidation(min: number = 1, max: number = Number.MAX_
     }, "arrayLength");
 }
 
-export function minLengthValidation(minLength: number, each?: boolean): ValidatorFn {
-    return validateEach(each, v => typeof v == "string" && v.length >= minLength, "minLength");
+export function minLengthValidation(minLength: number): ValidatorFn {
+    return validateEach(v => typeof v == "string" && v.length >= minLength, "minLength");
 }
 
-export function maxLengthValidation(maxLength: number, each?: boolean): ValidatorFn {
-    return validateEach(each, v => typeof v == "string" && v.length <= maxLength, "maxLength");
+export function maxLengthValidation(maxLength: number): ValidatorFn {
+    return validateEach(v => typeof v == "string" && v.length <= maxLength, "maxLength");
 }
 
-export function minValueValidation(each?: boolean): ValidatorFn {
-    return validateEach(each, (v, f) => {
+export function minValueValidation(): ValidatorFn {
+    return validateEach((v, f) => {
         const type = f.props.type || "number";
         const min = type.includes("date")
             ? convertToDate(f.props.min, type) : Number(f.props.min ?? 0);
@@ -140,8 +140,8 @@ export function minValueValidation(each?: boolean): ValidatorFn {
     }, "minValue");
 }
 
-export function maxValueValidation(each?: boolean): ValidatorFn {
-    return validateEach(each, (v, f) => {
+export function maxValueValidation(): ValidatorFn {
+    return validateEach((v, f) => {
         const type = f.props.type || "number";
         const max = type.includes("date")
             ? convertToDate(f.props.max, type) : Number(f.props.max ?? 0);
@@ -157,5 +157,5 @@ export function setFieldMinDate(field: FormFieldConfig, min: Date): void {
     setFieldDefault(field, min);
     setFieldProp(field, "min", min);
     setFieldValue(field, min);
-    addFieldValidators(field, [minValueValidation(field.type === "array")]);
+    addFieldValidators(field, [minValueValidation()]);
 }

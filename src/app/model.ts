@@ -229,7 +229,7 @@ export class OrderModel {
         type: "number",
         step: 0.05,
         min: 3,
-        validators: [minValueValidation(5)]
+        validators: [minValueValidation()]
     }, {
         fieldSet: "testing",
     })

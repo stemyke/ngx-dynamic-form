@@ -209,8 +209,8 @@ export class DynamicFormSchemaService {
             autocomplete: property.autocomplete,
             pattern: property.pattern,
             step: isNaN(sub.step) ? property.step : sub.step,
-            min: sub.minimum,
-            max: sub.maximum,
+            min: sub.minimum ?? sub.min,
+            max: sub.maximum ?? sub.max,
             minLength: sub.minLength,
             maxLength: sub.maxLength,
             placeholder: property.placeholder,
@@ -257,8 +257,8 @@ export class DynamicFormSchemaService {
         return this.builder.createFormInput(property.id, {
             ...this.getFormFieldData(property, options),
             type,
-            min: convertToDateFormat(property.min, property.format),
-            max: convertToDateFormat(property.max, property.format),
+            min: convertToDateFormat(property.minimum ?? property.min, property.format),
+            max: convertToDateFormat(property.maximum ?? property.max, property.format),
         }, parent, options);
     }
 
@@ -413,10 +413,10 @@ export class DynamicFormSchemaService {
             validators.maxLength = maxLengthValidation(property.maxLength);
         }
         if (!isNaN(property.minimum)) {
-            validators.min = minValueValidation(convertToDate(property.minimum, property.format));
+            validators.min = minValueValidation();
         }
         if (!isNaN(property.maximum)) {
-            validators.max = maxValueValidation(convertToDate(property.maximum, property.format));
+            validators.max = maxValueValidation();
         }
         // if (isString(property.pattern) && property.pattern.length) {
         //     validators.pattern = property.pattern;
@@ -431,16 +431,16 @@ export class DynamicFormSchemaService {
     protected addItemsValidators(validators: Validators, items: OpenApiSchemaProperty): void {
         if (!items) return;
         if (!isNaN(items.minLength)) {
-            validators.itemsMinLength = minLengthValidation(items.minLength, true);
+            validators.itemsMinLength = minLengthValidation(items.minLength);
         }
         if (!isNaN(items.maxLength)) {
-            validators.itemsMaxLength = maxLengthValidation(items.maxLength, true);
+            validators.itemsMaxLength = maxLengthValidation(items.maxLength);
         }
         if (!isNaN(items.minimum)) {
-            validators.itemsMinValue = minValueValidation(true);
+            validators.itemsMinValue = minValueValidation();
         }
         if (!isNaN(items.maximum)) {
-            validators.itemsMaxValue = maxValueValidation(true);
+            validators.itemsMaxValue = maxValueValidation();
         }
     }
 }
