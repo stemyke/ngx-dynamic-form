@@ -7,7 +7,7 @@ import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {components, directives, pipes} from "./ngx-dynamic-form.imports";
 
-import {IDynamicFormModuleConfig} from "./common-types";
+import {DEFAULT_NUMERIC_STEP, IDynamicFormModuleConfig} from "./common-types";
 
 import {DynamicFormService} from "./services/dynamic-form.service";
 import {DynamicFormBuilderService} from "./services/dynamic-form-builder.service";
@@ -15,6 +15,7 @@ import {DynamicFormSchemaService} from "./services/dynamic-form-schema.service";
 
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
+import {DynamicFormPasswordComponent} from "./components/dynamic-form-password/dynamic-form-password.component";
 import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
 import {DynamicFormTranslationComponent} from "./components/dynamic-form-translation/dynamic-form-translation.component";
 import {DynamicFormUploadComponent} from "./components/dynamic-form-upload/dynamic-form-upload.component";
@@ -62,6 +63,7 @@ export class NgxDynamicFormModule {
                 types: [
                     {name: "array", component: DynamicFormArrayComponent},
                     {name: "chips", component: DynamicFormChipsComponent},
+                    {name: "password", component: DynamicFormPasswordComponent},
                     {name: "static", component: DynamicFormStaticComponent},
                     {name: "translation", component: DynamicFormTranslationComponent},
                     {name: "upload", component: DynamicFormUploadComponent},
@@ -81,7 +83,11 @@ export class NgxDynamicFormModule {
             ...formlyConfigs,
             DynamicFormService,
             DynamicFormBuilderService,
-            DynamicFormSchemaService
+            DynamicFormSchemaService,
+            {
+                provide: DEFAULT_NUMERIC_STEP,
+                useValue: (config?.defaultNumericStep ?? 1)
+            }
         ];
     }
 

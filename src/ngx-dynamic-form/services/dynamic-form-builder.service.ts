@@ -13,6 +13,7 @@ import {
 } from "@stemy/ngx-utils";
 
 import {
+    DEFAULT_NUMERIC_STEP,
     FormArrayData,
     FormBuilderOptions,
     FormFieldConfig,
@@ -48,6 +49,8 @@ import {arrayItemActionToExpression, toStringArray} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
 
+const customInputTypes = ["checkbox", "textarea", "wysiwyg", "password"];
+
 @Injectable()
 export class DynamicFormBuilderService {
 
@@ -56,7 +59,8 @@ export class DynamicFormBuilderService {
     constructor(readonly injector: Injector,
                 readonly events: EventsService,
                 @Inject(API_SERVICE) readonly api: IApiService,
-                @Inject(LANGUAGE_SERVICE) protected readonly languages: ILanguageService) {
+                @Inject(LANGUAGE_SERVICE) protected readonly languages: ILanguageService,
+                @Inject(DEFAULT_NUMERIC_STEP) protected readonly defaultNumericStep: number) {
         const lang = new BehaviorSubject(this.languages.currentLanguage);
         this.events.languageChanged.subscribe(value => lang.next(value));
         this.language = lang;
@@ -166,7 +170,7 @@ export class DynamicFormBuilderService {
             type,
             autocomplete,
             pattern: ObjectUtils.isString(data.pattern) ? data.pattern : "",
-            step: data.step,
+            step: convertToNumber(data.step, this.defaultNumericStep),
             cols: data.cols || null,
             rows: data.rows || 10,
             placeholder: data.placeholder || "",
@@ -195,7 +199,7 @@ export class DynamicFormBuilderService {
                 break;
         }
         return this.createFormField(
-            key, type === "checkbox" || type === "textarea" || type === "wysiwyg" ? type : "input",
+            key, customInputTypes.includes(type) ? type : "input",
             data, props, parent, options
         );
     }

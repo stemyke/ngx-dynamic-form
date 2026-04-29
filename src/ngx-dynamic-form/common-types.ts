@@ -1,4 +1,4 @@
-import {Injector, OutputRef, Signal, Type} from "@angular/core";
+import {InjectionToken, Injector, OutputRef, Signal, Type} from "@angular/core";
 import {AbstractControl, FormControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
 import {ConfigOption, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
@@ -501,6 +501,11 @@ export type ConfigForSchemaOptions = RequireAtLeastOne<ConfigForSchemaOptionsBas
 
 export type CustomizerOrSchemaOptions = FormFieldCustomizer | ConfigForSchemaOptions;
 
+// --- Module Configuration ---
+
+export const DEFAULT_NUMERIC_STEP = new InjectionToken<string>("DEFAULT_NUMERIC_STEP");
+
 export interface IDynamicFormModuleConfig {
     options?: ConfigOption[];
+    defaultNumericStep?: number;
 }
