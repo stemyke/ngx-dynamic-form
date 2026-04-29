@@ -93,6 +93,61 @@ export class AddressesModel {
 
 export class OrderModel {
 
+    @FormInput({
+        fieldSet: "testing",
+        type: "number",
+        min: 1,
+        validators: [minValueValidation()]
+    })
+    num: number = 1;
+
+    @FormInput({
+        fieldSet: "testing",
+        placeholder: "label.html",
+        type: "wysiwyg"
+    })
+    @FormSerializable()
+    html: string = "";
+
+    @FormInput({
+        fieldSet: "testing",
+        type: "textarea",
+        hidden: true
+    })
+    @FormSerializable()
+    message: string = "";
+
+    @FormUpload({
+        fieldSet: "testing"
+    })
+    @FormSerializable()
+    file: string = "";
+
+    @FormStatic({
+        fieldSet: "testing",
+    })
+    displayName: string = "Teszt Elek";
+
+    @FormStatic({
+        fieldSet: "testing",
+    })
+    displayImage: string = "https://picsum.photos/200/300";
+
+    @FormArray("text", {
+        fieldSet: "testing"
+    })
+    lines: string[] = [];
+
+    @FormArray({
+        type: "number",
+        step: 0.05,
+        min: 3,
+        validators: [minValueValidation()]
+    }, {
+        fieldSet: "testing",
+    })
+    nums: number[] = [];
+
     @FormGroup({
         asFieldSet: true
     })
@@ -187,53 +242,6 @@ export class OrderModel {
     })
     @FormSerializable()
     radioContact: string = "";
-
-    @FormInput({
-        fieldSet: "testing",
-        placeholder: "label.html",
-        type: "wysiwyg"
-    })
-    @FormSerializable()
-    html: string = "";
-
-    @FormInput({
-        fieldSet: "testing",
-        type: "textarea",
-        hidden: true
-    })
-    @FormSerializable()
-    message: string = "";
-
-    @FormUpload({
-        fieldSet: "testing"
-    })
-    @FormSerializable()
-    file: string = "";
-
-    @FormStatic({
-        fieldSet: "testing",
-    })
-    displayName: string = "Teszt Elek";
-
-    @FormStatic({
-        fieldSet: "testing",
-    })
-    displayImage: string = "https://picsum.photos/200/300";
-
-    @FormArray("text", {
-        fieldSet: "testing"
-    })
-    lines: string[] = [];
-
-    @FormArray({
-        type: "number",
-        step: 0.05,
-        min: 3,
-        validators: [minValueValidation()]
-    }, {
-        fieldSet: "testing",
-    })
-    nums: number[] = [];
 
     constructor(data?: any) {
         if (data) Object.assign(this, data);
