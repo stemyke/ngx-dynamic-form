@@ -509,11 +509,12 @@ export class DynamicFormBuilderService {
                 const idName = String(field.id || field.key || "").replace(/\./, "-");
                 let baseName = `dynamic-form-fieldset dynamic-form-fieldset-${idName}`;
                 if (!this.isFieldset(target)) {
+                    const labelAlign = target.props?.labelAlign || "before";
                     const type = String(target.type || "group").replace("formly-", "");
                     const typeName = ObjectUtils.isConstructor(type)
                         ? `${(target.type as any).name}`.toLowerCase().replace("component", "")
                         : type;
-                    baseName = `dynamic-form-field dynamic-form-field-${target.key} dynamic-form-${typeName}`;
+                    baseName = `dynamic-form-field dynamic-form-field-${target.key} dynamic-form-label-${labelAlign} dynamic-form-${typeName}`;
                 }
                 const classesName = Array.isArray(classes) ? classes : [classes];
                 const layoutName = Array.isArray(layout) ? layout : [layout];
