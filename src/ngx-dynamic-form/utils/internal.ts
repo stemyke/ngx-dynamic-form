@@ -45,7 +45,7 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
     }
 
     get testId() {
-        return this.opts.testId;
+        return this.opts.testId || "form";
     }
 
     get context() {
@@ -82,7 +82,7 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
     }
 
     forSchema(schema: OpenApiSchema): ConfigForSchemaWrapOptions {
-        return new ConfigForSchemaWrap(this.opts,  this.mode, this.injector, schema);
+        return new ConfigForSchemaWrap(this.opts, this.mode, this.injector, schema);
     }
 }
 

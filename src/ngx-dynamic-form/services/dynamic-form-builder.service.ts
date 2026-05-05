@@ -268,9 +268,9 @@ export class DynamicFormBuilderService {
         }, parent, options);
     }
 
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig[], data: FormGroupData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent: FormFieldConfig, options?: FormBuilderOptions): Promise<FormFieldConfig>
-    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent: FormFieldConfig, options?: FormBuilderOptions): MaybePromise<FormFieldConfig> {
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => FormFieldConfig[], data: FormGroupData, parent?: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent?: FormFieldConfig, options?: FormBuilderOptions): Promise<FormFieldConfig>
+    createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent?: FormFieldConfig, options?: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
         const group = this.createFormField(key, undefined, data, {
             useTabs: data.useTabs === true,
