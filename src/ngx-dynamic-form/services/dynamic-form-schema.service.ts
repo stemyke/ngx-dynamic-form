@@ -296,13 +296,23 @@ export class DynamicFormSchemaService {
     }
 
     protected getFormSelectOptions($enum: string[], property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {
-        if (Array.isArray($enum)) {
-            return this.getFormEnumOptions($enum, property.id, options, field);
+        // --- Handle options from another property path ---
+        if (ObjectUtils.isStringWithValue(property.optionsPath)) {
+            return this.getFormPathOptions(property.optionsPath, field);
         }
+        // --- Handle options from an endpoint ---
         if (ObjectUtils.isStringWithValue(property.endpoint)) {
             return this.getFormEndpointOptions(property, field);
         }
-        return this.getFormPathOptions(property.optionsPath, field);
+        // --- Handle direct options like an enum  ---
+        if (Array.isArray(property.options)) {
+            return this.getFormEnumOptions(property.options, property.id, options, field);
+        }
+        // --- Handle enum options  ---
+        if (Array.isArray($enum)) {
+            return this.getFormEnumOptions($enum, property.id, options, field);
+        }
+        return [];
     }
 
     protected getFormEnumOptions($enum: string[], id: string, options: ConfigForSchemaWrapOptions, field: FormFieldConfig): FormSelectOptions {

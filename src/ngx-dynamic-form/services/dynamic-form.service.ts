@@ -35,24 +35,35 @@ export class DynamicFormService {
     }
 
     protected async getFormFieldGroupBySchemaName(name: string, customizeOrOptions: CustomizerOrSchemaOptions, restrictedMethod: string): Promise<FormFieldConfig> {
-        const config = {
-            id: FORM_ROOT_ID,
-            path: "",
-            wrappers: ["form-group"],
-            props: {}
-        } as FormFieldConfig;
         const schema = await this.fs.getSchema(name);
         if (!schema) {
             console.warn(`Schema with name "${name}" not found.`);
-            return config;
+            return {
+                id: FORM_ROOT_ID,
+                path: "",
+                wrappers: ["form-group"],
+                fieldGroup: [],
+                props: {},
+                hooks: {},
+                expressions: {}
+            };
         }
         const wrapOptions = await toWrapOptions(
             customizeOrOptions, this.injector, schema,
             `"DynamicFormService.${restrictedMethod}" is called from a customizer, which is not allowed. Please use DynamicFormSchemaService instead!`
         );
-        const fields = await this.fs.getFormFieldsForSchema(schema, config, wrapOptions);
+        const config = await this.fb.createFormGroup(null, parent => {
+            return this.fs.getFormFieldsForSchema(schema, parent, wrapOptions)
+        }, {
+            label: "",
+            hidden: false,
+            className: "dynamic-form-root-group"
+        }, null, wrapOptions);
+
+        const fields = config.fieldGroup || [];
         const fieldGroup = [...fields];
 
+        config.id = FORM_ROOT_ID;
         config.fieldGroup = fieldGroup;
 
         // There are no actual fields in the schema, or no schema exists
@@ -73,6 +84,7 @@ export class DynamicFormService {
             type: "object",
             properties: schema?.properties || {}
         }, schema);
+
         // Check if the customized root wrapper returned an array
         fields.length = 0;
 

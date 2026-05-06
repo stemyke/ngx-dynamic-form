@@ -21,12 +21,12 @@
     @if (props.labelAlign === "before") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
-    <tabs class="field-container">
-        @for (itemField of field.fieldGroup; track itemField; let ix = $index) {
+    <tabs class="field-container" [testId]="(field.testId || 'form') + '-tab'">
+        @for (itemField of field.fieldGroup; track itemField) {
             @if (itemField.display) {
                 @if (props.useTabs && itemField.wrappers | includes: 'form-fieldset') {
                     <div class="form-fieldset-item"
-                         [tabsItem]="ix"
+                         [tabsItem]="itemField.id"
                          [classes]="['form-fieldset-tab', itemField.valid === false ? 'invalid' : 'valid']"
                          [label]="itemField.props.label">
                         <formly-field [field]="itemField"></formly-field>

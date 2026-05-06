@@ -59,7 +59,7 @@ export class DynamicFormComponent implements IDynamicForm {
 
     readonly data = input<any>({});
 
-    readonly fields = input<FormFieldConfig[]>(null);
+    readonly fields = input<FormFieldConfig[] | FormFieldConfig>(null);
 
     readonly fieldChanges = new Subject<FormFieldChangeEvent>();
 
@@ -82,22 +82,22 @@ export class DynamicFormComponent implements IDynamicForm {
             legacyLabels: this.legacyLabels(),
             testId: this.testId(),
         };
-        const fields = this.fields();
+        const defs = this.fields();
+        const fields = Array.isArray(defs) ? defs : null;
         const constructor = this.data()?.constructor;
-        return [
-            this.builder.createFormGroup(
-                null, parent => this.builder.createFieldSets(
-                    fields || this.builder.resolveFormFields(constructor, parent, options),
-                    parent
-                ),
-                {
-                    label: "",
-                    useTabs: this.useTabs(),
-                    hidden: false,
-                    className: "dynamic-form-root-group"
-                }
-            )
-        ];
+        const root = (Array.isArray(defs) ? null : defs) ?? this.builder.createFormGroup(
+            null, parent => this.builder.createFieldSets(
+                fields ?? this.builder.resolveFormFields(constructor, parent, options),
+                parent
+            ),
+            {
+                label: "",
+                hidden: false,
+                useTabs: this.useTabs(),
+                className: "dynamic-form-root-group"
+            }
+        );
+        return [root];
     });
 
     readonly group = computed(() => {
