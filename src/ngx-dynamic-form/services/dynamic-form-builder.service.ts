@@ -532,7 +532,7 @@ export class DynamicFormBuilderService {
             },
             testId: target => {
                 const tp = target.parent;
-                const prefix = !tp?.testId ? options?.testId || "form" : tp.testId;
+                const prefix = !tp?.testId ? options?.testId : tp.testId;
                 return [prefix, String(target.key ?? "")].filter(ObjectUtils.isStringWithValue).join("-");
             }
         };
