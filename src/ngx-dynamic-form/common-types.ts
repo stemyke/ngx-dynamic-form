@@ -286,8 +286,9 @@ export interface FormFieldType<T = FormFieldProps> extends FormFieldConfig<T> {
 
 export interface FormFieldChangeEvent {
     field: FormFieldConfig;
-    type: string;
+    type: "expressionChanges" | "valueChanges" | string;
     value: any;
+    form?: IDynamicForm;
     [meta: string]: any;
 }
 
@@ -319,6 +320,7 @@ export interface IDynamicForm {
     readonly onSubmit: OutputRef<IDynamicForm>;
     readonly onFieldChanges: OutputRef<FormFieldChangeEvent>;
     readonly onValueChanges: OutputRef<FormFieldChangeEvent>;
+    readonly onExpressionChanges: OutputRef<FormFieldChangeEvent>;
     readonly onInit: OutputRef<FormFieldChangeEvent>;
 
     reset(): void;
