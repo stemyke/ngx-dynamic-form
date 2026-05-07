@@ -182,7 +182,7 @@ export class DynamicFormBuilderService {
         };
         switch (type) {
             case "checkbox":
-                data.defaultValue = data.defaultValue ?? true;
+                data.defaultValue = data.defaultValue ?? false;
                 break;
             case "number":
             case "integer":
@@ -197,6 +197,7 @@ export class DynamicFormBuilderService {
             case "string":
             case "text":
             case "textarea":
+                data.defaultValue = data.defaultValue ?? "";
                 props.minLength = isNaN(data.minLength) ? 0 : data.minLength;
                 props.maxLength = isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength;
                 break;
