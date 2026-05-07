@@ -4,9 +4,9 @@ import {combineLatestWith, distinctUntilChanged, switchMap} from "rxjs";
 import {
     IApiService,
     ILanguageService,
+    ObjectUtils,
     OpenApiSchema,
     OpenApiSchemaProperty,
-    ObjectUtils,
     OpenApiService,
     StringUtils
 } from "@stemy/ngx-utils";
@@ -27,14 +27,10 @@ import {
     minValueValidation,
     requiredValidation
 } from "../utils/validation";
-import {
-    ConfigForSchemaWrapOptions,
-    mergeFormFields,
-    toWrapOptions
-} from "../utils/internal";
+import {ConfigForSchemaWrapOptions, mergeFormFields, toWrapOptions} from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
-import {controlValues, convertToDate, convertToDateFormat, getSelectOptions} from "../utils/misc";
+import {controlValues, convertToDateFormat, getSelectOptions} from "../utils/misc";
 
 @Injectable()
 export class DynamicFormSchemaService {
@@ -135,6 +131,7 @@ export class DynamicFormSchemaService {
             classes: property.classes,
             layout: property.layout,
             serialize: property.serialize,
+            defaultValue: property.default,
             fieldSet: property.fieldSet,
             labelPrefix: property.labelPrefix,
             purposes: property.purposes || property.purpose,
@@ -203,7 +200,7 @@ export class DynamicFormSchemaService {
                 break;
         }
         const sub = property.type == "array" ? property.items || property : property;
-        return this.builder.createFormInput(property.id, {
+        const input = this.builder.createFormInput(property.id, {
             ...this.getFormFieldData(property, options),
             type,
             autocomplete: property.autocomplete,
@@ -217,6 +214,7 @@ export class DynamicFormSchemaService {
             indeterminate: property.indeterminate,
             suffix: property.suffix
         }, parent, options);
+        return input;
     }
 
     protected getFormTextareaConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {

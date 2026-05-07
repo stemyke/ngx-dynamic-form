@@ -181,6 +181,9 @@ export class DynamicFormBuilderService {
             },
         };
         switch (type) {
+            case "checkbox":
+                data.defaultValue = data.defaultValue ?? true;
+                break;
             case "number":
             case "integer":
                 props.min = convertToNumber(data.min, MIN_INPUT_NUM);
@@ -272,11 +275,11 @@ export class DynamicFormBuilderService {
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig[]>, data: FormGroupData, parent?: FormFieldConfig, options?: FormBuilderOptions): Promise<FormFieldConfig>
     createFormGroup(key: string, fields: (parent: FormFieldConfig) => any, data: FormGroupData, parent?: FormFieldConfig, options?: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
+        data.defaultValue = data.defaultValue ?? {};
         const group = this.createFormField(key, undefined, data, {
             useTabs: data.useTabs === true,
         }, parent, options);
         group.asFieldSet = data.asFieldSet === true;
-        group.defaultValue = {};
         const result = fields(group.asFieldSet ? parent : group);
         const handleGroup = (fieldGroup: FormFieldConfig[]) => {
             group.fieldGroup = fieldGroup;
@@ -291,10 +294,8 @@ export class DynamicFormBuilderService {
     createFormArray(key: string, fields: (parent: FormFieldConfig) => Promise<FormFieldConfig | FormFieldConfig[]>, data: FormArrayData, parent: FormFieldConfig, options?: FormBuilderOptions): Promise<FormFieldConfig>
     createFormArray(key: string, fields: (parent: FormFieldConfig) => any, data: FormArrayData, parent: FormFieldConfig, options?: FormBuilderOptions): MaybePromise<FormFieldConfig> {
         data = data || {};
+        data.defaultValue = data.defaultValue ?? [];
         const array = this.createFormField(key, "array", data, {
-            // initialCount: data.initialCount || 0,
-            // sortable: data.sortable || false,
-            defaultValue: [],
             useTabs: data.useTabs === true,
             tabsLabel: `${data.tabsLabel || "label"}`,
             insertItem: data.insertItem,
@@ -428,6 +429,7 @@ export class DynamicFormBuilderService {
         const prefix = data.labelPrefix ?? parent?.labelPrefix;
         const field: FormFieldConfig = {
             ...this.createFormSerializer(key, data as unknown as FormSerializerData),
+            defaultValue: data.defaultValue ?? null,
             fieldSet: String(data.fieldSet || ""),
             labelPrefix: prefix,
             controlTemplateKey: String(data.controlTemplateKey || ""),

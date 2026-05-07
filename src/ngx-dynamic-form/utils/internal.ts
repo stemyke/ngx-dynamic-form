@@ -67,7 +67,8 @@ class ConfigForSchemaWrap implements ConfigForSchemaWrapOptions {
 
     async customize(field: FormFieldConfig, property: OpenApiSchemaProperty, schema: OpenApiSchema) {
         field.defaultValue = property.format?.startsWith("date")
-            ? convertToDateFormat(property.default, property.format) : property.default;
+            ? convertToDateFormat(field.defaultValue, property.format)
+            : field.defaultValue;
         const res = await ForbiddenZone.run("customizer", () =>
             this.fieldCustomizer(
                 field, this.forCustomizer(), this.injector,

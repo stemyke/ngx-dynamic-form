@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.9.14",
+    "version": "19.9.15",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
