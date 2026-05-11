@@ -104,7 +104,8 @@ export class DynamicFormComponent implements IDynamicForm {
         const root = (Array.isArray(defs) ? null : defs) ?? this.builder.createFormGroup(
             null, parent => this.builder.createFieldSets(
                 fields ?? this.builder.resolveFormFields(constructor, parent, options),
-                parent
+                parent,
+                options
             ),
             {
                 label: "",
