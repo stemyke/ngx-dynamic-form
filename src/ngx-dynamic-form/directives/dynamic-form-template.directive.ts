@@ -1,7 +1,8 @@
-import {Directive, Input, OnChanges, OnDestroy, OnInit, TemplateRef} from "@angular/core";
-import {DynamicFormTemplateService} from "../services/dynamic-form-template.service";
+import {Directive, Optional, Input, OnChanges, OnDestroy, OnInit, TemplateRef} from "@angular/core";
 import {ObjectUtils} from "@stemy/ngx-utils";
+
 import {FormTemplateType} from "../common-types";
+import {DynamicFormTemplateService} from "../services/dynamic-form-template.service";
 
 @Directive({
     standalone: false,
@@ -25,7 +26,7 @@ export class DynamicFormTemplateDirective implements OnChanges, OnDestroy {
 
     protected setting: [string, FormTemplateType] = null;
 
-    constructor(readonly templates: DynamicFormTemplateService,
+    constructor(@Optional() readonly templates: DynamicFormTemplateService,
                 readonly template: TemplateRef<any>) {
     }
 
@@ -42,6 +43,7 @@ export class DynamicFormTemplateDirective implements OnChanges, OnDestroy {
     }
 
     selectType(): [string, FormTemplateType] {
+        if (!this.templates) return null;
         const inputs = Object.keys(this);
         for (const input of inputs) {
             const value = this[input] as string;
