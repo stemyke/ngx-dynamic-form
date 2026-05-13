@@ -210,11 +210,13 @@ export class DynamicFormBuilderService {
 
     createFormSelect(key: string, data: FormSelectData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
+        const multiple = data.multiple === true;
+        data.defaultValue = data.defaultValue ?? (multiple ? [] : null);
         const type = `${data.type || "select"}`;
         const fieldType = type === "radio" ? type : (data.strict === false ? "chips" : "select");
         const field = this.createFormField(key, fieldType, data, {
             type,
-            multiple: data.multiple === true,
+            multiple,
             strict: data.strict !== false,
             allowEmpty: data.allowEmpty === true,
             groupBy: data.groupBy,
@@ -390,8 +392,16 @@ export class DynamicFormBuilderService {
         }));
         const control = field.formControl;
         const multiple = field.props.multiple;
-        field.defaultValue = multiple ? [] : options[0]?.value ?? null;
-        if (multiple || options.length === 0 || options.findIndex(o => o.value === control.value) >= 0) return options;
+        if (multiple) {
+            // Handle if current control value is not an array
+            const value = Array.isArray(control.value)
+                ? control.value
+                : String(control.value || "").split(",");
+            control.setValue(value);
+            return options;
+        }
+        if (options.length === 0 || options.findIndex(o => o.value === control.value) >= 0)
+            return options;
         control.setValue(field.defaultValue);
         return options;
     }

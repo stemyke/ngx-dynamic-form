@@ -336,8 +336,9 @@ export class DynamicFormSchemaService {
                 const endpoint = entries.reduce((res, [key, control]) => {
                     return this.replaceOptionsEndpoint(res, key, control.value);
                 }, `${property.endpoint}`);
+                const cache = property.cache ?? new Date(Date.now() + 20_000);
                 const data = await this.api.list(endpoint, this.api.makeListParams(1, -1), {
-                    cache: this.api.cached(property.cache),
+                    cache: this.api.cached(cache),
                     read: String(property.responseProperty || "")
                 });
                 const items = ObjectUtils.isArray(data)
