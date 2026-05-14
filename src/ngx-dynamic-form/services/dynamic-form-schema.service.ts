@@ -348,7 +348,7 @@ export class DynamicFormSchemaService {
                     item = ObjectUtils.isObject(item) ? item : {id: item};
                     return {
                         ...item,
-                        value: item.id || item._id,
+                        value: item[property.idField] || item.id || item._id,
                         label: item[property.labelField] || item.label || item.id || item._id
                     };
                 }));
