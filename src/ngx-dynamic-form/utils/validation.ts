@@ -79,9 +79,7 @@ export function jsonValidation(): ValidatorFn {
 }
 
 export function requiredValidation(): ValidatorFn {
-    return withName((control, field) => {
-        if (field.props?.type === "checkbox")
-            return control.value === true;
+    return withName(control => {
         return ObjectUtils.isString(control.value) ? control.value.length > 0 : ObjectUtils.isDefined(control.value)
     },"required");
 }
@@ -151,6 +149,12 @@ export function maxValueValidation(): ValidatorFn {
         }
         return v == null || v <= max;
     }, "maxValue");
+}
+
+export function enumValidation($enum: any[]): ValidatorFn {
+    return validateEach(v => {
+        return $enum.includes(v);
+    },"enum");
 }
 
 export function setFieldMinDate(field: FormFieldConfig, min: Date): void {

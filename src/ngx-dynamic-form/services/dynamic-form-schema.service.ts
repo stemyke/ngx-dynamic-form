@@ -21,6 +21,7 @@ import {
 
 import {
     emailValidation,
+    enumValidation,
     maxLengthValidation,
     maxValueValidation,
     minLengthValidation,
@@ -77,10 +78,6 @@ export class DynamicFormSchemaService {
     }
 
     protected async getFormFieldForProp(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
-        const $enum = property.items?.enum || property.enum;
-        if (Array.isArray($enum) || ObjectUtils.isStringWithValue(property.optionsPath) || ObjectUtils.isStringWithValue(property.endpoint)) {
-            return this.getFormSelectConfig($enum, property, options, parent);
-        }
         switch (property.type) {
             // case "object":
             //     return this.getFormEditorConfig(property, options, parent);
@@ -91,6 +88,10 @@ export class DynamicFormSchemaService {
                 return this.getFormCheckboxConfig(property, options, parent);
             case "array":
                 return this.getFormArrayConfig(property, options, parent);
+        }
+        const $enum = property.items?.enum || property.enum;
+        if (Array.isArray($enum) || ObjectUtils.isStringWithValue(property.optionsPath) || ObjectUtils.isStringWithValue(property.endpoint)) {
+            return this.getFormSelectConfig($enum, property, options, parent);
         }
         // if (this.checkIsEditorProperty(property)) {
         //     return this.getFormEditorConfig(property, options, parent);
@@ -427,6 +428,12 @@ export class DynamicFormSchemaService {
         if (!isNaN(property.maximum)) {
             validators.max = maxValueValidation();
         }
+        if (!isNaN(property.maximum)) {
+            validators.max = maxValueValidation();
+        }
+        if (Array.isArray(property.enum)) {
+            validators.enum = enumValidation(property.enum);
+        }
         // if (isString(property.pattern) && property.pattern.length) {
         //     validators.pattern = property.pattern;
         // }
@@ -450,6 +457,9 @@ export class DynamicFormSchemaService {
         }
         if (!isNaN(items.maximum)) {
             validators.itemsMaxValue = maxValueValidation();
+        }
+        if (Array.isArray(items.enum)) {
+            validators.enum = enumValidation(items.enum);
         }
     }
 }
