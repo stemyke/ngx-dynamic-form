@@ -28,10 +28,12 @@ import {
     minValueValidation,
     requiredValidation
 } from "../utils/validation";
-import {ConfigForSchemaWrapOptions, mergeFormFields, toWrapOptions} from "../utils/internal";
+import {ConfigForSchemaWrapOptions, toWrapOptions} from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
 import {controlValues, convertToDateFormat, getSelectOptions} from "../utils/misc";
+
+const PRIORITY_DIFF = 20;
 
 @Injectable()
 export class DynamicFormSchemaService {
@@ -61,8 +63,11 @@ export class DynamicFormSchemaService {
         const keys = Object.keys(schema.properties || {});
         const fields: FormFieldConfig[] = [];
         // Collect all properties of this schema def
+        let priority = Number.MAX_SAFE_INTEGER - (keys.length * PRIORITY_DIFF);
         for (const key of keys) {
             const property = schema.properties[key];
+            // Property priority is necessary when merging different schemas
+            property.priority = property.priority ?? (priority += PRIORITY_DIFF);
             const propFields = await this.getFormFieldsForProp(property, schema, options, parent);
             fields.push(...propFields);
         }
@@ -70,6 +75,29 @@ export class DynamicFormSchemaService {
             fields.filter(f => null !== f),
             parent, options, schema.sets || []
         );
+    }
+
+    protected async getFormFieldsForRefs(subSchemas: OpenApiSchema[], parent: FormFieldConfig, options: ConfigForSchemaWrapOptions) {
+        const subFields = await Promise.all(
+            subSchemas.map(async s => this.getFormFieldsForSchema(s, parent, options))
+        );
+        const res: FormFieldConfig[] = [];
+        for (const ix in subSchemas) {
+            const schema = subSchemas[ix];
+            const fields = subFields[ix];
+            for (const field of fields) {
+                const index = field.key
+                    ? res.findIndex(t => t.key === field.key)
+                    : res.findIndex(t => t.id === field.id);
+                if (index >= 0) {
+                    res[index].schemas.push(schema.name);
+                    continue;
+                }
+                field.schemas.push(schema.name);
+                res.push(field);
+            }
+        }
+        return this.builder.createFieldSets(res, parent, options);
     }
 
     protected async getFormFieldsForProp(property: OpenApiSchemaProperty, schema: OpenApiSchema, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig[]> {
@@ -86,16 +114,16 @@ export class DynamicFormSchemaService {
                 return this.getFormUploadConfig(property, options, parent);
             case "boolean":
                 return this.getFormCheckboxConfig(property, options, parent);
-            case "array":
-                return this.getFormArrayConfig(property, options, parent);
         }
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || ObjectUtils.isStringWithValue(property.optionsPath) || ObjectUtils.isStringWithValue(property.endpoint)) {
+            // Handle select after boolean, because there could be a boolean field, with a strict enum [true] for validation
             return this.getFormSelectConfig($enum, property, options, parent);
         }
-        // if (this.checkIsEditorProperty(property)) {
-        //     return this.getFormEditorConfig(property, options, parent);
-        // }
+        if (property.type === "array") {
+            // Handle array after select, because there are also multi select fields
+            return this.getFormArrayConfig(property, options, parent);
+        }
         if (property.format == "file" || property.format == "upload") {
             return this.getFormUploadConfig(property, options, parent);
         }
@@ -109,6 +137,9 @@ export class DynamicFormSchemaService {
         if (refs.length > 0) {
             return this.getFormGroupConfig(property, options, parent);
         }
+        // if (this.checkIsEditorProperty(property)) {
+        //     return this.getFormEditorConfig(property, options, parent);
+        // }
         return this.getFormInputConfig(property, options, parent);
     }
 
@@ -136,6 +167,7 @@ export class DynamicFormSchemaService {
             fieldSet: property.fieldSet,
             labelPrefix: property.labelPrefix,
             purposes: property.purposes || property.purpose,
+            discriminator: property.discriminator,
             priority: property.priority,
             componentType: property.componentType,
             wrappers: wrappers.filter(ObjectUtils.isStringWithValue),
@@ -151,10 +183,7 @@ export class DynamicFormSchemaService {
         return this.builder.createFormArray(property.id, async sp => {
             const subSchemas = await this.openApi.getReferences(property, options.schema);
             if (subSchemas.length > 0) {
-                const subModels = await Promise.all(
-                    subSchemas.map(s => this.getFormFieldsForSchema(s, sp, options))
-                );
-                return mergeFormFields(ObjectUtils.copy(subModels));
+                return this.getFormFieldsForRefs(subSchemas, sp, options);
             }
             return this.getFormFieldForProp(property.items, options, sp);
         }, {
@@ -175,10 +204,7 @@ export class DynamicFormSchemaService {
     protected async getFormGroupConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         return this.builder.createFormGroup(property.id, async sp => {
             const subSchemas = await this.openApi.getReferences(property, options.schema);
-            const subFields = await Promise.all(
-                subSchemas.map(s => this.getFormFieldsForSchema(s, sp, options))
-            );
-            return mergeFormFields(subFields);
+            return this.getFormFieldsForRefs(subSchemas, sp, options);
         }, {
             ...this.getFormFieldData(property, options),
         }, parent, options);

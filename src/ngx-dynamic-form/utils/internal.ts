@@ -128,21 +128,6 @@ export function arrayItemActionToExpression(actionName: KeysOfType<FormFieldProp
     };
 }
 
-export function mergeFormFields(formFields: FormFieldConfig[][]): FormFieldConfig[] {
-    const res: FormFieldConfig[] = [];
-    for (const formModel of formFields) {
-        for (const subModel of formModel) {
-            const index = res.findIndex(t => t.key == subModel.key);
-            if (index >= 0) {
-                res[index] = subModel;
-                continue;
-            }
-            res.push(subModel);
-        }
-    }
-    return res;
-}
-
 interface FormGroupControls {
     [key: string]: AbstractControl;
 }

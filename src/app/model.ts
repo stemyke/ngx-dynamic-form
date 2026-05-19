@@ -225,15 +225,15 @@ export class OrderModel {
     @FormSerializable()
     buyerMobile: string = "";
 
-    @FormSelect({
-        fieldSet: "contact",
-        options: getPreferredContacts,
-        strict: false,
-        multiple: true
-    })
-    @FormSerializable()
-    preferredContacts: string[] = [];
-
+    // @FormSelect({
+    //     fieldSet: "contact",
+    //     options: getPreferredContacts,
+    //     strict: false,
+    //     multiple: true
+    // })
+    // @FormSerializable()
+    // preferredContacts: string[] = [];
+    //
     @FormSelect({
         fieldSet: "contact",
         options: getPreferredContacts,

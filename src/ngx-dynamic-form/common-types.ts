@@ -255,10 +255,24 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
      */
     purposes?: string[];
     /**
+     * Possible OpenApi schemas which this field is inherited from
+     */
+    schemas?: string[];
+    /**
+     * Discriminator decides which property values we choose the possible schemas from
+     */
+    discriminator?: any;
+    /**
      * Use this field as a field set instead of a keyed form group
      */
     asFieldSet?: boolean;
+    /**
+     * Defines the sorting priority of the field
+     */
     priority?: number;
+    /**
+     * Definition of how group items look
+     */
     fieldGroup?: FormFieldConfig[];
     /**
      * Definition of how array items look
@@ -268,7 +282,13 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
      * Custom field hook definitions
      */
     hooks: FormHookConfig;
+    /**
+     * Custom field expressions
+     */
     expressions: FormFieldExpressions;
+    /**
+     * Readonly parent of the field
+     */
     readonly parent?: FormFieldConfig;
     readonly display?: boolean;
     readonly valid?: boolean;
@@ -430,6 +450,14 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
      * Gives purpose to a field (can be used as a filter in serialization)
      */
     purposes?: string | string[];
+    /**
+     * Possible OpenApi schemas which this field is inherited from
+     */
+    schemas?: string | string[];
+    /**
+     * Discriminator decides which property values we choose the possible schemas from
+     */
+    discriminator?: any;
     /**
      * Puts the field in a custom order
      */

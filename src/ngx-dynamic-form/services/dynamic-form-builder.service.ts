@@ -101,6 +101,7 @@ export class DynamicFormBuilderService {
         return this.setExpressions({
             id,
             parent,
+            schemas: [],
             fieldGroup: fields,
             wrappers: ["form-fieldset"],
             props: {
@@ -231,7 +232,7 @@ export class DynamicFormBuilderService {
                     ? options
                     : controlValues(root).pipe(
                         combineLatestWith(this.language),
-                        switchMap(async () => {
+                        switchMap(async (a, b) => {
                             const results: FormSelectOption[] = await (factory(target, this.injector) as any) || [];
                             return this.fixSelectOptions(target, results);
                         })
@@ -402,7 +403,7 @@ export class DynamicFormBuilderService {
         }
         if (options.length === 0 || options.findIndex(o => o.value === control.value) >= 0)
             return options;
-        control.setValue(field.defaultValue);
+        control.setValue(options[0].value);
         return options;
     }
 
@@ -449,6 +450,8 @@ export class DynamicFormBuilderService {
             prefixTemplateKey: String(data.prefixTemplateKey || ""),
             suffixTemplateKey: String(data.suffixTemplateKey || ""),
             purposes: toStringArray(data.purposes),
+            schemas: toStringArray(data.schemas),
+            discriminator: data.discriminator,
             priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
             wrappers: wrappers.filter(ObjectUtils.isDefined),
             type: data.componentType || type,
