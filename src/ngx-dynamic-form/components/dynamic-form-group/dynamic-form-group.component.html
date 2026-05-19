@@ -10,7 +10,7 @@
     </label>
 </ng-template>
 <ng-template #labelTemplate>
-    @let label = !props.label || props.hideLabel ? null : props.label | translate;
+    @let label = !props.label || props.hideLabel || parent?.props?.useTabs ? null : props.label | translate;
     @if (label) {
         <ng-container [ngxTemplateOutlet]="(field | dynamicFormTemplate : 'label') || innerLabelTemplate"
                       [context]="field"
@@ -24,7 +24,7 @@
     <tabs class="field-container" [testId]="(field.testId || 'form') + '-tab'">
         @for (itemField of field.fieldGroup; track itemField) {
             @if (itemField.display) {
-                @if (props.useTabs && itemField.wrappers | includes: 'form-fieldset') {
+                @if (props.useTabs && itemField.fieldGroup) {
                     <div class="form-fieldset-item"
                          [tabsItem]="itemField.id"
                          [classes]="['form-fieldset-tab', itemField.valid === false ? 'invalid' : 'valid']"

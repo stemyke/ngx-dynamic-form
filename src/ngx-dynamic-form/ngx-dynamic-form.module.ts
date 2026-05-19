@@ -74,6 +74,9 @@ export class NgxDynamicFormModule {
                     { name: "form-field", component: DynamicFormFieldComponent },
                     { name: "form-fieldset", component: DynamicFormFieldsetComponent },
                     { name: "form-group", component: DynamicFormGroupComponent },
+                    // These are just placeholders, so the sample app does not break when it is in a more complex context
+                    { name: "form-integration", component: DynamicFormFieldComponent },
+                    { name: "form-address", component: DynamicFormGroupComponent },
                 ],
                 extras: {
                     resetFieldOnHide: false,

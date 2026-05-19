@@ -10,5 +10,7 @@ import {FormFieldConfig} from "../../common-types";
     encapsulation: ViewEncapsulation.None
 })
 export class DynamicFormGroupComponent extends FieldWrapper<FormFieldConfig> {
-
+    get parent(): FormFieldConfig {
+        return this.field?.parent;
+    }
 }

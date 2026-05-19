@@ -68,6 +68,7 @@ export class DynamicFormSchemaService {
             const property = schema.properties[key];
             // Property priority is necessary when merging different schemas
             property.priority = property.priority ?? (priority += PRIORITY_DIFF);
+            // Generate sub-fields for property
             const propFields = await this.getFormFieldsForProp(property, schema, options, parent);
             fields.push(...propFields);
         }
@@ -207,6 +208,7 @@ export class DynamicFormSchemaService {
             return this.getFormFieldsForRefs(subSchemas, sp, options);
         }, {
             ...this.getFormFieldData(property, options),
+            useTabs: property.useTabs
         }, parent, options);
     }
 
