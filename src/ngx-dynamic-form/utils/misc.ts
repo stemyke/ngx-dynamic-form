@@ -209,8 +209,17 @@ export function isFieldVisible(field: FormFieldConfig): boolean {
     let visible = true;
     let current = field;
     while (current && visible) {
+        // Discriminator based visibility
+        let parent = current.parent;
+        while (parent && !parent.key) {
+            parent = parent.parent;
+        }
+        const discriminator = parent?.discriminator;
+        const schema = !discriminator ? null : discriminator(parent.parent?.model || {});
+        visible = visible && (!schema || current.schemas.size === 0 || current.schemas.has(schema));
+        // Field based visibility
         const hiddenFn: FormFieldConditionFn = current.props?.__hidden;
-        const injector: Injector = field.options?.formState?.injector;
+        const injector: Injector = current.options?.formState?.injector;
         visible = visible && (!injector || !hiddenFn?.(current, injector));
         current = current.parent;
     }

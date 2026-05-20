@@ -82,6 +82,7 @@ export class DynamicFormService {
         const root = await wrapOptions.customize(config, {
             id: FORM_ROOT_ID,
             type: "object",
+            discriminator: null,
             properties: schema?.properties || {}
         }, schema);
 

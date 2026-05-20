@@ -9,7 +9,7 @@ import {
     LANGUAGE_SERVICE,
     MaybePromise,
     ObjectUtils,
-    ReflectUtils
+    ReflectUtils, SetUtils
 } from "@stemy/ngx-utils";
 
 import {
@@ -101,7 +101,8 @@ export class DynamicFormBuilderService {
         return this.setExpressions({
             id,
             parent,
-            schemas: [],
+            schemas: new Set<string>(),
+            discriminator: parent.discriminator,
             fieldGroup: fields,
             wrappers: ["form-fieldset"],
             props: {
@@ -115,15 +116,15 @@ export class DynamicFormBuilderService {
         }, options);
     }
 
-    createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options?: FormBuilderOptions, sets: FormFieldSetData[] = []): FormFieldConfig[] {
+    createFieldSets(fields: FormFieldConfig[], parent: FormFieldConfig, options?: FormBuilderOptions, data: FormFieldSetData[] = []): FormFieldConfig[] {
         const result: FormFieldConfig[] = [];
-        const groups: { [fs: string]: FormFieldConfig[] } = {};
+        const fieldSets: { [fs: string]: FormFieldConfig } = {};
         fields = Array.from(fields || [])
             .sort((a, b) => a.priority - b.priority);
         fields.forEach(field => {
             if (this.isFieldset(field)) {
                 // This field is an already existing set
-                groups[field.id] = field.fieldGroup;
+                fieldSets[field.id] = field;
             }
         });
 
@@ -132,18 +133,19 @@ export class DynamicFormBuilderService {
             // If we have a fieldset name defined, then push the property fields into a group
             if (fsName) {
                 const id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
-                const set: FormFieldSetData = sets.find(s => s.id === fsName) || {id: fsName, layout: ""};
-                let fieldGroup = groups[id];
-                if (!fieldGroup) {
-                    fieldGroup = [];
-                    groups[id] = fieldGroup;
-                    result.push(this.createFieldSet(set, fieldGroup, parent, options));
+                const setData: FormFieldSetData = data.find(s => s.id === fsName) || {id: fsName, layout: ""};
+                let fieldSet = fieldSets[id];
+                if (!fieldSet) {
+                    fieldSet = this.createFieldSet(setData, [], parent, options);
+                    fieldSets[id] = fieldSet;
+                    result.push(fieldSet);
                 }
-                fieldGroup.push(field);
+                SetUtils.merge(fieldSet.schemas, field.schemas);
+                fieldSet.fieldGroup.push(field);
                 continue;
-            } else if (field.asFieldSet && !groups[field.id]) {
+            } else if (field.asFieldSet && !fieldSets[field.id]) {
                 const fsName = String(field.key);
-                const set = sets.find(s => s.id === fsName);
+                const set = data.find(s => s.id === fsName);
                 field.id = !parent?.path ? fsName : `${parent.path}.${fsName}`;
                 field.wrappers = ["form-fieldset"];
                 field.props = {
@@ -450,7 +452,7 @@ export class DynamicFormBuilderService {
             prefixTemplateKey: String(data.prefixTemplateKey || ""),
             suffixTemplateKey: String(data.suffixTemplateKey || ""),
             purposes: toStringArray(data.purposes),
-            schemas: toStringArray(data.schemas),
+            schemas: new Set(toStringArray(data.schemas)),
             discriminator: data.discriminator,
             priority: isNaN(data.priority) ? Number.MAX_SAFE_INTEGER : Number(data.priority),
             wrappers: wrappers.filter(ObjectUtils.isDefined),

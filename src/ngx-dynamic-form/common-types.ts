@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {ConfigOption, FormlyFieldConfig, FormlyFieldProps} from "@ngx-formly/core";
 import {FormlySelectOption} from "@ngx-formly/core/select";
 import {
+    DiscriminatorFn,
     HttpRequestOptions,
     IAsyncMessage,
     MaybeArray,
@@ -257,11 +258,11 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     /**
      * Possible OpenApi schemas which this field is inherited from
      */
-    schemas?: string[];
+    schemas?: Set<string>;
     /**
-     * Discriminator decides which property values we choose the possible schemas from
+     * Discriminator defines a function which returns a schema name based on a target object (the model value itself)
      */
-    discriminator?: any;
+    discriminator?: DiscriminatorFn;
     /**
      * Use this field as a field set instead of a keyed form group
      */
@@ -455,9 +456,9 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
      */
     schemas?: string | string[];
     /**
-     * Discriminator decides which property values we choose the possible schemas from
+     * Discriminator defines a function which returns a schema name based on a target object (the model value itself)
      */
-    discriminator?: any;
+    discriminator?: DiscriminatorFn;
     /**
      * Puts the field in a custom order
      */

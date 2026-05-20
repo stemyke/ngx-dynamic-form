@@ -61,10 +61,10 @@ export class DynamicFormSchemaService {
                                  customizeOrOptions: CustomizerOrSchemaOptions): Promise<FormFieldConfig[]> {
         if (!schema) return [];
         const options = await toWrapOptions(customizeOrOptions, this.injector, schema);
-        return this.getFormFieldsForSchemas([schema], parent, options);
+        return this.getFormFieldsForSchemas(parent, options, schema);
     }
 
-    protected async getFormFieldsForSchemas(schemas: OpenApiSchema[], parent: FormFieldConfig, options: ConfigForSchemaWrapOptions) {
+    protected async getFormFieldsForSchemas(parent: FormFieldConfig, options: ConfigForSchemaWrapOptions, ...schemas: OpenApiSchema[]) {
         const sets: FormFieldSetData[] = [];
         const fieldsForSchemas = await Promise.all(
             schemas.map(async schema => {
@@ -100,10 +100,10 @@ export class DynamicFormSchemaService {
             for (const field of fields) {
                 const index = res.findIndex(t => t.key === field.key);
                 if (index >= 0) {
-                    res[index].schemas.push(schema.name);
+                    res[index].schemas.add(schema.name);
                     continue;
                 }
-                field.schemas.push(schema.name);
+                field.schemas.add(schema.name);
                 res.push(field);
             }
         }
@@ -177,7 +177,7 @@ export class DynamicFormSchemaService {
             fieldSet: property.fieldSet,
             labelPrefix: property.labelPrefix,
             purposes: property.purposes || property.purpose,
-            discriminator: property.discriminator,
+            discriminator: property.discriminatorFn,
             priority: property.priority,
             componentType: property.componentType,
             wrappers: wrappers.filter(ObjectUtils.isStringWithValue),
@@ -193,7 +193,7 @@ export class DynamicFormSchemaService {
         return this.builder.createFormArray(property.id, async sp => {
             const subSchemas = await this.openApi.getReferences(property, options.schema);
             if (subSchemas.length > 0) {
-                return this.getFormFieldsForSchemas(subSchemas, sp, options);
+                return this.getFormFieldsForSchemas(sp, options, ...subSchemas);
             }
             return this.getFormFieldForProp(property.items, options, sp);
         }, {
@@ -214,7 +214,7 @@ export class DynamicFormSchemaService {
     protected async getFormGroupConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         return this.builder.createFormGroup(property.id, async sp => {
             const subSchemas = await this.openApi.getReferences(property, options.schema);
-            return this.getFormFieldsForSchemas(subSchemas, sp, options);
+            return this.getFormFieldsForSchemas(sp, options, ...subSchemas);
         }, {
             ...this.getFormFieldData(property, options),
             useTabs: property.useTabs
