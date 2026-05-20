@@ -2,6 +2,7 @@ import {Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {combineLatestWith, distinctUntilChanged, switchMap} from "rxjs";
 import {
+    ArrayUtils,
     IApiService,
     ILanguageService,
     ObjectUtils,
@@ -14,7 +15,7 @@ import {
 import {
     CustomizerOrSchemaOptions,
     FormFieldConfig,
-    FormFieldData,
+    FormFieldData, FormFieldSetData,
     FormSelectOptions,
     Validators
 } from "../common-types";
@@ -60,36 +61,44 @@ export class DynamicFormSchemaService {
                                  customizeOrOptions: CustomizerOrSchemaOptions): Promise<FormFieldConfig[]> {
         if (!schema) return [];
         const options = await toWrapOptions(customizeOrOptions, this.injector, schema);
-        const keys = Object.keys(schema.properties || {});
-        const fields: FormFieldConfig[] = [];
-        // Collect all properties of this schema def
-        let priority = Number.MAX_SAFE_INTEGER - (keys.length * PRIORITY_DIFF);
-        for (const key of keys) {
-            const property = schema.properties[key];
-            // Property priority is necessary when merging different schemas
-            property.priority = property.priority ?? (priority += PRIORITY_DIFF);
-            // Generate sub-fields for property
-            const propFields = await this.getFormFieldsForProp(property, schema, options, parent);
-            fields.push(...propFields);
-        }
-        return this.builder.createFieldSets(
-            fields.filter(f => null !== f),
-            parent, options, schema.sets || []
-        );
+        return this.getFormFieldsForSchemas([schema], parent, options);
     }
 
-    protected async getFormFieldsForRefs(subSchemas: OpenApiSchema[], parent: FormFieldConfig, options: ConfigForSchemaWrapOptions) {
-        const subFields = await Promise.all(
-            subSchemas.map(async s => this.getFormFieldsForSchema(s, parent, options))
+    protected async getFormFieldsForSchemas(schemas: OpenApiSchema[], parent: FormFieldConfig, options: ConfigForSchemaWrapOptions) {
+        const sets: FormFieldSetData[] = [];
+        const fieldsForSchemas = await Promise.all(
+            schemas.map(async schema => {
+                const keys = Object.keys(schema.properties || {});
+                const fields: FormFieldConfig[] = [];
+                // Collect field set definitions for this schema
+                const schemaSets: FormFieldSetData[] = Array.isArray(schema.sets) ? schema.sets : [];
+                for (const set of schemaSets) {
+                    const existing = sets.find(s => s.id === set.id);
+                    if (!existing) {
+                        Object.assign(existing, set);
+                        continue;
+                    }
+                    sets.push(set);
+                }
+                // Collect all properties of this schema def
+                let priority = Number.MAX_SAFE_INTEGER - (keys.length * PRIORITY_DIFF);
+                for (const key of keys) {
+                    const property = schema.properties[key];
+                    // Property priority is necessary when merging different schemas
+                    property.priority = property.priority ?? (priority += PRIORITY_DIFF);
+                    // Generate sub-fields for property
+                    const propFields = await this.getFormFieldsForProp(property, schema, options, parent);
+                    fields.push(...propFields);
+                }
+                return fields.filter(ObjectUtils.isObject);
+            })
         );
         const res: FormFieldConfig[] = [];
-        for (const ix in subSchemas) {
-            const schema = subSchemas[ix];
-            const fields = subFields[ix];
+        for (const ix in schemas) {
+            const schema = schemas[ix];
+            const fields = fieldsForSchemas[ix];
             for (const field of fields) {
-                const index = field.key
-                    ? res.findIndex(t => t.key === field.key)
-                    : res.findIndex(t => t.id === field.id);
+                const index = res.findIndex(t => t.key === field.key);
                 if (index >= 0) {
                     res[index].schemas.push(schema.name);
                     continue;
@@ -98,7 +107,7 @@ export class DynamicFormSchemaService {
                 res.push(field);
             }
         }
-        return this.builder.createFieldSets(res, parent, options);
+        return this.builder.createFieldSets(res, parent, options, sets);
     }
 
     protected async getFormFieldsForProp(property: OpenApiSchemaProperty, schema: OpenApiSchema, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig[]> {
@@ -184,7 +193,7 @@ export class DynamicFormSchemaService {
         return this.builder.createFormArray(property.id, async sp => {
             const subSchemas = await this.openApi.getReferences(property, options.schema);
             if (subSchemas.length > 0) {
-                return this.getFormFieldsForRefs(subSchemas, sp, options);
+                return this.getFormFieldsForSchemas(subSchemas, sp, options);
             }
             return this.getFormFieldForProp(property.items, options, sp);
         }, {
@@ -205,7 +214,7 @@ export class DynamicFormSchemaService {
     protected async getFormGroupConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
         return this.builder.createFormGroup(property.id, async sp => {
             const subSchemas = await this.openApi.getReferences(property, options.schema);
-            return this.getFormFieldsForRefs(subSchemas, sp, options);
+            return this.getFormFieldsForSchemas(subSchemas, sp, options);
         }, {
             ...this.getFormFieldData(property, options),
             useTabs: property.useTabs
