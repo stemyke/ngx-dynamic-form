@@ -28,9 +28,8 @@
         "commander": "^14.0.2",
         "@angular/material": "19.0.2",
         "@angular/cdk": "19.0.2",
-        "bootstrap": "4.1.3",
-        "jquery": "1.9.1",
-        "popper.js": "1.15.0"
+        "bootstrap": "^5.3.8",
+        "jquery": "^4.0.0"
     },
     "optionalDependencies": {
         "@angular/material": "^19.2.18"
