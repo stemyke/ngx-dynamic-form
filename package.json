@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.9.25",
+    "version": "19.9.26",
     "license": "MIT",
     "scripts": {
         "start": "ng serve",
@@ -17,8 +17,8 @@
         "@angular/material": "^19.2.18"
     },
     "devDependencies": {
-        "@angular/cli": "19.2.26",
-        "@angular-devkit/build-angular": "19.2.26",
+        "@angular/cli": "^19.2.26",
+        "@angular-devkit/build-angular": "^19.2.26",
         "@ngx-formly/bootstrap": "^7.1.0",
         "ng-packagr": "^19.2.2",
         "tslib": "^2.3.0",
@@ -31,8 +31,8 @@
         "jquery": "^4.0.0",
         "@fortawesome/fontawesome-free": "^6.7.2"
     },
-    "optionalDependencies": {
-        "@angular/material": "^19.2.18"
+    "overrides": {
+        "@angular/core": "^19.2.22"
     },
     "main": "dist/bundles/stemy-ngx-dynamic-form.umd.js",
     "module": "dist/fesm5/stemy-ngx-dynamic-form.js",
