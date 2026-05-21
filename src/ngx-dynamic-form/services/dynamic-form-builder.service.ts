@@ -328,7 +328,7 @@ export class DynamicFormBuilderService {
                     wrappers: ["form-group"],
                     fieldGroup: items,
                     className: "dynamic-form-field dynamic-form-group",
-                    defaultValue: [],
+                    defaultValue: {},
                     hooks: {},
                     expressions
                 };
@@ -361,7 +361,7 @@ export class DynamicFormBuilderService {
                     ...items.props,
                     label: "",
                 },
-                defaultValue: [],
+                defaultValue: props.type === "json" ? {} : "",
                 hooks: {},
                 expressions
             };

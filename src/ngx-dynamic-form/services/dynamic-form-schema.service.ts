@@ -116,7 +116,6 @@ export class DynamicFormSchemaService {
     }
 
     protected async getFormFieldForProp(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
-        console.log(property, property.id);
         switch (property.type) {
             case "object":
                 return this.getFormEditorConfig(property, options, parent);

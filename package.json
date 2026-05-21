@@ -1,24 +1,25 @@
 {
     "name": "@stemy/ngx-dynamic-form",
-    "version": "19.9.24",
+    "version": "19.9.25",
     "license": "MIT",
     "scripts": {
-        "ng": "ng",
         "start": "ng serve",
-        "build": "ng-packagr",
+        "build": "ng-packagr -p ./ng-package.json -c ./tsconfig.json",
         "public": "npm publish ./dist --access public --ignore-scripts"
     },
     "public": true,
     "repository": "https://github.com/stemyke/ngx-dynamic-form.git",
     "author": "stemy <balazs.stemler@metrix.co.hu>",
     "peerDependencies": {
-        "@stemy/ngx-utils": ">=19.9.32",
+        "@stemy/ngx-utils": ">=19.9.34",
         "@ngx-formly/core": "^7.1.0",
         "ngx-mask": "^19.0.7",
         "@angular/material": "^19.2.18"
     },
     "devDependencies": {
-        "@stemy/ngx-utils": "^19.9.32",
+        "@angular/cli": "19.2.26",
+        "@angular-devkit/build-angular": "19.2.26",
+        "@ngx-formly/bootstrap": "^7.1.0",
         "ng-packagr": "^19.2.2",
         "tslib": "^2.3.0",
         "cpy": "^12.1.0",
@@ -26,10 +27,9 @@
         "del": "^8.0.1",
         "node-watch": "^0.7.4",
         "commander": "^14.0.2",
-        "@angular/material": "19.0.2",
-        "@angular/cdk": "19.0.2",
         "bootstrap": "^5.3.8",
-        "jquery": "^4.0.0"
+        "jquery": "^4.0.0",
+        "@fortawesome/fontawesome-free": "^6.7.2"
     },
     "optionalDependencies": {
         "@angular/material": "^19.2.18"
