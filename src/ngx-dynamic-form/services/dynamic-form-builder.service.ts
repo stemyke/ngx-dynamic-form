@@ -9,7 +9,8 @@ import {
     LANGUAGE_SERVICE,
     MaybePromise,
     ObjectUtils,
-    ReflectUtils, SetUtils
+    ReflectUtils,
+    SetUtils
 } from "@stemy/ngx-utils";
 
 import {
@@ -36,6 +37,7 @@ import {
     controlValues,
     convertToDateFormat,
     convertToNumber,
+    CUSTOM_INPUT_TYPES, EDITOR_TYPES,
     isFieldHidden,
     isFieldVisible,
     MAX_INPUT_NUM,
@@ -48,8 +50,6 @@ import {
 import {arrayItemActionToExpression, toStringArray} from "../utils/internal";
 
 export type FormFieldBuilder = (fb: DynamicFormBuilderService, parent: FormFieldConfig, options: FormBuilderOptions) => Partial<FormFieldConfig>;
-
-const customInputTypes = ["checkbox", "textarea", "wysiwyg", "password"];
 
 @Injectable()
 export class DynamicFormBuilderService {
@@ -167,7 +167,7 @@ export class DynamicFormBuilderService {
 
     createFormInput(key: string, data: FormInputData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
-        const type = `${data.type || "text"}`;
+        const type = String(data.type || "text");
         const autocomplete = data.autocomplete || (type === "password" ? "new-password" : "none");
         const props: FormFieldProps = {
             type,
@@ -205,8 +205,11 @@ export class DynamicFormBuilderService {
                 props.maxLength = isNaN(data.maxLength) ? MAX_INPUT_NUM : data.maxLength;
                 break;
         }
+        const fieldType = CUSTOM_INPUT_TYPES.includes(type)
+            ? type
+            : (EDITOR_TYPES.includes(type) ? "editor" : "input")
         return this.createFormField(
-            key, customInputTypes.includes(type) ? type : "input",
+            key, fieldType,
             data, props, parent, options
         );
     }
@@ -235,6 +238,7 @@ export class DynamicFormBuilderService {
                     : controlValues(root).pipe(
                         combineLatestWith(this.language),
                         switchMap(async (a, b) => {
+                            console.log(a, b, "????", target.key, target.formControl?.value)
                             const results: FormSelectOption[] = await (factory(target, this.injector) as any) || [];
                             return this.fixSelectOptions(target, results);
                         })
@@ -396,10 +400,9 @@ export class DynamicFormBuilderService {
         const control = field.formControl;
         const multiple = field.props.multiple;
         if (multiple) {
+            if (Array.isArray(control.value)) return options;
             // Handle if current control value is not an array
-            const value = Array.isArray(control.value)
-                ? control.value
-                : String(control.value || "").split(",");
+            const value = String(control.value || "").split(",");
             control.setValue(value);
             return options;
         }

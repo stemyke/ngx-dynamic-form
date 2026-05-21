@@ -2,7 +2,6 @@ import {Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {combineLatestWith, distinctUntilChanged, switchMap} from "rxjs";
 import {
-    ArrayUtils,
     IApiService,
     ILanguageService,
     ObjectUtils,
@@ -15,7 +14,8 @@ import {
 import {
     CustomizerOrSchemaOptions,
     FormFieldConfig,
-    FormFieldData, FormFieldSetData,
+    FormFieldData,
+    FormFieldSetData,
     FormSelectOptions,
     Validators
 } from "../common-types";
@@ -32,7 +32,7 @@ import {
 import {ConfigForSchemaWrapOptions, toWrapOptions} from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
-import {controlValues, convertToDateFormat, getSelectOptions} from "../utils/misc";
+import {controlValues, convertToDateFormat, EDITOR_TYPES, getSelectOptions} from "../utils/misc";
 
 const PRIORITY_DIFF = 20;
 
@@ -116,9 +116,10 @@ export class DynamicFormSchemaService {
     }
 
     protected async getFormFieldForProp(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
+        console.log(property, property.id);
         switch (property.type) {
-            // case "object":
-            //     return this.getFormEditorConfig(property, options, parent);
+            case "object":
+                return this.getFormEditorConfig(property, options, parent);
             case "file":
             case "upload":
                 return this.getFormUploadConfig(property, options, parent);
@@ -147,10 +148,15 @@ export class DynamicFormSchemaService {
         if (refs.length > 0) {
             return this.getFormGroupConfig(property, options, parent);
         }
-        // if (this.checkIsEditorProperty(property)) {
-        //     return this.getFormEditorConfig(property, options, parent);
-        // }
+        if (this.checkIsEditorProperty(property)) {
+            return this.getFormEditorConfig(property, options, parent);
+        }
         return this.getFormInputConfig(property, options, parent);
+    }
+
+    protected checkIsEditorProperty(property: OpenApiSchemaProperty): boolean {
+        if (!property.format) return false;
+        return EDITOR_TYPES.indexOf(property.format) >= 0 || property.format.endsWith("script");
     }
 
     protected getFormFieldData(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormFieldData {
@@ -268,25 +274,12 @@ export class DynamicFormSchemaService {
         }, parent, options);
     }
 
-    // getFormEditorConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrap): DynamicEditorModelConfig {
-    //     const sub = property.type == "array" ? property.items || property : property;
-    //     return Object.assign(
-    //         this.getFormControlConfig(property, options),
-    //         {
-    //             inputType: property.format || "json",
-    //             convertObject: property.type !== "string",
-    //             autoComplete: property.autoComplete || "off",
-    //             multiple: property.type == "array",
-    //             accept: ObjectUtils.isString(property.accept) ? property.accept : null,
-    //             mask: ObjectUtils.isString(property.mask) ? property.mask : null,
-    //             pattern: ObjectUtils.isString(property.pattern) ? property.pattern : null,
-    //             step: isNaN(sub.step) ? (isNaN(property.step) ? 1 : property.step) : sub.step,
-    //             minLength: isNaN(sub.minLength) ? 0 : sub.minLength,
-    //             maxLength: isNaN(sub.maxLength) ? MAX_INPUT_NUM : sub.maxLength,
-    //             placeholder: property.placeholder || ""
-    //         }
-    //     );
-    // }
+    protected getFormEditorConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
+        return this.builder.createFormInput(property.id, {
+            ...this.getFormFieldData(property, options),
+            type: property.format || "json"
+        }, parent, options);
+    }
 
     protected getFormDatepickerConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
         const type = property.format == "date-time" ? "datetime-local" : "date";

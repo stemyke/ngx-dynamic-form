@@ -29,7 +29,10 @@ export function controlValues(control: AbstractControl, timeout: number = 500): 
     const changes$ = control.valueChanges.pipe(
         debounceTime(timeout)
     );
-    return merge(initial$, changes$);
+    return merge(initial$, changes$).pipe(map(value => {
+        console.log(value, "why");
+        return value;
+    }));
 }
 
 /**
@@ -237,4 +240,6 @@ export const MIN_INPUT_NUM = -1999999999;
 
 export const MAX_INPUT_NUM = 1999999999;
 
-export const EDITOR_FORMATS = ["php", "json", "html", "css", "scss"];
+export const EDITOR_TYPES = ["php", "json", "html", "css", "scss"] as ReadonlyArray<string>;
+
+export const CUSTOM_INPUT_TYPES = ["checkbox", "textarea", "wysiwyg", "password"] as ReadonlyArray<string>;

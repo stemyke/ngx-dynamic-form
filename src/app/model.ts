@@ -8,10 +8,13 @@ import {
     FormInput,
     FormSelect,
     FormSelectOption,
-    FormSerializable, FormStatic,
+    FormSerializable,
+    FormStatic,
     FormUpload,
     minValueValidation,
-    requiredValidation, RichTranslationModel, TranslationModel
+    requiredValidation,
+    RichTranslationModel,
+    TranslationModel
 } from "../public_api";
 import {FormArray} from "../ngx-dynamic-form/utils/decorators";
 
@@ -225,15 +228,15 @@ export class OrderModel {
     @FormSerializable()
     buyerMobile: string = "";
 
-    // @FormSelect({
-    //     fieldSet: "contact",
-    //     options: getPreferredContacts,
-    //     strict: false,
-    //     multiple: true
-    // })
-    // @FormSerializable()
-    // preferredContacts: string[] = [];
-    //
+    @FormSelect({
+        fieldSet: "contact",
+        options: getPreferredContacts,
+        strict: false,
+        multiple: true
+    })
+    @FormSerializable()
+    preferredContacts: string[] = [];
+
     @FormSelect({
         fieldSet: "contact",
         options: getPreferredContacts,
