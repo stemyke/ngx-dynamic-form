@@ -157,9 +157,10 @@ export function enumValidation($enum: any[]): ValidatorFn {
     },"enum");
 }
 
-export function setFieldMinDate(field: FormFieldConfig, min: Date): void {
+export function setFieldMinDate(field: FormFieldConfig, min: Date, setValue: boolean = true): void {
     setFieldDefault(field, min);
     setFieldProp(field, "min", min);
-    setFieldValue(field, min);
     addFieldValidators(field, [minValueValidation()]);
+    if (!setValue) return;
+    setFieldValue(field, min);
 }
