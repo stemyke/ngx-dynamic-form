@@ -102,7 +102,7 @@ export class DynamicFormBuilderService {
             id,
             parent,
             schemas: new Set<string>(),
-            discriminator: parent.discriminator,
+            discriminator: parent?.discriminator,
             fieldGroup: fields,
             wrappers: ["form-fieldset"],
             props: {
@@ -270,11 +270,15 @@ export class DynamicFormBuilderService {
             console.warn(`File upload property "multi" is deprecated. Use "multiple" instead.`);
         }
 
+        const baseUrl = data.url?.startsWith("http") ? data.url : this.api.url(data.url || "assets");
         return this.createFormField(key, "upload", data, {
             inline: data.inline === true,
             multiple: data.multiple === true,
             accept: data.accept || [".png", ".jpg"],
-            url: data.url?.startsWith("http") ? data.url : this.api.url(data.url || "assets"),
+            url: baseUrl,
+            uploadUrl: data.url?.startsWith("http")
+                ? data.uploadUrl
+                : (data.uploadUrl ? this.api.url(data.uploadUrl || "assets") : baseUrl),
             maxSize: isNaN(data.maxSize) ? MAX_INPUT_NUM : data.maxSize,
             uploadOptions: data.uploadOptions || {},
             createUploadData: data.createUploadData

@@ -163,7 +163,14 @@ export interface FormFieldProps extends FormlyFieldProps {
      * Specifies what types of files the file upload component can accept. (.jpg, .png)
      */
     accept?: string | string[];
+    /**
+     * Specifies the url the upload component uses for displaying assets (or also for upload if uploadUrl is not defined)
+     */
     url?: string;
+    /**
+     * Specifies the url the upload component uses for uploading assets
+     */
+    uploadUrl?: string;
     maxSize?: number;
     uploadOptions?: HttpRequestOptions;
     createUploadData?: (file: File) => UploadData | Promise<UploadData>;
@@ -172,7 +179,6 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     multi?: boolean;
     asFile?: boolean;
-    uploadUrl?: string;
     /**
      * Angular material specific props
      */
