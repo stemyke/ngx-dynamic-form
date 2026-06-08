@@ -238,7 +238,6 @@ export class DynamicFormBuilderService {
                     : controlValues(root).pipe(
                         combineLatestWith(this.language),
                         switchMap(async (a, b) => {
-                            console.log(a, b, "????", target.key, target.formControl?.value)
                             const results: FormSelectOption[] = await (factory(target, this.injector) as any) || [];
                             return this.fixSelectOptions(target, results);
                         })

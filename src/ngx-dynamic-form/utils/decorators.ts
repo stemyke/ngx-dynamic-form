@@ -17,10 +17,8 @@ function defineFormControl(target: any, propertyKey: string, cb: FormFieldBuilde
     const fields: Set<string> = ReflectUtils.getMetadata("dynamicFormFields", target) || new Set();
     const existing: FormFieldBuilder = ReflectUtils.getMetadata("dynamicFormField", target, propertyKey);
     const builder: FormFieldBuilder = (fb, opts, path) => {
-        const data = ObjectUtils.isFunction(existing) ? existing(fb, opts, path) : {
-            priority: Number.MAX_SAFE_INTEGER
-        };
-        return ObjectUtils.assign(data, cb(fb, opts, path) || {});
+        const data = ObjectUtils.isFunction(existing) ? existing(fb, opts, path) : {};
+        return ObjectUtils.assign(cb(fb, opts, path) || {}, data);
     };
     fields.add(propertyKey);
     ReflectUtils.defineMetadata("dynamicFormField", builder, target, propertyKey);

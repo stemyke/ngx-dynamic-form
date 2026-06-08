@@ -116,6 +116,12 @@ export class DynamicFormSchemaService {
     }
 
     protected async getFormFieldForProp(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
+        // First check property references, because a dynamic schema can be a type of object which we use for editor
+        const refs = await this.openApi.getReferences(property, options.schema);
+        if (refs.length > 0) {
+            return this.getFormGroupConfig(property, options, parent);
+        }
+        // Then check the property type
         switch (property.type) {
             case "object":
                 return this.getFormEditorConfig(property, options, parent);
@@ -142,10 +148,6 @@ export class DynamicFormSchemaService {
         }
         if (property.format == "date" || property.format == "date-time") {
             return this.getFormDatepickerConfig(property, options, parent);
-        }
-        const refs = await this.openApi.getReferences(property, options.schema);
-        if (refs.length > 0) {
-            return this.getFormGroupConfig(property, options, parent);
         }
         if (this.checkIsEditorProperty(property)) {
             return this.getFormEditorConfig(property, options, parent);
@@ -243,7 +245,7 @@ export class DynamicFormSchemaService {
                 break;
         }
         const sub = property.type == "array" ? property.items || property : property;
-        const input = this.builder.createFormInput(property.id, {
+        return this.builder.createFormInput(property.id, {
             ...this.getFormFieldData(property, options),
             type,
             autocomplete: property.autocomplete,
@@ -257,7 +259,6 @@ export class DynamicFormSchemaService {
             indeterminate: property.indeterminate,
             suffix: property.suffix
         }, parent, options);
-        return input;
     }
 
     protected getFormTextareaConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
