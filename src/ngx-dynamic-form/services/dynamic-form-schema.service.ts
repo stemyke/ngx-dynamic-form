@@ -22,7 +22,7 @@ import {
 
 import {
     emailValidation,
-    enumValidation,
+    enumValidation, equalsValidation,
     maxLengthValidation,
     maxValueValidation,
     minLengthValidation,
@@ -464,6 +464,9 @@ export class DynamicFormSchemaService {
         if (Array.isArray(property.enum)) {
             validators.enum = enumValidation(property.enum);
         }
+        if ("equals" in property) {
+            validators.equals = equalsValidation(property.equals);
+        }
         // if (isString(property.pattern) && property.pattern.length) {
         //     validators.pattern = property.pattern;
         // }
@@ -490,6 +493,9 @@ export class DynamicFormSchemaService {
         }
         if (Array.isArray(items.enum)) {
             validators.enum = enumValidation(items.enum);
+        }
+        if ("equals" in items) {
+            validators.equals = equalsValidation(items.equals);
         }
     }
 }

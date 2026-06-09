@@ -127,6 +127,7 @@ export function maxLengthValidation(maxLength: number): ValidatorFn {
 
 export function minValueValidation(): ValidatorFn {
     return validateEach((v, f) => {
+        if (v == null) return true;
         const type = f.props.type || "number";
         const min = type.includes("date")
             ? convertToDate(f.props.min, type) : Number(f.props.min ?? 0);
@@ -134,12 +135,13 @@ export function minValueValidation(): ValidatorFn {
             const date = new Date(v) as any;
             return isNaN(date) || date >= min;
         }
-        return v == null || v >= min;
+        return v >= min;
     }, "minValue");
 }
 
 export function maxValueValidation(): ValidatorFn {
     return validateEach((v, f) => {
+        if (v == null) return true;
         const type = f.props.type || "number";
         const max = type.includes("date")
             ? convertToDate(f.props.max, type) : Number(f.props.max ?? 0);
@@ -147,7 +149,7 @@ export function maxValueValidation(): ValidatorFn {
             const date = new Date(v) as any;
             return isNaN(date) || date <= max;
         }
-        return v == null || v <= max;
+        return v <= max;
     }, "maxValue");
 }
 
@@ -155,6 +157,12 @@ export function enumValidation($enum: any[]): ValidatorFn {
     return validateEach(v => {
         return $enum.includes(v);
     },"enum");
+}
+
+export function equalsValidation(target: unknown): ValidatorFn {
+    return validateEach(v => {
+        return v === target;
+    },"equals");
 }
 
 export function setFieldMinDate(field: FormFieldConfig, min: Date, setValue: boolean = true): void {

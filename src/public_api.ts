@@ -90,6 +90,7 @@ export {
     minValueValidation,
     maxValueValidation,
     enumValidation,
+    equalsValidation,
     setFieldMinDate
 } from "./ngx-dynamic-form/utils/validation";
 
