@@ -10,6 +10,7 @@ import {DynamicFormComponent} from "./components/dynamic-form/dynamic-form.compo
 
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
+import {DynamicFormDateComponent} from "./components/dynamic-form-date/dynamic-form-date.component";
 import {DynamicFormEditorComponent} from "./components/dynamic-form-editor/dynamic-form-editor.component";
 import {DynamicFormPasswordComponent} from "./components/dynamic-form-password/dynamic-form-password.component";
 import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
@@ -29,6 +30,7 @@ export const components = [
 
     DynamicFormArrayComponent,
     DynamicFormChipsComponent,
+    DynamicFormDateComponent,
     DynamicFormEditorComponent,
     DynamicFormPasswordComponent,
     DynamicFormStaticComponent,

@@ -18,7 +18,7 @@
         <div *ngIf="showError" class="field-errors invalid-feedback">
             <formly-validation-message
                 [field]="field"
-                id="{{ id }}-formly-validation-error"
+                [id]="id + '-formly-validation-error'"
                 role="alert"
             ></formly-validation-message>
         </div>

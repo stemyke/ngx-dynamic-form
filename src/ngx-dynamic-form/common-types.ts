@@ -95,7 +95,9 @@ export interface FormFieldProps extends FormlyFieldProps {
      */
     multiple?: boolean;
     /**
-     * Specifies that the input balue does not have to be in the options of chips component if false (default: true)
+     * If false, then:
+     *   - in chips component, the value does not have to ba in the options,
+     *   - in datepicker component it does not have to be an actual date, it could be any string
      */
     strict?: boolean;
     /**
@@ -154,7 +156,11 @@ export interface FormFieldProps extends FormlyFieldProps {
     /**
      * An array of weekdays to be disabled in calendar
      */
-    daysDisabled?: number[];
+    disabledDays?: number[];
+    /**
+     * An array of dates to be disabled in calendar
+     */
+    disabledDates?: ReadonlyArray<string | Date>;
     /**
      * Specifies that the file upload component value is stored inline, so instead of an API call, the file Blob is inserted into the field value.
      */
@@ -171,14 +177,6 @@ export interface FormFieldProps extends FormlyFieldProps {
      * Specifies the url the upload component uses for uploading assets
      */
     uploadUrl?: string;
-    maxSize?: number;
-    uploadOptions?: HttpRequestOptions;
-    createUploadData?: (file: File) => UploadData | Promise<UploadData>;
-    /**
-     * Old upload props
-     */
-    multi?: boolean;
-    asFile?: boolean;
     /**
      * Angular material specific props
      */
@@ -191,6 +189,7 @@ export interface FormFieldProps extends FormlyFieldProps {
      * Specifies if required marker should be shown
      */
     markRequired?: boolean;
+
     /**
      * Additional custom field props
      */
@@ -301,6 +300,7 @@ export interface FormFieldConfig<T = FormFieldProps> extends FormlyFieldConfig<T
     readonly valid?: boolean;
     readonly path?: string;
     readonly testId?: string;
+
     [additionalProperties: string]: any;
 }
 
@@ -316,6 +316,7 @@ export interface FormFieldChangeEvent {
     type: "expressionChanges" | "valueChanges" | string;
     value: any;
     form?: IDynamicForm;
+
     [meta: string]: any;
 }
 
@@ -327,6 +328,7 @@ export interface FormSelectOption extends Omit<FormlySelectOption, "group"> {
     className?: string;
     classes?: string[] | string;
     id?: any;
+
     [key: string]: any;
 }
 
@@ -351,8 +353,11 @@ export interface IDynamicForm {
     readonly onInit: OutputRef<FormFieldChangeEvent>;
 
     reset(): void;
+
     serialize(validate?: boolean, ...purposes: string[]): Promise<FormSerializeResult>;
+
     getField(path: string): FormFieldConfig;
+
     getControl(path: string): AbstractControl;
 }
 
@@ -402,7 +407,8 @@ export interface AllValidationErrors {
 
 export type FormFieldCustom = Pick<FormFieldConfig, "wrappers" | "hooks" | "fieldGroup" | "fieldArray">;
 
-export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "description" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
+export type FormFieldData =
+    Pick<FormFieldProps, "label" | "labelAlign" | "description" | "hideRequiredMarker" | "hideLabel" | "classes" | "layout" | "className">
     & {
     /**
      * Conditional check if the field should be hidden or not
@@ -488,7 +494,7 @@ export type FormFieldData = Pick<FormFieldProps, "label" | "labelAlign" | "descr
 };
 
 export type FormInputData = FormFieldData
-    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows" | "daysDisabled"> & {
+    & Pick<FormFieldProps, "type" | "pattern" | "placeholder" | "step" | "minLength" | "maxLength" | "autocomplete" | "suffix" | "indeterminate" | "cols" | "rows"> & {
     min?: number | Date;
     max?: number | Date;
 };
@@ -501,8 +507,14 @@ export type FormSelectData = FormFieldData
 export type FormStaticData = FormFieldData
     & Pick<FormFieldProps, "properties" | "style">;
 
+export type FormDateData = FormFieldData
+    & Pick<FormFieldProps, "disabledDays" | "disabledDates" | "strict"> & {
+    min?: string | Date;
+    max?: string | Date;
+};
+
 export type FormUploadData = FormFieldData
-    & Pick<FormFieldProps, "inline" | "multiple" | "accept" | "url" | "maxSize" | "uploadOptions" | "createUploadData" | "multi" | "asFile" | "uploadUrl">;
+    & Pick<FormFieldProps, "inline" | "multiple" | "accept" | "url" | "uploadUrl">;
 
 export type FormGroupData = FormFieldData & Pick<FormFieldProps, "useTabs"> & {
     /**
@@ -516,7 +528,9 @@ export type FormArrayData = FormFieldData
 
 export type FormSerializerData = RequireAtLeastOne<Pick<FormFieldData, "serialize" | "serializer">>;
 
-export type FormFieldSetData = RequireAtLeastOne<Pick<FormFieldData, "label" | "labelPrefix" | "classes" | "layout">> & {
+export type FormFieldSetData =
+    RequireAtLeastOne<Pick<FormFieldData, "label" | "labelPrefix" | "classes" | "layout">>
+    & {
     id: string;
 };
 

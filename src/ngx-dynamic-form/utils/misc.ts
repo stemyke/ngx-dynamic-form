@@ -50,7 +50,7 @@ export function controlStatus(control: AbstractControl, timeout: number = 10): O
  * @param value Value to convert to date string
  * @param format Expected date format (date, date-time)
  */
-export function convertToDateFormat(value: any, format: string): any {
+export function convertToDateFormat(value: any, format: string = "date"): any {
     if (!ObjectUtils.isDefined(value) || !format?.includes("date")) return value;
     value = ObjectUtils.isDate(value) ? value : new Date(value);
     const date = isNaN(value) ? new Date() : value as Date;
@@ -65,7 +65,7 @@ export function convertToDateFormat(value: any, format: string): any {
  * @param value Value to convert to date
  * @param format Expected date format (date, date-time)
  */
-export function convertToDate(value: any, format: string): any {
+export function convertToDate(value: any, format: string = "date"): any {
     return (!ObjectUtils.isDefined(value) || !format?.includes("date"))
         ? value
         : new Date(convertToDateFormat(value, format));
@@ -239,4 +239,4 @@ export const MAX_INPUT_NUM = 1999999999;
 
 export const EDITOR_TYPES = ["php", "json", "html", "css", "scss"] as ReadonlyArray<string>;
 
-export const CUSTOM_INPUT_TYPES = ["checkbox", "textarea", "wysiwyg", "password"] as ReadonlyArray<string>;
+export const CUSTOM_INPUT_TYPES = ["checkbox", "textarea", "wysiwyg", "date", "password"] as ReadonlyArray<string>;

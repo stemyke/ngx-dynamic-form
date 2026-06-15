@@ -39,6 +39,7 @@ export {
     FormInputData,
     FormSelectData,
     FormStaticData,
+    FormDateData,
     FormUploadData,
     FormGroupData,
     FormArrayData,
@@ -69,6 +70,7 @@ export {
     FormInput,
     FormSelect,
     FormStatic,
+    FormDate,
     FormUpload,
     FormGroup,
     FormArray,
@@ -142,6 +144,7 @@ export {DynamicFormComponent} from "./ngx-dynamic-form/components/dynamic-form/d
 
 export {DynamicFormArrayComponent} from "./ngx-dynamic-form/components/dynamic-form-array/dynamic-form-array.component";
 export {DynamicFormChipsComponent} from "./ngx-dynamic-form/components/dynamic-form-chips/dynamic-form-chips.component";
+export {DynamicFormDateComponent} from "./ngx-dynamic-form/components/dynamic-form-date/dynamic-form-date.component";
 export {DynamicFormEditorComponent} from "./ngx-dynamic-form/components/dynamic-form-editor/dynamic-form-editor.component";
 export {DynamicFormPasswordComponent} from "./ngx-dynamic-form/components/dynamic-form-password/dynamic-form-password.component";
 export {DynamicFormStaticComponent} from "./ngx-dynamic-form/components/dynamic-form-static/dynamic-form-static.component";

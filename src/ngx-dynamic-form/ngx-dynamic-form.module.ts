@@ -15,6 +15,7 @@ import {DynamicFormSchemaService} from "./services/dynamic-form-schema.service";
 
 import {DynamicFormArrayComponent} from "./components/dynamic-form-array/dynamic-form-array.component";
 import {DynamicFormChipsComponent} from "./components/dynamic-form-chips/dynamic-form-chips.component";
+import {DynamicFormDateComponent} from "./components/dynamic-form-date/dynamic-form-date.component";
 import {DynamicFormEditorComponent} from "./components/dynamic-form-editor/dynamic-form-editor.component";
 import {DynamicFormPasswordComponent} from "./components/dynamic-form-password/dynamic-form-password.component";
 import {DynamicFormStaticComponent} from "./components/dynamic-form-static/dynamic-form-static.component";
@@ -64,6 +65,7 @@ export class NgxDynamicFormModule {
                 types: [
                     {name: "array", component: DynamicFormArrayComponent},
                     {name: "chips", component: DynamicFormChipsComponent},
+                    {name: "date", component: DynamicFormDateComponent},
                     {name: "editor", component: DynamicFormEditorComponent},
                     {name: "password", component: DynamicFormPasswordComponent},
                     {name: "static", component: DynamicFormStaticComponent},

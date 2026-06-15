@@ -1,7 +1,7 @@
 import {Type} from "@angular/core";
 import {ObjectUtils, ReflectUtils} from "@stemy/ngx-utils";
 import {
-    FormArrayData,
+    FormArrayData, FormDateData,
     FormFieldSerializer,
     FormFieldSetData,
     FormGroupData,
@@ -62,6 +62,17 @@ export function FormSelect(data?: FormSelectData): PropertyDecorator {
             target, key,
             (fb, path, options) =>
                 fb.createFormSelect(key, data, path, options)
+        );
+    };
+}
+
+export function FormDate(data?: FormDateData): PropertyDecorator {
+    data = data || {};
+    return (target: any, key: string): void => {
+        defineFormControl(
+            target, key,
+            (fb, path, options) =>
+                fb.createFormDate(key, data, path, options)
         );
     };
 }

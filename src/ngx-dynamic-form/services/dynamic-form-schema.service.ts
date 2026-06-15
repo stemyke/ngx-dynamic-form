@@ -32,7 +32,7 @@ import {
 import {ConfigForSchemaWrapOptions, toWrapOptions} from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
-import {controlValues, convertToDateFormat, EDITOR_TYPES, getSelectOptions} from "../utils/misc";
+import {controlValues, convertToDate, convertToDateFormat, EDITOR_TYPES, getSelectOptions} from "../utils/misc";
 
 const PRIORITY_DIFF = 20;
 
@@ -116,20 +116,9 @@ export class DynamicFormSchemaService {
     }
 
     protected async getFormFieldForProp(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): Promise<FormFieldConfig> {
-        // First check property references, because a dynamic schema can be a type of object which we use for editor
-        const refs = await this.openApi.getReferences(property, options.schema);
-        if (refs.length > 0) {
-            return this.getFormGroupConfig(property, options, parent);
-        }
-        // Then check the property type
-        switch (property.type) {
-            case "object":
-                return this.getFormEditorConfig(property, options, parent);
-            case "file":
-            case "upload":
-                return this.getFormUploadConfig(property, options, parent);
-            case "boolean":
-                return this.getFormCheckboxConfig(property, options, parent);
+        if (property.type === "boolean") {
+            // Handle boolean first
+            return this.getFormCheckboxConfig(property, options, parent);
         }
         const $enum = property.items?.enum || property.enum;
         if (Array.isArray($enum) || ObjectUtils.isStringWithValue(property.optionsPath) || ObjectUtils.isStringWithValue(property.endpoint)) {
@@ -147,8 +136,14 @@ export class DynamicFormSchemaService {
             return this.getFormTextareaConfig(property, options, parent);
         }
         if (property.format == "date" || property.format == "date-time") {
-            return this.getFormDatepickerConfig(property, options, parent);
+            return this.getFormDateConfig(property, options, parent);
         }
+        // First check property references, because a dynamic schema can be a type of object which we use for editor
+        const refs = await this.openApi.getReferences(property, options.schema);
+        if (refs.length > 0) {
+            return this.getFormGroupConfig(property, options, parent);
+        }
+        // Then check if it might be an editor property
         if (this.checkIsEditorProperty(property)) {
             return this.getFormEditorConfig(property, options, parent);
         }
@@ -156,8 +151,9 @@ export class DynamicFormSchemaService {
     }
 
     protected checkIsEditorProperty(property: OpenApiSchemaProperty): boolean {
-        if (!property.format) return false;
-        return EDITOR_TYPES.indexOf(property.format) >= 0 || property.format.endsWith("script");
+        return property.type === "object"
+            || EDITOR_TYPES.indexOf(property.format) >= 0
+            || property.format?.endsWith("script");
     }
 
     protected getFormFieldData(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions): FormFieldData {
@@ -281,13 +277,16 @@ export class DynamicFormSchemaService {
         }, parent, options);
     }
 
-    protected getFormDatepickerConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
-        const type = property.format == "date-time" ? "datetime-local" : "date";
-        return this.builder.createFormInput(property.id, {
+    protected getFormDateConfig(property: OpenApiSchemaProperty, options: ConfigForSchemaWrapOptions, parent: FormFieldConfig): FormFieldConfig {
+        // const type = property.format == "date-time" ? "datetime-local" : "date";
+        // TODO: Support date-time also
+        return this.builder.createFormDate(property.id, {
             ...this.getFormFieldData(property, options),
-            type,
-            min: convertToDateFormat(property.minimum ?? property.min, property.format),
-            max: convertToDateFormat(property.maximum ?? property.max, property.format),
+            min: convertToDate(property.minimum ?? property.min, property.format),
+            max: convertToDate(property.maximum ?? property.max, property.format),
+            disabledDays: property.disabledDays,
+            disabledDates: property.disabledDates,
+            strict: property.strict,
         }, parent, options);
     }
 
@@ -311,8 +310,7 @@ export class DynamicFormSchemaService {
             inline: property.inline,
             accept: property.accept,
             url: property.url,
-            maxSize: property.maxSize,
-            uploadOptions: property.uploadOptions
+            uploadUrl: property.uploadUrl,
         }, parent, options);
     }
 

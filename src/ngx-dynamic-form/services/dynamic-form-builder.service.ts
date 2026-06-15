@@ -16,7 +16,7 @@ import {
 import {
     DEFAULT_NUMERIC_STEP,
     FormArrayData,
-    FormBuilderOptions,
+    FormBuilderOptions, FormDateData,
     FormFieldConfig,
     FormFieldData,
     FormFieldExpressions,
@@ -34,7 +34,7 @@ import {
 } from "../common-types";
 import {addFieldValidators} from "../utils/validation";
 import {
-    controlValues,
+    controlValues, convertToDate,
     convertToDateFormat,
     convertToNumber,
     CUSTOM_INPUT_TYPES, EDITOR_TYPES,
@@ -256,19 +256,21 @@ export class DynamicFormBuilderService {
         }, parent, options);
     }
 
+    createFormDate(key: string, data: FormDateData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
+        data = data || {};
+        return this.createFormField(key, "date", data, {
+            min: convertToDateFormat(data.min),
+            max: convertToDateFormat(data.max),
+            disabledDays: Array.isArray(data.disabledDays)
+                ? data.disabledDays.map(n => convertToNumber(n)) : [],
+            disabledDates: Array.isArray(data.disabledDates)
+                ? data.disabledDates.map(n => convertToDate(n)) : [],
+            strict: data.strict !== false,
+        }, parent, options);
+    }
+
     createFormUpload(key: string, data: FormUploadData, parent: FormFieldConfig, options?: FormBuilderOptions): FormFieldConfig {
         data = data || {};
-
-        if (data.asFile) {
-            data.inline = true;
-            console.warn(`File upload property "asFile" is deprecated. Use "inline" instead.`);
-        }
-
-        if (data.multi) {
-            data.multiple = true;
-            console.warn(`File upload property "multi" is deprecated. Use "multiple" instead.`);
-        }
-
         const baseUrl = data.url?.startsWith("http") ? data.url : this.api.url(data.url || "assets");
         return this.createFormField(key, "upload", data, {
             inline: data.inline === true,
@@ -277,10 +279,7 @@ export class DynamicFormBuilderService {
             url: baseUrl,
             uploadUrl: data.url?.startsWith("http")
                 ? data.uploadUrl
-                : (data.uploadUrl ? this.api.url(data.uploadUrl || "assets") : baseUrl),
-            maxSize: isNaN(data.maxSize) ? MAX_INPUT_NUM : data.maxSize,
-            uploadOptions: data.uploadOptions || {},
-            createUploadData: data.createUploadData
+                : (data.uploadUrl ? this.api.url(data.uploadUrl || "assets") : baseUrl)
         }, parent, options);
     }
 
@@ -326,6 +325,7 @@ export class DynamicFormBuilderService {
                 moveItem: arrayItemActionToExpression("moveItem"),
                 removeItem: arrayItemActionToExpression("removeItem")
             };
+
             if (Array.isArray(items)) {
                 array.fieldArray = {
                     wrappers: ["form-group"],
