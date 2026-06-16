@@ -1,8 +1,8 @@
 import {Injector} from "@angular/core";
-import {LANGUAGE_SERVICE, ObjectUtils} from "@stemy/ngx-utils";
+import {LANGUAGE_SERVICE, ObjectUtils, convertToDate} from "@stemy/ngx-utils";
 import {FormFieldConfig, ValidationMessageFn, ValidatorFn, Validators} from "../common-types";
 import {AbstractControl} from "@angular/forms";
-import {convertToDate, convertToDateFormat, isFieldHidden, setFieldDefault, setFieldProp, setFieldValue} from "./misc";
+import {isFieldHidden, setFieldDefault, setFieldProp, setFieldValue} from "./misc";
 
 function validationMessage(errorKey: string): ValidationMessageFn {
     const key = `form.error.${errorKey}`;

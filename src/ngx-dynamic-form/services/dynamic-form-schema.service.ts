@@ -2,6 +2,7 @@ import {Injectable, Injector} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {combineLatestWith, distinctUntilChanged, switchMap} from "rxjs";
 import {
+    convertToDate,
     IApiService,
     ILanguageService,
     ObjectUtils,
@@ -22,7 +23,8 @@ import {
 
 import {
     emailValidation,
-    enumValidation, equalsValidation,
+    enumValidation,
+    equalsValidation,
     maxLengthValidation,
     maxValueValidation,
     minLengthValidation,
@@ -32,7 +34,7 @@ import {
 import {ConfigForSchemaWrapOptions, toWrapOptions} from "../utils/internal";
 
 import {DynamicFormBuilderService} from "./dynamic-form-builder.service";
-import {controlValues, convertToDate, convertToDateFormat, EDITOR_TYPES, getSelectOptions} from "../utils/misc";
+import {controlValues, EDITOR_TYPES, getSelectOptions} from "../utils/misc";
 
 const PRIORITY_DIFF = 20;
 
