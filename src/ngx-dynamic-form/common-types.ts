@@ -160,7 +160,7 @@ export interface FormFieldProps extends FormlyFieldProps {
     /**
      * An array of dates to be disabled in calendar
      */
-    disabledDates?: ReadonlyArray<string | Date>;
+    disabledDates?: Array<string | Date>;
     /**
      * Specifies that the file upload component value is stored inline, so instead of an API call, the file Blob is inserted into the field value.
      */

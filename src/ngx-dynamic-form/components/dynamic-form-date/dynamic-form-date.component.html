@@ -1,5 +1,7 @@
 <date-picker [formControl]="formControl"
+             [testId]="field.testId"
              [min]="$any(props.min)"
              [max]="$any(props.max)"
-             [disabledDays]="props.daysDisabled"
-             [disabledDates]=""></date-picker>
+             [disabledDays]="props.disabledDays"
+             [disabledDates]="props.disabledDates"
+             [formlyAttributes]="field"></date-picker>
