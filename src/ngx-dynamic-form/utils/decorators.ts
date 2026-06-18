@@ -49,8 +49,13 @@ export function FormInput(data?: FormInputData): PropertyDecorator {
         data.type = data.type || inputType;
         defineFormControl(
             target, key,
-            (fb, path, options) =>
-                fb.createFormInput(key, data, path, options)
+            (fb, path, options) => {
+                const instance = getInstance(target);
+                return fb.createFormInput(key, {
+                    ...data,
+                    defaultValue: instance[key] ?? null
+                }, path, options)
+            }
         );
     };
 }
@@ -60,8 +65,13 @@ export function FormSelect(data?: FormSelectData): PropertyDecorator {
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
-            (fb, path, options) =>
-                fb.createFormSelect(key, data, path, options)
+            (fb, path, options) => {
+                const instance = getInstance(target);
+                return fb.createFormSelect(key, {
+                    ...data,
+                    defaultValue: instance[key] ?? null
+                }, path, options);
+            }
         );
     };
 }
@@ -71,8 +81,13 @@ export function FormDate(data?: FormDateData): PropertyDecorator {
     return (target: any, key: string): void => {
         defineFormControl(
             target, key,
-            (fb, path, options) =>
-                fb.createFormDate(key, data, path, options)
+            (fb, path, options) => {
+                const instance = getInstance(target);
+                return fb.createFormDate(key, {
+                    ...data,
+                    defaultValue: instance[key] ?? null
+                }, path, options);
+            }
         );
     };
 }
@@ -93,8 +108,13 @@ export function FormStatic(data?: FormStaticData): PropertyDecorator {
     return (target: unknown, key: string): void => {
         defineFormControl(
             target, key,
-            (fb, path, options) =>
-                fb.createFormStatic(key, data, path, options)
+            (fb, path, options) => {
+                const instance = getInstance(target);
+                return fb.createFormStatic(key, {
+                    ...data,
+                    defaultValue: instance[key] ?? null
+                }, path, options);
+            }
         );
     };
 }
@@ -106,7 +126,11 @@ export function FormGroup(data?: FormGroupData): PropertyDecorator {
             target, key,
             (fb, parent, options) => {
                 const targetType = ReflectUtils.getOwnMetadata("design:type", target, key);
-                return fb.resolveFormGroup(key, targetType, data, parent, options);
+                const instance = getInstance(target);
+                return fb.resolveFormGroup(key, targetType, {
+                    ...data,
+                    defaultValue: instance[key] ?? {}
+                }, parent, options);
             }
         );
     };
@@ -118,7 +142,11 @@ export function FormArray(itemType: string | FormInputData | Type<any>, data?: F
         defineFormControl(
             target, key,
             (fb, parent, options) => {
-                return fb.resolveFormArray(key, itemType, data, parent, options);
+                const instance = getInstance(target);
+                return fb.resolveFormArray(key, itemType, {
+                    ...data,
+                    defaultValue: instance[key] ?? []
+                }, parent, options);
             }
         );
     };
@@ -138,4 +166,17 @@ export function FormFieldSet(data: FormFieldSetData): ClassDecorator {
     return (target: unknown): void => {
         defineFormFieldSet(target, data);
     };
+}
+
+function getInstance(target: any): Record<string, any> {
+    let instance = ReflectUtils.getMetadata("dynamicFormInstance", target);
+    if (!instance) {
+        try {
+            instance = new target.constructor();
+        } catch (e) {
+            instance = {};
+        }
+        ReflectUtils.defineMetadata("dynamicFormInstance", target, instance);
+    }
+    return instance;
 }
