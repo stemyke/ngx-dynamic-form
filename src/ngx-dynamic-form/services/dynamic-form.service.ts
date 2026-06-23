@@ -1,7 +1,7 @@
 import {Inject, Injectable, Injector, untracked} from "@angular/core";
 import {AbstractControl, FormArray, FormGroup} from "@angular/forms";
 import {first} from "rxjs";
-import {API_SERVICE, IApiService, ObjectUtils} from "@stemy/ngx-utils";
+import {API_SERVICE, IApiService, ObjectUtils, Enum} from "@stemy/ngx-utils";
 
 import {
     CustomizerOrSchemaOptions,
@@ -163,7 +163,8 @@ export class DynamicFormService {
                 Object.assign(result, group);
                 continue;
             }
-            result[key] = control.value;
+            const value = control.value;
+            result[key] = value instanceof Enum ? value.value : value;
         }
         return result;
     }

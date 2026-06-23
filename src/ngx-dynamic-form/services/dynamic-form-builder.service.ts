@@ -555,7 +555,7 @@ export class DynamicFormBuilderService {
             path: target => {
                 const tp = target.parent;
                 const prefix = tp?.path || "";
-                return [prefix, String(target.key ?? "")].filter(ObjectUtils.isStringWithValue).join("-");
+                return [prefix, String(target.key ?? "")].filter(ObjectUtils.isStringWithValue).join(".");
             },
             testId: target => {
                 const tp = target.parent;
