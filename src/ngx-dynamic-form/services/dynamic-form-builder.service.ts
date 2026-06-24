@@ -11,8 +11,8 @@ import {
     LANGUAGE_SERVICE,
     MaybePromise,
     ObjectUtils,
-    ReflectUtils,
-    SetUtils,
+    ReflectUtils, ROOT_ELEMENT,
+    SetUtils, UniversalService,
 } from "@stemy/ngx-utils";
 
 import {
@@ -61,7 +61,9 @@ export class DynamicFormBuilderService {
 
     constructor(readonly injector: Injector,
                 readonly events: EventsService,
+                readonly universal: UniversalService,
                 @Inject(API_SERVICE) readonly api: IApiService,
+                @Inject(ROOT_ELEMENT) protected readonly rootElement: HTMLElement,
                 @Inject(LANGUAGE_SERVICE) protected readonly languages: ILanguageService,
                 @Inject(DEFAULT_NUMERIC_STEP) protected readonly defaultNumericStep: number) {
         const lang = new BehaviorSubject(this.languages.currentLanguage);
@@ -190,13 +192,25 @@ export class DynamicFormBuilderService {
             case "checkbox":
                 data.defaultValue = data.defaultValue ?? false;
                 break;
+            case "color":
+                const styles = this.rootElement && this.universal.isBrowser
+                    ? getComputedStyle(this.rootElement)
+                    : null;
+                const value = (!styles ? "#DEDEDE" : null)
+                    || styles.getPropertyValue("--primary-color")
+                    || styles.getPropertyValue("--mat-sys-primary")
+                    || "#DEDEDE";
+                data.defaultValue = data.defaultValue ?? value;
+                break;
             case "number":
             case "integer":
+                data.defaultValue = 0;
                 props.min = convertToNumber(data.min, MIN_INPUT_NUM);
                 props.max = convertToNumber(data.max, MAX_INPUT_NUM);
                 break;
             case "date":
             case "datetime-local":
+                data.defaultValue = data.defaultValue ?? convertToDateFormat(new Date(), type);
                 props.min = convertToDateFormat(data.min, type);
                 props.max = convertToDateFormat(data.max, type);
                 break;
